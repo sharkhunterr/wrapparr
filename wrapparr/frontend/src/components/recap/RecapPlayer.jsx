@@ -9,6 +9,7 @@ import CategorySlide from "./slides/CategorySlide"
 import PodiumSlide from "./slides/PodiumSlide"
 import ServiceStatsSlide from "./slides/ServiceStatsSlide"
 import ServiceDeepSlide from "./slides/ServiceDeepSlide"
+import FilmTimelineSlide from "./slides/FilmTimelineSlide"
 import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import RankingSlide from "./slides/RankingSlide"
@@ -435,6 +436,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
       slides.push({
         id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} />,
+      })
+    }
+
+    // Film timeline / profil cinephile (if films with years)
+    const hasYears = (svcData.top || []).some((t) => t.y && t.y > 1890)
+    if (hasYears) {
+      slides.push({
+        id: svc + "-timeline", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} />,
       })
     }
 

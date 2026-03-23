@@ -17,6 +17,48 @@ function getSlideIcon(id) {
   return Tv
 }
 
+function ProfilesEditor({ value, onChange }) {
+  const items = Array.isArray(value) ? value : []
+
+  const update = (idx, field, val) => {
+    const next = items.map((p, i) => i === idx ? { ...p, [field]: field === "min" || field === "max" ? parseInt(val) || 0 : val } : p)
+    onChange(next)
+  }
+
+  const add = () => {
+    const last = items[items.length - 1]
+    onChange([...items, { min: (last?.max || 2020) + 1, max: 2030, name: "Nouveau profil", desc: "Description", emoji: "🎬" }])
+  }
+
+  const remove = (idx) => {
+    onChange(items.filter((_, i) => i !== idx))
+  }
+
+  return (
+    <div style={{ width: "100%", marginTop: 6, display: "flex", flexDirection: "column", gap: 6 }}>
+      {items.map((p, i) => (
+        <div key={i} style={{ padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <input value={p.emoji} onChange={(e) => update(i, "emoji", e.target.value)} style={{ ...pInput, width: 32, textAlign: "center" }} />
+            <input value={p.name} onChange={(e) => update(i, "name", e.target.value)} placeholder="Nom" style={{ ...pInput, flex: 1 }} />
+            <button onClick={() => remove(i)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.2)", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
+          </div>
+          <input value={p.desc} onChange={(e) => update(i, "desc", e.target.value)} placeholder="Description" style={{ ...pInput, width: "100%" }} />
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", width: 30 }}>De</span>
+            <input type="number" value={p.min} onChange={(e) => update(i, "min", e.target.value)} style={{ ...pInput, width: 60, textAlign: "center" }} />
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", width: 15, textAlign: "center" }}>a</span>
+            <input type="number" value={p.max} onChange={(e) => update(i, "max", e.target.value)} style={{ ...pInput, width: 60, textAlign: "center" }} />
+          </div>
+        </div>
+      ))}
+      <button onClick={add} style={{ background: "none", border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 6, color: "rgba(255,255,255,0.25)", fontSize: 10, padding: "4px 10px", cursor: "pointer", width: "100%" }}>+ ajouter un profil</button>
+    </div>
+  )
+}
+
+const pInput = { padding: "4px 6px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", color: "white", fontSize: 11, outline: "none", boxSizing: "border-box" }
+
 function CommentaryEditor({ value, onChange }) {
   const groups = Array.isArray(value) ? value : []
 
@@ -255,8 +297,8 @@ export default function SlideManager() {
                     if (!p.showWhen) return true
                     return (s.settings[p.showWhen.key] ?? s.params.find((x) => x.key === p.showWhen.key)?.default) === p.showWhen.value
                   }).map((p) => (
-                    <div key={p.key} style={p.type === "commentary" ? { display: "flex", flexDirection: "column", gap: 4 } : { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                      <label style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", flex: p.type === "commentary" ? undefined : 1 }}>{p.label}</label>
+                    <div key={p.key} style={(p.type === "commentary" || p.type === "profiles") ? { display: "flex", flexDirection: "column", gap: 4 } : { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <label style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", flex: (p.type === "commentary" || p.type === "profiles") ? undefined : 1 }}>{p.label}</label>
 
                       {p.type === "number" && (
                         <input type="number" value={s.settings[p.key] ?? p.default}
@@ -282,6 +324,13 @@ export default function SlideManager() {
 
                       {p.type === "commentary" && (
                         <CommentaryEditor
+                          value={s.settings[p.key] || p.default}
+                          onChange={(val) => updateParam(s.id, p.key, val)}
+                        />
+                      )}
+
+                      {p.type === "profiles" && (
+                        <ProfilesEditor
                           value={s.settings[p.key] || p.default}
                           onChange={(val) => updateParam(s.id, p.key, val)}
                         />

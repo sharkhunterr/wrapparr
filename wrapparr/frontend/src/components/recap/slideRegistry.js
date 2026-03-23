@@ -54,6 +54,20 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
+    id: "{service}-timeline", label: "Profil cinephile {service}", group: "service",
+    desc: "Analyse des annees de sortie — quel type de spectateur es-tu ?",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 8000 },
+      { key: "profiles", label: "Profils cinephiles", type: "profiles", default: [
+        { min: 1900, max: 1949, name: "Cinephile classique", desc: "Tes films datent de l'age d'or du cinema", emoji: "🎩" },
+        { min: 1950, max: 1979, name: "Nostalgique", desc: "Tu adores les grandes fresques et le cinema d'auteur", emoji: "📽️" },
+        { min: 1980, max: 1999, name: "Enfant des 80s-90s", desc: "Action, aventure, et blockbusters — ton epoque", emoji: "📼" },
+        { min: 2000, max: 2014, name: "Millenial", desc: "Tu as grandi avec les franchises et le cinema numerique", emoji: "🎬" },
+        { min: 2015, max: 2030, name: "Ultra-moderne", desc: "Toujours a la pointe, tu regardes les sorties recentes", emoji: "🚀" },
+      ]},
+    ],
+  },
+  {
     id: "{service}-genres", label: "Genres {service}", group: "service",
     desc: "Visualisation des genres les plus consommes",
     params: [
