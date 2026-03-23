@@ -26,6 +26,7 @@ class ServiceResponse(BaseModel):
     is_active: bool
     last_test_ok: bool | None = None
     last_test_at: datetime | None = None
+    api_key_clear: str | None = None
 
     model_config = {"from_attributes": True}
 

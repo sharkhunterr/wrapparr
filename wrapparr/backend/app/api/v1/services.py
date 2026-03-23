@@ -40,7 +40,12 @@ def _get_collector(svc: ServiceConnector):
 @router.get("", response_model=list[ServiceResponse])
 async def list_services(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(ServiceConnector).where(ServiceConnector.user_id == user.id))
-    return [ServiceResponse.model_validate(s) for s in result.scalars().all()]
+    services = []
+    for s in result.scalars().all():
+        resp = ServiceResponse.model_validate(s)
+        resp.api_key_clear = decrypt(s.api_key_enc)
+        services.append(resp)
+    return services
 
 
 @router.post("", response_model=ServiceResponse, status_code=status.HTTP_201_CREATED)
@@ -65,7 +70,9 @@ async def create_service(data: ServiceCreate, user: User = Depends(get_current_u
     db.add(svc)
     await db.commit()
     await db.refresh(svc)
-    return ServiceResponse.model_validate(svc)
+    resp = ServiceResponse.model_validate(svc)
+    resp.api_key_clear = decrypt(svc.api_key_enc)
+    return resp
 
 
 @router.put("/{service_id}", response_model=ServiceResponse)
@@ -91,7 +98,9 @@ async def update_service(
 
     await db.commit()
     await db.refresh(svc)
-    return ServiceResponse.model_validate(svc)
+    resp = ServiceResponse.model_validate(svc)
+    resp.api_key_clear = decrypt(svc.api_key_enc)
+    return resp
 
 
 @router.delete("/{service_id}", status_code=status.HTTP_204_NO_CONTENT)

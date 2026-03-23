@@ -21,7 +21,21 @@ export const SLIDE_REGISTRY = [
   {
     id: "cat-{service}", label: "Annonce {service}", group: "service", cat: true,
     desc: "Slide d'annonce plein ecran de la categorie",
-    params: [],
+    // defaults are resolved per-service in expandRegistry
+    params: [
+      { key: "customIcon", label: "Icone (emoji)", type: "text", default: "" },
+      { key: "customLabel", label: "Titre", type: "text", default: "" },
+      { key: "customSub", label: "Sous-titre", type: "text", default: "" },
+    ],
+    _defaults: {
+      tautulli: { customIcon: "🎬", customLabel: "FILMS", customSub: "Cinema · Documentaires" },
+      plex: { customIcon: "🎬", customLabel: "FILMS", customSub: "Cinema · Documentaires" },
+      jellyfin: { customIcon: "📺", customLabel: "JELLYFIN", customSub: "Films · Series" },
+      romm: { customIcon: "🎮", customLabel: "JEUX VIDEO", customSub: "Switch · PC · Retrogaming" },
+      audiobookshelf: { customIcon: "🎧", customLabel: "LIVRES AUDIO", customSub: "Sci-Fi · Thriller · Post-Apo" },
+      komga: { customIcon: "📚", customLabel: "MANGA", customSub: "Shonen · Seinen · Dark Fantasy" },
+      booklore: { customIcon: "📖", customLabel: "LIVRES", customSub: "Romans · Essais · BD" },
+    },
   },
   {
     id: "{service}-pod", label: "Podium {service}", group: "service", pod: true,
@@ -33,7 +47,17 @@ export const SLIDE_REGISTRY = [
       { key: "reveal1", label: "Delai reveal #3 (ms)", type: "number", default: 400 },
       { key: "reveal2", label: "Delai reveal #2 (ms)", type: "number", default: 1100 },
       { key: "reveal3", label: "Delai reveal #1 (ms)", type: "number", default: 2000 },
+      { key: "jokes", label: "Phrases de presentation", type: "phrases", default: [] },
     ],
+    _defaults: {
+      tautulli: { jokes: ["Voyons combien de films cette annee...", "Les popcorns etaient au rendez-vous.", "Il a ri, pleure, et probablement mange des chips.", "Voici le podium officiel"] },
+      plex: { jokes: ["Voyons combien de films cette annee...", "Les popcorns etaient au rendez-vous.", "Il a ri, pleure, et probablement mange des chips.", "Voici le podium officiel"] },
+      jellyfin: { jokes: ["Jellyfin a tourne a plein regime cette annee...", "Des heures de streaming en continu.", "Le serveur n'a pas chome.", "Le verdict tombe"] },
+      romm: { jokes: ["Les manettes ont chauffees cette annee...", "Des sessions epiques en perspective.", "Les voisins ont entendu les victoires.", "Voici le top du gamepad"] },
+      audiobookshelf: { jokes: ["Des heures d'ecoute cette annee...", "Principalement en mode concentration.", "Le cerveau a voyage dans des univers differents.", "Le palmares s'affiche"] },
+      komga: { jokes: ["Des volumes de manga lus cette annee.", "Plusieurs volumes par mois. Respect.", "Au moins 4 arcs qui font pleurer.", "Le podium des cases s'illumine"] },
+      booklore: { jokes: ["Des livres devores cette annee...", "La bibliotheque s'agrandit.", "Des histoires qui marquent.", "Le palmares litteraire"] },
+    },
   },
   {
     id: "{service}-stats", label: "Stats {service}", group: "service",
@@ -135,7 +159,11 @@ export const SLIDE_REGISTRY = [
     id: "cat-{service}-series", label: "Annonce series {service}", group: "service", cat: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Slide d'annonce plein ecran de la section series",
-    params: [],
+    params: [
+      { key: "customIcon", label: "Icone (emoji)", type: "text", default: "📺" },
+      { key: "customLabel", label: "Titre", type: "text", default: "SERIES" },
+      { key: "customSub", label: "Sous-titre", type: "text", default: "Series TV · Sagas" },
+    ],
   },
   {
     id: "{service}-series-pod", label: "Podium series {service}", group: "service", pod: true,
@@ -148,6 +176,7 @@ export const SLIDE_REGISTRY = [
       { key: "reveal1", label: "Delai reveal #3 (ms)", type: "number", default: 400 },
       { key: "reveal2", label: "Delai reveal #2 (ms)", type: "number", default: 1100 },
       { key: "reveal3", label: "Delai reveal #1 (ms)", type: "number", default: 2000 },
+      { key: "jokes", label: "Phrases de presentation", type: "phrases", default: ["Voyons quelles series t'ont accroche...", "Des episodes enchaines sans fin.", "Le binge-watching, un art de vivre.", "Voici ton podium series"] },
     ],
   },
   {
@@ -230,12 +259,18 @@ export function expandRegistry(dataServices = []) {
   for (const svc of dataServices.filter((s) => !SKIP_SERVICES.has(s))) {
     for (const tmpl of serviceTemplates.filter((t) => !t.onlyFor || t.onlyFor.includes(svc))) {
       const svcLabel = svc.charAt(0).toUpperCase() + svc.slice(1)
+      // Resolve per-service defaults for params
+      const svcDefaults = tmpl._defaults?.[svc] || {}
+      const resolvedParams = tmpl.params.map((p) => {
+        if (svcDefaults[p.key] !== undefined) return { ...p, default: svcDefaults[p.key] }
+        return { ...p }
+      })
       expanded.push({
         ...tmpl,
         id: tmpl.id.replace("{service}", svc),
         label: tmpl.label.replace("{service}", svcLabel),
         desc: tmpl.desc,
-        params: [...tmpl.params],
+        params: resolvedParams,
         _service: svc,
       })
     }

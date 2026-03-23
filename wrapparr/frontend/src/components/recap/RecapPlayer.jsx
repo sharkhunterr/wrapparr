@@ -403,7 +403,7 @@ const SERVICE_SLIDE_CONFIG = {
   tautulli: { icon: "🎬", label: "FILMS", sub: "Cinema · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SERIES", seriesSub: "Series TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
   plex: { icon: "🎬", label: "FILMS", sub: "Cinema · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SERIES", seriesSub: "Series TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
   jellyfin: { icon: "📺", label: "JELLYFIN", sub: "Films · Series", accent: "#00a4dc", bgCat: "#000a14", bgPod: "#000812", bgStats: "#000d18", statKey: "plays", statLabel: "vues", statSuffix: "" },
-  romm: { icon: "🎮", label: "JEUX VIDEO", sub: "Switch · PC · Retrogaming", accent: "#34d399", bgCat: "#010a05", bgPod: "#010806", bgStats: "#020f08", statKey: "hours", statLabel: "heures", statSuffix: "h" },
+  romm: { icon: "🎮", label: "JEUX VIDEO", sub: "Switch · PC · Retrogaming", accent: "#34d399", bgCat: "#010a05", bgPod: "#010806", bgStats: "#020f08", statKey: "g", statLabel: "plateforme", statSuffix: "" },
   audiobookshelf: { icon: "🎧", label: "LIVRES AUDIO", sub: "Sci-Fi · Thriller · Post-Apo", accent: "#fb923c", bgCat: "#0a0300", bgPod: "#080300", bgStats: "#110500", statKey: "h", statLabel: "duree", statSuffix: "h" },
   komga: { icon: "📚", label: "MANGA", sub: "Shonen · Seinen · Dark Fantasy", accent: "#c084fc", bgCat: "#060012", bgPod: "#050010", bgStats: "#0a0018", statKey: "vols", statLabel: "volumes", statSuffix: "" },
   booklore: { icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD", accent: "#a78bfa", bgCat: "#050010", bgPod: "#040008", bgStats: "#060012", statKey: "pages", statLabel: "pages", statSuffix: "" },
@@ -434,10 +434,25 @@ function buildSlides(data, theme, slideConfigs, user, year) {
   const slideOrder = slideConfigs?.order || []
   const sc = slideSettings
 
-  // Helper: resolve accent for a slide (override > theme > default)
-  const resolveAccent = (slideId, defaultAccent) => {
-    const override = getAccentOverride(sc, slideId)
-    return override || defaultAccent
+  // Helpers for reading slide config overrides
+  const resolveAccent = (slideId, defaultAccent) => getAccentOverride(sc, slideId) || defaultAccent
+  const catProps = (slideId, defaults) => {
+    const cfg = getSlideConfig(sc, slideId)
+    return {
+      icon: cfg.customIcon || defaults.icon,
+      label: cfg.customLabel || defaults.label,
+      sub: cfg.customSub || defaults.sub,
+    }
+  }
+  const podJokes = (slideId, defaultJokes) => {
+    const cfg = getSlideConfig(sc, slideId)
+    // jokes stored as commentary format [{trigger, phrases}] → flatten to string array
+    const custom = cfg.jokes
+    if (Array.isArray(custom) && custom.length > 0) {
+      if (typeof custom[0] === "string") return custom
+      return custom.flatMap((g) => g.phrases || []).filter(Boolean)
+    }
+    return defaultJokes
   }
   const palette = theme?.palette || {}
   const primary = palette.primary || "#E5A00D"
@@ -494,14 +509,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
       // ═══ FILMS SECTION ═══
       slides.push({
         id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
-        component: <CategorySlide accent={svcAccent} icon={cfg.icon} label={cfg.label} sub={cfg.sub} />,
+        component: <CategorySlide accent={svcAccent} {...catProps("cat-" + svc, cfg)} />,
       })
 
       const filmsBackdrop = svcData.extra?.backdrop || (filmsTop[0]?.art) || ""
+      const filmsCat = catProps("cat-" + svc, cfg)
       if (filmsTop.length >= 2) {
         slides.push({
           id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
-          component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={filmsTop} title={"Top " + cfg.label + " " + year} icon={cfg.icon} jokes={jokes} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={filmsBackdrop} config={getSlideConfig(sc, svc + "-pod")} />,
+          component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={filmsTop} title={"Top " + filmsCat.label + " " + year} icon={filmsCat.icon} jokes={podJokes(svc + "-pod", jokes)} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={filmsBackdrop} config={getSlideConfig(sc, svc + "-pod")} />,
         })
       }
 
@@ -583,12 +599,13 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
         slides.push({
           id: "cat-" + svc + "-series", accent: seriesAccent, bg: cfg.seriesBgCat || baseBg, cat: true, fullscreen: true,
-          component: <CategorySlide accent={seriesAccent} icon={cfg.seriesIcon} label={cfg.seriesLabel} sub={cfg.seriesSub} />,
+          component: <CategorySlide accent={seriesAccent} {...catProps("cat-" + svc + "-series", { icon: cfg.seriesIcon, label: cfg.seriesLabel, sub: cfg.seriesSub })} />,
         })
 
+        const seriesCat = catProps("cat-" + svc + "-series", { icon: cfg.seriesIcon, label: cfg.seriesLabel, sub: cfg.seriesSub })
         if (seriesTop.length >= 2) {
           const seriesBackdrop = (seriesTop[0]?.art) || ""
-          const seriesJokes = [
+          const defaultSeriesJokes = [
             "Voyons quelles series t'ont accroche...",
             "Des episodes enchaines sans fin.",
             "Le binge-watching, un art de vivre.",
@@ -596,7 +613,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
           ]
           slides.push({
             id: svc + "-series-pod", accent: seriesAccent, bg: cfg.seriesBgPod || baseBg, pod: true, fullscreen: true,
-            component: <PodiumSlide accent={seriesAccent} bg={cfg.seriesBgPod || baseBg} data={seriesTop} title={"Top " + cfg.seriesLabel + " " + year} icon={cfg.seriesIcon} jokes={seriesJokes} statLabel="episodes" statKey="ep" statSuffix="" backdrop={seriesBackdrop} config={getSlideConfig(sc, svc + "-series-pod")} />,
+            component: <PodiumSlide accent={seriesAccent} bg={cfg.seriesBgPod || baseBg} data={seriesTop} title={"Top " + seriesCat.label + " " + year} icon={seriesCat.icon} jokes={podJokes(svc + "-series-pod", defaultSeriesJokes)} statLabel="episodes" statKey="ep" statSuffix="" backdrop={seriesBackdrop} config={getSlideConfig(sc, svc + "-series-pod")} />,
           })
         }
 
@@ -630,14 +647,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
       slides.push({
         id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
-        component: <CategorySlide accent={svcAccent} icon={cfg.icon} label={cfg.label} sub={cfg.sub} />,
+        component: <CategorySlide accent={svcAccent} {...catProps("cat-" + svc, cfg)} />,
       })
 
+      const stdCat = catProps("cat-" + svc, cfg)
       const backdropUrl = (top[0]?.art) || ""
       if (top.length >= 2) {
         slides.push({
           id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
-          component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={top} title={"Top " + cfg.label + " " + year} icon={cfg.icon} jokes={jokes} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={backdropUrl} config={getSlideConfig(sc, svc + "-pod")} />,
+          component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={top} title={"Top " + stdCat.label + " " + year} icon={stdCat.icon} jokes={podJokes(svc + "-pod", jokes)} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={backdropUrl} config={getSlideConfig(sc, svc + "-pod")} />,
         })
       }
 
@@ -720,9 +738,13 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         delete byId[id]
       }
     }
-    // Append any slides not in saved order (new slides)
-    for (const s of finalSlides) {
-      if (byId[s.id]) reordered.push(s)
+    // Insert new slides (not in saved order) before the finale
+    const newSlides = finalSlides.filter((s) => byId[s.id])
+    const finaleIdx = reordered.findIndex((s) => s.id === "finale")
+    if (finaleIdx >= 0 && newSlides.length > 0) {
+      reordered.splice(finaleIdx, 0, ...newSlides)
+    } else {
+      reordered.push(...newSlides)
     }
     finalSlides = reordered
   }

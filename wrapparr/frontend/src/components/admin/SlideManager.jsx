@@ -383,6 +383,13 @@ export default function SlideManager() {
                           style={inputNum} />
                       )}
 
+                      {p.type === "text" && (
+                        <input type="text" value={s.settings[p.key] ?? p.default}
+                          onChange={(e) => updateParam(s.id, p.key, e.target.value)}
+                          placeholder={p.default || p.label}
+                          style={{ ...inputNum, width: 160, textAlign: "left" }} />
+                      )}
+
                       {p.type === "bool" && (
                         <button onClick={() => updateParam(s.id, p.key, !(s.settings[p.key] ?? p.default))} style={{
                           padding: "3px 10px", borderRadius: 5, border: "none", fontSize: 10, fontFamily: "JetBrains Mono,monospace", cursor: "pointer",
@@ -412,6 +419,25 @@ export default function SlideManager() {
                           onChange={(val) => updateParam(s.id, p.key, val)}
                         />
                       )}
+
+                      {p.type === "phrases" && (() => {
+                        const items = s.settings[p.key] || p.default || []
+                        return (
+                          <div style={{ width: "100%", marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                            {items.map((phrase, pi) => (
+                              <div key={pi} style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", width: 16, textAlign: "center", flexShrink: 0 }}>{pi + 1}</span>
+                                <input value={phrase} onChange={(e) => {
+                                  const next = [...items]; next[pi] = e.target.value
+                                  updateParam(s.id, p.key, next)
+                                }} placeholder="Phrase..." style={{ flex: 1, padding: "5px 8px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", color: "white", fontSize: 11, outline: "none", boxSizing: "border-box" }} />
+                                <button onClick={() => updateParam(s.id, p.key, items.filter((_, i) => i !== pi))} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.2)", cursor: "pointer", fontSize: 14, padding: "0 4px", flexShrink: 0 }}>×</button>
+                              </div>
+                            ))}
+                            <button onClick={() => updateParam(s.id, p.key, [...items, ""])} style={{ background: "none", border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 5, color: "rgba(255,255,255,0.25)", fontSize: 10, padding: "3px 10px", cursor: "pointer", width: "100%" }}>+ ajouter une phrase</button>
+                          </div>
+                        )
+                      })()}
                     </div>
                   ))}
                 </div>
