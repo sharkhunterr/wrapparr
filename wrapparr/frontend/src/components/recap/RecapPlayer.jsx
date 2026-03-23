@@ -650,6 +650,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
             component: <FavoriteActorsSlide accent={seriesAccent} data={{ extra: { actors: seriesActors } }} year={year} config={seriesActorsConfig} />,
           })
         }
+
+        // Comparison slide (series)
+        const seriesCompare = data.comparison?.[svc]
+        if (seriesCompare) {
+          slides.push({
+            id: svc + "-series-compare", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} config={getSlideConfig(sc, svc + "-series-compare")} />,
+          })
+        }
       }
     } else {
       // ── Standard service (romm, audiobookshelf, komga, booklore) ──

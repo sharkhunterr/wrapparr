@@ -168,6 +168,7 @@ export const SLIDE_REGISTRY = [
         { value: "radar", label: "Radar" },
         { value: "race", label: "Course animee" },
         { value: "gauge", label: "Jauge" },
+        { value: "linechart", label: "Courbe mensuelle" },
       ]},
       { key: "dataMetric", label: "Donnee a comparer", type: "select", default: "total_items", options: [
         { value: "total_items", label: "Nombre total" },
@@ -242,6 +243,33 @@ export const SLIDE_REGISTRY = [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
       { key: "minAppearances", label: "Apparitions minimum", type: "number", default: 2 },
       { key: "maxCards", label: "Nombre max d'acteurs", type: "number", default: 6 },
+    ],
+  },
+  {
+    id: "{service}-series-compare", label: "Comparaison series {service}", group: "service",
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Comparaison series avec l'annee precedente",
+    params: [
+      { key: "compareMode", label: "Mode de comparaison", type: "select", default: "year_vs_year", options: [
+        { value: "year_vs_year", label: "Annee vs Annee" },
+        { value: "user_vs_users", label: "Toi vs les autres" },
+      ]},
+      { key: "displayMode", label: "Mode d'affichage", type: "select", default: "linechart", options: [
+        { value: "horizontal_bars", label: "Barres horizontales" },
+        { value: "vertical_bars", label: "Barres verticales" },
+        { value: "donut", label: "Cercle / Donut" },
+        { value: "radar", label: "Radar" },
+        { value: "race", label: "Course animee" },
+        { value: "gauge", label: "Jauge" },
+        { value: "linechart", label: "Courbe mensuelle" },
+      ]},
+      { key: "dataMetric", label: "Donnee a comparer", type: "select", default: "monthly", options: [
+        { value: "total_items", label: "Nombre total" },
+        { value: "total_hours", label: "Heures totales" },
+        { value: "genres", label: "Top genres" },
+        { value: "monthly", label: "Activite mensuelle" },
+      ]},
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
     ],
   },
 

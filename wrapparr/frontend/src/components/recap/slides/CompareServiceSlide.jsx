@@ -88,6 +88,7 @@ export default function CompareServiceSlide({ accent, compareData, year, config 
       {displayMode === "radar" && <RadarChart items={items} colors={colors} speed={speed} accent={accent} />}
       {displayMode === "race" && <RaceMode items={items} colors={colors} speed={speed} accent={accent} />}
       {displayMode === "gauge" && <GaugeCompare items={items} colors={colors} speed={speed} accent={accent} />}
+      {displayMode === "linechart" && <LineChartCompare items={items} colors={colors} speed={speed} accent={accent} year={year} />}
     </div>
   )
 }
@@ -313,6 +314,85 @@ function GaugeCompare({ items, colors, speed, accent }) {
           <span style={{ fontSize: 12, fontWeight: 700, color: diff >= 0 ? accent : "#f87171" }}>
             {diff >= 0 ? "+" : ""}{diffPct}%
           </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LineChartCompare({ items, colors, speed, accent, year }) {
+  const [progress, setProgress] = useState(0)
+  const raf = useRef(null)
+
+  useEffect(() => {
+    const start = performance.now()
+    const dur = 1500
+    const t = setTimeout(() => {
+      const tick = (now) => {
+        const p = Math.min(1, (now - start - 500) / dur)
+        setProgress(Math.max(0, 1 - Math.pow(1 - p, 3)))
+        if (p < 1) raf.current = requestAnimationFrame(tick)
+      }
+      raf.current = requestAnimationFrame(tick)
+    }, 500)
+    return () => { clearTimeout(t); cancelAnimationFrame(raf.current) }
+  }, [])
+
+  if (items.length < 2) return <HorizontalBars items={items} colors={colors} speed={speed} accent={accent} />
+
+  const W = 400, H = 140, padX = 30, padY = 10
+  const n = items.length
+  const maxVal = Math.max(1, ...items.flatMap((i) => [i.a, i.b]))
+
+  const toX = (i) => padX + (i / (n - 1)) * (W - padX * 2)
+  const toY = (val) => padY + (1 - val / maxVal) * (H - padY * 2)
+
+  const pathA = items.map((item, i) => {
+    const x = toX(i), y = toY(item.a * progress)
+    return (i === 0 ? "M" : "L") + x + "," + y
+  }).join(" ")
+
+  const pathB = items.map((item, i) => {
+    const x = toX(i), y = toY(item.b * progress)
+    return (i === 0 ? "M" : "L") + x + "," + y
+  }).join(" ")
+
+  const areaA = pathA + ` L${toX(n - 1)},${H - padY} L${padX},${H - padY} Z`
+
+  return (
+    <div>
+      <svg width="100%" viewBox={`0 0 ${W} ${H + 20}`} style={{ display: "block" }}>
+        {[0.25, 0.5, 0.75, 1].map((pct) => (
+          <line key={pct} x1={padX} x2={W - padX} y1={toY(maxVal * pct)} y2={toY(maxVal * pct)}
+            stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
+        ))}
+        <path d={areaA} fill={colors[0] + "12"} />
+        <path d={pathB} fill="none" stroke={colors[1]} strokeWidth={2} strokeDasharray="5 4" opacity={0.4}
+          style={{ filter: `drop-shadow(0 0 3px ${colors[1]}30)` }} />
+        <path d={pathA} fill="none" stroke={colors[0]} strokeWidth={2.5}
+          style={{ filter: `drop-shadow(0 0 6px ${colors[0]}50)` }} />
+        {items.map((item, i) => (
+          <g key={i}>
+            <circle cx={toX(i)} cy={toY(item.a * progress)} r={3.5} fill={colors[0]} stroke="white" strokeWidth={1.5} />
+            <circle cx={toX(i)} cy={toY(item.b * progress)} r={2.5} fill={colors[1]} opacity={0.5} />
+          </g>
+        ))}
+        {items.map((item, i) => (
+          <text key={i} x={toX(i)} y={H + 12} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize={8}
+            fontFamily="JetBrains Mono,monospace">{item.label}</text>
+        ))}
+      </svg>
+      {progress > 0.9 && (
+        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 8, animation: "slide-up 0.4s ease both" }}>
+          {[
+            { label: year, val: items.reduce((s, i) => s + i.a, 0), color: colors[0] },
+            { label: year - 1, val: items.reduce((s, i) => s + i.b, 0), color: colors[1] },
+          ].map((s) => (
+            <div key={s.label} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: s.color, fontFamily: "JetBrains Mono,monospace" }}>{Math.round(s.val)}</div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>{s.label}</div>
+            </div>
+          ))}
         </div>
       )}
     </div>
