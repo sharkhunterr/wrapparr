@@ -1,0 +1,223 @@
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.security import hash_password, require_admin
+from app.models.mapping import UserServiceMapping
+from app.models.recap import HistorySnapshot, YearlyRecap
+from app.models.service import ServiceConnector
+from app.models.share import GlobalConfig
+from app.models.user import User
+from app.schemas.auth import UserResponse
+
+router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@router.get("/dashboard")
+async def dashboard(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    user_count = (await db.execute(select(func.count(User.id)))).scalar()
+    active_services = (await db.execute(
+        select(func.count(ServiceConnector.id)).where(ServiceConnector.is_active.is_(True))
+    )).scalar()
+    running_jobs = (await db.execute(
+        select(func.count(YearlyRecap.id)).where(
+            YearlyRecap.status.in_(["collecting", "processing", "fetching_posters"])
+        )
+    )).scalar()
+
+    return {
+        "user_count": user_count,
+        "active_services": active_services,
+        "running_jobs": running_jobs,
+        "recent_logs": [],
+    }
+
+
+@router.get("/users", response_model=list[UserResponse])
+async def list_users(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).order_by(User.created_at.desc()))
+    return [UserResponse.model_validate(u) for u in result.scalars().all()]
+
+
+@router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def create_user(
+    email: str, password: str, display_name: str, role: str = "user",
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    existing = await db.execute(select(User).where(User.email == email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Email déjà utilisé")
+
+    user = User(email=email, hashed_password=hash_password(password), display_name=display_name, role=role)
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return UserResponse.model_validate(user)
+
+
+@router.patch("/users/{user_id}", response_model=UserResponse)
+async def update_user(
+    user_id: uuid.UUID, role: str | None = None, is_active: bool | None = None, password: str | None = None,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+
+    if role is not None:
+        user.role = role
+    if is_active is not None:
+        user.is_active = is_active
+    if password is not None:
+        user.hashed_password = hash_password(password)
+
+    await db.commit()
+    await db.refresh(user)
+    return UserResponse.model_validate(user)
+
+
+@router.get("/mapping")
+async def get_mappings(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(UserServiceMapping))
+    mappings = result.scalars().all()
+    # Return as { user_id: { service_type: username } }
+    out = {}
+    for m in mappings:
+        uid = str(m.user_id)
+        if uid not in out:
+            out[uid] = {}
+        out[uid][m.service_type] = m.service_username
+    return out
+
+
+@router.put("/mapping")
+async def save_mappings(data: dict, _admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    # data = { user_id: { service_type: username, ... }, ... }
+    for user_id_str, services in data.items():
+        user_id = uuid.UUID(user_id_str)
+        for service_type, username in services.items():
+            if not username or not username.strip():
+                # Delete mapping if empty
+                result = await db.execute(
+                    select(UserServiceMapping).where(
+                        UserServiceMapping.user_id == user_id,
+                        UserServiceMapping.service_type == service_type,
+                    )
+                )
+                existing = result.scalar_one_or_none()
+                if existing:
+                    await db.delete(existing)
+                continue
+
+            result = await db.execute(
+                select(UserServiceMapping).where(
+                    UserServiceMapping.user_id == user_id,
+                    UserServiceMapping.service_type == service_type,
+                )
+            )
+            existing = result.scalar_one_or_none()
+            if existing:
+                existing.service_username = username.strip()
+            else:
+                db.add(UserServiceMapping(user_id=user_id, service_type=service_type, service_username=username.strip()))
+
+    await db.commit()
+    return {"status": "ok"}
+
+
+# ── Recap management ──
+
+@router.get("/recaps")
+async def admin_list_recaps(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(YearlyRecap).order_by(YearlyRecap.year.desc())
+    )
+    recaps = result.scalars().all()
+    out = []
+    for r in recaps:
+        # Get user display name
+        user_result = await db.execute(select(User).where(User.id == r.user_id))
+        user = user_result.scalar_one_or_none()
+        out.append({
+            "id": str(r.id),
+            "user_id": str(r.user_id),
+            "user_name": user.display_name if user else "?",
+            "year": r.year,
+            "status": r.status,
+            "progress": r.progress,
+            "is_active": r.is_active,
+            "available_from": r.available_from.isoformat() if r.available_from else None,
+            "available_until": r.available_until.isoformat() if r.available_until else None,
+            "slide_settings": r.slide_settings,
+            "completed_at": r.completed_at.isoformat() if r.completed_at else None,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+            "error_message": r.error_message,
+        })
+    return out
+
+
+@router.patch("/recaps/{recap_id}")
+async def admin_update_recap(
+    recap_id: uuid.UUID, updates: dict,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == recap_id))
+    recap = result.scalar_one_or_none()
+    if not recap:
+        raise HTTPException(status_code=404, detail="Recap introuvable")
+
+    if "is_active" in updates:
+        recap.is_active = updates["is_active"]
+    if "available_from" in updates:
+        recap.available_from = updates["available_from"]
+    if "available_until" in updates:
+        recap.available_until = updates["available_until"]
+    if "slide_settings" in updates:
+        recap.slide_settings = updates["slide_settings"]
+
+    await db.commit()
+    return {"status": "ok"}
+
+
+@router.delete("/recaps/{recap_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def admin_delete_recap(
+    recap_id: uuid.UUID,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == recap_id))
+    recap = result.scalar_one_or_none()
+    if not recap:
+        raise HTTPException(status_code=404, detail="Recap introuvable")
+
+    # Delete snapshot first
+    snap_result = await db.execute(select(HistorySnapshot).where(HistorySnapshot.recap_id == recap.id))
+    snap = snap_result.scalar_one_or_none()
+    if snap:
+        await db.delete(snap)
+
+    await db.delete(recap)
+    await db.commit()
+
+
+@router.get("/config")
+async def get_config(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(GlobalConfig))
+    configs = result.scalars().all()
+    return {c.key: c.value for c in configs}
+
+
+@router.patch("/config")
+async def update_config(updates: dict, _admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    for key, value in updates.items():
+        result = await db.execute(select(GlobalConfig).where(GlobalConfig.key == key))
+        cfg = result.scalar_one_or_none()
+        if cfg:
+            cfg.value = value
+        else:
+            db.add(GlobalConfig(key=key, value=value))
+    await db.commit()
+    return {"status": "ok"}
