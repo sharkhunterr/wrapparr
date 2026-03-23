@@ -542,7 +542,6 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         if (ratingsBrackets) {
           ratingsConfig.brackets = ratingsBrackets.map((b) => ({
             min: b.min, max: b.max, label: b.name, emoji: b.emoji,
-            color: b.min < 4 ? "#ef4444" : b.min < 6 ? "#f97316" : b.min < 7 ? "#eab308" : b.min < 8 ? "#22c55e" : "#3b82f6",
           }))
         }
         slides.push({
@@ -668,19 +667,21 @@ function buildSlides(data, theme, slideConfigs, user, year) {
   }
 
   // Compare
+  const compareAccent = accents.compare || "#60a5fa"
   if (data.comparison) {
     slides.push({
-      id: "compare", accent: "#60a5fa", bg: "#00091a",
-      component: <CompareSlide accent="#60a5fa" comparison={data.comparison} year={year} />,
+      id: "compare", accent: compareAccent, bg: baseBg,
+      component: <CompareSlide accent={compareAccent} comparison={data.comparison} year={year} />,
     })
   }
 
   // Ranking
+  const rankingAccent = accents.ranking || "#f87171"
   const ranking = data.global?.users || data.tautulli?.ranking || []
   if (ranking.length > 0) {
     slides.push({
-      id: "ranking", accent: "#f87171", bg: "#130000",
-      component: <RankingSlide accent="#f87171" users={ranking} me={userName} year={year} />,
+      id: "ranking", accent: rankingAccent, bg: baseBg,
+      component: <RankingSlide accent={rankingAccent} users={ranking} me={userName} year={year} />,
     })
   }
 

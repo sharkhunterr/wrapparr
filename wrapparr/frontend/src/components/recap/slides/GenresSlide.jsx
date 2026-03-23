@@ -1,12 +1,42 @@
 import { useState, useEffect, useRef } from "react"
 
-const COLORS = ["#E5A00D", "#fb923c", "#c084fc", "#34d399", "#60a5fa", "#f87171", "#fbbf24", "#a78bfa"]
+// Generate a palette of colors derived from the accent
+function buildPalette(accent) {
+  // Parse hex to HSL, then generate variations
+  const hex = accent.replace("#", "")
+  const r = parseInt(hex.substring(0, 2), 16) / 255
+  const g = parseInt(hex.substring(2, 4), 16) / 255
+  const b = parseInt(hex.substring(4, 6), 16) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  let h = 0, s = 0, l = (max + min) / 2
+  if (max !== min) {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6
+    else if (max === g) h = ((b - r) / d + 2) / 6
+    else h = ((r - g) / d + 4) / 6
+  }
+  const hsl = (hue, sat, lit) => {
+    sat = Math.min(1, Math.max(0, sat)); lit = Math.min(1, Math.max(0, lit))
+    const c = (1 - Math.abs(2 * lit - 1)) * sat, x = c * (1 - Math.abs(((hue * 6) % 2) - 1)), m = lit - c / 2
+    let r1, g1, b1
+    const i = Math.floor(hue * 6) % 6
+    if (i === 0) { r1 = c; g1 = x; b1 = 0 } else if (i === 1) { r1 = x; g1 = c; b1 = 0 } else if (i === 2) { r1 = 0; g1 = c; b1 = x }
+    else if (i === 3) { r1 = 0; g1 = x; b1 = c } else if (i === 4) { r1 = x; g1 = 0; b1 = c } else { r1 = c; g1 = 0; b1 = x }
+    return "#" + [r1 + m, g1 + m, b1 + m].map((v) => Math.round(v * 255).toString(16).padStart(2, "0")).join("")
+  }
+  // Generate 8 colors by rotating hue and varying saturation/lightness
+  const offsets = [0, 0.08, 0.18, 0.33, 0.48, 0.62, 0.75, 0.88]
+  return offsets.map((off) => hsl((h + off) % 1, Math.min(1, s * (0.7 + off * 0.4)), Math.min(0.65, l * (0.85 + off * 0.2))))
+}
 
 export default function GenresSlide({ accent, genres = [], year, config = {} }) {
   const mode = config.displayMode || "race"
   const maxGenres = config.maxGenres || 6
   const speed = config.animationSpeed || 25000
   const data = genres.slice(0, maxGenres)
+
+  const COLORS = buildPalette(accent)
 
   if (!data.length) return null
 
@@ -19,10 +49,10 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
         </h2>
       </div>
 
-      {mode === "race" && <RaceMode data={data} accent={accent} speed={speed} config={config} />}
-      {mode === "bubbles" && <BubblesMode data={data} accent={accent} speed={speed} />}
-      {mode === "orbit" && <OrbitMode data={data} accent={accent} speed={speed} />}
-      {mode === "podium" && <PodiumMode data={data} accent={accent} speed={speed} />}
+      {mode === "race" && <RaceMode data={data} accent={accent} speed={speed} config={config} colors={COLORS} />}
+      {mode === "bubbles" && <BubblesMode data={data} accent={accent} speed={speed} colors={COLORS} />}
+      {mode === "orbit" && <OrbitMode data={data} accent={accent} speed={speed} colors={COLORS} />}
+      {mode === "podium" && <PodiumMode data={data} accent={accent} speed={speed} colors={COLORS} />}
     </div>
   )
 }
@@ -45,7 +75,7 @@ function pickPhrase(phrases) {
   return phrases[Math.floor(Math.random() * phrases.length)]
 }
 
-function RaceMode({ data, accent, speed, config = {} }) {
+function RaceMode({ data, accent, speed, config = {}, colors: COLORS }) {
   const max = data[0]?.v || 1
   const ROW_H = 48
   const medals = ["🥇", "🥈", "🥉"]
@@ -315,7 +345,7 @@ function RaceMode({ data, accent, speed, config = {} }) {
 }
 
 /* ═══ BUBBLES — all start small, grow fluidly to final size, bigger overlaps smaller ═══ */
-function BubblesMode({ data, accent, speed }) {
+function BubblesMode({ data, accent, speed, colors: COLORS }) {
   const max = data[0]?.v || 1
   const N = data.length
   const [progress, setProgress] = useState(0)
@@ -408,7 +438,7 @@ function BubblesMode({ data, accent, speed }) {
 }
 
 /* ═══ ORBIT — SVG circle with spinning dots that stop and trace colored arcs ═══ */
-function OrbitMode({ data, accent, speed }) {
+function OrbitMode({ data, accent, speed, colors: COLORS }) {
   const total = data.reduce((s, g) => s + g.v, 0)
   const N = data.length
   const R = 42 // SVG radius
@@ -567,7 +597,7 @@ function OrbitMode({ data, accent, speed }) {
 }
 
 /* ═══ PODIUM ═══ */
-function PodiumMode({ data, accent, speed }) {
+function PodiumMode({ data, accent, speed, colors: COLORS }) {
   const [revealed, setRevealed] = useState(false)
   useEffect(() => { const t = setTimeout(() => setRevealed(true), 500); return () => clearTimeout(t) }, [])
 

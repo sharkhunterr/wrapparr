@@ -1,12 +1,19 @@
 import { useState, useEffect, useRef } from "react"
 
 const DEFAULT_BRACKETS = [
-  { min: 0, max: 4, label: "Navet", emoji: "🥬", color: "#ef4444" },
-  { min: 4, max: 6, label: "Passable", emoji: "😐", color: "#f97316" },
-  { min: 6, max: 7, label: "Bon", emoji: "👍", color: "#eab308" },
-  { min: 7, max: 8, label: "Tres bon", emoji: "🎬", color: "#22c55e" },
-  { min: 8, max: 10, label: "Excellent", emoji: "🏆", color: "#3b82f6" },
+  { min: 0, max: 4, label: "Navet", emoji: "🥬" },
+  { min: 4, max: 6, label: "Passable", emoji: "😐" },
+  { min: 6, max: 7, label: "Bon", emoji: "👍" },
+  { min: 7, max: 8, label: "Tres bon", emoji: "🎬" },
+  { min: 8, max: 10, label: "Excellent", emoji: "🏆" },
 ]
+
+// Interpolate between two hex colors
+function lerpColor(a, b, t) {
+  const pa = [parseInt(a.slice(1, 3), 16), parseInt(a.slice(3, 5), 16), parseInt(a.slice(5, 7), 16)]
+  const pb = [parseInt(b.slice(1, 3), 16), parseInt(b.slice(3, 5), 16), parseInt(b.slice(5, 7), 16)]
+  return "#" + pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, "0")).join("")
+}
 
 function getBracket(rating, brackets) {
   return brackets.find((b) => rating >= b.min && rating < b.max) || brackets[brackets.length - 1]
@@ -84,7 +91,12 @@ function Gauge({ value, max = 10, accent, animated, size = 200 }) {
 
 export default function RatingsSlide({ accent, data, year, config = {} }) {
   const animSpeed = config.animationSpeed || 10000
-  const brackets = config.brackets || DEFAULT_BRACKETS
+  const rawBrackets = config.brackets || DEFAULT_BRACKETS
+  // Generate bracket colors: gradient from muted to accent
+  const brackets = rawBrackets.map((b, i) => ({
+    ...b,
+    color: b.color || lerpColor("#555555", accent, i / Math.max(1, rawBrackets.length - 1)),
+  }))
   const ratings = data?.extra?.ratings || []
 
   const [phase, setPhase] = useState(0) // 0=idle, 1=gauge, 2=bars, 3=done
@@ -190,18 +202,18 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
         <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.3s both" }}>
           <div style={{
             flex: 1, padding: "8px 10px", borderRadius: 10, textAlign: "center",
-            background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)",
+            background: accent + "0a", border: "1px solid " + accent + "25",
           }}>
             <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 2 }}>Meilleure note</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#3b82f6" }}>{ratings[0].r}/10</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: accent }}>{ratings[0].r}/10</div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ratings[0].t}</div>
           </div>
           <div style={{
             flex: 1, padding: "8px 10px", borderRadius: 10, textAlign: "center",
-            background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)",
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
           }}>
             <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 2 }}>Pire note</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#ef4444" }}>{ratings[ratings.length - 1].r}/10</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>{ratings[ratings.length - 1].r}/10</div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ratings[ratings.length - 1].t}</div>
           </div>
         </div>
