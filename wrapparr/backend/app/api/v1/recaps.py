@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session, get_db
 from app.core.security import get_current_user
+from app.models.recap import YearlyRecap
 from app.models.user import User
 from app.schemas.recap import (
     CompareResponse,
