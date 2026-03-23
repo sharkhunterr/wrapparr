@@ -30,11 +30,16 @@ async def _run_pipeline(user_id, year: int):
 
 @router.get("/slide-config")
 async def get_slide_config_public(_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    """Get slide settings (readable by any authenticated user)."""
+    """Get slide settings + order (readable by any authenticated user)."""
     from app.models.share import GlobalConfig
     result = await db.execute(select(GlobalConfig).where(GlobalConfig.key == "slide_settings"))
     cfg = result.scalar_one_or_none()
-    return cfg.value if cfg else {}
+    result2 = await db.execute(select(GlobalConfig).where(GlobalConfig.key == "slide_order"))
+    order_cfg = result2.scalar_one_or_none()
+    return {
+        "settings": cfg.value if cfg else {},
+        "order": order_cfg.value if order_cfg else [],
+    }
 
 
 @router.get("", response_model=list[RecapListItem])

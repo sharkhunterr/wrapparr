@@ -1,9 +1,97 @@
+import { useState } from "react"
 import { useActive, AN } from "../SharedUI"
 
-export default function FinaleSlide({ accent, userName, year, globalStats, onRestart }) {
+function PosterStrip({ posters, accent }) {
+  if (!posters.length) return null
+  // Duplicate for seamless infinite scroll
+  const items = [...posters, ...posters]
+
+  return (
+    <div style={{
+      position: "absolute", bottom: 0, left: 0, right: 0, height: 95, overflow: "hidden", zIndex: 1,
+      mask: "linear-gradient(90deg,transparent,black 12%,black 88%,transparent)",
+      WebkitMask: "linear-gradient(90deg,transparent,black 12%,black 88%,transparent)",
+    }}>
+      <div style={{
+        display: "flex", gap: 8, animation: "poster-strip 25s linear infinite",
+        width: "max-content", padding: "8px 0",
+      }}>
+        {items.map((p, i) => (
+          <PosterCard key={i} src={p.thumb} title={p.t} accent={accent} emoji={p.emoji} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PosterCard({ src, title, accent, emoji }) {
+  const [err, setErr] = useState(false)
+  return (
+    <div style={{
+      width: 54, height: 76, borderRadius: 7, flexShrink: 0, overflow: "hidden",
+      boxShadow: `0 4px 18px ${accent}25`, opacity: 0.6,
+      border: "1px solid rgba(255,255,255,0.1)",
+    }}>
+      {src && !err ? (
+        <img src={src} alt={title} onError={() => setErr(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      ) : (
+        <div style={{
+          width: "100%", height: "100%", background: "linear-gradient(135deg,#1a1a2e,#16213e)",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+        }}>{emoji || "🎬"}</div>
+      )}
+    </div>
+  )
+}
+
+function collectPosters(recapData) {
+  if (!recapData) return []
+  const posters = []
+  const SERVICE_EMOJI = {
+    tautulli: "🎬", plex: "🎬", jellyfin: "📺",
+    romm: "🎮", audiobookshelf: "🎧", komga: "📚", booklore: "📖",
+  }
+
+  for (const [svc, data] of Object.entries(recapData)) {
+    if (svc === "global" || !data || typeof data !== "object") continue
+    const emoji = SERVICE_EMOJI[svc] || "🎬"
+
+    // Films
+    const filmsTop = data.extra?.films?.top || []
+    for (const f of filmsTop.slice(0, 8)) {
+      if (f.thumb) posters.push({ thumb: f.thumb, t: f.t, emoji })
+    }
+
+    // Series
+    const seriesTop = data.extra?.series?.top || []
+    for (const s of seriesTop.slice(0, 4)) {
+      if (s.thumb) posters.push({ thumb: s.thumb, t: s.t, emoji })
+    }
+
+    // Top items (other services)
+    if (!filmsTop.length && !seriesTop.length) {
+      const top = data.top || []
+      for (const t of top.slice(0, 4)) {
+        if (t.thumb) posters.push({ thumb: t.thumb, t: t.t, emoji })
+      }
+    }
+  }
+
+  return posters
+}
+
+export default function FinaleSlide({ accent, userName, year, globalStats, recapData, onRestart }) {
   const active = useActive()
+  const posters = collectPosters(recapData)
+
   return (
     <div style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
+
+      {/* Poster filmstrip */}
+      <PosterStrip posters={posters} accent={accent} />
+
+      {/* Content */}
       <div style={{ position: "relative", zIndex: 5, textAlign: "center", maxWidth: 400, width: "100%", padding: "0 20px" }}>
         <div style={{ fontSize: 62, marginBottom: 12, animation: "float 2.5s ease-in-out infinite", filter: "drop-shadow(0 0 30px " + accent + "90)" }}>🏆</div>
         <div className="s0" style={{ fontSize: 8, color: "rgba(255,255,255,.2)", letterSpacing: ".35em", textTransform: "uppercase", fontFamily: "JetBrains Mono,monospace", marginBottom: 10 }}>MERCI POUR CETTE BELLE ANNEE</div>

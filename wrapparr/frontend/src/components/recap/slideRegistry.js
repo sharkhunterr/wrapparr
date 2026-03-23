@@ -54,7 +54,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-timeline", label: "Profil cinephile {service}", group: "service", tmdb: true,
+    id: "{service}-timeline", label: "Profil cinephile {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Analyse des annees de sortie — quel type de spectateur es-tu ?",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 8000 },
@@ -68,14 +68,14 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-worldmap", label: "Carte du monde {service}", group: "service", tmdb: true,
+    id: "{service}-worldmap", label: "Carte du monde {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Pays d'origine des films vus",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 15000 },
     ],
   },
   {
-    id: "{service}-ratings", label: "Notes {service}", group: "service", tmdb: true,
+    id: "{service}-ratings", label: "Notes {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Moyenne des notes et distribution par tranches",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 10000 },
@@ -86,6 +86,24 @@ export const SLIDE_REGISTRY = [
         { min: 7, max: 8, name: "Tres bon", desc: "Films tres bien notes", emoji: "🎬" },
         { min: 8, max: 10, name: "Excellent", desc: "Les pepites", emoji: "🏆" },
       ]},
+    ],
+  },
+  {
+    id: "{service}-actors", label: "Acteurs favoris {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Acteurs les plus presents dans tes films",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
+      { key: "minAppearances", label: "Apparitions minimum", type: "number", default: 2 },
+      { key: "maxCards", label: "Nombre max d'acteurs", type: "number", default: 6 },
+    ],
+  },
+  {
+    id: "{service}-directors", label: "Realisateurs favoris {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Realisateurs les plus presents dans tes films",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
+      { key: "minAppearances", label: "Apparitions minimum", type: "number", default: 2 },
+      { key: "maxCards", label: "Nombre max de realisateurs", type: "number", default: 6 },
     ],
   },
   {
@@ -109,6 +127,67 @@ export const SLIDE_REGISTRY = [
         { trigger: "mid_race", label: "Mi-course", phrases: ["La course bat son plein !", "Tout peut encore changer !", "Qui va l'emporter ?"] },
         { trigger: "near_end", label: "Fin de course", phrases: ["Derniere ligne droite !", "On approche de la fin...", "Les jeux sont presque faits !"] },
       ]},
+    ],
+  },
+
+  // ── Series-specific slides (for services that have separate series data) ──
+  {
+    id: "cat-{service}-series", label: "Annonce series {service}", group: "service", cat: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Slide d'annonce plein ecran de la section series",
+    params: [],
+  },
+  {
+    id: "{service}-series-pod", label: "Podium series {service}", group: "service", pod: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Top series avec reveal anime",
+    params: [
+      { key: "phaseWait", label: "Attente avant jokes (ms)", type: "number", default: 1800 },
+      { key: "jokeDuration", label: "Duree par joke (ms)", type: "number", default: 1800 },
+      { key: "jokeTransition", label: "Transition entre jokes (ms)", type: "number", default: 350 },
+      { key: "reveal1", label: "Delai reveal #3 (ms)", type: "number", default: 400 },
+      { key: "reveal2", label: "Delai reveal #2 (ms)", type: "number", default: 1100 },
+      { key: "reveal3", label: "Delai reveal #1 (ms)", type: "number", default: 2000 },
+    ],
+  },
+  {
+    id: "{service}-series", label: "Stats series {service}", group: "service",
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Statistiques detaillees des series",
+    params: [],
+  },
+  {
+    id: "{service}-series-genres", label: "Genres series {service}", group: "service",
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Genres les plus regardes en series",
+    params: [
+      { key: "displayMode", label: "Mode d'affichage", type: "select", default: "race", options: [
+        { value: "race", label: "Course" },
+        { value: "bubbles", label: "Bulles" },
+        { value: "orbit", label: "Orbite" },
+        { value: "podium", label: "Podium classique" },
+      ]},
+      { key: "maxGenres", label: "Nombre de genres affiches", type: "number", default: 6 },
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 25000 },
+      { key: "commentaryEnabled", label: "Commentaires en direct", type: "bool", default: true, showWhen: { key: "displayMode", value: "race" } },
+      { key: "raceCommentary", label: "Phrases de commentaire", type: "commentary", showWhen: { key: "displayMode", value: "race" }, default: [
+        { trigger: "start", label: "Depart", phrases: ["C'est parti !", "Les genres s'elancent !", "Et c'est le depart !"] },
+        { trigger: "leader_change", label: "Changement leader", phrases: ["{name} prend la tete !", "{name} depasse tout le monde !", "Incroyable, {name} passe devant !"], vars: ["{name}"] },
+        { trigger: "last_place", label: "Dernier", phrases: ["{name} bon dernier...", "{name} ferme la marche, courage !"], vars: ["{name}"] },
+        { trigger: "close_race", label: "Course serree", phrases: ["C'est serre entre {name1} et {name2} !"], vars: ["{name1}", "{name2}"] },
+        { trigger: "mid_race", label: "Mi-course", phrases: ["La course bat son plein !", "Tout peut encore changer !"] },
+        { trigger: "near_end", label: "Fin de course", phrases: ["Derniere ligne droite !", "Les jeux sont presque faits !"] },
+      ]},
+    ],
+  },
+  {
+    id: "{service}-series-actors", label: "Acteurs series {service}", group: "service", tmdb: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Acteurs les plus vus dans tes series",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
+      { key: "minAppearances", label: "Apparitions minimum", type: "number", default: 2 },
+      { key: "maxCards", label: "Nombre max d'acteurs", type: "number", default: 6 },
     ],
   },
 
@@ -146,8 +225,10 @@ export function expandRegistry(dataServices = []) {
   }
 
   // 2. Per service — all slides for service1, then all for service2, etc.
-  for (const svc of dataServices) {
-    for (const tmpl of serviceTemplates) {
+  // Skip non-collector services (tmdb is an enrichment source, not a data collector)
+  const SKIP_SERVICES = new Set(["tmdb"])
+  for (const svc of dataServices.filter((s) => !SKIP_SERVICES.has(s))) {
+    for (const tmpl of serviceTemplates.filter((t) => !t.onlyFor || t.onlyFor.includes(svc))) {
       const svcLabel = svc.charAt(0).toUpperCase() + svc.slice(1)
       expanded.push({
         ...tmpl,

@@ -12,6 +12,8 @@ import ServiceDeepSlide from "./slides/ServiceDeepSlide"
 import FilmTimelineSlide from "./slides/FilmTimelineSlide"
 import WorldMapSlide from "./slides/WorldMapSlide"
 import RatingsSlide from "./slides/RatingsSlide"
+import FavoriteActorsSlide from "./slides/FavoriteActorsSlide"
+import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
 import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import RankingSlide from "./slides/RankingSlide"
@@ -68,6 +70,46 @@ function ConfettiEffect() {
   </div>
 }
 
+const FW_P = [["#E5A00D", "#fb923c", "#fbbf24"], ["#34d399", "#60a5fa", "#a78bfa"], ["#f87171", "#c084fc", "#fb923c"], ["#fff", "#60a5fa", "#a78bfa"]]
+function FireworksEffect({ active }) {
+  const cv = useRef(null), pts = useRef([]), raf = useRef(null)
+  useEffect(() => {
+    if (!active) return
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
+    const launch = () => {
+      const pal = FW_P[Math.floor(Math.random() * FW_P.length)]
+      const x = c.width * (0.15 + Math.random() * 0.7), y = c.height * (0.05 + Math.random() * 0.5)
+      const count = 60 + Math.floor(Math.random() * 60), type = Math.floor(Math.random() * 3)
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.4
+        const speed = (3.5 + Math.random() * 2) * (type === 1 ? 0.65 : 1)
+        pts.current.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, alpha: 1, decay: 0.011 + Math.random() * 0.009, size: 2.2 + Math.random() * 2.4, color: pal[Math.floor(Math.random() * pal.length)], gravity: type === 0 ? 0.065 : 0.042 })
+        if (type === 2) { const a2 = angle + (Math.random() - 0.5) * 0.3, s2 = speed * (0.35 + Math.random() * 0.4); pts.current.push({ x, y, vx: Math.cos(a2) * s2, vy: Math.sin(a2) * s2, alpha: 0.6, decay: 0.026, size: 1.2, color: pal[0], gravity: 0.085 }) }
+      }
+    }
+    let last = 0
+    const draw = (now) => {
+      ctx.fillStyle = "rgba(0,0,0,0.075)"; ctx.fillRect(0, 0, c.width, c.height)
+      if (now - last > 650) { launch(); last = now }
+      pts.current = pts.current.filter((p) => p.alpha > 0.012)
+      pts.current.forEach((p) => {
+        p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= 0.97; p.alpha -= p.decay; p.size *= 0.977
+        ctx.save(); ctx.globalAlpha = Math.max(0, p.alpha); ctx.fillStyle = p.color
+        ctx.shadowBlur = 10; ctx.shadowColor = p.color
+        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0.1, p.size), 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+      })
+      raf.current = requestAnimationFrame(draw)
+    }
+    raf.current = requestAnimationFrame(draw)
+    launch(); setTimeout(launch, 180); setTimeout(launch, 420)
+    return () => { cancelAnimationFrame(raf.current); window.removeEventListener("resize", rz); ctx.clearRect(0, 0, c.width, c.height); pts.current = [] }
+  }, [active])
+  return <canvas ref={cv} style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 3 }} />
+}
+
 const SERVICE_META = {
   tautulli: { key: "plex", icon: "🎬", label: "FILMS & SERIES", sub: "Cinema · Series TV" },
   plex: { key: "plex", icon: "🎬", label: "FILMS & SERIES", sub: "Cinema · Series TV" },
@@ -100,12 +142,14 @@ export default function RecapPlayer() {
       try {
         const [themes, slideCfg] = await Promise.all([
           api("/themes"),
-          api("/recaps/slide-config").catch(() => ({})),
+          api("/recaps/slide-config").catch(() => ({ settings: {}, order: [] })),
         ])
         const me = await api("/auth/me")
         const activeTheme = themes.find((t) => t.id === me.theme_pack_id) || themes[0]
         setTheme(activeTheme?.config || null)
-        setSlideConfigs(slideCfg || {})
+        // slideCfg is now { settings: {...}, order: [...] } or legacy plain object
+        const parsedCfg = slideCfg?.settings ? slideCfg : { settings: slideCfg || {}, order: [] }
+        setSlideConfigs(parsedCfg)
 
         let recapResult = null
 
@@ -253,6 +297,7 @@ export default function RecapPlayer() {
       <Orbs accent={accent} />
       {needSpotlights && <Spotlights accent={accent} intensity={spotlightIntensity} />}
       {isFinale && <ConfettiEffect />}
+      {isFinale && <FireworksEffect active={true} />}
       <Grain />
 
       {/* Dot nav */}
@@ -355,8 +400,8 @@ const JOKES = {
 
 // Service config for slide generation (matches prototype SLIDES_DEF colors)
 const SERVICE_SLIDE_CONFIG = {
-  tautulli: { icon: "🎬", label: "FILMS & SERIES", sub: "Cinema · Documentaires · Series TV", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "" },
-  plex: { icon: "🎬", label: "FILMS & SERIES", sub: "Cinema · Series", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "" },
+  tautulli: { icon: "🎬", label: "FILMS", sub: "Cinema · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SERIES", seriesSub: "Series TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
+  plex: { icon: "🎬", label: "FILMS", sub: "Cinema · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SERIES", seriesSub: "Series TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
   jellyfin: { icon: "📺", label: "JELLYFIN", sub: "Films · Series", accent: "#00a4dc", bgCat: "#000a14", bgPod: "#000812", bgStats: "#000d18", statKey: "plays", statLabel: "vues", statSuffix: "" },
   romm: { icon: "🎮", label: "JEUX VIDEO", sub: "Switch · PC · Retrogaming", accent: "#34d399", bgCat: "#010a05", bgPod: "#010806", bgStats: "#020f08", statKey: "hours", statLabel: "heures", statSuffix: "h" },
   audiobookshelf: { icon: "🎧", label: "LIVRES AUDIO", sub: "Sci-Fi · Thriller · Post-Apo", accent: "#fb923c", bgCat: "#0a0300", bgPod: "#080300", bgStats: "#110500", statKey: "h", statLabel: "duree", statSuffix: "h" },
@@ -364,16 +409,25 @@ const SERVICE_SLIDE_CONFIG = {
   booklore: { icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD", accent: "#a78bfa", bgCat: "#050010", bgPod: "#040008", bgStats: "#060012", statKey: "pages", statLabel: "pages", statSuffix: "" },
 }
 
-function getSlideConfig(slideConfigs, slideId) {
-  if (!slideConfigs || typeof slideConfigs !== "object") return {}
-  const cfg = slideConfigs[slideId] || {}
+function getSlideConfig(slideSettings, slideId) {
+  if (!slideSettings || typeof slideSettings !== "object") return {}
+  const cfg = slideSettings[slideId] || {}
   const { enabled, ...rest } = cfg
   return rest
 }
 
+function isSlideEnabled(slideSettings, slideId) {
+  if (!slideSettings || typeof slideSettings !== "object") return true
+  const cfg = slideSettings[slideId]
+  if (!cfg) return true
+  return cfg.enabled !== false
+}
+
 function buildSlides(data, theme, slideConfigs, user, year) {
   if (!data) return []
-  const sc = slideConfigs || {}
+  const slideSettings = slideConfigs?.settings || slideConfigs || {}
+  const slideOrder = slideConfigs?.order || []
+  const sc = slideSettings
   const palette = theme?.palette || {}
   const primary = palette.primary || "#E5A00D"
   const baseBg = palette.background || "#05050e"
@@ -409,80 +463,192 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
     const cfg = SERVICE_SLIDE_CONFIG[svc] || {}
     const svcAccent = accents[svcKey] || cfg.accent || primary
-    const top = svcData.top || svcData.extra?.films?.top || svcData.extra?.series?.top || []
     const jokes = JOKES[svc] || []
 
-    // Category slide
-    slides.push({
-      id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
-      component: <CategorySlide accent={svcAccent} icon={cfg.icon} label={cfg.label} sub={cfg.sub} />,
-    })
+    // ── For services with separate films+series (tautulli, plex): split into 2 sections ──
+    if (cfg.hasSeries) {
+      const filmsExtra = svcData.extra?.films || {}
+      const seriesExtra = svcData.extra?.series || {}
+      const filmsTop = (filmsExtra.top || []).slice(0, 4)
+      const seriesTop = (seriesExtra.top || []).slice(0, 4)
 
-    // Podium slide (if top items) — with backdrop from #1
-    const backdropUrl = svcData.extra?.backdrop || (top[0]?.art) || ""
-    if (top.length >= 2) {
+      // Build a films-only data overlay for slides that read data.total_items etc.
+      const filmsData = { ...svcData, top: filmsTop, total_items: filmsExtra.total || 0, total_hours: filmsExtra.hours || 0 }
+      const seriesData = { ...svcData, top: seriesTop, total_items: seriesExtra.episodes || 0, total_hours: seriesExtra.hours || 0 }
+
+      // ═══ FILMS SECTION ═══
       slides.push({
-        id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
-        component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={top} title={"Top " + cfg.label + " " + year} icon={cfg.icon} jokes={jokes} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={backdropUrl} config={getSlideConfig(sc, svc + "-pod")} />,
+        id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
+        component: <CategorySlide accent={svcAccent} icon={cfg.icon} label={cfg.label} sub={cfg.sub} />,
       })
-    }
 
-    // Stats slide
-    slides.push({
-      id: svc, accent: svcAccent, bg: cfg.bgStats || baseBg,
-      component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} year={year} />,
-    })
-
-    // Deep slide (habitudes)
-    if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
-      slides.push({
-        id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} />,
-      })
-    }
-
-    // Film timeline / profil cinephile (if films with years)
-    const hasYears = (svcData.top || []).some((t) => t.y && t.y > 1890)
-    if (hasYears) {
-      slides.push({
-        id: svc + "-timeline", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} />,
-      })
-    }
-
-    // World map slide (if country data from TMDB)
-    const countryData = svcData.extra?.countries || []
-    if (countryData.length > 0) {
-      slides.push({
-        id: svc + "-worldmap", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} />,
-      })
-    }
-
-    // Ratings slide (if rating data available)
-    const ratingsData = svcData.extra?.ratings || []
-    if (ratingsData.length >= 2) {
-      const ratingsBrackets = getSlideConfig(sc, svc + "-ratings")?.brackets
-      const ratingsConfig = { ...getSlideConfig(sc, svc + "-ratings") }
-      if (ratingsBrackets) {
-        ratingsConfig.brackets = ratingsBrackets.map((b) => ({
-          min: b.min, max: b.max, label: b.name, emoji: b.emoji,
-          color: b.min < 4 ? "#ef4444" : b.min < 6 ? "#f97316" : b.min < 7 ? "#eab308" : b.min < 8 ? "#22c55e" : "#3b82f6",
-        }))
+      const filmsBackdrop = svcData.extra?.backdrop || (filmsTop[0]?.art) || ""
+      if (filmsTop.length >= 2) {
+        slides.push({
+          id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
+          component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={filmsTop} title={"Top " + cfg.label + " " + year} icon={cfg.icon} jokes={jokes} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={filmsBackdrop} config={getSlideConfig(sc, svc + "-pod")} />,
+        })
       }
+
       slides.push({
-        id: svc + "-ratings", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} />,
+        id: svc + "-stats", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} />,
       })
+
+      // Deep slide (habitudes) — uses combined data
+      if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
+        slides.push({
+          id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} />,
+        })
+      }
+
+      // Film-specific slides (timeline, worldmap, ratings, actors, directors)
+      const hasYears = filmsTop.some((t) => t.y && t.y > 1890)
+      if (hasYears) {
+        slides.push({
+          id: svc + "-timeline", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} />,
+        })
+      }
+
+      const countryData = svcData.extra?.countries || []
+      if (countryData.length > 0) {
+        slides.push({
+          id: svc + "-worldmap", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} />,
+        })
+      }
+
+      const ratingsData = svcData.extra?.ratings || []
+      if (ratingsData.length >= 2) {
+        const ratingsBrackets = getSlideConfig(sc, svc + "-ratings")?.brackets
+        const ratingsConfig = { ...getSlideConfig(sc, svc + "-ratings") }
+        if (ratingsBrackets) {
+          ratingsConfig.brackets = ratingsBrackets.map((b) => ({
+            min: b.min, max: b.max, label: b.name, emoji: b.emoji,
+            color: b.min < 4 ? "#ef4444" : b.min < 6 ? "#f97316" : b.min < 7 ? "#eab308" : b.min < 8 ? "#22c55e" : "#3b82f6",
+          }))
+        }
+        slides.push({
+          id: svc + "-ratings", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} />,
+        })
+      }
+
+      const actorsData = svcData.extra?.actors || []
+      const actorsConfig = getSlideConfig(sc, svc + "-actors")
+      if (actorsData.filter((a) => a.count >= (actorsConfig?.minAppearances || 2)).length > 0) {
+        slides.push({
+          id: svc + "-actors", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <FavoriteActorsSlide accent={svcAccent} data={svcData} year={year} config={actorsConfig} />,
+        })
+      }
+
+      const directorsData = svcData.extra?.directors || []
+      const directorsConfig = getSlideConfig(sc, svc + "-directors")
+      if (directorsData.filter((d) => d.count >= (directorsConfig?.minAppearances || 2)).length > 0) {
+        slides.push({
+          id: svc + "-directors", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <FavoriteDirectorsSlide accent={svcAccent} data={svcData} year={year} config={directorsConfig} />,
+        })
+      }
+
+      // Genres slide (films section)
+      const topGenres = svcData.extra?.top_genres || svcData.genres || []
+      if (topGenres.length >= 3) {
+        slides.push({
+          id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
+        })
+      }
+
+      // ═══ SERIES SECTION ═══
+      if (seriesTop.length >= 1) {
+        const seriesAccent = cfg.seriesAccent || "#fb923c"
+
+        slides.push({
+          id: "cat-" + svc + "-series", accent: seriesAccent, bg: cfg.seriesBgCat || baseBg, cat: true, fullscreen: true,
+          component: <CategorySlide accent={seriesAccent} icon={cfg.seriesIcon} label={cfg.seriesLabel} sub={cfg.seriesSub} />,
+        })
+
+        if (seriesTop.length >= 2) {
+          const seriesBackdrop = (seriesTop[0]?.art) || ""
+          const seriesJokes = [
+            "Voyons quelles series t'ont accroche...",
+            "Des episodes enchaines sans fin.",
+            "Le binge-watching, un art de vivre.",
+            "Voici ton podium series",
+          ]
+          slides.push({
+            id: svc + "-series-pod", accent: seriesAccent, bg: cfg.seriesBgPod || baseBg, pod: true, fullscreen: true,
+            component: <PodiumSlide accent={seriesAccent} bg={cfg.seriesBgPod || baseBg} data={seriesTop} title={"Top " + cfg.seriesLabel + " " + year} icon={cfg.seriesIcon} jokes={seriesJokes} statLabel="episodes" statKey="ep" statSuffix="" backdrop={seriesBackdrop} config={getSlideConfig(sc, svc + "-series-pod")} />,
+          })
+        }
+
+        slides.push({
+          id: svc + "-series", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+          component: <ServiceStatsSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} />,
+        })
+
+        // Series genres
+        const seriesGenres = svcData.extra?.series_genres || []
+        if (seriesGenres.length >= 3) {
+          slides.push({
+            id: svc + "-series-genres", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <GenresSlide accent={seriesAccent} genres={seriesGenres} year={year} config={{ displayMode: "race", ...getSlideConfig(sc, svc + "-series-genres") }} />,
+          })
+        }
+
+        // Series actors
+        const seriesActors = svcData.extra?.series_actors || []
+        const seriesActorsConfig = getSlideConfig(sc, svc + "-series-actors")
+        if (seriesActors.filter((a) => a.count >= (seriesActorsConfig?.minAppearances || 2)).length > 0) {
+          slides.push({
+            id: svc + "-series-actors", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <FavoriteActorsSlide accent={seriesAccent} data={{ extra: { actors: seriesActors } }} year={year} config={seriesActorsConfig} />,
+          })
+        }
+      }
+    } else {
+      // ── Standard service (romm, audiobookshelf, komga, booklore) ──
+      const top = svcData.top || []
+
+      slides.push({
+        id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
+        component: <CategorySlide accent={svcAccent} icon={cfg.icon} label={cfg.label} sub={cfg.sub} />,
+      })
+
+      const backdropUrl = (top[0]?.art) || ""
+      if (top.length >= 2) {
+        slides.push({
+          id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
+          component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={top} title={"Top " + cfg.label + " " + year} icon={cfg.icon} jokes={jokes} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={backdropUrl} config={getSlideConfig(sc, svc + "-pod")} />,
+        })
+      }
+
+      slides.push({
+        id: svc + "-stats", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} year={year} />,
+      })
+
+      if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
+        slides.push({
+          id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} />,
+        })
+      }
     }
 
-    // Genres podium slide (if genres available)
-    const topGenres = svcData.extra?.top_genres || svcData.genres || []
-    if (topGenres.length >= 3) {
-      slides.push({
-        id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
-      })
+    // Genres slide for standard services (non-hasSeries)
+    if (!cfg.hasSeries) {
+      const topGenres = svcData.extra?.top_genres || svcData.genres || []
+      if (topGenres.length >= 3) {
+        slides.push({
+          id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
+        })
+      }
     }
   }
 
@@ -506,8 +672,31 @@ function buildSlides(data, theme, slideConfigs, user, year) {
   // Finale
   slides.push({
     id: "finale", accent: primary, bg: baseBg, fullscreen: true,
-    component: <FinaleSlide accent={primary} userName={userName} year={year} globalStats={globalStats} onRestart={null} />,
+    component: <FinaleSlide accent={primary} userName={userName} year={year} globalStats={globalStats} recapData={data} onRestart={null} />,
   })
 
-  return slides
+  // ── Apply saved order + enabled filter ──
+  // Filter out disabled slides (but keep locked: intro, finale)
+  const LOCKED = new Set(["intro", "finale"])
+  let finalSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
+
+  // Reorder according to saved order if available
+  if (slideOrder.length > 0) {
+    const byId = {}
+    for (const s of finalSlides) byId[s.id] = s
+    const reordered = []
+    for (const id of slideOrder) {
+      if (byId[id]) {
+        reordered.push(byId[id])
+        delete byId[id]
+      }
+    }
+    // Append any slides not in saved order (new slides)
+    for (const s of finalSlides) {
+      if (byId[s.id]) reordered.push(s)
+    }
+    finalSlides = reordered
+  }
+
+  return finalSlides
 }

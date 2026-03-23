@@ -85,11 +85,12 @@ class TautulliCollector(BaseCollector):
                     "thumb": r.get("thumb", ""),
                 }
 
-        movies_to_fetch = [rk for rk, _ in movie_rk.most_common(50)]
-        series_to_fetch = [rk for rk, _ in series_rk.most_common(10)]
+        movies_to_fetch = [rk for rk, _ in movie_rk.most_common(100)]
+        series_to_fetch = [rk for rk, _ in series_rk.most_common(20)]
 
         metadata = {}
         countries_by_rk = {}
+        credits_by_rk = {}
 
         if self.tmdb_api_key:
             # ── TMDB is the single enrichment source ──
@@ -129,15 +130,50 @@ class TautulliCollector(BaseCollector):
                     countries = tmdb_data.get("production_countries", [])
                     if countries:
                         countries_by_rk[srk] = [{"code": c["iso_3166_1"], "name": c.get("name", c["iso_3166_1"])} for c in countries]
+                    credits = tmdb_data.get("credits")
+                    if credits:
+                        credits_by_rk[srk] = credits
                 elif tau_meta:
                     # TMDB failed entirely — use Tautulli data
                     metadata[srk] = tau_meta
 
-            # Series: use Tautulli metadata (TMDB series API is different)
+            # Series: enrich via TMDB TV API
             for rk in series_to_fetch:
                 srk = str(rk)
-                if srk in tautulli_meta:
-                    metadata[srk] = tautulli_meta[srk]
+                tau_meta = tautulli_meta.get(srk, {})
+                tmdb_data = None
+
+                # Try TMDB ID from guids
+                tmdb_id = self._extract_tmdb_id(tau_meta.get("guids", []))
+                if tmdb_id:
+                    tmdb_data = await self._fetch_tmdb_tv(tmdb_id)
+
+                # Search by title
+                if not tmdb_data:
+                    info = rk_info.get(rk, {})
+                    title = info.get("title") or tau_meta.get("title", "")
+                    if title:
+                        tmdb_data = await self._search_tmdb_tv(title)
+
+                if tmdb_data:
+                    metadata[srk] = self._tmdb_tv_to_metadata(tmdb_data)
+                    if not metadata[srk].get("thumb") and tau_meta.get("thumb"):
+                        metadata[srk]["thumb"] = tau_meta["thumb"]
+                    # aggregate_credits for TV
+                    agg_credits = tmdb_data.get("aggregate_credits")
+                    if agg_credits:
+                        # Normalize to same format as movie credits
+                        cast = []
+                        for member in agg_credits.get("cast", [])[:15]:
+                            cast.append({
+                                "id": member.get("id"),
+                                "name": member.get("name", "?"),
+                                "profile_path": member.get("profile_path"),
+                                "order": member.get("order", 99),
+                            })
+                        credits_by_rk[srk] = {"cast": cast, "crew": []}
+                elif tau_meta:
+                    metadata[srk] = tau_meta
 
         else:
             # ── No TMDB — Tautulli only ──
@@ -147,7 +183,7 @@ class TautulliCollector(BaseCollector):
                 if meta and (meta.get("title") or meta.get("year")):
                     metadata[str(rk)] = meta
 
-        return {"history": history, "users": users_table, "metadata": metadata, "countries": countries_by_rk, "year": year, "base_url": self.base_url}
+        return {"history": history, "users": users_table, "metadata": metadata, "countries": countries_by_rk, "credits": credits_by_rk, "year": year, "base_url": self.base_url}
 
     def _extract_tmdb_id(self, guids):
         if not guids:
@@ -163,7 +199,7 @@ class TautulliCollector(BaseCollector):
         try:
             resp = await self.client.get(
                 f"https://api.themoviedb.org/3/movie/{tmdb_id}",
-                params={"api_key": self.tmdb_api_key, "language": "fr-FR"},
+                params={"api_key": self.tmdb_api_key, "language": "fr-FR", "append_to_response": "credits"},
             )
             if resp.status_code == 200:
                 return resp.json()
@@ -202,6 +238,52 @@ class TautulliCollector(BaseCollector):
             "thumb": f"https://image.tmdb.org/t/p/w300{poster}" if poster else "",
             "art": "",
             "production_countries": tmdb.get("production_countries", []),
+            "_source": "tmdb",
+        }
+
+    async def _fetch_tmdb_tv(self, tmdb_id: str) -> dict:
+        """Fetch TV series details + credits from TMDB."""
+        try:
+            resp = await self.client.get(
+                f"https://api.themoviedb.org/3/tv/{tmdb_id}",
+                params={"api_key": self.tmdb_api_key, "language": "fr-FR", "append_to_response": "aggregate_credits"},
+            )
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception as e:
+            logger.debug("TMDB TV fetch error for %s: %s", tmdb_id, e)
+        return {}
+
+    async def _search_tmdb_tv(self, title: str, year: int = 0) -> dict:
+        """Search TMDB TV by title, return first match details or {}."""
+        try:
+            params = {"api_key": self.tmdb_api_key, "language": "fr-FR", "query": title}
+            if year and year > 1900:
+                params["first_air_date_year"] = year
+            resp = await self.client.get(
+                "https://api.themoviedb.org/3/search/tv", params=params,
+            )
+            if resp.status_code == 200:
+                results = resp.json().get("results", [])
+                if results:
+                    return await self._fetch_tmdb_tv(str(results[0]["id"]))
+        except Exception as e:
+            logger.debug("TMDB TV search error for '%s': %s", title, e)
+        return {}
+
+    def _tmdb_tv_to_metadata(self, tmdb: dict) -> dict:
+        """Convert TMDB TV data to metadata dict."""
+        if not tmdb:
+            return {}
+        poster = tmdb.get("poster_path", "")
+        return {
+            "title": tmdb.get("name", ""),
+            "year": int(tmdb.get("first_air_date", "0000")[:4]) if tmdb.get("first_air_date") else 0,
+            "genres": [g["name"] for g in tmdb.get("genres", [])],
+            "audience_rating": str(round(tmdb.get("vote_average", 0), 1)) if tmdb.get("vote_average") else "",
+            "rating": "",
+            "thumb": f"https://image.tmdb.org/t/p/w300{poster}" if poster else "",
+            "art": "",
             "_source": "tmdb",
         }
 
@@ -254,8 +336,12 @@ class TautulliCollector(BaseCollector):
                 "series": {"episodes": len(series), "hours": round(total_h_series, 1), "top": all_series},
                 "backdrop": backdrop,
                 "top_genres": genres[:6],
+                "series_genres": self._build_genres(series, metadata)[:6],
                 "countries": self._build_countries(films, raw.get("countries", {})),
                 "ratings": self._build_ratings(all_films),
+                "actors": self._build_actors(films, raw.get("credits", {})),
+                "directors": self._build_directors(films, raw.get("credits", {})),
+                "series_actors": self._build_actors(series, raw.get("credits", {})),
             },
         )
 
@@ -267,6 +353,85 @@ class TautulliCollector(BaseCollector):
             if r and float(r) > 0:
                 ratings.append({"t": f["t"], "r": round(float(r), 1)})
         return sorted(ratings, key=lambda x: -x["r"])
+
+    def _build_actors(self, records: list, credits_by_rk: dict) -> list:
+        """Build top actors appearing in multiple items (films or series)."""
+        PHOTO_BASE = "https://image.tmdb.org/t/p/w185"
+        people = defaultdict(lambda: {"name": "", "photo": "", "items": {}})
+
+        seen_rk = set()
+        for r in records:
+            rk = str(r.get("rating_key", ""))
+            grk = str(r.get("grandparent_rating_key", "") or "")
+            # Deduplicate by unique item key (grandparent for episodes, rating_key for movies)
+            item_key = grk if grk and grk != "" else rk
+            if item_key in seen_rk:
+                continue
+            seen_rk.add(item_key)
+            title = r.get("grandparent_title") or r.get("full_title") or r.get("title", "?")
+            credits = credits_by_rk.get(grk, {}) or credits_by_rk.get(rk, {})
+            for member in credits.get("cast", [])[:10]:
+                pid = member.get("id")
+                if not pid:
+                    continue
+                p = people[pid]
+                p["name"] = member.get("name", "?")
+                profile = member.get("profile_path") or ""
+                if profile and not p["photo"]:
+                    p["photo"] = f"{PHOTO_BASE}{profile}"
+                p["items"][item_key] = title
+
+        result = []
+        for pid, p in people.items():
+            if len(p["items"]) >= 2:
+                result.append({
+                    "id": pid,
+                    "name": p["name"],
+                    "photo": p["photo"],
+                    "count": len(p["items"]),
+                    "films": sorted(set(p["items"].values()))[:5],
+                })
+        return sorted(result, key=lambda x: -x["count"])[:10]
+
+    def _build_directors(self, records: list, credits_by_rk: dict) -> list:
+        """Build top directors appearing in multiple items."""
+        PHOTO_BASE = "https://image.tmdb.org/t/p/w185"
+        people = defaultdict(lambda: {"name": "", "photo": "", "items": {}})
+
+        seen_rk = set()
+        for r in records:
+            rk = str(r.get("rating_key", ""))
+            grk = str(r.get("grandparent_rating_key", "") or "")
+            item_key = grk if grk and grk != "" else rk
+            if item_key in seen_rk:
+                continue
+            seen_rk.add(item_key)
+            title = r.get("grandparent_title") or r.get("full_title") or r.get("title", "?")
+            credits = credits_by_rk.get(grk, {}) or credits_by_rk.get(rk, {})
+            for member in credits.get("crew", []):
+                if member.get("job") != "Director":
+                    continue
+                pid = member.get("id")
+                if not pid:
+                    continue
+                p = people[pid]
+                p["name"] = member.get("name", "?")
+                profile = member.get("profile_path") or ""
+                if profile and not p["photo"]:
+                    p["photo"] = f"{PHOTO_BASE}{profile}"
+                p["items"][item_key] = title
+
+        result = []
+        for pid, p in people.items():
+            if len(p["items"]) >= 2:
+                result.append({
+                    "id": pid,
+                    "name": p["name"],
+                    "photo": p["photo"],
+                    "count": len(p["items"]),
+                    "films": sorted(set(p["items"].values()))[:5],
+                })
+        return sorted(result, key=lambda x: -x["count"])[:10]
 
     def _build_countries(self, films: list, countries_by_rk: dict) -> list:
         count = Counter()
