@@ -77,12 +77,35 @@ class RecapPipeline:
             await self._update_progress(recap, "collecting", 10, "Collecte des données en cours...")
             collected = await self._collect(user_id, year)
 
-            # Step 2: Process and normalize
+            # Step 2: Fetch comparison data (previous year + other users)
             await self._update_progress(recap, "processing", 40, "Calcul des statistiques...")
-            processed = self._process(collected)
+
+            prev_year_data = None
+            prev_recap = await self.db.execute(
+                select(YearlyRecap).where(YearlyRecap.user_id == user_id, YearlyRecap.year == year - 1, YearlyRecap.status == "completed")
+            )
+            prev = prev_recap.scalar_one_or_none()
+            if prev and prev.data:
+                prev_year_data = prev.data
+
+            # Other users' recaps for same year (for user vs users comparison)
+            from app.models.user import User
+            other_users = []
+            other_recaps = await self.db.execute(
+                select(YearlyRecap, User).join(User, YearlyRecap.user_id == User.id).where(
+                    YearlyRecap.year == year,
+                    YearlyRecap.status == "completed",
+                    YearlyRecap.user_id != user_id,
+                )
+            )
+            for other_recap, other_user in other_recaps.all():
+                if other_recap.data:
+                    other_users.append({"name": other_user.display_name or other_user.email, "data": other_recap.data})
+
+            processed = self._process(collected, prev_year_data, other_users if other_users else None)
 
             # Step 3: Fetch posters
-            await self._update_progress(recap, "fetching_posters", 70, "Récupération des affiches...")
+            await self._update_progress(recap, "fetching_posters", 70, "Recuperation des affiches...")
             # Poster fetching is a pass-through for now — URLs are stored in data
             # Real TMDB/OpenLibrary proxy calls will enrich the data
 
@@ -163,7 +186,7 @@ class RecapPipeline:
 
         return collected
 
-    def _process(self, collected: dict[str, Any]) -> dict[str, Any]:
+    def _process(self, collected: dict[str, Any], prev_year_data: dict | None = None, other_users: list[dict] | None = None) -> dict[str, Any]:
         # Aggregate all service data into the recap structure
         recap_data = {}
         for service_type, data in collected.items():
@@ -178,4 +201,101 @@ class RecapPipeline:
             "services_count": len(collected),
         }
 
+        # ── Build per-service comparison data ──
+        comparison = {}
+        for service_type, data in collected.items():
+            comp = {}
+
+            # Year vs year
+            if prev_year_data:
+                prev_svc = prev_year_data.get(service_type)
+                if prev_svc:
+                    comp["year_vs_year"] = self._build_year_comparison(data, prev_svc)
+
+            # User vs users
+            if other_users:
+                others_svc = []
+                for ou in other_users:
+                    ou_svc = ou.get("data", {}).get(service_type)
+                    if ou_svc:
+                        others_svc.append({"name": ou.get("name", "?"), **self._extract_user_metrics(ou_svc)})
+                if others_svc:
+                    comp["user_vs_users"] = {
+                        "me": self._extract_user_metrics(data),
+                        "others": others_svc,
+                    }
+
+            if comp:
+                comparison[service_type] = comp
+
+        # Global comparison
+        if prev_year_data:
+            prev_global = prev_year_data.get("global", {})
+            cur_global = recap_data["global"]
+            comparison["global"] = {
+                "year_vs_year": {
+                    "total_items": {"current": cur_global.get("total_items", 0), "previous": prev_global.get("total_items", 0)},
+                    "total_hours": {"current": cur_global.get("total_hours", 0), "previous": prev_global.get("total_hours", 0)},
+                },
+            }
+
+        if comparison:
+            recap_data["comparison"] = comparison
+
         return recap_data
+
+    @staticmethod
+    def _build_year_comparison(current: dict, previous: dict) -> dict:
+        """Build year-vs-year comparison metrics for a service."""
+        cur_extra = current.get("extra", {})
+        prev_extra = previous.get("extra", {})
+
+        comp = {
+            "total_items": {"current": current.get("total_items", 0), "previous": previous.get("total_items", 0)},
+            "total_hours": {"current": current.get("total_hours", 0), "previous": previous.get("total_hours", 0)},
+        }
+
+        # Genres comparison
+        cur_genres = {g["n"]: g["v"] for g in current.get("genres", [])}
+        prev_genres = {g["n"]: g["v"] for g in previous.get("genres", [])}
+        all_genre_names = sorted(set(list(cur_genres.keys()) + list(prev_genres.keys())), key=lambda n: -(cur_genres.get(n, 0) + prev_genres.get(n, 0)))
+        comp["genres"] = [{"n": n, "current": cur_genres.get(n, 0), "previous": prev_genres.get(n, 0)} for n in all_genre_names[:8]]
+
+        # Monthly comparison
+        cur_monthly = current.get("monthly", [])
+        prev_monthly = previous.get("monthly", [])
+        if cur_monthly and prev_monthly:
+            comp["monthly"] = []
+            for i in range(min(len(cur_monthly), len(prev_monthly))):
+                comp["monthly"].append({
+                    "m": cur_monthly[i].get("m", ""),
+                    "current": cur_monthly[i].get("v", 0),
+                    "previous": prev_monthly[i].get("v", 0),
+                })
+
+        # Films/series specific
+        if cur_extra.get("films"):
+            comp["films"] = {
+                "current": cur_extra["films"].get("total", 0),
+                "previous": prev_extra.get("films", {}).get("total", 0),
+            }
+        if cur_extra.get("series"):
+            comp["series"] = {
+                "current": cur_extra["series"].get("episodes", 0),
+                "previous": prev_extra.get("series", {}).get("episodes", 0),
+            }
+
+        return comp
+
+    @staticmethod
+    def _extract_user_metrics(svc_data: dict) -> dict:
+        """Extract summary metrics from a service data block for user comparison."""
+        top_genre = ""
+        genres = svc_data.get("genres", [])
+        if genres:
+            top_genre = genres[0].get("n", "")
+        return {
+            "total_items": svc_data.get("total_items", 0),
+            "total_hours": round(svc_data.get("total_hours", 0), 1),
+            "top_genre": top_genre,
+        }

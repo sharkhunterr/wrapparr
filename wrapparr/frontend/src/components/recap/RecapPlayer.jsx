@@ -16,6 +16,7 @@ import FavoriteActorsSlide from "./slides/FavoriteActorsSlide"
 import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
 import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
+import CompareServiceSlide from "./slides/CompareServiceSlide"
 import RankingSlide from "./slides/RankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
 
@@ -593,6 +594,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         })
       }
 
+      // Comparison slide (films)
+      const filmCompare = data.comparison?.[svc]
+      if (filmCompare) {
+        slides.push({
+          id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <CompareServiceSlide accent={svcAccent} compareData={filmCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} />,
+        })
+      }
+
       // ═══ SERIES SECTION ═══
       if (seriesTop.length >= 1) {
         const seriesAccent = accents.series || cfg.seriesAccent || "#fb923c"
@@ -679,6 +689,17 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         slides.push({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
+        })
+      }
+    }
+
+    // Comparison slide for all services (including standard)
+    if (!cfg.hasSeries) {
+      const svcCompare = data.comparison?.[svc]
+      if (svcCompare) {
+        slides.push({
+          id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <CompareServiceSlide accent={svcAccent} compareData={svcCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} />,
         })
       }
     }
