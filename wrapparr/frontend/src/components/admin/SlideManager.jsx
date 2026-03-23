@@ -111,20 +111,44 @@ function CommentaryEditor({ value, onChange }) {
   )
 }
 
+// Map slide id → theme accent key
+const SLIDE_ACCENT_KEY = {
+  "intro": "primary", "overview": "films", "compare": null, "ranking": null, "finale": "primary",
+}
+function getSlideAccentKey(slideId) {
+  if (SLIDE_ACCENT_KEY[slideId] !== undefined) return SLIDE_ACCENT_KEY[slideId]
+  // Series slides
+  if (slideId.includes("-series")) return "series"
+  // Per-service: extract service name
+  const svc = slideId.replace(/^cat-/, "").split("-")[0]
+  const map = { tautulli: "films", plex: "films", jellyfin: "films", romm: "romm", audiobookshelf: "audio", komga: "komga", booklore: "booklore" }
+  return map[svc] || null
+}
+
 export default function SlideManager() {
   const [slides, setSlides] = useState([])
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(false)
   const [services, setServices] = useState([])
+  const [themeAccents, setThemeAccents] = useState({})
+  const [themePrimary, setThemePrimary] = useState("#E5A00D")
 
   const hasTmdb = services.includes("tmdb")
 
-  // Load services + saved config, then build slide list from registry
+  // Load services + saved config + active theme
   useEffect(() => {
     Promise.all([
       api("/services").catch(() => []),
       api("/admin/config").catch(() => ({})),
-    ]).then(([svcs, globalConfig]) => {
+      api("/themes").catch(() => []),
+      api("/auth/me").catch(() => ({})),
+    ]).then(([svcs, globalConfig, themes, me]) => {
+      // Load active theme accents
+      const activeTheme = themes.find((t) => t.id === me.theme_pack_id) || themes[0]
+      const palette = activeTheme?.config?.palette || {}
+      setThemePrimary(palette.primary || "#E5A00D")
+      setThemeAccents(palette.accents || {})
+
       const svcTypes = svcs.map((s) => s.service_type)
       setServices(svcTypes)
       const registry = expandRegistry(svcTypes)
@@ -241,6 +265,8 @@ export default function SlideManager() {
         {slides.map((s, slideIdx) => {
           const isExpanded = expanded === s.id
           const hasParams = s.params && s.params.length > 0
+          const hasAccent = !!getSlideAccentKey(s.id)
+          const isExpandable = hasParams || hasAccent
           const Icon = getSlideIcon(s.id)
 
           // Show service group separator
@@ -269,14 +295,14 @@ export default function SlideManager() {
               {separator}
               {/* Slide row */}
               <div
-                onClick={() => hasParams && setExpanded(isExpanded ? null : s.id)}
+                onClick={() => isExpandable && setExpanded(isExpanded ? null : s.id)}
                 style={{
                   display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                  borderRadius: isExpanded ? "10px 10px 0 0" : 10,
+                  borderRadius: (isExpanded && isExpandable) ? "10px 10px 0 0" : 10,
                   background: s.enabled ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.005)",
                   border: "1px solid " + (s.cat ? "rgba(229,160,13,0.12)" : isExpanded ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.04)"),
-                  borderBottom: isExpanded ? "none" : undefined,
-                  opacity: s.enabled ? 1 : 0.45, cursor: hasParams ? "pointer" : "default",
+                  borderBottom: (isExpanded && isExpandable) ? "none" : undefined,
+                  opacity: s.enabled ? 1 : 0.45, cursor: isExpandable ? "pointer" : "default",
                 }}
               >
                 {!s.locked ? (
@@ -296,7 +322,7 @@ export default function SlideManager() {
                   </div>
                   <div style={{ color: "rgba(255,255,255,0.2)", fontSize: 10, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.desc}</div>
                 </div>
-                {hasParams && (isExpanded ? <ChevronDown size={14} color="rgba(255,255,255,0.3)" /> : <ChevronRight size={14} color="rgba(255,255,255,0.15)" />)}
+                {isExpandable && (isExpanded ? <ChevronDown size={14} color="rgba(255,255,255,0.3)" /> : <ChevronRight size={14} color="rgba(255,255,255,0.15)" />)}
                 <button onClick={(e) => { e.stopPropagation(); toggle(s.id) }} disabled={s.locked || (s.tmdb && !hasTmdb)} title={s.tmdb && !hasTmdb ? "Configurer TMDB pour activer cette slide" : ""} style={{
                   padding: "4px 10px", borderRadius: 5, border: "none", fontSize: 10, fontFamily: "JetBrains Mono,monospace", flexShrink: 0,
                   background: (s.tmdb && !hasTmdb) ? "rgba(239,68,68,0.08)" : s.enabled ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)",
@@ -306,13 +332,44 @@ export default function SlideManager() {
                 }}>{(s.tmdb && !hasTmdb) ? "off" : s.enabled ? "on" : "off"}</button>
               </div>
 
-              {/* Expanded params */}
-              {isExpanded && hasParams && (
+              {/* Expanded params — show if expanded AND (has params OR has accent) */}
+              {isExpanded && (hasParams || getSlideAccentKey(s.id)) && (
                 <div style={{
                   padding: "12px 14px", borderRadius: "0 0 10px 10px",
                   background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.1)", borderTop: "none",
                   display: "flex", flexDirection: "column", gap: 8,
                 }}>
+                  {/* Accent color selector */}
+                  {(() => {
+                    const accentKey = getSlideAccentKey(s.id)
+                    if (!accentKey) return null
+                    const themeColor = accentKey === "primary" ? themePrimary : (themeAccents[accentKey] || themePrimary)
+                    const override = s.settings.accentOverride || ""
+                    const isCustom = !!override
+                    return (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
+                          <label style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Couleur</label>
+                          <div style={{ width: 18, height: 18, borderRadius: 4, background: isCustom ? override : themeColor, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
+                          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace" }}>
+                            {isCustom ? override : `theme: ${accentKey}`}
+                          </span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <input type="color" value={isCustom ? override : themeColor}
+                            onChange={(e) => updateParam(s.id, "accentOverride", e.target.value)}
+                            style={{ width: 24, height: 20, border: "none", background: "none", cursor: "pointer", padding: 0 }} />
+                          {isCustom && (
+                            <button onClick={() => updateParam(s.id, "accentOverride", "")} style={{
+                              background: "none", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4,
+                              color: "rgba(255,255,255,0.3)", fontSize: 8, padding: "2px 6px", cursor: "pointer",
+                              fontFamily: "JetBrains Mono,monospace",
+                            }}>reset</button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
                   {s.params.filter((p) => {
                     if (!p.showWhen) return true
                     return (s.settings[p.showWhen.key] ?? s.params.find((x) => x.key === p.showWhen.key)?.default) === p.showWhen.value

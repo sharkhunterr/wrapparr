@@ -423,11 +423,22 @@ function isSlideEnabled(slideSettings, slideId) {
   return cfg.enabled !== false
 }
 
+function getAccentOverride(slideSettings, slideId) {
+  if (!slideSettings || typeof slideSettings !== "object") return ""
+  return slideSettings[slideId]?.accentOverride || ""
+}
+
 function buildSlides(data, theme, slideConfigs, user, year) {
   if (!data) return []
   const slideSettings = slideConfigs?.settings || slideConfigs || {}
   const slideOrder = slideConfigs?.order || []
   const sc = slideSettings
+
+  // Helper: resolve accent for a slide (override > theme > default)
+  const resolveAccent = (slideId, defaultAccent) => {
+    const override = getAccentOverride(sc, slideId)
+    return override || defaultAccent
+  }
   const palette = theme?.palette || {}
   const primary = palette.primary || "#E5A00D"
   const baseBg = palette.background || "#05050e"
@@ -445,8 +456,8 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
   // 1 — Overview
   slides.push({
-    id: "overview", accent: accents.films || "#a78bfa", bg: "#080618",
-    component: <OverviewSlide accent={accents.films || "#a78bfa"} globalStats={globalStats} year={year} />,
+    id: "overview", accent: primary, bg: baseBg,
+    component: <OverviewSlide accent={primary} globalStats={globalStats} year={year} />,
   })
 
   // Per-service: Category → Podium → Stats → Deep
@@ -461,8 +472,12 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     if (seen.has(svcKey)) continue
     seen.add(svcKey)
 
+    // Map service to theme accent key
+    const ACCENT_KEY_MAP = { tautulli: "films", plex: "films", jellyfin: "films", audiobookshelf: "audio" }
+    const accentKey = ACCENT_KEY_MAP[svc] || svc
+
     const cfg = SERVICE_SLIDE_CONFIG[svc] || {}
-    const svcAccent = accents[svcKey] || cfg.accent || primary
+    const svcAccent = accents[accentKey] || cfg.accent || primary
     const jokes = JOKES[svc] || []
 
     // ── For services with separate films+series (tautulli, plex): split into 2 sections ──
@@ -565,7 +580,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
       // ═══ SERIES SECTION ═══
       if (seriesTop.length >= 1) {
-        const seriesAccent = cfg.seriesAccent || "#fb923c"
+        const seriesAccent = accents.series || cfg.seriesAccent || "#fb923c"
 
         slides.push({
           id: "cat-" + svc + "-series", accent: seriesAccent, bg: cfg.seriesBgCat || baseBg, cat: true, fullscreen: true,
@@ -674,6 +689,19 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     id: "finale", accent: primary, bg: baseBg, fullscreen: true,
     component: <FinaleSlide accent={primary} userName={userName} year={year} globalStats={globalStats} recapData={data} onRestart={null} />,
   })
+
+  // ── Apply accent overrides from slide settings ──
+  for (const s of slides) {
+    const override = getAccentOverride(sc, s.id)
+    if (override) {
+      s.accent = override
+      // Re-create component with overridden accent
+      if (s.component && s.component.props) {
+        const { accent: _oldAccent, ...restProps } = s.component.props
+        s.component = { ...s.component, props: { ...s.component.props, accent: override } }
+      }
+    }
+  }
 
   // ── Apply saved order + enabled filter ──
   // Filter out disabled slides (but keep locked: intro, finale)
