@@ -135,16 +135,28 @@ export default function SlideManager() {
         return { ...s, enabled: enabled !== undefined ? enabled : true, settings: savedSettings }
       })
 
-      // Apply saved order if exists
+      // Apply saved order — insert new slides at their natural position from registry
       if (savedOrder.length > 0) {
         const byId = {}
         for (const s of ordered) byId[s.id] = s
         const reordered = []
+        const used = new Set()
         for (const id of savedOrder) {
-          if (byId[id]) { reordered.push(byId[id]); delete byId[id] }
+          if (byId[id]) { reordered.push(byId[id]); used.add(id) }
         }
-        // Append any new slides not in saved order
-        for (const s of Object.values(byId)) reordered.push(s)
+        // Insert new slides (not in savedOrder) at their registry position
+        for (let i = 0; i < registry.length; i++) {
+          const s = registry[i]
+          if (used.has(s.id) || !byId[s.id]) continue
+          // Find the best insertion point: after the previous registry sibling
+          let insertIdx = reordered.length
+          for (let j = i - 1; j >= 0; j--) {
+            const prevIdx = reordered.findIndex((r) => r.id === registry[j].id)
+            if (prevIdx >= 0) { insertIdx = prevIdx + 1; break }
+          }
+          reordered.splice(insertIdx, 0, byId[s.id])
+          used.add(s.id)
+        }
         ordered = reordered
       }
 
@@ -221,7 +233,7 @@ export default function SlideManager() {
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        {slides.map((s) => {
+        {slides.map((s, slideIdx) => {
           const isExpanded = expanded === s.id
           const hasParams = s.params && s.params.length > 0
           const Icon = getSlideIcon(s.id)
@@ -264,8 +276,8 @@ export default function SlideManager() {
               >
                 {!s.locked ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
-                    <button onClick={(e) => { e.stopPropagation(); moveUp(slides.indexOf(s)) }} style={arrowBtn}><ArrowUp size={10} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); moveDown(slides.indexOf(s)) }} style={arrowBtn}><ArrowDown size={10} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); moveUp(slideIdx) }} style={arrowBtn}><ArrowUp size={10} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); moveDown(slideIdx) }} style={arrowBtn}><ArrowDown size={10} /></button>
                   </div>
                 ) : <Lock size={13} color="rgba(255,255,255,0.1)" style={{ flexShrink: 0 }} />}
                 <Icon size={15} color={s.cat ? "#E5A00D" : s.pod ? "#fb923c" : "rgba(255,255,255,0.3)"} strokeWidth={1.5} style={{ flexShrink: 0 }} />

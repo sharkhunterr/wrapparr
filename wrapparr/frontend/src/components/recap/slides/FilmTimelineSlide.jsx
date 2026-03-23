@@ -179,12 +179,12 @@ export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
           })}
         </div>
 
-        {/* Average year badge */}
+        {/* Average year badge — below the decade labels */}
         {phase >= 2 && (
           <div style={{
-            position: "absolute", bottom: 22, left: cursorPos + "%", transform: "translateX(-50%)",
+            position: "absolute", top: "100%", marginTop: 4, left: cursorPos + "%", transform: "translateX(-50%)",
             background: accent + "25", border: "1px solid " + accent + "50", borderRadius: 6,
-            padding: "2px 8px", fontSize: 10, color: accent, fontWeight: 700,
+            padding: "2px 8px", fontSize: 9, color: accent, fontWeight: 700,
             fontFamily: "JetBrains Mono,monospace", whiteSpace: "nowrap",
             animation: "slide-up 0.4s ease both", zIndex: 6,
           }}>
