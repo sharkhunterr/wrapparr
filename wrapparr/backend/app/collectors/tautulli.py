@@ -1,7 +1,11 @@
+import logging
 from collections import Counter, defaultdict
 from datetime import datetime
 
 from app.collectors.base import BaseCollector, NormalizedData
+from app.core.config import settings
+
+logger = logging.getLogger("wrapparr.tautulli")
 
 
 class TautulliCollector(BaseCollector):
@@ -76,7 +80,45 @@ class TautulliCollector(BaseCollector):
             if meta:
                 metadata[str(rk)] = meta
 
-        return {"history": history, "users": users_table, "metadata": metadata, "year": year, "base_url": self.base_url}
+        # Fetch countries from TMDB for ALL movies (not just top 4)
+        countries_by_rk = {}
+        if settings.tmdb_api_key:
+            for rk, _ in movie_rk.most_common(50):
+                meta = metadata.get(str(rk))
+                if not meta:
+                    meta = await self._get_metadata(rk)
+                    if meta:
+                        metadata[str(rk)] = meta
+                if meta:
+                    tmdb_id = self._extract_tmdb_id(meta.get("guids", []))
+                    if tmdb_id:
+                        clist = await self._fetch_tmdb_countries(tmdb_id)
+                        if clist:
+                            countries_by_rk[str(rk)] = clist
+
+        return {"history": history, "users": users_table, "metadata": metadata, "countries": countries_by_rk, "year": year, "base_url": self.base_url}
+
+    def _extract_tmdb_id(self, guids):
+        if not guids:
+            return None
+        for g in guids:
+            s = g if isinstance(g, str) else g.get("id", "")
+            if s.startswith("tmdb://"):
+                return s.replace("tmdb://", "")
+        return None
+
+    async def _fetch_tmdb_countries(self, tmdb_id):
+        try:
+            resp = await self.client.get(
+                f"https://api.themoviedb.org/3/movie/{tmdb_id}",
+                params={"api_key": settings.tmdb_api_key, "language": "fr-FR"},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return [{"code": c["iso_3166_1"], "name": c.get("name", c["iso_3166_1"])} for c in data.get("production_countries", [])]
+        except Exception as e:
+            logger.debug("TMDB error for %s: %s", tmdb_id, e)
+        return []
 
     def normalize(self, raw: dict) -> NormalizedData:
         history = raw.get("history", {})
@@ -115,8 +157,21 @@ class TautulliCollector(BaseCollector):
                 "series": {"episodes": len(series), "hours": round(total_h_series, 1), "top": top_series},
                 "backdrop": backdrop,
                 "top_genres": genres[:6],
+                "countries": self._build_countries(films, raw.get("countries", {})),
             },
         )
+
+    def _build_countries(self, films: list, countries_by_rk: dict) -> list:
+        count = Counter()
+        names = {}
+        for r in films:
+            rk = str(r.get("rating_key", ""))
+            plays = 1
+            for c in countries_by_rk.get(rk, []):
+                code = c["code"]
+                count[code] += plays
+                names[code] = c["name"]
+        return sorted([{"code": k, "name": names.get(k, k), "count": v} for k, v in count.items()], key=lambda x: -x["count"])
 
     def _build_top_films(self, films: list, metadata: dict) -> list:
         plays = Counter()

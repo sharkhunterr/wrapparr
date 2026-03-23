@@ -10,6 +10,7 @@ import PodiumSlide from "./slides/PodiumSlide"
 import ServiceStatsSlide from "./slides/ServiceStatsSlide"
 import ServiceDeepSlide from "./slides/ServiceDeepSlide"
 import FilmTimelineSlide from "./slides/FilmTimelineSlide"
+import WorldMapSlide from "./slides/WorldMapSlide"
 import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import RankingSlide from "./slides/RankingSlide"
@@ -445,6 +446,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
       slides.push({
         id: svc + "-timeline", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} />,
+      })
+    }
+
+    // World map slide (if country data from TMDB)
+    const countryData = svcData.extra?.countries || []
+    if (countryData.length > 0) {
+      slides.push({
+        id: svc + "-worldmap", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} />,
       })
     }
 

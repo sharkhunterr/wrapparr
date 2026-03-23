@@ -68,6 +68,13 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
+    id: "{service}-worldmap", label: "Carte du monde {service}", group: "service",
+    desc: "Pays d'origine des films vus (necessite cle TMDB)",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 15000 },
+    ],
+  },
+  {
     id: "{service}-genres", label: "Genres {service}", group: "service",
     desc: "Visualisation des genres les plus consommes",
     params: [
