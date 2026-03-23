@@ -36,6 +36,9 @@ class TautulliCollector(BaseCollector):
     def _poster_url(self, thumb: str) -> str:
         if not thumb:
             return ""
+        # TMDB URLs are already absolute
+        if thumb.startswith("http"):
+            return thumb
         return f"{self.base_url}/api/v2?apikey={self.api_key}&cmd=pms_image_proxy&img={thumb}&width=300&height=450"
 
     async def _get_metadata(self, rating_key: str) -> dict:
@@ -58,7 +61,7 @@ class TautulliCollector(BaseCollector):
 
         records = history.get("data", []) if isinstance(history, dict) else []
 
-        # Find top movie rating_keys and top series grandparent_rating_keys separately
+        # Count plays per movie/series — single pass
         movie_rk = Counter()
         series_rk = Counter()
         for r in records:
@@ -71,29 +74,78 @@ class TautulliCollector(BaseCollector):
                 if grk:
                     series_rk[grk] += 1
 
-        # Fetch metadata for top 4 movies + top 4 series
-        metadata = {}
-        to_fetch = [rk for rk, _ in movie_rk.most_common(4)] + [rk for rk, _ in series_rk.most_common(4)]
-        for rk in to_fetch:
-            meta = await self._get_metadata(rk)
-            if meta:
-                metadata[str(rk)] = meta
+        # ── Build rk → (title, year, thumb) mapping from history ──
+        rk_info = {}
+        for r in records:
+            rk = r.get("rating_key")
+            if rk and rk not in rk_info:
+                rk_info[rk] = {
+                    "title": r.get("full_title") or r.get("title", ""),
+                    "year": r.get("year", 0),
+                    "thumb": r.get("thumb", ""),
+                }
 
-        # Fetch countries from TMDB for ALL movies (not just top 4)
+        movies_to_fetch = [rk for rk, _ in movie_rk.most_common(50)]
+        series_to_fetch = [rk for rk, _ in series_rk.most_common(10)]
+
+        metadata = {}
         countries_by_rk = {}
+
         if self.tmdb_api_key:
-            for rk, _ in movie_rk.most_common(50):
-                meta = metadata.get(str(rk))
-                if not meta:
-                    meta = await self._get_metadata(rk)
-                    if meta:
-                        metadata[str(rk)] = meta
-                if meta:
-                    tmdb_id = self._extract_tmdb_id(meta.get("guids", []))
-                    if tmdb_id:
-                        clist = await self._fetch_tmdb_countries(tmdb_id)
-                        if clist:
-                            countries_by_rk[str(rk)] = clist
+            # ── TMDB is the single enrichment source ──
+            logger.info("TMDB configured — using as enrichment source for %d movies", len(movies_to_fetch))
+
+            # First pass: get Tautulli metadata to extract TMDB IDs (guids)
+            tautulli_meta = {}
+            for rk in movies_to_fetch + series_to_fetch:
+                meta = await self._get_metadata(rk)
+                if meta and (meta.get("title") or meta.get("year")):
+                    tautulli_meta[str(rk)] = meta
+
+            # Second pass: enrich movies via TMDB
+            for rk in movies_to_fetch:
+                srk = str(rk)
+                tau_meta = tautulli_meta.get(srk, {})
+                tmdb_data = None
+
+                # Try TMDB ID from Tautulli guids first
+                tmdb_id = self._extract_tmdb_id(tau_meta.get("guids", []))
+                if tmdb_id:
+                    tmdb_data = await self._fetch_tmdb_movie(tmdb_id)
+
+                # Otherwise search TMDB by title+year
+                if not tmdb_data:
+                    info = rk_info.get(rk, {})
+                    title = info.get("title") or tau_meta.get("title", "")
+                    year_val = info.get("year") or tau_meta.get("year", 0)
+                    if title:
+                        tmdb_data = await self._search_tmdb_movie(title, year_val)
+
+                if tmdb_data:
+                    metadata[srk] = self._tmdb_to_metadata(tmdb_data)
+                    # Also keep Tautulli thumb/art as fallback if TMDB has none
+                    if not metadata[srk].get("thumb") and tau_meta.get("thumb"):
+                        metadata[srk]["thumb"] = tau_meta["thumb"]
+                    countries = tmdb_data.get("production_countries", [])
+                    if countries:
+                        countries_by_rk[srk] = [{"code": c["iso_3166_1"], "name": c.get("name", c["iso_3166_1"])} for c in countries]
+                elif tau_meta:
+                    # TMDB failed entirely — use Tautulli data
+                    metadata[srk] = tau_meta
+
+            # Series: use Tautulli metadata (TMDB series API is different)
+            for rk in series_to_fetch:
+                srk = str(rk)
+                if srk in tautulli_meta:
+                    metadata[srk] = tautulli_meta[srk]
+
+        else:
+            # ── No TMDB — Tautulli only ──
+            logger.info("No TMDB key — using Tautulli metadata only")
+            for rk in movies_to_fetch + series_to_fetch:
+                meta = await self._get_metadata(rk)
+                if meta and (meta.get("title") or meta.get("year")):
+                    metadata[str(rk)] = meta
 
         return {"history": history, "users": users_table, "metadata": metadata, "countries": countries_by_rk, "year": year, "base_url": self.base_url}
 
@@ -106,17 +158,57 @@ class TautulliCollector(BaseCollector):
                 return s.replace("tmdb://", "")
         return None
 
-    async def _fetch_tmdb_countries(self, tmdb_id):
+    async def _fetch_tmdb_movie(self, tmdb_id: str) -> dict:
+        """Fetch full movie details from TMDB (genres, rating, countries, poster)."""
         try:
             resp = await self.client.get(
                 f"https://api.themoviedb.org/3/movie/{tmdb_id}",
                 params={"api_key": self.tmdb_api_key, "language": "fr-FR"},
             )
             if resp.status_code == 200:
-                data = resp.json()
-                return [{"code": c["iso_3166_1"], "name": c.get("name", c["iso_3166_1"])} for c in data.get("production_countries", [])]
+                return resp.json()
         except Exception as e:
-            logger.debug("TMDB error for %s: %s", tmdb_id, e)
+            logger.debug("TMDB fetch error for %s: %s", tmdb_id, e)
+        return {}
+
+    async def _search_tmdb_movie(self, title: str, year: int = 0) -> dict:
+        """Search TMDB by title+year, return first match details or {}."""
+        try:
+            params = {"api_key": self.tmdb_api_key, "language": "fr-FR", "query": title}
+            if year and year > 1900:
+                params["year"] = year
+            resp = await self.client.get(
+                "https://api.themoviedb.org/3/search/movie", params=params,
+            )
+            if resp.status_code == 200:
+                results = resp.json().get("results", [])
+                if results:
+                    return await self._fetch_tmdb_movie(str(results[0]["id"]))
+        except Exception as e:
+            logger.debug("TMDB search error for '%s': %s", title, e)
+        return {}
+
+    def _tmdb_to_metadata(self, tmdb: dict) -> dict:
+        """Convert TMDB movie data to Tautulli-like metadata dict."""
+        if not tmdb:
+            return {}
+        poster = tmdb.get("poster_path", "")
+        return {
+            "title": tmdb.get("title", ""),
+            "year": int(tmdb.get("release_date", "0000")[:4]) if tmdb.get("release_date") else 0,
+            "genres": [g["name"] for g in tmdb.get("genres", [])],
+            "audience_rating": str(round(tmdb.get("vote_average", 0), 1)) if tmdb.get("vote_average") else "",
+            "rating": "",
+            "thumb": f"https://image.tmdb.org/t/p/w300{poster}" if poster else "",
+            "art": "",
+            "production_countries": tmdb.get("production_countries", []),
+            "_source": "tmdb",
+        }
+
+    async def _fetch_tmdb_countries(self, tmdb_id):
+        data = await self._fetch_tmdb_movie(tmdb_id)
+        if data:
+            return [{"code": c["iso_3166_1"], "name": c.get("name", c["iso_3166_1"])} for c in data.get("production_countries", [])]
         return []
 
     def normalize(self, raw: dict) -> NormalizedData:
@@ -127,8 +219,14 @@ class TautulliCollector(BaseCollector):
         films = [r for r in records if r.get("media_type") == "movie"]
         series = [r for r in records if r.get("media_type") == "episode"]
 
-        top_films = self._build_top_films(films, metadata)
-        top_series = self._build_top_series(series, metadata)
+        # ── Build COMPLETE film/series lists from the unified metadata ──
+        all_films = self._build_all_films(films, metadata)
+        all_series = self._build_all_series(series, metadata)
+
+        # top = podium (first 4), all = all enriched films for other slides
+        top_films = all_films[:4]
+        top_series = all_series[:4]
+
         genres = self._build_genres(records, metadata)
         day_of_week = self._build_day_of_week(records)
         time_of_day = self._build_time_of_day(records)
@@ -152,13 +250,23 @@ class TautulliCollector(BaseCollector):
             monthly=monthly,
             ranking=ranking,
             extra={
-                "films": {"total": len(films), "hours": round(total_h_films, 1), "top": top_films},
-                "series": {"episodes": len(series), "hours": round(total_h_series, 1), "top": top_series},
+                "films": {"total": len(films), "hours": round(total_h_films, 1), "top": all_films},
+                "series": {"episodes": len(series), "hours": round(total_h_series, 1), "top": all_series},
                 "backdrop": backdrop,
                 "top_genres": genres[:6],
                 "countries": self._build_countries(films, raw.get("countries", {})),
+                "ratings": self._build_ratings(all_films),
             },
         )
+
+    def _build_ratings(self, all_films: list) -> list:
+        """Extract ratings from the centralized film list."""
+        ratings = []
+        for f in all_films:
+            r = f.get("r") or 0
+            if r and float(r) > 0:
+                ratings.append({"t": f["t"], "r": round(float(r), 1)})
+        return sorted(ratings, key=lambda x: -x["r"])
 
     def _build_countries(self, films: list, countries_by_rk: dict) -> list:
         count = Counter()
@@ -172,7 +280,22 @@ class TautulliCollector(BaseCollector):
                 names[code] = c["name"]
         return sorted([{"code": k, "name": names.get(k, k), "count": v} for k, v in count.items()], key=lambda x: -x["count"])
 
-    def _build_top_films(self, films: list, metadata: dict) -> list:
+    @staticmethod
+    def _to_rating(val) -> float:
+        """Convert a rating value (string, float, None) to float."""
+        if not val:
+            return 0
+        try:
+            return round(float(val), 1)
+        except (ValueError, TypeError):
+            return 0
+
+    def _build_all_films(self, films: list, metadata: dict) -> list:
+        """Build enriched list of ALL films, sorted by plays (most common first).
+
+        Films with metadata get full enrichment (genres, rating, poster, year).
+        Films without metadata still appear with basic info from history records.
+        """
         plays = Counter()
         info = {}
         for r in films:
@@ -181,26 +304,29 @@ class TautulliCollector(BaseCollector):
             plays[title] += 1
             if title not in info:
                 meta = metadata.get(rk, {})
+                raw_r = meta.get("audience_rating") or meta.get("rating") or 0
                 info[title] = {
                     "t": title,
                     "y": meta.get("year") or r.get("year", 0),
                     "date": r.get("originally_available_at", ""),
                     "g": ", ".join(meta.get("genres", [])[:2]) if meta.get("genres") else "",
-                    "r": meta.get("audience_rating") or meta.get("rating") or 0,
+                    "r": self._to_rating(raw_r),
                     "h": 0,
                     "thumb": self._poster_url(meta.get("thumb") or r.get("thumb", "")),
                     "art": self._poster_url(meta.get("art", "")),
                     "rk": rk,
+                    "_enriched": bool(meta),
                 }
             info[title]["h"] += r.get("duration", 0) / 3600
 
         result = []
-        for i, (title, count) in enumerate(plays.most_common(4)):
+        for i, (title, count) in enumerate(plays.most_common()):
             entry = {**info[title], "rank": i + 1, "plays": count, "h": round(info[title]["h"], 1)}
             result.append(entry)
         return result
 
-    def _build_top_series(self, series: list, metadata: dict) -> list:
+    def _build_all_series(self, series: list, metadata: dict) -> list:
+        """Build enriched list of ALL series, sorted by episode count."""
         plays = Counter()
         info = {}
         for r in series:
@@ -209,18 +335,20 @@ class TautulliCollector(BaseCollector):
             plays[show] += 1
             if show not in info:
                 meta = metadata.get(grk, {})
+                raw_r = meta.get("audience_rating") or meta.get("rating") or 0
                 info[show] = {
                     "t": show,
                     "g": ", ".join(meta.get("genres", [])[:2]) if meta.get("genres") else "",
-                    "r": meta.get("audience_rating") or meta.get("rating") or 0,
+                    "r": self._to_rating(raw_r),
                     "ep": 0,
                     "thumb": self._poster_url(meta.get("thumb") or r.get("grandparent_thumb") or r.get("thumb", "")),
                     "art": self._poster_url(meta.get("art", "")),
+                    "_enriched": bool(meta),
                 }
             info[show]["ep"] = plays[show]
 
         result = []
-        for i, (show, count) in enumerate(plays.most_common(4)):
+        for i, (show, count) in enumerate(plays.most_common()):
             result.append({**info[show], "rank": i + 1, "ep": count})
         return result
 

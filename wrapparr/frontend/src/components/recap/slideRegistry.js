@@ -54,7 +54,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-timeline", label: "Profil cinephile {service}", group: "service",
+    id: "{service}-timeline", label: "Profil cinephile {service}", group: "service", tmdb: true,
     desc: "Analyse des annees de sortie — quel type de spectateur es-tu ?",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 8000 },
@@ -68,10 +68,24 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-worldmap", label: "Carte du monde {service}", group: "service",
-    desc: "Pays d'origine des films vus (necessite cle TMDB)",
+    id: "{service}-worldmap", label: "Carte du monde {service}", group: "service", tmdb: true,
+    desc: "Pays d'origine des films vus",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 15000 },
+    ],
+  },
+  {
+    id: "{service}-ratings", label: "Notes {service}", group: "service", tmdb: true,
+    desc: "Moyenne des notes et distribution par tranches",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 10000 },
+      { key: "brackets", label: "Tranches de notes", type: "profiles", default: [
+        { min: 0, max: 4, name: "Navet", desc: "Films mal notes", emoji: "🥬" },
+        { min: 4, max: 6, name: "Passable", desc: "Notes moyennes-basses", emoji: "😐" },
+        { min: 6, max: 7, name: "Bon", desc: "Bons films", emoji: "👍" },
+        { min: 7, max: 8, name: "Tres bon", desc: "Films tres bien notes", emoji: "🎬" },
+        { min: 8, max: 10, name: "Excellent", desc: "Les pepites", emoji: "🏆" },
+      ]},
     ],
   },
   {

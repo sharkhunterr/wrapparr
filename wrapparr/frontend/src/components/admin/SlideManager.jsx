@@ -117,6 +117,8 @@ export default function SlideManager() {
   const [saving, setSaving] = useState(false)
   const [services, setServices] = useState([])
 
+  const hasTmdb = services.includes("tmdb")
+
   // Load services + saved config, then build slide list from registry
   useEffect(() => {
     Promise.all([
@@ -164,7 +166,11 @@ export default function SlideManager() {
   }, [])
 
   const toggle = (id) => {
-    setSlides(slides.map((s) => s.id === id && !s.locked ? { ...s, enabled: !s.enabled } : s))
+    setSlides(slides.map((s) => {
+      if (s.id !== id || s.locked) return s
+      if (s.tmdb && !hasTmdb) return s // Can't enable TMDB slides without TMDB
+      return { ...s, enabled: !s.enabled }
+    }))
   }
 
   const updateParam = (slideId, key, value) => {
@@ -285,16 +291,19 @@ export default function SlideManager() {
                     <span style={{ fontSize: 12, fontWeight: 600, color: "white" }}>{s.label}</span>
                     {s.cat && <span style={badge("#E5A00D")}>section</span>}
                     {s.pod && <span style={badge("#fb923c")}>podium</span>}
+                    {s.tmdb && <span style={badge(hasTmdb ? "#06b6d4" : "#ef4444")}>{hasTmdb ? "TMDB" : "TMDB requis"}</span>}
                     {hasParams && <span style={badge("rgba(255,255,255,0.15)")}>config</span>}
                   </div>
                   <div style={{ color: "rgba(255,255,255,0.2)", fontSize: 10, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.desc}</div>
                 </div>
                 {hasParams && (isExpanded ? <ChevronDown size={14} color="rgba(255,255,255,0.3)" /> : <ChevronRight size={14} color="rgba(255,255,255,0.15)" />)}
-                <button onClick={(e) => { e.stopPropagation(); toggle(s.id) }} disabled={s.locked} style={{
+                <button onClick={(e) => { e.stopPropagation(); toggle(s.id) }} disabled={s.locked || (s.tmdb && !hasTmdb)} title={s.tmdb && !hasTmdb ? "Configurer TMDB pour activer cette slide" : ""} style={{
                   padding: "4px 10px", borderRadius: 5, border: "none", fontSize: 10, fontFamily: "JetBrains Mono,monospace", flexShrink: 0,
-                  background: s.enabled ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)",
-                  color: s.enabled ? "#4ade80" : "#f87171", cursor: s.locked ? "default" : "pointer", opacity: s.locked ? 0.3 : 1,
-                }}>{s.enabled ? "on" : "off"}</button>
+                  background: (s.tmdb && !hasTmdb) ? "rgba(239,68,68,0.08)" : s.enabled ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)",
+                  color: (s.tmdb && !hasTmdb) ? "#f87171" : s.enabled ? "#4ade80" : "#f87171",
+                  cursor: (s.locked || (s.tmdb && !hasTmdb)) ? "default" : "pointer",
+                  opacity: (s.locked || (s.tmdb && !hasTmdb)) ? 0.3 : 1,
+                }}>{(s.tmdb && !hasTmdb) ? "off" : s.enabled ? "on" : "off"}</button>
               </div>
 
               {/* Expanded params */}

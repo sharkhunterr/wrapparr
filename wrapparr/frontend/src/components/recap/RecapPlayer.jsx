@@ -11,6 +11,7 @@ import ServiceStatsSlide from "./slides/ServiceStatsSlide"
 import ServiceDeepSlide from "./slides/ServiceDeepSlide"
 import FilmTimelineSlide from "./slides/FilmTimelineSlide"
 import WorldMapSlide from "./slides/WorldMapSlide"
+import RatingsSlide from "./slides/RatingsSlide"
 import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import RankingSlide from "./slides/RankingSlide"
@@ -455,6 +456,23 @@ function buildSlides(data, theme, slideConfigs, user, year) {
       slides.push({
         id: svc + "-worldmap", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} />,
+      })
+    }
+
+    // Ratings slide (if rating data available)
+    const ratingsData = svcData.extra?.ratings || []
+    if (ratingsData.length >= 2) {
+      const ratingsBrackets = getSlideConfig(sc, svc + "-ratings")?.brackets
+      const ratingsConfig = { ...getSlideConfig(sc, svc + "-ratings") }
+      if (ratingsBrackets) {
+        ratingsConfig.brackets = ratingsBrackets.map((b) => ({
+          min: b.min, max: b.max, label: b.name, emoji: b.emoji,
+          color: b.min < 4 ? "#ef4444" : b.min < 6 ? "#f97316" : b.min < 7 ? "#eab308" : b.min < 8 ? "#22c55e" : "#3b82f6",
+        }))
+      }
+      slides.push({
+        id: svc + "-ratings", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} />,
       })
     }
 

@@ -17,9 +17,8 @@ function getProfile(avgYear, profiles) {
 export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
   const animSpeed = config.animationSpeed || 8000
   const profiles = config.profiles || DEFAULT_PROFILES
-  const top = data?.top || []
   const extra = data?.extra || {}
-  const allFilms = [...(extra.films?.top || []), ...top]
+  const allFilms = extra.films?.top || data?.top || []
 
   // Build year distribution
   const yearCounts = {}
