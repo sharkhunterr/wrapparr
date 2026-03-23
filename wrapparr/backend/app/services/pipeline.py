@@ -120,28 +120,38 @@ class RecapPipeline:
         return recap
 
     async def _collect(self, user_id, year: int) -> dict[str, Any]:
-        # Get service connectors (admin-configured, shared for all users)
+        # Get all service connectors
         result = await self.db.execute(
             select(ServiceConnector).where(ServiceConnector.is_active.is_(True))
         )
         services = result.scalars().all()
 
-        # Get user mappings to know which service username to filter by
+        # Get user mappings
         result = await self.db.execute(
             select(UserServiceMapping).where(UserServiceMapping.user_id == user_id)
         )
         mappings = {m.service_type: m.service_username for m in result.scalars().all()}
 
+        # Extract TMDB API key if configured as a service
+        tmdb_key = None
+        for svc in services:
+            if svc.service_type == "tmdb":
+                tmdb_key = decrypt(svc.api_key_enc)
+                break
+
         collected = {}
 
         for svc in services:
+            # Skip TMDB — it's not a data collector, just a key provider
+            if svc.service_type == "tmdb":
+                continue
             cls = COLLECTOR_MAP.get(svc.service_type)
             if not cls:
                 continue
-            # Get the mapped username for this user on this service
             service_username = mappings.get(svc.service_type)
             collector = cls(base_url=svc.base_url, api_key=decrypt(svc.api_key_enc))
-            collector.target_user = service_username  # Pass username to collector
+            collector.target_user = service_username
+            collector.tmdb_api_key = tmdb_key  # Pass TMDB key to all collectors
             try:
                 data = await collector.run(year)
                 collected[svc.service_type] = asdict(data)

@@ -25,6 +25,7 @@ class BaseCollector(ABC):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.target_user: str | None = None
+        self.tmdb_api_key: str | None = None
         self.client = httpx.AsyncClient(timeout=30.0)
 
     async def close(self):

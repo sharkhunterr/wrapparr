@@ -119,11 +119,27 @@ async def test_connection(
     if not svc:
         raise HTTPException(status_code=404, detail="Service introuvable")
 
-    collector = _get_collector(svc)
-    try:
-        ok, msg = await collector.test_connection()
-    finally:
-        await collector.close()
+    # Special handling for TMDB — not a collector, just an API key test
+    if svc.service_type == "tmdb":
+        import httpx
+        api_key = decrypt(svc.api_key_enc)
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get("https://api.themoviedb.org/3/configuration", params={"api_key": api_key})
+                if resp.status_code == 200:
+                    ok, msg = True, "Connexion TMDB reussie"
+                elif resp.status_code == 401:
+                    ok, msg = False, "Cle API TMDB invalide"
+                else:
+                    ok, msg = False, f"Erreur TMDB: {resp.status_code}"
+        except Exception as e:
+            ok, msg = False, str(e)
+    else:
+        collector = _get_collector(svc)
+        try:
+            ok, msg = await collector.test_connection()
+        finally:
+            await collector.close()
 
     svc.last_test_at = datetime.now(timezone.utc)
     svc.last_test_ok = ok

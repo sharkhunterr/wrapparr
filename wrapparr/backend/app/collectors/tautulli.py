@@ -3,7 +3,6 @@ from collections import Counter, defaultdict
 from datetime import datetime
 
 from app.collectors.base import BaseCollector, NormalizedData
-from app.core.config import settings
 
 logger = logging.getLogger("wrapparr.tautulli")
 
@@ -82,7 +81,7 @@ class TautulliCollector(BaseCollector):
 
         # Fetch countries from TMDB for ALL movies (not just top 4)
         countries_by_rk = {}
-        if settings.tmdb_api_key:
+        if self.tmdb_api_key:
             for rk, _ in movie_rk.most_common(50):
                 meta = metadata.get(str(rk))
                 if not meta:
@@ -111,7 +110,7 @@ class TautulliCollector(BaseCollector):
         try:
             resp = await self.client.get(
                 f"https://api.themoviedb.org/3/movie/{tmdb_id}",
-                params={"api_key": settings.tmdb_api_key, "language": "fr-FR"},
+                params={"api_key": self.tmdb_api_key, "language": "fr-FR"},
             )
             if resp.status_code == 200:
                 data = resp.json()

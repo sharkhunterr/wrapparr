@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Clapperboard, MonitorPlay, Gamepad2, Headphones, BookOpen, Library, CircleCheck, CircleX, Trash2, Plug } from "lucide-react"
+import { Clapperboard, MonitorPlay, Gamepad2, Headphones, BookOpen, Library, CircleCheck, CircleX, Trash2, Plug, Film } from "lucide-react"
 import { api } from "../../services/api"
 
 const SERVICE_TYPES = [
@@ -9,6 +9,7 @@ const SERVICE_TYPES = [
   { type: "audiobookshelf", label: "Audiobookshelf", Icon: Headphones, color: "#fb923c", placeholder_url: "http://audiobookshelf:13378", placeholder_key: "Token API" },
   { type: "komga", label: "Komga", Icon: Library, color: "#c084fc", placeholder_url: "http://komga:25600", placeholder_key: "email:password" },
   { type: "booklore", label: "Booklore", Icon: BookOpen, color: "#a78bfa", placeholder_url: "http://booklore:8080", placeholder_key: "Token API" },
+  { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", placeholder_key: "Cle API TMDB (v3)" },
 ]
 
 export default function ServiceConfig() {
