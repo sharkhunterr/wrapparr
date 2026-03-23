@@ -21,6 +21,7 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
 
       {mode === "race" && <RaceMode data={data} accent={accent} speed={speed} config={config} />}
       {mode === "bubbles" && <BubblesMode data={data} accent={accent} speed={speed} />}
+      {mode === "orbit" && <OrbitMode data={data} accent={accent} speed={speed} />}
       {mode === "podium" && <PodiumMode data={data} accent={accent} speed={speed} />}
     </div>
   )
@@ -313,114 +314,252 @@ function RaceMode({ data, accent, speed, config = {} }) {
   )
 }
 
-/* ═══ BUBBLES — suspense reveal ═══ */
+/* ═══ BUBBLES — all start small, grow fluidly to final size, bigger overlaps smaller ═══ */
 function BubblesMode({ data, accent, speed }) {
   const max = data[0]?.v || 1
   const N = data.length
-  const [revealedCount, setRevealedCount] = useState(0)
-  const [showWinner, setShowWinner] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [finished, setFinished] = useState(false)
+  const rafRef = useRef(null)
+  const startRef = useRef(null)
 
-  // Reveal from last place to first, with pauses
+  const [positions] = useState(() => {
+    const pts = [
+      { x: 50, y: 38 }, { x: 24, y: 54 }, { x: 76, y: 54 },
+      { x: 18, y: 26 }, { x: 82, y: 28 }, { x: 50, y: 74 },
+      { x: 34, y: 74 }, { x: 66, y: 74 },
+    ]
+    return data.map((_, i) => pts[i] || { x: 20 + Math.random() * 60, y: 20 + Math.random() * 60 })
+  })
+
   useEffect(() => {
-    const perItem = speed / (N + 2) // time per reveal
-    const timers = []
-    // Reveal from worst to best (reverse order = suspense)
-    for (let i = 0; i < N; i++) {
-      timers.push(setTimeout(() => setRevealedCount(i + 1), 800 + i * perItem))
-    }
-    timers.push(setTimeout(() => setShowWinner(true), 800 + N * perItem + 500))
-    return () => timers.forEach(clearTimeout)
-  }, [speed, N])
+    const t = setTimeout(() => {
+      startRef.current = performance.now()
+      const tick = (now) => {
+        const p = Math.min((now - startRef.current) / speed, 1)
+        setProgress(p)
+        if (p < 1) { rafRef.current = requestAnimationFrame(tick) }
+        else { setFinished(true) }
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }, 600)
+    return () => { clearTimeout(t); cancelAnimationFrame(rafRef.current) }
+  }, [speed])
 
-  // Layout positions — winner center, others around
-  const positions = [
-    { x: 50, y: 38 },  // #1 center
-    { x: 25, y: 52 },  // #2 left
-    { x: 75, y: 52 },  // #3 right
-    { x: 18, y: 28 },  // #4 top-left
-    { x: 82, y: 30 },  // #5 top-right
-    { x: 50, y: 72 },  // #6 bottom
-    { x: 35, y: 75 },  // #7
-    { x: 65, y: 75 },  // #8
-  ]
-
-  // Reveal order: last to first (most suspense for #1)
-  const revealOrder = [...data].reverse()
+  const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 
   return (
     <div>
       <style>{`
-        @keyframes bubble-in { 0%{transform:translate(-50%,-50%) scale(0);opacity:0} 60%{transform:translate(-50%,-50%) scale(1.15);opacity:1} 100%{transform:translate(-50%,-50%) scale(1)} }
-        @keyframes bubble-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.06)} }
-        @keyframes glow-winner { 0%,100%{box-shadow:0 0 20px var(--c)} 50%{box-shadow:0 0 40px var(--c),0 0 60px var(--c)} }
-        @keyframes rank-reveal { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes bb-beat { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.06);filter:brightness(1.2)} }
+        @keyframes bb-beat-winner { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.08);filter:brightness(1.4)} }
       `}</style>
 
-      {/* Suspense counter */}
-      <div style={{ textAlign: "center", marginBottom: 10, minHeight: 24 }}>
-        {revealedCount > 0 && revealedCount < N && (
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace", letterSpacing: "0.15em" }}>
-            {N - revealedCount} restant{N - revealedCount > 1 ? "s" : ""}...
-          </span>
-        )}
-        {showWinner && (
-          <span style={{ fontSize: 9, color: accent, fontFamily: "JetBrains Mono,monospace", letterSpacing: "0.15em", animation: "rank-reveal 0.5s ease both" }}>
-            RESULTATS
-          </span>
-        )}
-      </div>
-
-      <div style={{ position: "relative", width: "100%", height: 300 }}>
+      <div style={{ position: "relative", width: "100%", height: 310 }}>
         {data.map((g, rank) => {
           const color = COLORS[rank % COLORS.length]
-          const pos = positions[rank] || { x: 30 + Math.random() * 40, y: 30 + Math.random() * 40 }
+          const pos = positions[rank]
           const ratio = g.v / max
-          const size = 35 + ratio * 75
+          const finalSize = 38 + ratio * 75
+          const offset = rank * 0.08
+          const t = Math.max(0, Math.min(1, (progress - offset) / (1 - offset)))
+          const currentSize = 8 + (finalSize - 8) * ease(t)
           const isFirst = rank === 0
-
-          // This item is revealed when its reverse-order index < revealedCount
-          const revealIdx = N - 1 - rank
-          const isRevealed = revealIdx < revealedCount
-          const justRevealed = revealIdx === revealedCount - 1
+          const showLabel = currentSize > 28
 
           return (
             <div key={g.n} style={{
-              position: "absolute", left: pos.x + "%", top: pos.y + "%",
-              zIndex: isRevealed ? (isFirst ? 10 : 5) : 0,
-              animation: isRevealed ? "bubble-in 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards" : "none",
-              opacity: isRevealed ? 1 : 0,
+              position: "absolute",
+              left: pos.x + "%", top: pos.y + "%",
+              marginLeft: -currentSize / 2, marginTop: -currentSize / 2,
+              zIndex: Math.round(currentSize),
             }}>
               <div style={{
-                width: size, height: size, borderRadius: "50%",
-                background: "radial-gradient(circle at 30% 30%," + color + "45," + color + "10)",
-                border: (isFirst && showWinner) ? "2px solid " + color : "1.5px solid " + color + "50",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 4,
-                boxShadow: (isFirst && showWinner) ? "0 0 30px " + color + "50, 0 0 60px " + color + "20" : justRevealed ? "0 0 20px " + color + "40" : "0 0 8px " + color + "15",
-                animation: (isFirst && showWinner) ? "bubble-pulse 2s ease-in-out infinite, glow-winner 2s ease-in-out infinite" : isRevealed ? "bubble-pulse 3s ease-in-out " + (rank * 0.5) + "s infinite" : "none",
-                "--c": color + "40",
+                width: currentSize, height: currentSize, borderRadius: "50%",
+                background: "radial-gradient(circle at 30% 30%," + color + "50," + color + "12)",
+                border: "1.5px solid " + color + (finished ? "70" : "30"),
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                padding: 4, overflow: "hidden",
+                boxShadow: finished
+                  ? "0 0 " + (isFirst ? 30 : 15) + "px " + color + (isFirst ? "50" : "25")
+                  : "0 0 " + Math.round(currentSize * 0.12) + "px " + color + "15",
+                animation: finished ? (isFirst ? "bb-beat-winner 1.8s ease-in-out infinite" : "bb-beat 2.5s ease-in-out " + (rank * 0.3) + "s infinite") : "none",
                 transition: "box-shadow 0.5s ease, border 0.5s ease",
               }}>
-                {/* Rank badge */}
-                {isRevealed && <div style={{
-                  position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%",
-                  background: color, display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 9, fontWeight: 800, color: "#000",
-                  animation: "rank-reveal 0.4s ease 0.3s both",
-                }}>{rank + 1}</div>}
-
-                <div style={{ fontSize: size > 65 ? 13 : size > 45 ? 10 : 8, fontWeight: 700, color: "white", lineHeight: 1.1, textAlign: "center" }}>{g.n}</div>
-                <div style={{ fontSize: size > 65 ? 11 : 8, color: color, fontFamily: "JetBrains Mono,monospace", marginTop: 2 }}>{g.v}</div>
+                {showLabel && <>
+                  {finished && <div style={{ position: "absolute", top: -5, right: -5, width: 18, height: 18, borderRadius: "50%", background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800, color: "#000" }}>{rank + 1}</div>}
+                  <div style={{ fontSize: currentSize > 65 ? 12 : currentSize > 45 ? 9 : 7, fontWeight: 700, color: "white", lineHeight: 1.1, textAlign: "center", opacity: Math.min(1, (currentSize - 28) / 15) }}>{g.n}</div>
+                  <div style={{ fontSize: currentSize > 55 ? 10 : 7, color: color, fontFamily: "JetBrains Mono,monospace", marginTop: 1, opacity: Math.min(1, (currentSize - 32) / 15) }}>{Math.round(g.v * t)}</div>
+                </>}
               </div>
             </div>
           )
         })}
       </div>
 
-      {/* Winner announcement */}
-      {showWinner && (
-        <div style={{ textAlign: "center", marginTop: 8, animation: "slide-up 0.5s ease 0.3s both" }}>
+      {finished && (
+        <div style={{ textAlign: "center", marginTop: 4, animation: "slide-up 0.5s ease 0.3s both" }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: COLORS[0] }}>{data[0].n}</div>
           <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{data[0].v} vues — genre dominant</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ═══ ORBIT — SVG circle with spinning dots that stop and trace colored arcs ═══ */
+function OrbitMode({ data, accent, speed }) {
+  const total = data.reduce((s, g) => s + g.v, 0)
+  const N = data.length
+  const R = 42 // SVG radius
+  const SVG_SIZE = 100 // viewBox
+
+  const [elapsed, setElapsed] = useState(0)
+  const [stoppedCount, setStoppedCount] = useState(0)
+  const rafRef = useRef(null)
+  const startRef = useRef(null)
+
+  // Pre-compute arcs (final positions on the circle)
+  const [arcs] = useState(() => {
+    let cum = -90
+    return data.map((g, i) => {
+      const pct = total > 0 ? g.v / total : 1 / N
+      const deg = pct * 360
+      const start = cum
+      cum += deg
+      return { pct, deg, startAngle: start, endAngle: cum, midAngle: start + deg / 2, color: COLORS[i % COLORS.length] }
+    })
+  })
+
+  // Spin config per dot
+  const [spins] = useState(() => data.map(() => ({
+    speed: 120 + Math.random() * 200,
+    dir: Math.random() > 0.5 ? 1 : -1,
+  })))
+
+  // Spin for 30%, then stop one by one — last one stops at exactly 100%
+  const spinPhase = speed * 0.3
+  const stopInterval = (speed * 0.7 - 500) / Math.max(1, N) // 500ms buffer before end
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      startRef.current = performance.now()
+      const tick = (now) => {
+        const el = now - startRef.current
+        setElapsed(el)
+        if (el >= speed) {
+          setStoppedCount(N)
+          return
+        }
+        // Stop one by one, evenly spaced, last one at speed - 300ms
+        const stopStart = spinPhase
+        const stopEnd = speed - 300
+        const stopRange = Math.max(1, stopEnd - stopStart)
+        const sc = Math.min(N, Math.floor(Math.max(0, el - stopStart) / (stopRange / N) + 1))
+        setStoppedCount(Math.min(sc, N))
+        rafRef.current = requestAnimationFrame(tick)
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }, 400)
+    return () => { clearTimeout(t); cancelAnimationFrame(rafRef.current) }
+  }, [speed, spinPhase, stopInterval, N])
+
+  const finished = stoppedCount >= N
+  // Stop order: smallest first (reverse)
+  const stopOrder = [...data].map((_, i) => i).reverse()
+
+  const toXY = (angleDeg, r) => ({
+    x: SVG_SIZE / 2 + r * Math.cos(angleDeg * Math.PI / 180),
+    y: SVG_SIZE / 2 + r * Math.sin(angleDeg * Math.PI / 180),
+  })
+
+  const arcPath = (startDeg, endDeg, r) => {
+    const s = toXY(startDeg, r)
+    const e = toXY(endDeg, r)
+    const large = (endDeg - startDeg) > 180 ? 1 : 0
+    return "M " + s.x + " " + s.y + " A " + r + " " + r + " 0 " + large + " 1 " + e.x + " " + e.y
+  }
+
+  return (
+    <div>
+      <div style={{ position: "relative", width: "100%", maxWidth: 320, margin: "0 auto", aspectRatio: "1" }}>
+        <svg viewBox={"0 0 " + SVG_SIZE + " " + SVG_SIZE} style={{ width: "100%", height: "100%" }}>
+          {/* Base circle — thin line */}
+          <circle cx={SVG_SIZE / 2} cy={SVG_SIZE / 2} r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+
+          {/* Colored arcs + white separator ticks at end of each arc */}
+          {arcs.map((arc, i) => {
+            const si = stopOrder.indexOf(i)
+            if (si >= stoppedCount) return null
+            const gap = 1
+            const endPt = toXY(arc.endAngle, R)
+            // Small tick line extending outward at end of arc
+            const tickOuter = toXY(arc.endAngle, R + 3)
+            const tickInner = toXY(arc.endAngle, R - 3)
+            return <g key={"arc" + i}>
+              <path d={arcPath(arc.startAngle + gap, arc.endAngle - gap, R)} fill="none" stroke={arc.color} strokeWidth="4" strokeLinecap="round" opacity="0.7" style={{ transition: "opacity 0.5s" }} />
+              {/* White separator tick */}
+              <line x1={tickInner.x} y1={tickInner.y} x2={tickOuter.x} y2={tickOuter.y} stroke="white" strokeWidth="1" opacity="0.6" />
+            </g>
+          })}
+
+          {/* Dots */}
+          {data.map((g, rank) => {
+            const arc = arcs[rank]
+            const si = stopOrder.indexOf(rank)
+            const isStopped = si < stoppedCount
+            const dotR = 2.5
+
+            let angle
+            if (isStopped) {
+              angle = arc.endAngle
+            } else {
+              const sec = elapsed / 1000
+              angle = sec * spins[rank].speed * spins[rank].dir
+            }
+            const pos = toXY(angle, R)
+
+            // Label position = middle of arc, pushed outward
+            const labelPos = toXY(arc.midAngle, R + 10)
+
+            return (
+              <g key={g.n}>
+                {/* Dot at end of arc */}
+                <circle cx={pos.x} cy={pos.y} r={dotR} fill={isStopped ? "white" : arc.color + "60"} stroke={arc.color} strokeWidth={isStopped ? "0.8" : "0.5"} style={{ transition: isStopped ? "cx 0.8s cubic-bezier(0.34,1.56,0.64,1), cy 0.8s cubic-bezier(0.34,1.56,0.64,1), fill 0.5s" : "" }}>
+                  {!isStopped && elapsed > 0 && <animate attributeName="opacity" values="0.5;1;0.5" dur="0.4s" repeatCount="indefinite" />}
+                </circle>
+                {/* Label at middle of arc, outside the circle */}
+                {isStopped && (
+                  <g style={{ opacity: 0.9 }}>
+                    <text x={labelPos.x} y={labelPos.y - 2} textAnchor="middle" fill="white" fontSize="3.5" fontWeight="700">{g.n}</text>
+                    <text x={labelPos.x} y={labelPos.y + 3} textAnchor="middle" fill={arc.color} fontSize="3" fontFamily="JetBrains Mono,monospace">{Math.round(arc.pct * 100)}%</text>
+                  </g>
+                )}
+              </g>
+            )
+          })}
+
+          {/* Center text */}
+          <text x={SVG_SIZE / 2} y={SVG_SIZE / 2 - 2} textAnchor="middle" fill="white" fontSize="8" fontWeight="800">
+            {finished ? total : Math.round(total * Math.min(1, elapsed / speed))}
+          </text>
+          <text x={SVG_SIZE / 2} y={SVG_SIZE / 2 + 6} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="3" fontFamily="JetBrains Mono,monospace" letterSpacing="0.1em">
+            TOTAL VUES
+          </text>
+        </svg>
+      </div>
+
+      {finished && (
+        <div style={{ textAlign: "center", marginTop: 8, animation: "slide-up 0.5s ease 0.3s both" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            {data.slice(0, 3).map((g, i) => (
+              <div key={g.n} style={{ textAlign: "center" }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: COLORS[i], margin: "0 auto 4px" }} />
+                <div style={{ fontSize: 11, fontWeight: 600, color: COLORS[i] }}>{g.n}</div>
+                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{Math.round(arcs[i].pct * 100)}% — {g.v}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

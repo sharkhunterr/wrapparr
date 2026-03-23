@@ -60,12 +60,13 @@ export const SLIDE_REGISTRY = [
       { key: "displayMode", label: "Mode d'affichage", type: "select", default: "race", options: [
         { value: "race", label: "Course" },
         { value: "bubbles", label: "Bulles" },
+        { value: "orbit", label: "Orbite" },
         { value: "podium", label: "Podium classique" },
       ]},
       { key: "maxGenres", label: "Nombre de genres affiches", type: "number", default: 6 },
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 25000 },
-      { key: "commentaryEnabled", label: "Commentaires en direct", type: "bool", default: true },
-      { key: "raceCommentary", label: "Phrases de commentaire", type: "commentary", default: [
+      { key: "commentaryEnabled", label: "Commentaires en direct", type: "bool", default: true, showWhen: { key: "displayMode", value: "race" } },
+      { key: "raceCommentary", label: "Phrases de commentaire", type: "commentary", showWhen: { key: "displayMode", value: "race" }, default: [
         { trigger: "start", label: "Depart", phrases: ["C'est parti !", "Les genres s'elancent !", "Et c'est le depart !"] },
         { trigger: "leader_change", label: "Changement leader", phrases: ["{name} prend la tete !", "{name} depasse tout le monde !", "Incroyable, {name} passe devant !"], vars: ["{name}"] },
         { trigger: "last_place", label: "Dernier", phrases: ["{name} bon dernier... ca m'etonne pas", "{name} ferme la marche, courage !", "Aie, {name} est largue"], vars: ["{name}"] },

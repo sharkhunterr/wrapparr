@@ -251,7 +251,10 @@ export default function SlideManager() {
                   background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.1)", borderTop: "none",
                   display: "flex", flexDirection: "column", gap: 8,
                 }}>
-                  {s.params.map((p) => (
+                  {s.params.filter((p) => {
+                    if (!p.showWhen) return true
+                    return (s.settings[p.showWhen.key] ?? s.params.find((x) => x.key === p.showWhen.key)?.default) === p.showWhen.value
+                  }).map((p) => (
                     <div key={p.key} style={p.type === "commentary" ? { display: "flex", flexDirection: "column", gap: 4 } : { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                       <label style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", flex: p.type === "commentary" ? undefined : 1 }}>{p.label}</label>
 
