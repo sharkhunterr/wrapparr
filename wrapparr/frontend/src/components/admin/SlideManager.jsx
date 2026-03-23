@@ -135,29 +135,28 @@ export default function SlideManager() {
         return { ...s, enabled: enabled !== undefined ? enabled : true, settings: savedSettings }
       })
 
-      // Apply saved order — insert new slides at their natural position from registry
+      // Apply saved order ONLY if it contains all current slides (= admin manually reordered)
+      // Otherwise use the registry default order (which is always correct)
       if (savedOrder.length > 0) {
-        const byId = {}
-        for (const s of ordered) byId[s.id] = s
-        const reordered = []
-        const used = new Set()
-        for (const id of savedOrder) {
-          if (byId[id]) { reordered.push(byId[id]); used.add(id) }
-        }
-        // Insert new slides (not in savedOrder) at their registry position
-        for (let i = 0; i < registry.length; i++) {
-          const s = registry[i]
-          if (used.has(s.id) || !byId[s.id]) continue
-          // Find the best insertion point: after the previous registry sibling
-          let insertIdx = reordered.length
-          for (let j = i - 1; j >= 0; j--) {
-            const prevIdx = reordered.findIndex((r) => r.id === registry[j].id)
-            if (prevIdx >= 0) { insertIdx = prevIdx + 1; break }
+        const currentIds = new Set(ordered.map((s) => s.id))
+        const savedIds = new Set(savedOrder)
+        const allPresent = [...currentIds].every((id) => savedIds.has(id))
+
+        if (allPresent) {
+          // Saved order is complete — respect admin's custom order
+          const byId = {}
+          for (const s of ordered) byId[s.id] = s
+          const reordered = []
+          for (const id of savedOrder) {
+            if (byId[id]) reordered.push(byId[id])
           }
-          reordered.splice(insertIdx, 0, byId[s.id])
-          used.add(s.id)
+          // Append any truly new slides at registry position
+          for (const s of ordered) {
+            if (!reordered.find((r) => r.id === s.id)) reordered.push(s)
+          }
+          ordered = reordered
         }
-        ordered = reordered
+        // If savedOrder is incomplete/outdated, ignore it and use registry order
       }
 
       setSlides(ordered)
