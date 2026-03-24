@@ -73,16 +73,25 @@ class RecapPipeline:
         recap.error_message = None
 
         try:
-            # Get all users with mappings
+            # Get all users that have at least one mapping
             all_users_result = await self.db.execute(select(User).where(User.is_active.is_(True)))
             all_users = all_users_result.scalars().all()
+
+            # Filter to only users with mappings
+            all_mappings_result = await self.db.execute(select(UserServiceMapping))
+            mapped_user_ids = {str(m.user_id) for m in all_mappings_result.scalars().all()}
+            users_to_collect = [u for u in all_users if str(u.id) in mapped_user_ids]
+
+            if not users_to_collect:
+                logger.warning("No users with mappings found — collecting for admin only")
+                users_to_collect = [u for u in all_users if str(u.id) == str(user_id)]
 
             # Step 1: Collect data for each mapped user
             await self._update_progress(recap, "collecting", 10, "Collecte des données en cours...")
 
             users_data = {}
-            for i, u in enumerate(all_users):
-                pct = 10 + int((i / max(1, len(all_users))) * 30)
+            for i, u in enumerate(users_to_collect):
+                pct = 10 + int((i / max(1, len(users_to_collect))) * 30)
                 await self._update_progress(recap, "collecting", pct, f"Collecte pour {u.display_name or u.email}...")
                 try:
                     collected = await self._collect(u.id, year)

@@ -177,7 +177,17 @@ export default function RecapPlayer() {
         }
 
         if (recapResult && recapResult.data) {
-          setRecapData(recapResult.data)
+          // Extract current user's data from multi-user recap
+          let data = recapResult.data
+          const userId = me?.id ? String(me.id) : null
+          if (data.users && userId && data.users[userId]) {
+            // Use this user's specific data, keep global/users for comparison
+            const userData = data.users[userId]
+            data = { ...userData, users: data.users }
+            // Remove "name" field that's not needed for rendering
+            delete data.name
+          }
+          setRecapData(data)
         }
       } catch (e) {
         setError(e.message)
