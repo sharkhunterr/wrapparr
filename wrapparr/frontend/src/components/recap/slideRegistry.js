@@ -11,12 +11,6 @@ export const SLIDE_REGISTRY = [
     desc: "Ecran d'accueil avec le titre WRAPPARR",
     params: [],
   },
-  {
-    id: "overview", label: "Vue d'ensemble", group: "global",
-    desc: "Statistiques globales toutes plateformes",
-    params: [],
-  },
-
   // Per-service slides — generated dynamically per service, but these define the templates
   {
     id: "cat-{service}", label: "Annonce {service}", group: "service", cat: true,
@@ -72,34 +66,8 @@ export const SLIDE_REGISTRY = [
     id: "{service}-stats-enriched", label: "Stats enrichies {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Stats films enrichies : top films, donut genres, equivalent temps, categorie fun, affiches",
     params: [
-      { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
-        { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
-        { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
-        { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
-        { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
-        { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
-        { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
-      ]},
-    ],
-  },
-  {
-    id: "{service}-bilan", label: "Bilan films {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
-    desc: "Bilan total : nombre de films, heures, equivalent temps, categorie fun",
-    params: [
-      { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
-        { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
-        { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
-        { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
-        { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
-        { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
-        { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
-      ]},
-    ],
-  },
-  {
-    id: "{service}-digest", label: "Digest cinema {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
-    desc: "Habitudes + bilan : jour/heure, records, equivalent temps, categorie fun, affiches defilantes",
-    params: [
+      { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
+      { key: "stampText", label: "Texte du tampon", type: "text", default: "Approuve" },
       { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
         { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
         { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
@@ -350,8 +318,8 @@ export const SLIDE_REGISTRY = [
 export function expandRegistry(dataServices = []) {
   const expanded = []
   const serviceTemplates = SLIDE_REGISTRY.filter((s) => s.group === "service")
-  const globalBefore = SLIDE_REGISTRY.filter((s) => s.group === "global" && (s.id === "intro" || s.id === "overview"))
-  const globalAfter = SLIDE_REGISTRY.filter((s) => s.group === "global" && s.id !== "intro" && s.id !== "overview")
+  const globalBefore = SLIDE_REGISTRY.filter((s) => s.group === "global" && s.id === "intro")
+  const globalAfter = SLIDE_REGISTRY.filter((s) => s.group === "global" && s.id !== "intro")
 
   // 1. Global slides first (intro, overview)
   for (const tmpl of globalBefore) {

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useActive, AN, Tag, Lbl, Pill, AreaG } from "../SharedUI"
 
 const DEFAULT_CATEGORIES = [
@@ -49,12 +49,12 @@ function GenreDonut({ genres, accent, maxShow = 4 }) {
             transform={`rotate(-90 ${cx} ${cy})`} opacity={opacities[i] || 0.15} />
         })}
       </svg>
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, columnGap: 8 }}>
         {items.map((g, i) => (
           <div key={g.n} style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div style={{ width: 7, height: 7, borderRadius: 2, background: accent, opacity: opacities[i] || 0.15, flexShrink: 0 }} />
-            <span style={{ fontSize: 10, color: i === 0 ? "white" : "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400 }}>{g.n}</span>
-            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace" }}>{g.v}</span>
+            <span style={{ fontSize: 11, color: i === 0 ? "white" : "rgba(255,255,255,0.5)", fontWeight: i === 0 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.n}</span>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{g.v}</span>
           </div>
         ))}
       </div>
@@ -70,7 +70,7 @@ function PosterWall({ films }) {
       {[0, 1, 2, 3, 4, 5, 6, 7].map((row) => (
         <div key={row} style={{ display: "flex", gap: 8, padding: "4px 0", animation: `pse-scroll-${row % 2 === 0 ? "l" : "r"} ${22 + row * 3}s linear infinite`, width: "max-content" }}>
           {posters.concat(posters).slice(row * 5, row * 5 + 24).map((f, i) => (
-            <img key={i} src={f.thumb} alt="" style={{ width: 56, height: 80, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+            <img key={i} src={f.thumb} alt="" style={{ width: 70, height: 100, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
           ))}
         </div>
       ))}
@@ -96,11 +96,11 @@ const ICONS = {
 function MiniStat({ iconKey, value, label, accent }) {
   const iconFn = ICONS[iconKey] || ICONS.chart
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 5, padding: "4px 7px", borderRadius: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6, padding: "5px 8px", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
       <div style={{ flexShrink: 0 }}>{iconFn(accent)}</div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "white", lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
-        <div style={{ fontSize: 7, color: accent, lineHeight: 1, opacity: 0.7 }}>{label}</div>
+        <div style={{ fontSize: 12, fontWeight: 800, color: "white", lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+        <div style={{ fontSize: 8, color: accent, lineHeight: 1.1, opacity: 0.8 }}>{label}</div>
       </div>
     </div>
   )
@@ -108,6 +108,8 @@ function MiniStat({ iconKey, value, label, accent }) {
 
 export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {} }) {
   const active = useActive()
+  const [stamped, setStamped] = useState(false)
+  useEffect(() => { const t = setTimeout(() => setStamped(true), 3500); return () => clearTimeout(t) }, [])
   const categories = config.categories || DEFAULT_CATEGORIES
   const top = data.top || []
   const genres = data.genres || []
@@ -135,6 +137,9 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
     <div style={{ position: "relative", zIndex: 1 }}>
       <div className="s0" style={{ marginBottom: 8 }}>
         <Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05, marginTop: 4 }}>
+          Ton bilan <span style={{ color: accent }}>cinema</span>
+        </h2>
 
         {/* Stats row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
@@ -153,37 +158,33 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
             <span style={{ fontSize: 14, position: "relative" }}>{category.emoji}</span>
             <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>{category.name}</span>
           </div>
-          <div style={{ padding: "4px 8px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div style={{ padding: "4px 8px", borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
             <span style={{ fontSize: 9, fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
           </div>
         </div>
       </div>
 
       {/* Genre donut + quick stats side by side */}
-      <div className="s1" style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-        <div className="glass" style={{ flex: "0 0 auto", padding: "8px 10px", backdropFilter: "blur(6px)", display: "flex", alignItems: "center" }}>
+      <div className="s1" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "stretch" }}>
+        <div style={{ flex: "0 0 40%", padding: "8px 10px", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <GenreDonut genres={genres} accent={accent} />
         </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
-          {/* Row 1: Moyenne/mois + Note + Année */}
-          <div style={{ display: "flex", gap: 3 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3, justifyContent: "space-between" }}>
+          <div style={{ flex: 1, display: "flex", gap: 3 }}>
             {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label="films / mois" accent={accent} />}
             {ratings.length > 0 && <MiniStat iconKey="star" value={avgRating + "/10"} label="note moyenne" accent={accent} />}
             {avgYear && <MiniStat iconKey="film" value={avgYear} label="annee moyenne" accent={accent} />}
           </div>
-          {/* Row 2: Acteur + Realisateur */}
-          <div style={{ display: "flex", gap: 3 }}>
+          <div style={{ flex: 1, display: "flex", gap: 3 }}>
             {topActor && <MiniStat iconKey="user" value={topActor.name} label={topActor.count + " films"} accent={accent} />}
             {topDirector && <MiniStat iconKey="clapperboard" value={topDirector.name} label={topDirector.count + " films"} accent={accent} />}
           </div>
-          {/* Row 3: Mois record + Jour record */}
-          <div style={{ display: "flex", gap: 3 }}>
+          <div style={{ flex: 1, display: "flex", gap: 3 }}>
             {bestMonth && <MiniStat iconKey="calendar" value={bestMonth.month} label={bestMonth.views + " vues"} accent={accent} />}
-            {bestDay && <MiniStat iconKey="calendar" value={bestDay.day + " " + bestDay.month.slice(0, 3)} label="journee record" accent={accent} />}
+            {bestDay && <MiniStat iconKey="calendar" value={bestDay.day + " " + bestDay.month.slice(0, 3)} label={bestDay.views + " vues · " + bestDay.hours + "h"} accent={accent} />}
           </div>
-          {/* Row 4: Pays */}
           {countries.length > 0 && (
-            <div style={{ display: "flex", gap: 3 }}>
+            <div style={{ flex: 1, display: "flex", gap: 3 }}>
               <MiniStat iconKey="film" value={countries[0].name} label={countries[0].count + " films · pays principal"} accent={accent} />
             </div>
           )}
@@ -195,7 +196,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         const monthly = data.extra?.films?.monthly || data.monthly || []
         if (monthly.length < 3) return null
         return (
-          <div className="glass s1" style={{ padding: "8px 10px", marginBottom: 6, backdropFilter: "blur(6px)" }}>
+          <div style={{ padding: "8px 10px", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
             <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
             <AreaG data={monthly} dataKey="v" accent={accent} height={60} unit=" vues" id={"stats-enriched-" + label} />
           </div>
@@ -206,27 +207,65 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       {top.length > 0 && (
         <div className="s2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5 }}>
           {top.slice(0, 4).map((item, i) => (
-            <div key={item.t || i} className="glass" style={{
-              padding: "7px", display: "flex", gap: 7, backdropFilter: "blur(6px)",
+            <div key={item.t || i} style={{
+              padding: "7px", display: "flex", gap: 7, borderRadius: 10,
+              background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
               animation: "slide-up .4s ease " + (0.15 + i * 0.08) + "s both",
-              border: i === 0 ? `1px solid ${accent}35` : undefined,
+              border: i === 0 ? `1px solid ${accent}35` : "1px solid rgba(255,255,255,0.15)",
               boxShadow: i === 0 ? `0 0 14px ${accent}12` : undefined,
               position: "relative", overflow: "hidden",
             }}>
               {i === 0 && <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 30%, ${accent}15 50%, transparent 70%)`, animation: "badge-shine 4s ease-in-out 2s infinite", pointerEvents: "none" }} />}
               <PosterImg src={item.thumb} size={34} />
               <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-                <div style={{ fontSize: 8, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "white", lineHeight: 1.15, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
+                <div style={{ fontSize: 9, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "white", lineHeight: 1.15, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
                 <div style={{ display: "flex", gap: 3, marginTop: 2 }}>
-                  {item.r > 0 && <span style={{ fontSize: 8, color: "#fbbf24", fontWeight: 600 }}>★{item.r}</span>}
-                  {item.y && <span style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{item.y}</span>}
+                  {item.r > 0 && <span style={{ fontSize: 9, color: "#fbbf24", fontWeight: 600 }}>★{item.r}</span>}
+                  {item.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{item.y}</span>}
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Stamp animation */}
+      {stamped && (config.showStamp !== false) && (
+        <div style={{
+          position: "absolute", top: 30, right: -5,
+          transform: "rotate(15deg)",
+          zIndex: 10, pointerEvents: "none",
+          animation: "stamp-hit 0.4s cubic-bezier(0.17, 0.67, 0.21, 1.2) both",
+        }}>
+          <div style={{
+            padding: "5px 18px", borderRadius: 6,
+            border: `2px solid ${accent}`,
+            color: accent,
+            fontSize: 14, fontWeight: 900, fontFamily: "JetBrains Mono,monospace",
+            textTransform: "uppercase", letterSpacing: "0.12em",
+            textShadow: `0 0 12px ${accent}50`,
+            boxShadow: `0 0 16px ${accent}20`,
+            background: accent + "0a",
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}35 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
+            <span style={{ position: "relative" }}>{config.stampText || "Approuve"}</span>
+          </div>
+        </div>
+      )}
+      <style>{`
+        @keyframes stamp-hit {
+          0% { transform: rotate(15deg) scale(3); opacity: 0; }
+          60% { transform: rotate(15deg) scale(0.95); opacity: 0.8; }
+          80% { transform: rotate(15deg) scale(1.02); opacity: 0.7; }
+          100% { transform: rotate(15deg) scale(1); opacity: 0.7; }
+        }
+        @keyframes stamp-pulse {
+          0%, 100% { transform: rotate(15deg) scale(1); opacity: 0.7; }
+          50% { transform: rotate(15deg) scale(1.06); opacity: 0.9; }
+        }
+      `}</style>
     </div>
   </div>
 }

@@ -4,7 +4,7 @@ import { api } from "../../services/api"
 import useAuthStore from "../../stores/authStore"
 import { RECAP_CSS } from "./recapStyles"
 import IntroSlide from "./slides/IntroSlide"
-import OverviewSlide from "./slides/OverviewSlide"
+// OverviewSlide removed
 import CategorySlide from "./slides/CategorySlide"
 import PodiumSlide from "./slides/PodiumSlide"
 import ServiceStatsSlide from "./slides/ServiceStatsSlide"
@@ -13,8 +13,7 @@ import FilmTimelineSlide from "./slides/FilmTimelineSlide"
 import WorldMapSlide from "./slides/WorldMapSlide"
 import RatingsSlide from "./slides/RatingsSlide"
 import BudgetSlide from "./slides/BudgetSlide"
-import BilanFilmsSlide from "./slides/BilanFilmsSlide"
-import FilmDigestSlide from "./slides/FilmDigestSlide"
+// BilanFilmsSlide + FilmDigestSlide removed (merged into FilmStatsEnrichedSlide)
 import FilmStatsEnrichedSlide from "./slides/FilmStatsEnrichedSlide"
 import FavoriteActorsSlide from "./slides/FavoriteActorsSlide"
 import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
@@ -474,12 +473,6 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     component: <IntroSlide accent={primary} userName={userName} year={year} onStart={null} />,
   })
 
-  // 1 — Overview
-  slides.push({
-    id: "overview", accent: primary, bg: baseBg,
-    component: <OverviewSlide accent={primary} globalStats={globalStats} year={year} />,
-  })
-
   // Per-service: Category → Podium → Stats → Deep
   const serviceOrder = ["tautulli", "plex", "jellyfin", "romm", "audiobookshelf", "komga", "booklore"]
   const seen = new Set()
@@ -526,27 +519,10 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         })
       }
 
-      slides.push({
-        id: svc + "-stats", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} />,
-      })
-
-      // Stats enriched slide
+      // Stats enriched slide (replaces old stats + bilan + digest)
       slides.push({
         id: svc + "-stats-enriched", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} />,
-      })
-
-      // Bilan films slide
-      slides.push({
-        id: svc + "-bilan", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <BilanFilmsSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-bilan")} />,
-      })
-
-      // Digest cinema slide
-      slides.push({
-        id: svc + "-digest", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <FilmDigestSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-digest")} />,
       })
 
       // Deep slide (habitudes) — uses combined data
