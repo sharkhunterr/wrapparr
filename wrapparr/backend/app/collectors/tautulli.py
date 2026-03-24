@@ -346,6 +346,7 @@ class TautulliCollector(BaseCollector):
                 "directors": self._build_directors(films, raw.get("credits", {})),
                 "series_actors": self._build_actors(series, raw.get("credits", {})),
                 "budgets": self._build_budgets(all_films),
+                "peak_stats": self._build_peak_stats(records),
             },
         )
 
@@ -637,6 +638,60 @@ class TautulliCollector(BaseCollector):
                 except (ValueError, OSError):
                     pass
         return [{"m": names[i], "v": count.get(i, 0)} for i in range(12)]
+
+    @staticmethod
+    def _build_peak_stats(records: list) -> dict:
+        """Find the single best day and best month (by view count + hours)."""
+        day_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        month_names = ["Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"]
+
+        daily_count = defaultdict(int)
+        daily_hours = defaultdict(float)
+        monthly_count = defaultdict(int)
+        monthly_hours = defaultdict(float)
+
+        for r in records:
+            ts = r.get("started")
+            dur = r.get("duration", 0) / 3600
+            if not ts:
+                continue
+            try:
+                dt = datetime.fromtimestamp(ts)
+                day_key = dt.strftime("%Y-%m-%d")
+                daily_count[day_key] += 1
+                daily_hours[day_key] += dur
+                month_key = dt.month - 1
+                monthly_count[month_key] += 1
+                monthly_hours[month_key] += dur
+            except (ValueError, OSError):
+                pass
+
+        result = {}
+
+        # Best day (by view count)
+        if daily_count:
+            best_day_key = max(daily_count, key=lambda k: daily_count[k])
+            dt = datetime.strptime(best_day_key, "%Y-%m-%d")
+            result["best_day"] = {
+                "date": best_day_key,
+                "day_name": day_names[dt.weekday()],
+                "day": dt.day,
+                "month": month_names[dt.month - 1],
+                "views": daily_count[best_day_key],
+                "hours": round(daily_hours[best_day_key], 1),
+            }
+
+        # Best month (by view count)
+        if monthly_count:
+            best_month_key = max(monthly_count, key=lambda k: monthly_count[k])
+            result["best_month"] = {
+                "month": month_names[best_month_key],
+                "views": monthly_count[best_month_key],
+                "hours": round(monthly_hours[best_month_key], 1),
+            }
+            result["total_views"] = sum(monthly_count.values())
+
+        return result
 
     def _build_ranking(self, raw: dict) -> list:
         users_data = raw.get("users", {})

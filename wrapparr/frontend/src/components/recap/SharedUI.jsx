@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, AreaChart, Area } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, AreaChart, Area, CartesianGrid } from "recharts"
 
 // ── Hooks ──
 export function useActive() {
@@ -61,16 +61,16 @@ function CTip({ active, payload, label, unit = "h" }) {
 
 // ── Charts ──
 export function AreaG({ data, dataKey = "v", accent, height = 52, unit = "h", id }) {
-  return <ResponsiveContainer width="100%" height={height}><AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis hide /><Tooltip content={<CTip unit={unit} />} /><Area type="monotone" dataKey={dataKey} stroke={accent} strokeWidth={2} fill={"url(#" + id + ")"} dot={false} /></AreaChart></ResponsiveContainer>
+  return <ResponsiveContainer width="100%" height={height}><AreaChart data={data} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit} />} /><Area type="monotone" dataKey={dataKey} stroke={accent} strokeWidth={2} fill={"url(#" + id + ")"} dot={false} /></AreaChart></ResponsiveContainer>
 }
 
 export function DayChart({ data, accent, height = 55, unit }) {
-  return <ResponsiveContainer width="100%" height={height}><BarChart data={data} margin={{ left: 0, right: 0, top: 0, bottom: 0 }}><XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,.4)", fontSize: 9 }} axisLine={false} tickLine={false} /><YAxis hide /><Tooltip content={<CTip unit={unit || " items"} />} /><Bar dataKey="v" radius={[3, 3, 0, 0]}>{data.map((d, i) => <Cell key={i} fill={d.d === "Sam" || d.d === "Dim" || d.d === "Ven" ? accent : accent + "45"} />)}</Bar></BarChart></ResponsiveContainer>
+  return <ResponsiveContainer width="100%" height={height}><BarChart data={data} margin={{ left: -10, right: 0, top: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,.4)", fontSize: 9 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} /><Bar dataKey="v" radius={[3, 3, 0, 0]}>{data.map((d, i) => <Cell key={i} fill={d.d === "Sam" || d.d === "Dim" || d.d === "Ven" ? accent : accent + "45"} />)}</Bar></BarChart></ResponsiveContainer>
 }
 
 export function TimeChart({ data, accent, height = 50, unit }) {
   const gId = "tg" + accent.replace(/[^a-f0-9]/gi, "")
-  return <ResponsiveContainer width="100%" height={height}><AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}><defs><linearGradient id={gId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><XAxis dataKey="h" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis hide /><Tooltip content={<CTip unit={unit || " items"} />} /><Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill={"url(#" + gId + ")"} dot={false} /></AreaChart></ResponsiveContainer>
+  return <ResponsiveContainer width="100%" height={height}><AreaChart data={data} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={gId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="h" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} /><Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill={"url(#" + gId + ")"} dot={false} /></AreaChart></ResponsiveContainer>
 }
 
 export function MiniRank({ data, accent, unit = "h", label = "Classement", me = "" }) {

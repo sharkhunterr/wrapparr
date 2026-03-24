@@ -34,6 +34,11 @@ export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
   }
 
   const avgYear = totalCount > 0 ? Math.round(totalWeighted / totalCount) : 2020
+
+  // Oldest and newest films
+  const filmsWithYear = allFilms.filter((f) => (f.y || f.year) && (f.y || f.year) > 1890)
+  const oldestFilm = filmsWithYear.length > 0 ? filmsWithYear.reduce((a, b) => ((a.y || a.year) < (b.y || b.year) ? a : b)) : null
+  const newestFilm = filmsWithYear.length > 0 ? filmsWithYear.reduce((a, b) => ((a.y || a.year) > (b.y || b.year) ? a : b)) : null
   const profile = getProfile(avgYear, profiles)
 
   // Decade buckets
@@ -198,6 +203,29 @@ export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
           <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
             {totalCount} films analyses — annee moyenne <span style={{ color: accent, fontWeight: 700 }}>{avgYear}</span>
           </div>
+        </div>
+      )}
+
+      {/* Oldest vs Newest film */}
+      {done && oldestFilm && newestFilm && oldestFilm !== newestFilm && (
+        <div style={{ display: "flex", gap: 8, marginTop: 10, animation: "slide-up 0.4s ease 0.5s both" }}>
+          {[{ film: oldestFilm, label: "Le plus ancien", icon: "🎞️" }, { film: newestFilm, label: "Le plus recent", icon: "🆕" }].map(({ film, label, icon }) => (
+            <div key={label} style={{ flex: 1, display: "flex", gap: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+              {film.thumb ? (
+                <img src={film.thumb} alt="" style={{ width: 30, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+              ) : (
+                <div style={{ width: 30, height: 44, borderRadius: 4, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{icon}</div>
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{film.t}</div>
+                <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{film.y || film.year}</span>
+                  {film.r > 0 && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>★ {film.r}</span>}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

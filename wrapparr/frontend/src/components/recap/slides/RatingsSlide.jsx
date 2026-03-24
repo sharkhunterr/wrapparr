@@ -98,6 +98,10 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
     color: b.color || lerpColor("#555555", accent, i / Math.max(1, rawBrackets.length - 1)),
   }))
   const ratings = data?.extra?.ratings || []
+  // Build lookup for film details (thumb, year)
+  const allFilms = data?.extra?.films?.top || data?.top || []
+  const filmLookup = {}
+  for (const f of allFilms) { filmLookup[f.t] = f }
 
   const [phase, setPhase] = useState(0) // 0=idle, 1=gauge, 2=bars, 3=done
 
@@ -198,26 +202,37 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
       )}
 
       {/* Best & worst films */}
-      {done && ratings.length >= 2 && (
-        <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.3s both" }}>
-          <div style={{
-            flex: 1, padding: "8px 10px", borderRadius: 10, textAlign: "center",
-            background: accent + "0a", border: "1px solid " + accent + "25",
-          }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 2 }}>Meilleure note</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: accent }}>{ratings[0].r}/10</div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ratings[0].t}</div>
+      {done && ratings.length >= 2 && (() => {
+        const best = ratings[0]
+        const worst = ratings[ratings.length - 1]
+        const bestFilm = filmLookup[best.t] || {}
+        const worstFilm = filmLookup[worst.t] || {}
+        return (
+          <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.3s both" }}>
+            {[{ r: best, film: bestFilm, label: "Meilleure note", isBest: true }, { r: worst, film: worstFilm, label: "Pire note", isBest: false }].map(({ r, film, label, isBest }) => (
+              <div key={label} style={{
+                flex: 1, display: "flex", gap: 8, padding: "8px 10px", borderRadius: 10,
+                background: isBest ? accent + "0a" : "rgba(255,255,255,0.03)",
+                border: "1px solid " + (isBest ? accent + "25" : "rgba(255,255,255,0.08)"),
+              }}>
+                {film.thumb ? (
+                  <img src={film.thumb} alt="" style={{ width: 30, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+                ) : (
+                  <div style={{ width: 30, height: 44, borderRadius: 4, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🎬</div>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: isBest ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.t}</div>
+                  <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: isBest ? accent : "rgba(255,255,255,0.4)", fontFamily: "JetBrains Mono,monospace" }}>{r.r}/10</span>
+                    {film.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{film.y}</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div style={{
-            flex: 1, padding: "8px 10px", borderRadius: 10, textAlign: "center",
-            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
-          }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 2 }}>Pire note</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>{ratings[ratings.length - 1].r}/10</div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ratings[ratings.length - 1].t}</div>
-          </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Summary */}
       {done && (
