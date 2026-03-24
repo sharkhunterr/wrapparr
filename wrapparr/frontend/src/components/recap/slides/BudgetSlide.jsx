@@ -215,7 +215,7 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
   return (
     <div style={{ maxWidth: 460, width: "100%", position: "relative" }}>
       {/* Money rain effect when done */}
-      <MoneyRain active={phase >= 4} accent={accent} />
+      {/* MoneyRain removed */}
 
       <div style={{ position: "relative", zIndex: 1 }}>
         <div className="s0" style={{ marginBottom: 14 }}>

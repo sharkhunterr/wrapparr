@@ -8,9 +8,9 @@ function DirectorCard({ person, index, accent, revealed, rank }) {
       <div style={{
         position: "relative",
         transformStyle: "preserve-3d",
-        transform: revealed ? "rotateX(0deg)" : "rotateX(-90deg)",
-        transition: `transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.18}s`,
-        transformOrigin: "top center",
+        transform: revealed ? "rotateY(0deg)" : "rotateY(90deg)",
+        transition: `transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.15}s`,
+        backfaceVisibility: "hidden",
       }}>
         <div style={{
           display: "flex", alignItems: "center", gap: 12,
