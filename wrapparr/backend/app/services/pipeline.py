@@ -44,19 +44,19 @@ class RecapPipeline:
             await self.progress_callback(str(recap.id), status, progress, msg)
 
     async def run(self, user_id, year: int) -> YearlyRecap:
-        # Get or create recap
+        from app.models.user import User
+
+        # Get or create recap (one per year, owned by admin who triggers it)
         result = await self.db.execute(
-            select(YearlyRecap).where(YearlyRecap.user_id == user_id, YearlyRecap.year == year)
+            select(YearlyRecap).where(YearlyRecap.year == year)
         )
         recap = result.scalar_one_or_none()
         if recap:
-            # Reset for regeneration
             recap.data = None
             recap.error_message = None
             recap.progress = 0
             recap.progress_msg = None
             recap.completed_at = None
-            # Delete old snapshot
             old_snap = await self.db.execute(
                 select(HistorySnapshot).where(HistorySnapshot.recap_id == recap.id)
             )
@@ -73,44 +73,68 @@ class RecapPipeline:
         recap.error_message = None
 
         try:
-            # Step 1: Collect data from all active services
+            # Get all users with mappings
+            all_users_result = await self.db.execute(select(User).where(User.is_active.is_(True)))
+            all_users = all_users_result.scalars().all()
+
+            # Step 1: Collect data for each mapped user
             await self._update_progress(recap, "collecting", 10, "Collecte des données en cours...")
-            collected = await self._collect(user_id, year)
 
-            # Step 2: Fetch comparison data (previous year + other users)
-            await self._update_progress(recap, "processing", 40, "Calcul des statistiques...")
+            users_data = {}
+            for i, u in enumerate(all_users):
+                pct = 10 + int((i / max(1, len(all_users))) * 30)
+                await self._update_progress(recap, "collecting", pct, f"Collecte pour {u.display_name or u.email}...")
+                try:
+                    collected = await self._collect(u.id, year)
+                    if collected:
+                        processed = self._process(collected)
+                        users_data[str(u.id)] = {
+                            "name": u.display_name or u.email,
+                            **processed,
+                        }
+                except Exception as e:
+                    logger.warning("Collecte echouee pour %s: %s", u.display_name, e)
 
+            # Step 2: Build global recap with all users' data
+            await self._update_progress(recap, "processing", 50, "Calcul des statistiques...")
+
+            # Previous year data for comparison
             prev_year_data = None
             prev_recap = await self.db.execute(
-                select(YearlyRecap).where(YearlyRecap.user_id == user_id, YearlyRecap.year == year - 1, YearlyRecap.status == "completed")
+                select(YearlyRecap).where(YearlyRecap.year == year - 1, YearlyRecap.status == "completed")
             )
             prev = prev_recap.scalar_one_or_none()
             if prev and prev.data:
                 prev_year_data = prev.data
 
-            # Other users' recaps for same year (for user vs users comparison)
-            from app.models.user import User
-            other_users = []
-            other_recaps = await self.db.execute(
-                select(YearlyRecap, User).join(User, YearlyRecap.user_id == User.id).where(
-                    YearlyRecap.year == year,
-                    YearlyRecap.status == "completed",
-                    YearlyRecap.user_id != user_id,
-                )
-            )
-            for other_recap, other_user in other_recaps.all():
-                if other_recap.data:
-                    other_users.append({"name": other_user.display_name or other_user.email, "data": other_recap.data})
+            # Build final data structure: { global, users: { uid: {...} } }
+            # The "default" user data (for admin / single-user display) is the admin's
+            admin_uid = str(user_id)
+            admin_data = users_data.get(admin_uid, next(iter(users_data.values()), {}))
 
-            processed = self._process(collected, prev_year_data, other_users if other_users else None)
+            # Merge admin data at root level for backward compatibility
+            recap_data = {k: v for k, v in admin_data.items() if k != "name"}
+            recap_data["users"] = users_data
 
-            # Step 3: Fetch posters
+            # Add comparison if previous year exists
+            if prev_year_data:
+                prev_users = prev_year_data.get("users", {})
+                for uid, udata in users_data.items():
+                    prev_udata = prev_users.get(uid, prev_year_data if uid == admin_uid else {})
+                    if prev_udata:
+                        comparison = {}
+                        for svc_key in [k for k in udata if k not in ("global", "comparison", "users", "name")]:
+                            svc_cur = udata.get(svc_key, {})
+                            svc_prev = prev_udata.get(svc_key, {})
+                            if svc_cur and svc_prev:
+                                comparison[svc_key] = self._build_year_comparison(svc_cur, svc_prev)
+                        if comparison:
+                            users_data[uid]["comparison"] = comparison
+
+            # Step 3: Posters
             await self._update_progress(recap, "fetching_posters", 70, "Recuperation des affiches...")
-            # Poster fetching is a pass-through for now — URLs are stored in data
-            # Real TMDB/OpenLibrary proxy calls will enrich the data
 
-            # Step 4: Complete
-            recap.data = processed
+            recap.data = recap_data
             recap.status = "completed"
             recap.progress = 100
             recap.progress_msg = "Recap terminé"

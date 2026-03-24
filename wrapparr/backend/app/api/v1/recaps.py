@@ -44,8 +44,17 @@ async def get_slide_config_public(_user: User = Depends(get_current_user), db: A
 
 @router.get("", response_model=list[RecapListItem])
 async def list_recaps(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    recaps = await get_recaps(db, user.id)
-    return [RecapListItem.model_validate(r) for r in recaps]
+    # Show user's own recaps + any active/completed recaps
+    own = await get_recaps(db, user.id)
+    own_ids = {r.id for r in own}
+    result = await db.execute(
+        select(YearlyRecap).where(YearlyRecap.status == "completed").order_by(YearlyRecap.year.desc())
+    )
+    all_recaps = list(own)
+    for r in result.scalars().all():
+        if r.id not in own_ids:
+            all_recaps.append(r)
+    return [RecapListItem.model_validate(r) for r in all_recaps]
 
 
 @router.get("/active")
@@ -53,9 +62,9 @@ async def get_active_recap(user: User = Depends(get_current_user), db: AsyncSess
     """Get the currently active recap for this user (within diffusion period)."""
     from sqlalchemy import and_
     now = datetime.now()
+    # Active recaps are shared — any user can see any active recap
     result = await db.execute(
         select(YearlyRecap).where(
-            YearlyRecap.user_id == user.id,
             YearlyRecap.is_active.is_(True),
             YearlyRecap.status == "completed",
         ).order_by(YearlyRecap.year.desc())
@@ -88,11 +97,17 @@ async def compare_recaps(
 
 @router.get("/{year}", response_model=RecapDetail)
 async def get_recap_detail(year: int, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    # Try user's own recap first, then any active recap for that year
     recap = await get_recap(db, user.id, year)
+    if not recap:
+        result = await db.execute(
+            select(YearlyRecap).where(YearlyRecap.year == year, YearlyRecap.status == "completed")
+        )
+        recap = result.scalar_one_or_none()
     if not recap:
         raise HTTPException(status_code=404, detail="Aucun recap pour cette année")
 
-    snapshot = await get_snapshot(db, user.id, year)
+    snapshot = await get_snapshot(db, recap.user_id, year)
     return RecapDetail(
         year=recap.year,
         status=recap.status,

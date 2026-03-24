@@ -44,9 +44,15 @@ async def list_users(_admin=Depends(require_admin), db: AsyncSession = Depends(g
 
 @router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
-    email: str, password: str, display_name: str, role: str = "user",
+    data: dict,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
+    email = data.get("email", "")
+    password = data.get("password", "")
+    display_name = data.get("display_name", "")
+    role = data.get("role", "user")
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email et mot de passe requis")
     existing = await db.execute(select(User).where(User.email == email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email déjà utilisé")
@@ -78,6 +84,64 @@ async def update_user(
     await db.commit()
     await db.refresh(user)
     return UserResponse.model_validate(user)
+
+
+@router.get("/service-users")
+async def get_service_users(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    """List users from each connected service."""
+    import httpx
+    from app.core.encryption import decrypt
+
+    result = await db.execute(select(ServiceConnector).where(ServiceConnector.is_active.is_(True)))
+    services = result.scalars().all()
+    out = {}
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        for svc in services:
+            if svc.service_type in ("tmdb",):
+                continue
+            key = decrypt(svc.api_key_enc)
+            users = []
+            try:
+                if svc.service_type == "tautulli":
+                    resp = await client.get(f"{svc.base_url}/api/v2", params={"apikey": key, "cmd": "get_users_table", "length": "100"})
+                    if resp.status_code == 200:
+                        data = resp.json().get("response", {}).get("data", {})
+                        for u in (data.get("data", []) if isinstance(data, dict) else []):
+                            name = u.get("friendly_name", "?")
+                            if name and name != "Local":
+                                users.append({"id": str(u.get("user_id", "")), "name": name})
+                elif svc.service_type == "audiobookshelf":
+                    resp = await client.get(f"{svc.base_url}/api/users", headers={"Authorization": f"Bearer {key}"})
+                    if resp.status_code == 200:
+                        raw = resp.json()
+                        for u in (raw if isinstance(raw, list) else raw.get("users", [])):
+                            users.append({"id": str(u.get("id", "")), "name": u.get("username", "?")})
+                elif svc.service_type == "jellyfin":
+                    resp = await client.get(f"{svc.base_url}/Users", headers={"X-Emby-Token": key})
+                    if resp.status_code == 200:
+                        for u in resp.json():
+                            users.append({"id": str(u.get("Id", "")), "name": u.get("Name", "?")})
+                elif svc.service_type == "romm":
+                    parts = key.split(":", 1)
+                    if len(parts) == 2:
+                        resp = await client.post(f"{svc.base_url}/api/token", data={"username": parts[0], "password": parts[1], "scope": "me.read"})
+                        if resp.status_code == 200:
+                            token = resp.json().get("access_token")
+                            # ROMM may not expose user list — add current user
+                            users.append({"id": "self", "name": parts[0]})
+                elif svc.service_type in ("komga", "booklore"):
+                    # Basic auth — add the configured user
+                    parts = key.split(":", 1)
+                    if len(parts) == 2:
+                        users.append({"id": "self", "name": parts[0]})
+            except Exception:
+                pass
+
+            if users:
+                out[svc.service_type] = users
+
+    return out
 
 
 @router.get("/mapping")

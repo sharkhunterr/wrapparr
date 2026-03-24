@@ -42,8 +42,24 @@ function useRequireAuth({ requireAdmin = false } = {}) {
 /* ── User: recap ── */
 function UserHome() {
   const { user, loading } = useRequireAuth()
+  const logout = useAuthStore((s) => s.logout)
+  const navigate = useNavigate()
   if (loading || !user) return null
-  return <RecapPlayer />
+  return (
+    <>
+      <RecapPlayer />
+      <div style={{ position: "fixed", top: 12, right: 44, zIndex: 200, display: "flex", gap: 6 }}>
+        {user.role === "admin" && (
+          <button onClick={() => navigate("/admin")} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 8px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <Settings size={11} /> Admin
+          </button>
+        )}
+        <button onClick={async () => { await logout(); navigate("/login") }} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 8px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+          <LogOut size={11} />
+        </button>
+      </div>
+    </>
+  )
 }
 
 /* ── Icon size for nav ── */
