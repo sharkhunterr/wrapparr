@@ -238,6 +238,9 @@ class TautulliCollector(BaseCollector):
             "thumb": f"https://image.tmdb.org/t/p/w300{poster}" if poster else "",
             "art": "",
             "production_countries": tmdb.get("production_countries", []),
+            "budget": tmdb.get("budget", 0),
+            "revenue": tmdb.get("revenue", 0),
+            "runtime": tmdb.get("runtime", 0),
             "_source": "tmdb",
         }
 
@@ -342,8 +345,60 @@ class TautulliCollector(BaseCollector):
                 "actors": self._build_actors(films, raw.get("credits", {})),
                 "directors": self._build_directors(films, raw.get("credits", {})),
                 "series_actors": self._build_actors(series, raw.get("credits", {})),
+                "budgets": self._build_budgets(all_films),
             },
         )
+
+    @staticmethod
+    def _build_budgets(all_films: list) -> dict:
+        """Build budget analysis from enriched films."""
+        films_with_budget = [f for f in all_films if f.get("budget", 0) > 0]
+        if not films_with_budget:
+            return {}
+
+        budgets = [f["budget"] for f in films_with_budget]
+        avg = sum(budgets) / len(budgets)
+        total = sum(budgets)
+
+        # Top budgets
+        sorted_by_budget = sorted(films_with_budget, key=lambda f: -f["budget"])
+        top_expensive = [{"t": f["t"], "budget": f["budget"], "thumb": f.get("thumb", "")} for f in sorted_by_budget[:3]]
+        top_cheap = [{"t": f["t"], "budget": f["budget"], "thumb": f.get("thumb", "")} for f in sorted_by_budget[-3:] if f["budget"] > 0]
+
+        # Revenue vs budget (ROI)
+        films_with_revenue = [f for f in films_with_budget if f.get("revenue", 0) > 0]
+        best_roi = []
+        if films_with_revenue:
+            for f in films_with_revenue:
+                roi = (f["revenue"] - f["budget"]) / f["budget"] * 100
+                best_roi.append({"t": f["t"], "roi": round(roi), "budget": f["budget"], "revenue": f["revenue"]})
+            best_roi.sort(key=lambda x: -x["roi"])
+
+        # Budget brackets
+        brackets = [
+            {"label": "< 5M$", "min": 0, "max": 5_000_000},
+            {"label": "5-20M$", "min": 5_000_000, "max": 20_000_000},
+            {"label": "20-50M$", "min": 20_000_000, "max": 50_000_000},
+            {"label": "50-100M$", "min": 50_000_000, "max": 100_000_000},
+            {"label": "100-200M$", "min": 100_000_000, "max": 200_000_000},
+            {"label": "> 200M$", "min": 200_000_000, "max": 999_999_999_999},
+        ]
+        distribution = []
+        for b in brackets:
+            count = sum(1 for f in films_with_budget if b["min"] <= f["budget"] < b["max"])
+            if count > 0:
+                distribution.append({"label": b["label"], "count": count})
+
+        return {
+            "count": len(films_with_budget),
+            "average": round(avg),
+            "total": total,
+            "top_expensive": top_expensive,
+            "top_cheap": top_cheap,
+            "distribution": distribution,
+            "best_roi": best_roi[:3],
+            "all_budgets": sorted([{"t": f["t"], "budget": f["budget"]} for f in films_with_budget], key=lambda x: x["budget"]),
+        }
 
     def _build_ratings(self, all_films: list) -> list:
         """Extract ratings from the centralized film list."""
@@ -480,6 +535,9 @@ class TautulliCollector(BaseCollector):
                     "thumb": self._poster_url(meta.get("thumb") or r.get("thumb", "")),
                     "art": self._poster_url(meta.get("art", "")),
                     "rk": rk,
+                    "budget": meta.get("budget", 0),
+                    "revenue": meta.get("revenue", 0),
+                    "runtime": meta.get("runtime", 0),
                     "_enriched": bool(meta),
                 }
             info[title]["h"] += r.get("duration", 0) / 3600

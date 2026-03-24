@@ -12,6 +12,7 @@ import ServiceDeepSlide from "./slides/ServiceDeepSlide"
 import FilmTimelineSlide from "./slides/FilmTimelineSlide"
 import WorldMapSlide from "./slides/WorldMapSlide"
 import RatingsSlide from "./slides/RatingsSlide"
+import BudgetSlide from "./slides/BudgetSlide"
 import FavoriteActorsSlide from "./slides/FavoriteActorsSlide"
 import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
 import GenresSlide from "./slides/GenresSlide"
@@ -564,6 +565,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         slides.push({
           id: svc + "-ratings", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} />,
+        })
+      }
+
+      // Budget slide (if budget data available)
+      const budgetData = svcData.extra?.budgets
+      if (budgetData && budgetData.count > 0) {
+        slides.push({
+          id: svc + "-budgets", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <BudgetSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-budgets")} />,
         })
       }
 

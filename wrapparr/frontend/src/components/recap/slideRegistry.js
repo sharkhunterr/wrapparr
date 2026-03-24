@@ -78,6 +78,16 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
+    id: "{service}-budgets", label: "Budgets films {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Analyse des budgets des films vus",
+    params: [
+      { key: "displayMode", label: "Mode d'affichage distribution", type: "select", default: "bars", options: [
+        { value: "bars", label: "Barres horizontales" },
+        { value: "linechart", label: "Courbe avec moyenne" },
+      ]},
+    ],
+  },
+  {
     id: "{service}-timeline", label: "Profil cinephile {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Analyse des annees de sortie — quel type de spectateur es-tu ?",
     params: [
