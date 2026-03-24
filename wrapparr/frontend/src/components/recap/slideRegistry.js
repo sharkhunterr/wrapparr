@@ -69,8 +69,36 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
+    id: "{service}-stats-enriched", label: "Stats enrichies {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Stats films enrichies : top films, donut genres, equivalent temps, categorie fun, affiches",
+    params: [
+      { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
+        { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
+        { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
+        { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
+        { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
+        { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
+        { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
+      ]},
+    ],
+  },
+  {
     id: "{service}-bilan", label: "Bilan films {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Bilan total : nombre de films, heures, equivalent temps, categorie fun",
+    params: [
+      { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
+        { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
+        { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
+        { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
+        { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
+        { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
+        { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
+      ]},
+    ],
+  },
+  {
+    id: "{service}-digest", label: "Digest cinema {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Habitudes + bilan : jour/heure, records, equivalent temps, categorie fun, affiches defilantes",
     params: [
       { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
         { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },

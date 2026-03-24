@@ -14,7 +14,8 @@ import WorldMapSlide from "./slides/WorldMapSlide"
 import RatingsSlide from "./slides/RatingsSlide"
 import BudgetSlide from "./slides/BudgetSlide"
 import BilanFilmsSlide from "./slides/BilanFilmsSlide"
-// SectionResumeSlide removed
+import FilmDigestSlide from "./slides/FilmDigestSlide"
+import FilmStatsEnrichedSlide from "./slides/FilmStatsEnrichedSlide"
 import FavoriteActorsSlide from "./slides/FavoriteActorsSlide"
 import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
 import GenresSlide from "./slides/GenresSlide"
@@ -530,10 +531,22 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} />,
       })
 
+      // Stats enriched slide
+      slides.push({
+        id: svc + "-stats-enriched", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} />,
+      })
+
       // Bilan films slide
       slides.push({
         id: svc + "-bilan", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <BilanFilmsSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-bilan")} />,
+      })
+
+      // Digest cinema slide
+      slides.push({
+        id: svc + "-digest", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <FilmDigestSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-digest")} />,
       })
 
       // Deep slide (habitudes) — uses combined data

@@ -1,0 +1,232 @@
+import { useState } from "react"
+import { useActive, AN, Tag, Lbl, Pill, AreaG } from "../SharedUI"
+
+const DEFAULT_CATEGORIES = [
+  { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
+  { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
+  { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
+]
+
+function formatEquiv(hours) {
+  if (hours >= 720) return (hours / 720).toFixed(1) + " mois"
+  if (hours >= 168) return (hours / 168).toFixed(1) + " sem."
+  if (hours >= 24) return (hours / 24).toFixed(1) + " jours"
+  return Math.round(hours) + "h"
+}
+
+function PosterImg({ src, size = 36 }) {
+  const [err, setErr] = useState(false)
+  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 5, flexShrink: 0, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.3, color: "rgba(255,255,255,0.15)" }}>?</div>
+  return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 3px 10px rgba(0,0,0,0.4)" }} />
+}
+
+function GenreDonut({ genres, accent, maxShow = 4 }) {
+  if (!genres || genres.length === 0) return null
+  const total = genres.reduce((s, g) => s + g.v, 0)
+  if (total === 0) return null
+  const shown = genres.slice(0, maxShow)
+  const restCount = genres.slice(maxShow).reduce((s, g) => s + g.v, 0)
+  const items = restCount > 0 ? [...shown, { n: "Autres", v: restCount }] : shown
+  const size = 100, cx = size / 2, cy = size / 2, r = 36, stroke = 15
+  const circ = 2 * Math.PI * r
+  let offset = 0
+  const opacities = [1, 0.72, 0.5, 0.35, 0.2]
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={stroke} />
+        {items.map((g, i) => {
+          const pct = g.v / total
+          const dashLen = circ * pct - 1.5
+          const dashOff = circ * offset + 0.75
+          offset += pct
+          return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={accent} strokeWidth={stroke} strokeLinecap="round"
+            strokeDasharray={`${Math.max(0, dashLen)} ${circ}`} strokeDashoffset={-dashOff}
+            transform={`rotate(-90 ${cx} ${cy})`} opacity={opacities[i] || 0.15} />
+        })}
+      </svg>
+      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {items.map((g, i) => (
+          <div key={g.n} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ width: 7, height: 7, borderRadius: 2, background: accent, opacity: opacities[i] || 0.15, flexShrink: 0 }} />
+            <span style={{ fontSize: 10, color: i === 0 ? "white" : "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400 }}>{g.n}</span>
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace" }}>{g.v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PosterWall({ films }) {
+  const posters = [...films, ...films, ...films].filter((f) => f.thumb)
+  if (posters.length < 6) return null
+  return (
+    <div style={{ position: "fixed", inset: 0, overflow: "hidden", zIndex: 0, opacity: 0.1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((row) => (
+        <div key={row} style={{ display: "flex", gap: 8, padding: "4px 0", animation: `pse-scroll-${row % 2 === 0 ? "l" : "r"} ${22 + row * 3}s linear infinite`, width: "max-content" }}>
+          {posters.concat(posters).slice(row * 5, row * 5 + 24).map((f, i) => (
+            <img key={i} src={f.thumb} alt="" style={{ width: 56, height: 80, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+          ))}
+        </div>
+      ))}
+      <style>{`
+        @keyframes pse-scroll-l { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes pse-scroll-r { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+        @keyframes badge-shine { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+      `}</style>
+    </div>
+  )
+}
+
+// SVG mini icons
+const ICONS = {
+  chart: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>,
+  calendar: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  user: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  film: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>,
+  clapperboard: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><path d="M20.2 6L3 11l-.9-2.7a1 1 0 0 1 .6-1.3L17.5 2a1 1 0 0 1 1.3.6Z"/><path d="M6.2 5.5 8 10"/><path d="m12 3.5 1.8 4.5"/><rect x="2" y="11" width="20" height="11" rx="2"/></svg>,
+  star: (c) => <svg width="14" height="14" viewBox="0 0 24 24" fill={c} stroke={c} strokeWidth="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>,
+}
+
+function MiniStat({ iconKey, value, label, accent }) {
+  const iconFn = ICONS[iconKey] || ICONS.chart
+  return (
+    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 5, padding: "4px 7px", borderRadius: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <div style={{ flexShrink: 0 }}>{iconFn(accent)}</div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "white", lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+        <div style={{ fontSize: 7, color: accent, lineHeight: 1, opacity: 0.7 }}>{label}</div>
+      </div>
+    </div>
+  )
+}
+
+export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {} }) {
+  const active = useActive()
+  const categories = config.categories || DEFAULT_CATEGORIES
+  const top = data.top || []
+  const genres = data.genres || []
+  const totalItems = data.total_items || 0
+  const totalHours = data.total_hours || 0
+  const allFilms = data.extra?.films?.top || top
+  const equiv = formatEquiv(totalHours)
+  const category = categories.find((c) => totalHours >= c.min && totalHours < c.max) || categories[categories.length - 1]
+
+  // Quick stats
+  const avgPerMonth = totalItems > 0 ? (totalItems / 12).toFixed(1) : "0"
+  const peak = data.extra?.films?.peak_stats || data.extra?.peak_stats || {}
+  const bestMonth = peak.best_month
+  const bestDay = peak.best_day
+  const topActor = (data.extra?.actors || [])[0]
+  const topDirector = (data.extra?.directors || [])[0]
+  const ratings = data.extra?.ratings || []
+  const avgRating = ratings.length > 0 ? (ratings.reduce((s, r) => s + r.r, 0) / ratings.length).toFixed(1) : null
+  const countries = data.extra?.countries || []
+  const avgYear = allFilms.length > 0 ? Math.round(allFilms.filter((f) => f.y > 1900).reduce((s, f) => s + f.y, 0) / allFilms.filter((f) => f.y > 1900).length) : null
+
+  return <div style={{ maxWidth: 440, width: "100%", position: "relative" }}>
+    <PosterWall films={allFilms} />
+
+    <div style={{ position: "relative", zIndex: 1 }}>
+      <div className="s0" style={{ marginBottom: 8 }}>
+        <Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
+
+        {/* Stats row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+            <span style={{ fontSize: 28, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: accent + "90" }}>vus</span>
+          </div>
+          <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
+          <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+            <span style={{ fontSize: 28, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
+          </div>
+          <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
+          {/* Category badge with shine */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
+            <span style={{ fontSize: 14, position: "relative" }}>{category.emoji}</span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>{category.name}</span>
+          </div>
+          <div style={{ padding: "4px 8px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Genre donut + quick stats side by side */}
+      <div className="s1" style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        <div className="glass" style={{ flex: "0 0 auto", padding: "8px 10px", backdropFilter: "blur(6px)", display: "flex", alignItems: "center" }}>
+          <GenreDonut genres={genres} accent={accent} />
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+          {/* Row 1: Moyenne/mois + Note + Année */}
+          <div style={{ display: "flex", gap: 3 }}>
+            {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label="films / mois" accent={accent} />}
+            {ratings.length > 0 && <MiniStat iconKey="star" value={avgRating + "/10"} label="note moyenne" accent={accent} />}
+            {avgYear && <MiniStat iconKey="film" value={avgYear} label="annee moyenne" accent={accent} />}
+          </div>
+          {/* Row 2: Acteur + Realisateur */}
+          <div style={{ display: "flex", gap: 3 }}>
+            {topActor && <MiniStat iconKey="user" value={topActor.name} label={topActor.count + " films"} accent={accent} />}
+            {topDirector && <MiniStat iconKey="clapperboard" value={topDirector.name} label={topDirector.count + " films"} accent={accent} />}
+          </div>
+          {/* Row 3: Mois record + Jour record */}
+          <div style={{ display: "flex", gap: 3 }}>
+            {bestMonth && <MiniStat iconKey="calendar" value={bestMonth.month} label={bestMonth.views + " vues"} accent={accent} />}
+            {bestDay && <MiniStat iconKey="calendar" value={bestDay.day + " " + bestDay.month.slice(0, 3)} label="journee record" accent={accent} />}
+          </div>
+          {/* Row 4: Pays */}
+          {countries.length > 0 && (
+            <div style={{ display: "flex", gap: 3 }}>
+              <MiniStat iconKey="film" value={countries[0].name} label={countries[0].count + " films · pays principal"} accent={accent} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Activite mensuelle */}
+      {(() => {
+        const monthly = data.extra?.films?.monthly || data.monthly || []
+        if (monthly.length < 3) return null
+        return (
+          <div className="glass s1" style={{ padding: "8px 10px", marginBottom: 6, backdropFilter: "blur(6px)" }}>
+            <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
+            <AreaG data={monthly} dataKey="v" accent={accent} height={60} unit=" vues" id={"stats-enriched-" + label} />
+          </div>
+        )
+      })()}
+
+      {/* Top films — compact 2-column grid */}
+      {top.length > 0 && (
+        <div className="s2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5 }}>
+          {top.slice(0, 4).map((item, i) => (
+            <div key={item.t || i} className="glass" style={{
+              padding: "7px", display: "flex", gap: 7, backdropFilter: "blur(6px)",
+              animation: "slide-up .4s ease " + (0.15 + i * 0.08) + "s both",
+              border: i === 0 ? `1px solid ${accent}35` : undefined,
+              boxShadow: i === 0 ? `0 0 14px ${accent}12` : undefined,
+              position: "relative", overflow: "hidden",
+            }}>
+              {i === 0 && <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 30%, ${accent}15 50%, transparent 70%)`, animation: "badge-shine 4s ease-in-out 2s infinite", pointerEvents: "none" }} />}
+              <PosterImg src={item.thumb} size={34} />
+              <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+                <div style={{ fontSize: 8, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "white", lineHeight: 1.15, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
+                <div style={{ display: "flex", gap: 3, marginTop: 2 }}>
+                  {item.r > 0 && <span style={{ fontSize: 8, color: "#fbbf24", fontWeight: 600 }}>★{item.r}</span>}
+                  {item.y && <span style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{item.y}</span>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+}
