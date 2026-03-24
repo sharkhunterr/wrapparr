@@ -1,16 +1,18 @@
 import { Tag, Lbl, DayChart, TimeChart, AreaG } from "../SharedUI"
 
 export default function ServiceDeepSlide({ accent, label, icon, data, me, year }) {
-  const dayData = data.day_of_week || []
-  const timeData = data.time_of_day || []
-  const monthly = data.monthly || []
-  const peak = data.extra?.peak_stats || {}
+  // Use films-only data if available (for tautulli/plex), fallback to combined
+  const filmsExtra = data.extra?.films || {}
+  const dayData = filmsExtra.day_of_week || data.day_of_week || []
+  const timeData = filmsExtra.time_of_day || data.time_of_day || []
+  const monthly = filmsExtra.monthly || data.monthly || []
+  const peak = filmsExtra.peak_stats || data.extra?.peak_stats || {}
   const bestDay = peak.best_day
   const bestMonth = peak.best_month
   const totalViews = peak.total_views || 0
 
-  const totalItems = data.total_items || 0
-  const totalHours = Math.round(data.total_hours || 0)
+  const totalItems = filmsExtra.total || data.total_items || 0
+  const totalHours = Math.round(filmsExtra.hours || data.total_hours || 0)
 
   return <div style={{ maxWidth: 430, width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}><Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label} · Habitudes</Lbl>

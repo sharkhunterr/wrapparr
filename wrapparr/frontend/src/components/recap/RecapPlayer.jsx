@@ -13,6 +13,8 @@ import FilmTimelineSlide from "./slides/FilmTimelineSlide"
 import WorldMapSlide from "./slides/WorldMapSlide"
 import RatingsSlide from "./slides/RatingsSlide"
 import BudgetSlide from "./slides/BudgetSlide"
+import BilanFilmsSlide from "./slides/BilanFilmsSlide"
+// SectionResumeSlide removed
 import FavoriteActorsSlide from "./slides/FavoriteActorsSlide"
 import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
 import GenresSlide from "./slides/GenresSlide"
@@ -528,6 +530,12 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} />,
       })
 
+      // Bilan films slide
+      slides.push({
+        id: svc + "-bilan", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <BilanFilmsSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-bilan")} />,
+      })
+
       // Deep slide (habitudes) — uses combined data
       if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
         slides.push({
@@ -669,6 +677,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
             component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} config={getSlideConfig(sc, svc + "-series-compare")} />,
           })
         }
+
       }
     } else {
       // ── Standard service (romm, audiobookshelf, komga, booklore) ──

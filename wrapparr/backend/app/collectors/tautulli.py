@@ -318,6 +318,12 @@ class TautulliCollector(BaseCollector):
         monthly = self._build_monthly(records)
         ranking = self._build_ranking(raw)
 
+        # Films-only stats for the habits slide
+        films_day_of_week = self._build_day_of_week(films)
+        films_time_of_day = self._build_time_of_day(films)
+        films_monthly = self._build_monthly(films)
+        films_peak_stats = self._build_peak_stats(films)
+
         total_h_films = sum(r.get("duration", 0) for r in films) / 3600
         total_h_series = sum(r.get("duration", 0) for r in series) / 3600
 
@@ -335,7 +341,7 @@ class TautulliCollector(BaseCollector):
             monthly=monthly,
             ranking=ranking,
             extra={
-                "films": {"total": len(films), "hours": round(total_h_films, 1), "top": all_films},
+                "films": {"total": len(films), "hours": round(total_h_films, 1), "top": all_films, "monthly": films_monthly, "day_of_week": films_day_of_week, "time_of_day": films_time_of_day, "peak_stats": films_peak_stats},
                 "series": {"episodes": len(series), "hours": round(total_h_series, 1), "top": all_series},
                 "backdrop": backdrop,
                 "top_genres": genres[:6],
