@@ -349,27 +349,33 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
           return (
             <div key={u.n} style={{
               animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
-              position: "relative",
-              padding: isMe ? "4px 6px" : 0,
-              borderRadius: isMe ? 8 : 0,
-              background: isMe ? accent + "0c" : "transparent",
-              border: isMe ? "1px solid " + accent + "25" : "1px solid transparent",
-              boxShadow: isMe ? `0 0 16px ${accent}18` : "none",
+              position: "relative", overflow: "hidden",
+              padding: "5px 8px",
+              borderRadius: 10,
+              background: isMe ? accent + "18" : "transparent",
+              border: isMe ? "1px solid " + accent + "40" : "1px solid transparent",
+              boxShadow: isMe ? `0 0 20px ${accent}25, inset 0 0 20px ${accent}08` : "none",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                <span style={{ fontSize: 12, fontWeight: i === 0 ? 800 : 500, color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"), flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {u.n}{isMe && <span style={{ fontSize: 9, color: accent + "70", marginLeft: 4 }}>moi</span>}
+              {/* Shine effect on me row */}
+              {isMe && <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}20 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1s infinite", pointerEvents: "none" }} />}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, position: "relative" }}>
+                <span style={{
+                  fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  fontWeight: isMe ? 800 : (i === 0 ? 800 : 500),
+                  color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"),
+                }}>
+                  {u.n}{isMe && <span style={{ fontSize: 9, color: accent, marginLeft: 4, fontWeight: 700 }}>· moi</span>}
                 </span>
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
+                <span style={{ fontSize: 9, color: isMe ? accent + "80" : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
                 <span style={{ fontSize: 10, fontWeight: 700, color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
               </div>
-              <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
                 <div style={{
                   height: "100%", borderRadius: 3,
                   background: accent, opacity: isMe ? 1 : (opacities[i] || 0.15),
                   width: (u.v / max * 100) + "%",
                   transformOrigin: "left", animation: "bar-grow .7s ease " + (delayBase + 0.2 + i * 0.05) + "s both",
-                  boxShadow: isMe ? `0 0 8px ${accent}50` : "none",
+                  boxShadow: isMe ? `0 0 10px ${accent}60` : "none",
                 }} />
               </div>
             </div>

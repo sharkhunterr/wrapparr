@@ -794,10 +794,15 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
   // ═══ COMMUNITY SECTION — Comparaison multi-utilisateurs ═══
   const communityAccent = accents.compare || "#60a5fa"
+  const currentUserId = user?.id ? String(user.id) : null
   const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => ({
     name: udata.name || uid,
+    uid,
+    isMe: uid === currentUserId,
     data: udata.tautulli || udata.plex || udata.jellyfin || {},
   })).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
+  // Find me name for matching in slides
+  const myNameInData = allUsersData.find((u) => u.isMe)?.name || userName
 
   if (allUsersData.length >= 2) {
     // Category slide for community section
@@ -811,19 +816,19 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     if (hasFilmsData) {
       slides.push({
         id: "community-top-films", accent: communityAccent, bg: baseBg, fullscreen: true,
-        component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+        component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
       slides.push({
         id: "community-activity-films", accent: communityAccent, bg: baseBg,
-        component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+        component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
       slides.push({
         id: "community-rankings-films", accent: communityAccent, bg: baseBg,
-        component: <CommunityRankingsSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+        component: <CommunityRankingsSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
       slides.push({
         id: "community-genres-films", accent: communityAccent, bg: baseBg,
-        component: <CommunityGenresSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+        component: <CommunityGenresSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
     }
 
@@ -832,19 +837,19 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     if (hasSeriesData) {
       slides.push({
         id: "community-top-series", accent: accents.series || "#fb923c", bg: baseBg, fullscreen: true,
-        component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+        component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
       slides.push({
         id: "community-activity-series", accent: accents.series || "#fb923c", bg: baseBg,
-        component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+        component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
       slides.push({
         id: "community-rankings-series", accent: accents.series || "#fb923c", bg: baseBg,
-        component: <CommunityRankingsSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+        component: <CommunityRankingsSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
       slides.push({
         id: "community-genres-series", accent: accents.series || "#fb923c", bg: baseBg,
-        component: <CommunityGenresSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+        component: <CommunityGenresSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
     }
   }
