@@ -331,8 +331,6 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
   const viewLabel = isSeries ? "episodes" : "films"
 
   // Build rankings — filter out users with 0, propagate isMe
-  console.log("[Rankings]", mediaType, "me:", me, "allUsers isMe:", allUsers.map((u) => ({ name: u.name, isMe: u.isMe })),
-    "myRankViews will be:", allUsers.map((u) => ({ n: u.name, isMe: u.isMe, v: isSeries ? (u.data?.extra?.series?.episodes || 0) : (u.data?.extra?.films?.total || u.data?.total_items || 0) })))
   const byViews = allUsers.map((u) => ({
     n: u.name,
     v: isSeries ? (u.data?.extra?.series?.episodes || 0) : (u.data?.extra?.films?.total || u.data?.total_items || 0),
@@ -396,20 +394,16 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
 
     {/* Position badges — shine effect like bilan cinema */}
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-      {myRankViews > 0 && (
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
-          <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>#{myRankViews}</span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en {viewLabel}</span>
-        </div>
-      )}
-      {myRankHours > 0 && (
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
-          <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>#{myRankHours}</span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en heures</span>
-        </div>
-      )}
+      <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
+        <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>{myRankViews > 0 ? `#${myRankViews}` : "—"}</span>
+        <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en {viewLabel}</span>
+      </div>
+      <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
+        <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>{myRankHours > 0 ? `#${myRankHours}` : "—"}</span>
+        <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en heures</span>
+      </div>
     </div>
 
     {/* Ranking by views */}

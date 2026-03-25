@@ -827,10 +827,9 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         || (_email && e && e === _email)
       if (match) { foundMyUid = uid; break }
     }
-    console.log("[Community] user.id:", _uid, "recapUid:", _recapUid, "name:", _name, "email:", _email,
-      "→ foundMyUid:", foundMyUid,
-      "| data.users keys:", Object.keys(data.users),
-      "| data.users names:", Object.values(data.users).map((u) => u.name))
+    if (!foundMyUid) {
+      console.warn("[Community] Utilisateur non trouve dans le recap. Verifiez le mapping admin.", { uid: _uid, name: _name, email: _email, recapUsers: Object.keys(data.users) })
+    }
   }
 
   const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => ({
