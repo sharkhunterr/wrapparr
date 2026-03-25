@@ -22,7 +22,7 @@ import CompareSlide from "./slides/CompareSlide"
 import CompareServiceSlide from "./slides/CompareServiceSlide"
 import RankingSlide from "./slides/RankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
-import { CommunityActivitySlide, CommunityTopSlide, CommunityRankingsSlide, CommunityGenresSlide } from "./slides/CommunitySlides"
+import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide } from "./slides/CommunitySlides"
 
 // ── AMBIENT EFFECTS (from prototype) ──
 function Orbs({ accent }) {
@@ -854,6 +854,10 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       slides.push({
         id: "community-top-films", accent: communityAccent, bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
+      })
+      slides.push({
+        id: "community-mostviewed-films", accent: communityAccent, bg: baseBg,
+        component: <CommunityMostViewedSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
       slides.push({
         id: "community-activity-films", accent: communityAccent, bg: baseBg,

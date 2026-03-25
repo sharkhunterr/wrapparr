@@ -355,6 +355,11 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
+    id: "community-mostviewed-films", label: "Films les plus vus", group: "global",
+    desc: "Top 10 films par nombre de vues avec details par utilisateur",
+    params: [],
+  },
+  {
     id: "community-activity-films", label: "Activite communaute (films)", group: "global",
     desc: "Activite mensuelle de tous les utilisateurs superposee — films",
     params: [],
