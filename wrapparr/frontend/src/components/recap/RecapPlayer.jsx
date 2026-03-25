@@ -809,21 +809,26 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
   // ═══ COMMUNITY SECTION — Comparaison multi-utilisateurs ═══
   const communityAccent = accents.compare || "#60a5fa"
-  const currentUserId = myRecapUserId || (user?.id ? String(user.id) : null)
-  const meNorm = userName.toLowerCase().trim()
-  const meEmail = user?.email?.toLowerCase().trim() || ""
+  // Match current user in data.users: try uid, then name, then email
+  const myUid = myRecapUserId || (user?.id ? String(user.id) : null)
+  const myName = userName.toLowerCase().trim()
+  const myEmail = (user?.email || "").toLowerCase().trim()
+  let foundMyUid = null
   if (data.users) {
-    console.log("[Community] Matching user — currentUserId:", currentUserId, "userName:", userName, "email:", meEmail, "keys in data.users:", Object.keys(data.users), "names:", Object.values(data.users).map((u) => u.name))
+    for (const [uid, udata] of Object.entries(data.users)) {
+      const n = (udata.name || "").toLowerCase().trim()
+      if (uid === myUid || (myName && n === myName) || (myEmail && (udata.email || "").toLowerCase().trim() === myEmail)) {
+        foundMyUid = uid
+        break
+      }
+    }
   }
   const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => {
     const name = udata.name || uid
-    const matchById = uid === currentUserId
-    const matchByName = meNorm && name.toLowerCase().trim() === meNorm
-    const matchByEmail = meEmail && udata.email && udata.email.toLowerCase().trim() === meEmail
     return {
       name,
       uid,
-      isMe: matchById || matchByName || matchByEmail,
+      isMe: uid === foundMyUid,
       data: udata.tautulli || udata.plex || udata.jellyfin || {},
     }
   }).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
