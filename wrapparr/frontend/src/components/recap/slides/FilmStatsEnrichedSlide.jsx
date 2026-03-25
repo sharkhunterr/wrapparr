@@ -10,6 +10,15 @@ const DEFAULT_CATEGORIES = [
   { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
 ]
 
+const DEFAULT_SERIES_CATEGORIES = [
+  { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "📺" },
+  { min: 20, max: 50, name: "Binge watcher debutant", desc: "Tu enchaines quelques episodes", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro aux series", desc: "Tu ne peux plus t'arreter", emoji: "📺" },
+  { min: 100, max: 200, name: "Machine a episodes", desc: "Les saisons defilent sous tes yeux", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien des series", desc: "Tu vis et respires series", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Legende du binge", desc: "Tu as probablement vu plus de series que Netflix", emoji: "👑" },
+]
+
 function formatEquiv(hours) {
   if (hours >= 720) return (hours / 720).toFixed(1) + " mois"
   if (hours >= 168) return (hours / 168).toFixed(1) + " sem."
@@ -106,11 +115,12 @@ function MiniStat({ iconKey, value, label, accent }) {
   )
 }
 
-export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {} }) {
+export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {}, mediaType = "films" }) {
+  const isSeries = mediaType === "series"
   const active = useActive()
   const [stamped, setStamped] = useState(false)
   useEffect(() => { const t = setTimeout(() => setStamped(true), 3500); return () => clearTimeout(t) }, [])
-  const categories = config.categories || DEFAULT_CATEGORIES
+  const categories = config.categories || (isSeries ? DEFAULT_SERIES_CATEGORIES : DEFAULT_CATEGORIES)
   const top = data.top || []
   const genres = data.genres || []
   const totalItems = data.total_items || 0
@@ -118,6 +128,12 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   const allFilms = data.extra?.films?.top || top
   const equiv = formatEquiv(totalHours)
   const category = categories.find((c) => totalHours >= c.min && totalHours < c.max) || categories[categories.length - 1]
+
+  // Labels adaptes films vs series
+  const itemLabel = isSeries ? "episodes" : "films"
+  const bilanLabel = isSeries ? "series" : "cinema"
+  const unitLabel = isSeries ? "ep." : "vus"
+  const perMonthLabel = isSeries ? "ep. / mois" : "films / mois"
 
   // Quick stats
   const avgPerMonth = totalItems > 0 ? (totalItems / 12).toFixed(1) : "0"
@@ -138,14 +154,14 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       <div className="s0" style={{ marginBottom: 8 }}>
         <Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05, marginTop: 4 }}>
-          Ton bilan <span style={{ color: accent }}>cinema</span>
+          Ton bilan <span style={{ color: accent }}>{bilanLabel}</span>
         </h2>
 
         {/* Stats row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
             <span style={{ fontSize: 28, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
-            <span style={{ fontSize: 10, fontWeight: 600, color: accent + "90" }}>vus</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: accent + "90" }}>{unitLabel}</span>
           </div>
           <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
@@ -171,13 +187,13 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3, justifyContent: "space-between" }}>
           <div style={{ flex: 1, display: "flex", gap: 3 }}>
-            {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label="films / mois" accent={accent} />}
+            {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label={perMonthLabel} accent={accent} />}
             {ratings.length > 0 && <MiniStat iconKey="star" value={avgRating + "/10"} label="note moyenne" accent={accent} />}
             {avgYear && <MiniStat iconKey="film" value={avgYear} label="annee moyenne" accent={accent} />}
           </div>
           <div style={{ flex: 1, display: "flex", gap: 3 }}>
-            {topActor && <MiniStat iconKey="user" value={topActor.name} label={topActor.count + " films"} accent={accent} />}
-            {topDirector && <MiniStat iconKey="clapperboard" value={topDirector.name} label={topDirector.count + " films"} accent={accent} />}
+            {topActor && <MiniStat iconKey="user" value={topActor.name} label={topActor.count + " " + itemLabel} accent={accent} />}
+            {topDirector && <MiniStat iconKey="clapperboard" value={topDirector.name} label={topDirector.count + " " + itemLabel} accent={accent} />}
           </div>
           <div style={{ flex: 1, display: "flex", gap: 3 }}>
             {bestMonth && <MiniStat iconKey="calendar" value={bestMonth.month} label={bestMonth.views + " vues"} accent={accent} />}
@@ -185,7 +201,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
           </div>
           {countries.length > 0 && (
             <div style={{ flex: 1, display: "flex", gap: 3 }}>
-              <MiniStat iconKey="film" value={countries[0].name} label={countries[0].count + " films · pays principal"} accent={accent} />
+              <MiniStat iconKey="film" value={countries[0].name} label={countries[0].count + " " + itemLabel + " · pays principal"} accent={accent} />
             </div>
           )}
         </div>

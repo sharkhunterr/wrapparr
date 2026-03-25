@@ -14,7 +14,8 @@ function getProfile(avgYear, profiles) {
   return profiles.find((p) => avgYear >= p.min && avgYear <= p.max) || profiles[profiles.length - 1]
 }
 
-export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
+export default function FilmTimelineSlide({ accent, data, year, config = {}, mediaType = "films" }) {
+  const isSeries = mediaType === "series"
   const animSpeed = config.animationSpeed || 8000
   const profiles = config.profiles || DEFAULT_PROFILES
   const extra = data?.extra || {}
@@ -88,7 +89,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
       <div className="s0" style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-          Ton profil <span style={{ color: accent }}>cinephile</span>
+          Ton profil <span style={{ color: accent }}>{isSeries ? "seriephile" : "cinephile"}</span>
         </h2>
       </div>
 
@@ -201,7 +202,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {} }) {
       {done && totalCount > 0 && (
         <div style={{ marginTop: 14, padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", animation: "slide-up 0.4s ease 0.3s both" }}>
           <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
-            {totalCount} films analyses — annee moyenne <span style={{ color: accent, fontWeight: 700 }}>{avgYear}</span>
+            {totalCount} {isSeries ? "series analysees" : "films analyses"} — annee moyenne <span style={{ color: accent, fontWeight: 700 }}>{avgYear}</span>
           </div>
         </div>
       )}

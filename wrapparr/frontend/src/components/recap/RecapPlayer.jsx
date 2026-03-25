@@ -522,8 +522,12 @@ function buildSlides(data, theme, slideConfigs, user, year) {
       const seriesTop = (seriesExtra.top || []).slice(0, 4)
 
       // Build a films-only data overlay for slides that read data.total_items etc.
-      const filmsData = { ...svcData, top: filmsTop, total_items: filmsExtra.total || 0, total_hours: filmsExtra.hours || 0 }
-      const seriesData = { ...svcData, top: seriesTop, total_items: seriesExtra.episodes || 0, total_hours: seriesExtra.hours || 0 }
+      const filmsGenres = filmsExtra.genres || svcData.extra?.top_genres || svcData.genres || []
+      const seriesGenres = seriesExtra.genres || svcData.extra?.series_genres || []
+      const filmsData = { ...svcData, top: filmsTop, genres: filmsGenres, total_items: filmsExtra.total || 0, total_hours: filmsExtra.hours || 0 }
+      const seriesData = { ...svcData, top: seriesTop, genres: seriesGenres, total_items: seriesExtra.episodes || 0, total_hours: seriesExtra.hours || 0,
+        extra: { ...svcData.extra, films: seriesExtra, actors: seriesExtra.actors || [], directors: seriesExtra.directors || [], ratings: seriesExtra.ratings || [], countries: seriesExtra.countries || [], peak_stats: seriesExtra.peak_stats || {} },
+      }
 
       // ═══ FILMS SECTION ═══
       slides.push({
@@ -666,7 +670,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         if (seriesHasYears) {
           slides.push({
             id: svc + "-series-timeline", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <FilmTimelineSlide accent={seriesAccent} data={{ ...svcData, top: seriesTop, extra: { ...svcData.extra, films: { top: (seriesExtraData.top || seriesTop) } } }} year={year} config={getSlideConfig(sc, svc + "-series-timeline")} />,
+            component: <FilmTimelineSlide accent={seriesAccent} data={{ ...svcData, top: seriesTop, extra: { ...svcData.extra, films: { top: (seriesExtraData.top || seriesTop) } } }} year={year} config={getSlideConfig(sc, svc + "-series-timeline")} mediaType="series" />,
           })
         }
 
@@ -729,7 +733,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         // Bilan series (fin de section)
         slides.push({
           id: svc + "-series-stats-enriched", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-          component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} />,
+          component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} mediaType="series" />,
         })
 
       }
