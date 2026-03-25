@@ -125,9 +125,10 @@ class RecapPipeline:
             recap_data = {k: v for k, v in admin_data.items() if k != "name"}
             recap_data["users"] = users_data
 
-            # Add comparison if previous year exists
+            # Add per-user comparison + root comparison if previous year exists
             if prev_year_data:
                 prev_users = prev_year_data.get("users", {})
+                root_comparison = {}
                 for uid, udata in users_data.items():
                     prev_udata = prev_users.get(uid, prev_year_data if uid == admin_uid else {})
                     if prev_udata:
@@ -139,6 +140,11 @@ class RecapPipeline:
                                 comparison[svc_key] = self._build_year_comparison(svc_cur, svc_prev)
                         if comparison:
                             users_data[uid]["comparison"] = comparison
+                            # Merge into root comparison (use admin's or first user's)
+                            if uid == admin_uid or not root_comparison:
+                                root_comparison.update(comparison)
+                if root_comparison:
+                    recap_data["comparison"] = root_comparison
 
             # Step 3: Posters
             await self._update_progress(recap, "fetching_posters", 70, "Recuperation des affiches...")
