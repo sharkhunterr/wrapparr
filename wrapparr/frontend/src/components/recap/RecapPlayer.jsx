@@ -795,12 +795,18 @@ function buildSlides(data, theme, slideConfigs, user, year) {
   // ═══ COMMUNITY SECTION — Comparaison multi-utilisateurs ═══
   const communityAccent = accents.compare || "#60a5fa"
   const currentUserId = user?.id ? String(user.id) : null
-  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => ({
-    name: udata.name || uid,
-    uid,
-    isMe: uid === currentUserId,
-    data: udata.tautulli || udata.plex || udata.jellyfin || {},
-  })).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
+  const meNorm = userName.toLowerCase().trim()
+  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => {
+    const name = udata.name || uid
+    const matchById = uid === currentUserId
+    const matchByName = meNorm && name.toLowerCase().trim() === meNorm
+    return {
+      name,
+      uid,
+      isMe: matchById || matchByName,
+      data: udata.tautulli || udata.plex || udata.jellyfin || {},
+    }
+  }).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
   // Find me name for matching in slides
   const myNameInData = allUsersData.find((u) => u.isMe)?.name || userName
 
