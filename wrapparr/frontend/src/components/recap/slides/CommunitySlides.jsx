@@ -317,6 +317,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
 
 /* ═══════════════════════════════════════════════════════
    3. RANKINGS — Classements vues + heures
+   Style identique a CommunityGenresSlide (barres horizontales)
    ═══════════════════════════════════════════════════════ */
 export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType = "films" }) {
   const active = useActive()
@@ -338,103 +339,119 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
   const medals = ["🥇", "🥈", "🥉"]
   const myRankViews = byViews.findIndex((u) => u.n === me) + 1
   const myRankHours = byHours.findIndex((u) => u.n === me) + 1
-
-  // Total communaute
   const totalViews = byViews.reduce((s, u) => s + u.v, 0)
   const totalHours = byHours.reduce((s, u) => s + u.v, 0)
-
-  function RankingBlock({ title, data, unit, icon }) {
-    const max = data[0]?.v || 1
-    return (
-      <div className="s1" style={{ padding: "14px 14px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-          <span style={{ fontSize: 16 }}>{icon}</span>
-          <Lbl c={accent} size={9} upper={false}>{title}</Lbl>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-          {data.map((u, i) => {
-            const isMe = u.n === me
-            const pct = u.v / max * 100
-            return <div key={u.n} style={{
-              padding: "8px 12px", borderRadius: 12,
-              background: isMe ? accent + "12" : "rgba(255,255,255,0.02)",
-              border: isMe ? "1px solid " + accent + "35" : "1px solid rgba(255,255,255,0.05)",
-              boxShadow: isMe ? "0 0 20px " + accent + "15" : "none",
-              animation: "slide-up .4s ease " + (0.08 + i * 0.07) + "s both",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-                <div style={{ width: 24, textAlign: "center", fontSize: 16, flexShrink: 0 }}>
-                  {i < 3 ? medals[i] : <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{i + 1}</span>}
-                </div>
-                <span style={{
-                  fontSize: 13, fontWeight: isMe ? 800 : 500, flex: 1,
-                  color: isMe ? accent : "white",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                }}>
-                  {u.n}
-                  {isMe && <span style={{ fontSize: 9, color: accent + "70", marginLeft: 4 }}>moi</span>}
-                </span>
-                <span style={{
-                  fontSize: 14, fontWeight: 800, fontFamily: "JetBrains Mono,monospace",
-                  color: isMe ? accent : "white", flexShrink: 0,
-                }}>
-                  {u.v.toLocaleString("fr-FR")}<span style={{ fontSize: 10, fontWeight: 400, color: "rgba(255,255,255,0.4)" }}>{unit}</span>
-                </span>
-              </div>
-              <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
-                <div style={{
-                  height: "100%", borderRadius: 3,
-                  background: isMe
-                    ? `linear-gradient(90deg, ${accent}, ${accent}cc)`
-                    : `linear-gradient(90deg, ${accent}50, ${accent}25)`,
-                  width: pct + "%",
-                  transformOrigin: "left", animation: "bar-grow .8s ease " + (0.3 + i * 0.07) + "s both",
-                  boxShadow: isMe ? `0 0 8px ${accent}40` : "none",
-                }} />
-              </div>
-            </div>
-          })}
-        </div>
-      </div>
-    )
-  }
+  const opacities = [1, 0.75, 0.55, 0.4, 0.3, 0.22, 0.18, 0.15]
 
   return <div style={{ maxWidth: 440, width: "100%" }}>
-    <div className="s0" style={{ marginBottom: 14 }}>
+    <div className="s0" style={{ marginBottom: 10 }}>
       <Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
         Qui regarde le plus de <span style={{ color: accent }}>{label}</span> ?
       </h2>
+    </div>
 
-      {/* Position badge */}
+    {/* Position badges */}
+    <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
       {myRankViews > 0 && (
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, padding: "6px 14px", borderRadius: 20, background: accent + "14", border: "1px solid " + accent + "30" }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: accent }}>#{myRankViews}</span>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>en {viewLabel} sur {byViews.length}</span>
-          {myRankHours > 0 && myRankHours !== myRankViews && <>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ fontSize: 13, fontWeight: 800, color: accent }}>#{myRankHours}</span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>en heures</span>
-          </>}
+        <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: accent + "14", border: "1px solid " + accent + "30", boxShadow: `0 0 12px ${accent}15` }}>
+          <span style={{ fontSize: 15, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{myRankViews}</span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>en {viewLabel}</span>
         </div>
       )}
-
-      {/* Totaux communaute */}
-      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-          <span style={{ fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalViews.toLocaleString("fr-FR")}</span> {viewLabel} au total
+      {myRankHours > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: accent + "14", border: "1px solid " + accent + "30", boxShadow: `0 0 12px ${accent}15` }}>
+          <span style={{ fontSize: 15, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{myRankHours}</span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>en heures</span>
         </div>
-        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-          <span style={{ fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalHours.toLocaleString("fr-FR")}h</span> cumulees
-        </div>
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <span style={{ fontSize: 13, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalViews.toLocaleString("fr-FR")}</span>
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{viewLabel}</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <span style={{ fontSize: 13, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalHours.toLocaleString("fr-FR")}h</span>
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>cumulees</span>
       </div>
     </div>
 
-    {/* Two ranking blocks stacked */}
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {byViews.length > 0 && <RankingBlock title={isSeries ? "Episodes vus" : "Films vus"} data={byViews} unit="" icon={isSeries ? "📺" : "🎬"} />}
-      {byHours.length > 0 && <RankingBlock title="Temps passe" data={byHours} unit="h" icon="⏱️" />}
-    </div>
+    {/* Ranking by views — bar style like genres */}
+    {byViews.length > 0 && (
+      <div className="s1" style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+        <Lbl c={accent} size={9}>{isSeries ? "📺" : "🎬"} {isSeries ? "Episodes vus" : "Films vus"}</Lbl>
+        {byViews.map((u, i) => {
+          const isMe = u.n === me
+          const max = byViews[0]?.v || 1
+          return (
+            <div key={u.n} style={{ animation: "slide-up .4s ease " + (0.1 + i * 0.05) + "s both" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 14, width: 22, textAlign: "center", flexShrink: 0 }}>{i < 3 ? medals[i] : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{i + 1}</span>}</span>
+                <span style={{
+                  fontSize: 13, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  fontWeight: isMe ? 800 : 500, color: isMe ? accent : "rgba(255,255,255,0.7)",
+                  textShadow: isMe ? `0 0 12px ${accent}50` : "none",
+                }}>
+                  {u.n}{isMe && <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 4 }}>moi</span>}
+                </span>
+                <span style={{
+                  fontSize: 13, fontWeight: 800, fontFamily: "JetBrains Mono,monospace",
+                  color: isMe ? accent : "rgba(255,255,255,0.5)", flexShrink: 0,
+                }}>{u.v.toLocaleString("fr-FR")}</span>
+              </div>
+              <div style={{ height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{
+                  height: "100%", borderRadius: 4,
+                  background: isMe ? accent : accent,
+                  opacity: isMe ? 1 : (opacities[i] || 0.15),
+                  width: (u.v / max * 100) + "%",
+                  transformOrigin: "left", animation: "bar-grow .7s ease " + (0.3 + i * 0.05) + "s both",
+                  boxShadow: isMe ? `0 0 10px ${accent}50` : "none",
+                }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )}
+
+    {/* Ranking by hours — bar style like genres */}
+    {byHours.length > 0 && (
+      <div className="s2" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <Lbl c={accent} size={9}>⏱️ Heures passees</Lbl>
+        {byHours.map((u, i) => {
+          const isMe = u.n === me
+          const max = byHours[0]?.v || 1
+          return (
+            <div key={u.n} style={{ animation: "slide-up .4s ease " + (0.15 + i * 0.05) + "s both" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 14, width: 22, textAlign: "center", flexShrink: 0 }}>{i < 3 ? medals[i] : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{i + 1}</span>}</span>
+                <span style={{
+                  fontSize: 13, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  fontWeight: isMe ? 800 : 500, color: isMe ? accent : "rgba(255,255,255,0.7)",
+                  textShadow: isMe ? `0 0 12px ${accent}50` : "none",
+                }}>
+                  {u.n}{isMe && <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 4 }}>moi</span>}
+                </span>
+                <span style={{
+                  fontSize: 13, fontWeight: 800, fontFamily: "JetBrains Mono,monospace",
+                  color: isMe ? accent : "rgba(255,255,255,0.5)", flexShrink: 0,
+                }}>{u.v.toLocaleString("fr-FR")}h</span>
+              </div>
+              <div style={{ height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{
+                  height: "100%", borderRadius: 4,
+                  background: isMe ? accent : accent,
+                  opacity: isMe ? 1 : (opacities[i] || 0.15),
+                  width: (u.v / max * 100) + "%",
+                  transformOrigin: "left", animation: "bar-grow .7s ease " + (0.35 + i * 0.05) + "s both",
+                  boxShadow: isMe ? `0 0 10px ${accent}50` : "none",
+                }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )}
   </div>
 }
 
