@@ -163,12 +163,13 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
 
 /* ═══════════════════════════════════════════════════════
    2. TOP MOST WATCHED — Films/series les plus vus
+      Mur d'affiches + reveal podium + liste
    ═══════════════════════════════════════════════════════ */
+const PODIUM_H = [75, 95, 115]
+
 export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "films" }) {
-  const active = useActive()
   const isSeries = mediaType === "series"
-  const label = isSeries ? "series" : "films"
-  const [expanded, setExpanded] = useState(null)
+  const label = isSeries ? "Series" : "Films"
 
   // Aggregate top items across all users
   const itemMap = new Map()
@@ -190,65 +191,126 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
       if (!entry.art && item.art) entry.art = item.art
     }
   }
-  const topItems = [...itemMap.values()].sort((a, b) => b.userCount - a.userCount || b.viewCount - a.viewCount).slice(0, 8)
+  const topItems = [...itemMap.values()].sort((a, b) => b.userCount - a.userCount || b.viewCount - a.viewCount).slice(0, 10)
+  const top3 = topItems.slice(0, 3)
+  const rest = topItems.slice(3)
+  const allPosters = topItems.filter((f) => f.thumb)
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
-    <div className="s0" style={{ marginBottom: 12 }}>
-      <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-        {isSeries ? "Series" : "Films"} les plus <span style={{ color: accent }}>populaires</span>
-      </h2>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{allUsers.length} utilisateurs</div>
-    </div>
+  // Phases: 0=wall, 1=reveal podium, 2=show list
+  const [phase, setPhase] = useState(0)
+  const [revealed, setRevealed] = useState([false, false, false])
 
-    {/* Poster wall scrolling */}
-    {topItems.filter((f) => f.thumb).length >= 4 && (
-      <div className="s0" style={{ overflow: "hidden", borderRadius: 12, marginBottom: 10, height: 70 }}>
-        <div style={{ display: "flex", gap: 6, animation: "pse-scroll-l 20s linear infinite", width: "max-content" }}>
-          {[...topItems, ...topItems, ...topItems].filter((f) => f.thumb).map((f, i) => (
-            <img key={i} src={f.thumb} alt="" style={{ width: 46, height: 68, borderRadius: 5, objectFit: "cover", flexShrink: 0, opacity: 0.7 }} onError={(e) => { e.target.style.display = "none" }} />
-          ))}
-        </div>
-        <style>{`@keyframes pse-scroll-l { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }`}</style>
-      </div>
-    )}
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 2200)
+    const t2 = setTimeout(() => setRevealed((p) => { const n = [...p]; n[0] = true; return n }), 2800)   // #3
+    const t3 = setTimeout(() => setRevealed((p) => { const n = [...p]; n[1] = true; return n }), 3800)   // #2
+    const t4 = setTimeout(() => setRevealed((p) => { const n = [...p]; n[2] = true; return n }), 5000)   // #1
+    const t5 = setTimeout(() => setPhase(2), 6200)
+    return () => { [t1, t2, t3, t4, t5].forEach(clearTimeout) }
+  }, [])
 
-    {/* Top items list */}
-    <div className="s1" style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      {topItems.map((item, i) => {
-        const isExpanded = expanded === i
-        return <div key={item.t + i} onClick={() => setExpanded(isExpanded ? null : i)} style={{
-          padding: "8px 10px", borderRadius: 11,
-          background: i === 0 ? accent + "0c" : "rgba(255,255,255,0.03)",
-          border: `1px solid ${i === 0 ? accent + "30" : "rgba(255,255,255,0.06)"}`,
-          cursor: "pointer", animation: "slide-up .4s ease " + (0.1 + i * 0.06) + "s both",
-        }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: i < 3 ? accent : "rgba(255,255,255,0.25)", width: 20, textAlign: "center", flexShrink: 0 }}>
-              {i < 3 ? ["🥇", "🥈", "🥉"][i] : "#" + (i + 1)}
-            </div>
-            <PosterImg src={item.thumb} size={32} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.t}</div>
-              <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
-                <span style={{ fontSize: 9, color: accent, fontWeight: 700 }}>{item.userCount} utilisateur{item.userCount > 1 ? "s" : ""}</span>
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>{item.viewCount} vue{item.viewCount > 1 ? "s" : ""}</span>
-                {item.r > 0 && <span style={{ fontSize: 9, color: "#fbbf24" }}>★{item.r}</span>}
-                {item.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{item.y}</span>}
-              </div>
-            </div>
-          </div>
-          {isExpanded && (
-            <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 4, flexWrap: "wrap" }}>
-              {item.users.map((name) => (
-                <span key={name} style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: name === me ? accent + "20" : "rgba(255,255,255,0.05)", color: name === me ? accent : "rgba(255,255,255,0.5)", border: name === me ? "1px solid " + accent + "30" : "1px solid rgba(255,255,255,0.06)" }}>{name}</span>
+  const backdrop = top3[0]?.art || top3[0]?.thumb || ""
+
+  return (
+    <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "16px 20px", position: "relative", zIndex: 10 }}>
+
+      {/* Poster wall background */}
+      {allPosters.length >= 4 && (
+        <div style={{ position: "fixed", inset: 0, overflow: "hidden", zIndex: 0, opacity: phase >= 1 ? 0.06 : 0.15, transition: "opacity 1.5s ease", display: "flex", flexDirection: "column", justifyContent: "center", pointerEvents: "none" }}>
+          {[0, 1, 2, 3, 4, 5].map((row) => (
+            <div key={row} style={{ display: "flex", gap: 8, padding: "4px 0", animation: `comm-scroll-${row % 2 === 0 ? "l" : "r"} ${20 + row * 3}s linear infinite`, width: "max-content" }}>
+              {[...allPosters, ...allPosters, ...allPosters, ...allPosters].slice(row * 3, row * 3 + 20).map((f, i) => (
+                <img key={i} src={f.thumb} alt="" style={{ width: 70, height: 100, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
               ))}
             </div>
-          )}
+          ))}
+          <style>{`
+            @keyframes comm-scroll-l { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+            @keyframes comm-scroll-r { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+          `}</style>
         </div>
-      })}
+      )}
+
+      {/* Backdrop from #1 */}
+      {backdrop && phase >= 1 && <div style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 0, pointerEvents: "none" }}>
+        <img src={backdrop} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.1, filter: "blur(2px)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "#05050ecc" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,#05050e80 0%,transparent 30%,transparent 70%,#05050eff 100%)" }} />
+      </div>}
+
+      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "70vw", height: "55vh", pointerEvents: "none", zIndex: 1, background: "radial-gradient(ellipse at 50% 0%," + accent + "25 0%,transparent 70%)" }} />
+
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: 16, position: "relative", zIndex: 5 }}>
+        <div style={{ fontSize: 34, marginBottom: 6, filter: "drop-shadow(0 0 20px " + accent + ")", animation: "float 3s ease-in-out infinite" }}>{isSeries ? "📺" : "🎬"}</div>
+        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 4 }}>WRAPPARR · COMMUNAUTE</div>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 28px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+          {label} les plus <span style={{ color: accent }}>populaires</span>
+        </h2>
+      </div>
+
+      {/* Podium reveal */}
+      {phase >= 1 && top3.length >= 2 && (
+        <div style={{ width: "100%", maxWidth: 380, position: "relative", zIndex: 5 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
+            {[{ item: top3[2], rIdx: 0, rank: 3 }, { item: top3[0], rIdx: 2, rank: 1 }, { item: top3[1], rIdx: 1, rank: 2 }].map(({ item, rIdx, rank }, col) => {
+              if (!item) return <div key={col} style={{ flex: rank === 1 ? 1.15 : 1 }} />
+              const isOne = rank === 1
+              const posterSize = isOne ? 68 : 50
+              const show = revealed[rIdx]
+              return (
+                <div key={col} style={{ flex: isOne ? 1.15 : 1, display: "flex", flexDirection: "column", alignItems: "center", opacity: show ? 1 : 0, transition: "opacity .4s ease" }}>
+                  {isOne && show && <div style={{ fontSize: 22, marginBottom: 3, animation: "crown-bounce 1.8s ease-in-out infinite", filter: "drop-shadow(0 0 12px " + accent + ")" }}>👑</div>}
+                  {show && <div style={{ fontSize: isOne ? 32 : 22, fontWeight: 800, marginBottom: 4, color: accent, textShadow: "0 0 30px " + accent, animation: "rank-stamp .5s cubic-bezier(0.34,1.56,0.64,1) both" }}>#{rank}</div>}
+                  {show && <div style={{ animation: "poster-appear .65s cubic-bezier(0.34,1.3,0.64,1) both", marginBottom: 6 }}>
+                    <PosterImg src={item.thumb} size={posterSize} />
+                  </div>}
+                  <div style={{
+                    width: "100%", borderRadius: "6px 6px 0 0", height: PODIUM_H[rIdx],
+                    background: show ? "linear-gradient(180deg," + accent + "38 0%," + accent + "18 100%)" : "rgba(255,255,255,0.04)",
+                    border: "1px solid " + (show ? accent + "55" : "rgba(255,255,255,0.05)"), borderBottom: "none",
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "8px 5px",
+                    animation: show ? "platform-rise .7s cubic-bezier(0.34,1.3,0.64,1) both" : "none",
+                  }}>
+                    {show && <>
+                      <div style={{ color: "white", fontWeight: 700, fontSize: isOne ? 11 : 9, textAlign: "center", lineHeight: 1.2, marginBottom: 3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
+                      <div style={{ color: accent, fontWeight: 800, fontFamily: "JetBrains Mono,monospace", fontSize: isOne ? 13 : 10 }}>{item.userCount} user{item.userCount > 1 ? "s" : ""}</div>
+                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 8 }}>{item.viewCount} vue{item.viewCount > 1 ? "s" : ""}</div>
+                      {item.r > 0 && <div style={{ color: "#fbbf24", fontSize: 8, marginTop: 1 }}>★ {item.r}</div>}
+                    </>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ height: 5, borderRadius: 3, background: "linear-gradient(90deg,transparent," + accent + "40," + accent + "70," + accent + "40,transparent)", boxShadow: "0 0 20px " + accent + "30" }} />
+        </div>
+      )}
+
+      {/* Rest of the list (4-10) */}
+      {phase >= 2 && rest.length > 0 && (
+        <div style={{ width: "100%", maxWidth: 380, position: "relative", zIndex: 5, marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
+          {rest.map((item, i) => (
+            <div key={item.t + i} style={{
+              display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", borderRadius: 9,
+              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+              animation: "slide-up .35s ease " + (i * 0.06) + "s both",
+            }}>
+              <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", width: 16, textAlign: "center", flexShrink: 0 }}>{i + 4}</span>
+              <PosterImg src={item.thumb} size={24} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.t}</div>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
+                <span style={{ fontSize: 9, color: accent, fontWeight: 700 }}>{item.userCount} user{item.userCount > 1 ? "s" : ""}</span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{item.viewCount} vues</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  </div>
+  )
 }
 
 /* ═══════════════════════════════════════════════════════

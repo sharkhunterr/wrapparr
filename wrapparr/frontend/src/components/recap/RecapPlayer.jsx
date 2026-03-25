@@ -814,7 +814,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
       })
       slides.push({
-        id: "community-top-films", accent: communityAccent, bg: baseBg,
+        id: "community-top-films", accent: communityAccent, bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
       })
       slides.push({
@@ -835,7 +835,7 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
       })
       slides.push({
-        id: "community-top-series", accent: accents.series || "#fb923c", bg: baseBg,
+        id: "community-top-series", accent: accents.series || "#fb923c", bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
       })
       slides.push({
