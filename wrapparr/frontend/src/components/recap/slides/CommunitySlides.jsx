@@ -140,7 +140,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
         {allUsers.map((u, i) => (
           <div key={u.name} style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div style={{ width: 8, height: 3, borderRadius: 2, background: USER_COLORS[i % USER_COLORS.length] }} />
-            <span style={{ fontSize: 9, color: u.name === me ? "white" : "rgba(255,255,255,0.4)", fontWeight: u.name === me ? 700 : 400 }}>{u.name}</span>
+            <span style={{ fontSize: 9, color: (u.isMe || u.name === me) ? "white" : "rgba(255,255,255,0.4)", fontWeight: (u.isMe || u.name === me) ? 700 : 400 }}>{u.name}</span>
           </div>
         ))}
       </div>
@@ -330,19 +330,21 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
   const label = isSeries ? "series" : "films"
   const viewLabel = isSeries ? "episodes" : "films"
 
-  // Build rankings — filter out users with 0
+  // Build rankings — filter out users with 0, propagate isMe
   const byViews = allUsers.map((u) => ({
     n: u.name,
     v: isSeries ? (u.data?.extra?.series?.episodes || 0) : (u.data?.extra?.films?.total || u.data?.total_items || 0),
+    isMe: u.isMe || u.name === me,
   })).filter((u) => u.v > 0).sort((a, b) => b.v - a.v)
 
   const byHours = allUsers.map((u) => ({
     n: u.name,
     v: Math.round(isSeries ? (u.data?.extra?.series?.hours || 0) : (u.data?.extra?.films?.hours || u.data?.total_hours || 0)),
+    isMe: u.isMe || u.name === me,
   })).filter((u) => u.v > 0).sort((a, b) => b.v - a.v)
 
-  const myRankViews = byViews.findIndex((u) => u.n === me) + 1
-  const myRankHours = byHours.findIndex((u) => u.n === me) + 1
+  const myRankViews = byViews.findIndex((u) => u.isMe) + 1
+  const myRankHours = byHours.findIndex((u) => u.isMe) + 1
   const opacities = [1, 0.8, 0.65, 0.5, 0.4, 0.32, 0.25, 0.2]
 
   function RankBar({ data, unitSuffix, sectionClass, delayBase }) {
@@ -350,34 +352,33 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
     return (
       <div className={sectionClass} style={{ display: "flex", flexDirection: "column", gap: 5 }}>
         {data.map((u, i) => {
-          const isMe = u.n === me
           return (
             <div key={u.n} style={{
               animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
-              padding: isMe ? "5px 8px" : 0,
-              borderRadius: isMe ? 10 : 0,
-              background: isMe ? accent + "14" : "transparent",
-              border: isMe ? "1px solid " + accent + "35" : "1px solid transparent",
-              boxShadow: isMe ? `0 0 16px ${accent}20` : "none",
+              padding: u.isMe ? "5px 8px" : 0,
+              borderRadius: u.isMe ? 10 : 0,
+              background: u.isMe ? accent + "14" : "transparent",
+              border: u.isMe ? "1px solid " + accent + "35" : "1px solid transparent",
+              boxShadow: u.isMe ? `0 0 16px ${accent}20` : "none",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, position: "relative" }}>
                 <span style={{
                   fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  fontWeight: isMe ? 800 : (i === 0 ? 800 : 500),
-                  color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"),
+                  fontWeight: u.isMe ? 800 : (i === 0 ? 800 : 500),
+                  color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"),
                 }}>
-                  {u.n}{isMe && <span style={{ fontSize: 9, color: accent, marginLeft: 4, fontWeight: 700 }}>· moi</span>}
+                  {u.n}{u.isMe && <span style={{ fontSize: 9, color: accent, marginLeft: 4, fontWeight: 700 }}>· moi</span>}
                 </span>
-                <span style={{ fontSize: 9, color: isMe ? accent + "80" : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
+                <span style={{ fontSize: 9, color: u.isMe ? accent + "80" : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
               </div>
               <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
                 <div style={{
                   height: "100%", borderRadius: 3,
-                  background: accent, opacity: isMe ? 1 : (opacities[i] || 0.15),
+                  background: accent, opacity: u.isMe ? 1 : (opacities[i] || 0.15),
                   width: (u.v / max * 100) + "%",
                   transformOrigin: "left", animation: "bar-grow .7s ease " + (delayBase + 0.2 + i * 0.05) + "s both",
-                  boxShadow: isMe ? `0 0 10px ${accent}60` : "none",
+                  boxShadow: u.isMe ? `0 0 10px ${accent}60` : "none",
                 }} />
               </div>
             </div>
@@ -464,7 +465,7 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
       ? (u.data?.extra?.series?.genres || u.data?.extra?.series_genres || [])
       : (u.data?.extra?.films?.genres || u.data?.extra?.top_genres || u.data?.genres || [])
     const top = genres.sort((a, b) => (b.v || 0) - (a.v || 0))[0]
-    return { name: u.name, genre: top?.n || "—" }
+    return { name: u.name, genre: top?.n || "—", isMe: u.isMe || u.name === me }
   })
 
   const opacities = [1, 0.8, 0.65, 0.5, 0.4, 0.32, 0.25, 0.2]
@@ -505,13 +506,12 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
         <Lbl c={accent} size={8}>Genre prefere par utilisateur</Lbl>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 6 }}>
           {userTopGenre.map((u) => {
-            const isMe = u.name === me
             return <div key={u.name} style={{
               display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 8,
-              background: isMe ? accent + "12" : "rgba(255,255,255,0.03)",
-              border: isMe ? "1px solid " + accent + "30" : "1px solid rgba(255,255,255,0.06)",
+              background: u.isMe ? accent + "12" : "rgba(255,255,255,0.03)",
+              border: u.isMe ? "1px solid " + accent + "30" : "1px solid rgba(255,255,255,0.06)",
             }}>
-              <span style={{ fontSize: 10, fontWeight: isMe ? 700 : 400, color: isMe ? accent : "rgba(255,255,255,0.6)" }}>{u.name}</span>
+              <span style={{ fontSize: 10, fontWeight: u.isMe ? 700 : 400, color: u.isMe ? accent : "rgba(255,255,255,0.6)" }}>{u.name}</span>
               <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>{u.genre}</span>
             </div>
           })}
