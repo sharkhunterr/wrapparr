@@ -226,10 +226,61 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series", label: "Stats series {service}", group: "service",
+    id: "{service}-series-stats-enriched", label: "Bilan series {service}", group: "service", tmdb: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
-    desc: "Statistiques detaillees des series",
+    desc: "Stats series enrichies : donut genres, acteurs, records, affiches",
+    params: [
+      { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
+      { key: "stampText", label: "Texte du tampon", type: "text", default: "Approuve" },
+      { key: "categories", label: "Categories fun (par heures)", type: "profiles", default: [
+        { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
+        { min: 20, max: 50, name: "Binge watcher debutant", desc: "Tu enchaines quelques episodes", emoji: "🛋️" },
+        { min: 50, max: 100, name: "Accro aux series", desc: "Tu ne peux plus t'arreter", emoji: "📺" },
+        { min: 100, max: 200, name: "Machine a episodes", desc: "Les saisons defilent sous tes yeux", emoji: "🤖" },
+        { min: 200, max: 500, name: "Marathonien des series", desc: "Tu vis et respires series", emoji: "🏆" },
+        { min: 500, max: 99999, name: "Legende du binge", desc: "Tu as probablement vu plus de series que Netflix", emoji: "👑" },
+      ]},
+    ],
+  },
+  {
+    id: "{service}-series-deep", label: "Habitudes series {service}", group: "service",
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Quand tu regardes tes series : jour, heure, mois record",
     params: [],
+  },
+  {
+    id: "{service}-series-timeline", label: "Profil seriephile {service}", group: "service", tmdb: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Analyse des annees de sortie des series vues",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 8000 },
+    ],
+  },
+  {
+    id: "{service}-series-worldmap", label: "Carte du monde series {service}", group: "service", tmdb: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Pays d'origine des series vues",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 15000 },
+    ],
+  },
+  {
+    id: "{service}-series-ratings", label: "Notes series {service}", group: "service", tmdb: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Moyenne des notes et distribution des series",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 10000 },
+    ],
+  },
+  {
+    id: "{service}-series-directors", label: "Realisateurs series {service}", group: "service", tmdb: true,
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Realisateurs les plus presents dans tes series",
+    params: [
+      { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
+      { key: "minAppearances", label: "Apparitions minimum", type: "number", default: 2 },
+      { key: "maxCards", label: "Nombre max de realisateurs", type: "number", default: 6 },
+    ],
   },
   {
     id: "{service}-series-genres", label: "Genres series {service}", group: "service",

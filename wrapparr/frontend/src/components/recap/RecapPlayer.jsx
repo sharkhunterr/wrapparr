@@ -529,12 +529,6 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         })
       }
 
-      // Stats enriched slide (replaces old stats + bilan + digest)
-      slides.push({
-        id: svc + "-stats-enriched", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} />,
-      })
-
       // Deep slide (habitudes) — uses combined data
       if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
         slides.push({
@@ -620,46 +614,71 @@ function buildSlides(data, theme, slideConfigs, user, year) {
         })
       }
 
+      // Stats enriched / bilan cinema (fin de section films)
+      slides.push({
+        id: svc + "-stats-enriched", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} />,
+      })
+
       // ═══ SERIES SECTION ═══
       if (seriesTop.length >= 1) {
         const seriesAccent = accents.series || cfg.seriesAccent || "#fb923c"
+        const seriesExtraData = svcData.extra?.series || {}
 
+        // Category
         slides.push({
           id: "cat-" + svc + "-series", accent: seriesAccent, bg: cfg.seriesBgCat || baseBg, cat: true, fullscreen: true,
           component: <CategorySlide accent={seriesAccent} {...catProps("cat-" + svc + "-series", { icon: cfg.seriesIcon, label: cfg.seriesLabel, sub: cfg.seriesSub })} />,
         })
 
+        // Podium
         const seriesCat = catProps("cat-" + svc + "-series", { icon: cfg.seriesIcon, label: cfg.seriesLabel, sub: cfg.seriesSub })
         if (seriesTop.length >= 2) {
           const seriesBackdrop = (seriesTop[0]?.art) || ""
-          const defaultSeriesJokes = [
-            "Voyons quelles series t'ont accroche...",
-            "Des episodes enchaines sans fin.",
-            "Le binge-watching, un art de vivre.",
-            "Voici ton podium series",
-          ]
+          const defaultSeriesJokes = ["Voyons quelles series t'ont accroche...", "Des episodes enchaines sans fin.", "Le binge-watching, un art de vivre.", "Voici ton podium series"]
           slides.push({
             id: svc + "-series-pod", accent: seriesAccent, bg: cfg.seriesBgPod || baseBg, pod: true, fullscreen: true,
             component: <PodiumSlide accent={seriesAccent} bg={cfg.seriesBgPod || baseBg} data={seriesTop} title={"Top " + seriesCat.label + " " + year} icon={seriesCat.icon} jokes={podJokes(svc + "-series-pod", defaultSeriesJokes)} statLabel="episodes" statKey="ep" statSuffix="" backdrop={seriesBackdrop} config={getSlideConfig(sc, svc + "-series-pod")} />,
           })
         }
 
-        slides.push({
-          id: svc + "-series", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-          component: <ServiceStatsSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} />,
-        })
-
-        // Series genres
-        const seriesGenres = svcData.extra?.series_genres || []
-        if (seriesGenres.length >= 3) {
+        // Habitudes series
+        if (seriesExtraData.day_of_week?.length > 0 || seriesExtraData.time_of_day?.length > 0) {
           slides.push({
-            id: svc + "-series-genres", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <GenresSlide accent={seriesAccent} genres={seriesGenres} year={year} config={{ displayMode: "race", ...getSlideConfig(sc, svc + "-series-genres") }} />,
+            id: svc + "-series-deep", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <ServiceDeepSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={{ ...svcData, ...seriesData, extra: { ...svcData.extra, films: seriesExtraData } }} me={userName} year={year} />,
           })
         }
 
-        // Series actors
-        const seriesActors = svcData.extra?.series_actors || []
+        // Profil seriephile (timeline)
+        const seriesHasYears = seriesTop.some((t) => t.y && t.y > 1890)
+        if (seriesHasYears) {
+          slides.push({
+            id: svc + "-series-timeline", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <FilmTimelineSlide accent={seriesAccent} data={{ ...svcData, top: seriesTop, extra: { ...svcData.extra, films: { top: (seriesExtraData.top || seriesTop) } } }} year={year} config={getSlideConfig(sc, svc + "-series-timeline")} />,
+          })
+        }
+
+        // Carte du monde series
+        const seriesCountries = seriesExtraData.countries || []
+        if (seriesCountries.length > 0) {
+          slides.push({
+            id: svc + "-series-worldmap", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <WorldMapSlide accent={seriesAccent} data={{ extra: { countries: seriesCountries } }} year={year} config={getSlideConfig(sc, svc + "-series-worldmap")} />,
+          })
+        }
+
+        // Notes series
+        const seriesRatings = seriesExtraData.ratings || []
+        if (seriesRatings.length >= 2) {
+          slides.push({
+            id: svc + "-series-ratings", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <RatingsSlide accent={seriesAccent} data={{ extra: { ratings: seriesRatings, films: { top: seriesExtraData.top || [] } }, top: seriesTop }} year={year} config={getSlideConfig(sc, svc + "-series-ratings")} />,
+          })
+        }
+
+        // Acteurs series
+        const seriesActors = seriesExtraData.actors || svcData.extra?.series_actors || []
         const seriesActorsConfig = getSlideConfig(sc, svc + "-series-actors")
         if (seriesActors.filter((a) => a.count >= (seriesActorsConfig?.minAppearances || 2)).length > 0) {
           slides.push({
@@ -668,7 +687,26 @@ function buildSlides(data, theme, slideConfigs, user, year) {
           })
         }
 
-        // Comparison slide (series)
+        // Realisateurs series
+        const seriesDirectors = seriesExtraData.directors || []
+        const seriesDirectorsConfig = getSlideConfig(sc, svc + "-series-directors")
+        if (seriesDirectors.filter((d) => d.count >= (seriesDirectorsConfig?.minAppearances || 2)).length > 0) {
+          slides.push({
+            id: svc + "-series-directors", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <FavoriteDirectorsSlide accent={seriesAccent} data={{ extra: { directors: seriesDirectors } }} year={year} config={seriesDirectorsConfig} />,
+          })
+        }
+
+        // Genres series
+        const seriesGenres = seriesExtraData.genres || svcData.extra?.series_genres || []
+        if (seriesGenres.length >= 3) {
+          slides.push({
+            id: svc + "-series-genres", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+            component: <GenresSlide accent={seriesAccent} genres={seriesGenres} year={year} config={{ displayMode: "race", ...getSlideConfig(sc, svc + "-series-genres") }} />,
+          })
+        }
+
+        // Comparison series
         const seriesCompare = data.comparison?.[svc]
         if (seriesCompare) {
           slides.push({
@@ -676,6 +714,12 @@ function buildSlides(data, theme, slideConfigs, user, year) {
             component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} config={getSlideConfig(sc, svc + "-series-compare")} />,
           })
         }
+
+        // Bilan series (fin de section)
+        slides.push({
+          id: svc + "-series-stats-enriched", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+          component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} />,
+        })
 
       }
     } else {
@@ -771,31 +815,46 @@ function buildSlides(data, theme, slideConfigs, user, year) {
   }
 
   // ── Apply saved order + enabled filter ──
-  // Filter out disabled slides (but keep locked: intro, finale)
   const LOCKED = new Set(["intro", "finale"])
-  let finalSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
 
-  // Reorder according to saved order if available
-  if (slideOrder.length > 0) {
-    const byId = {}
-    for (const s of finalSlides) byId[s.id] = s
-    const reordered = []
+  // Filter out disabled slides (but keep locked: intro, finale)
+  const enabledSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
+
+  // Apply saved order if available
+  if (slideOrder && slideOrder.length > 0) {
+    const slideMap = new Map(enabledSlides.map((s) => [s.id, s]))
+    const ordered = []
+
+    // Intro always first
+    if (slideMap.has("intro")) {
+      ordered.push(slideMap.get("intro"))
+      slideMap.delete("intro")
+    }
+
+    // Follow saved order for the rest
     for (const id of slideOrder) {
-      if (byId[id]) {
-        reordered.push(byId[id])
-        delete byId[id]
+      if (id === "intro" || id === "finale") continue
+      if (slideMap.has(id)) {
+        ordered.push(slideMap.get(id))
+        slideMap.delete(id)
       }
     }
-    // Insert new slides (not in saved order) before the finale
-    const newSlides = finalSlides.filter((s) => byId[s.id])
-    const finaleIdx = reordered.findIndex((s) => s.id === "finale")
-    if (finaleIdx >= 0 && newSlides.length > 0) {
-      reordered.splice(finaleIdx, 0, ...newSlides)
-    } else {
-      reordered.push(...newSlides)
+
+    // Add any remaining slides not in the saved order (new slides)
+    for (const s of enabledSlides) {
+      if (slideMap.has(s.id) && s.id !== "finale") {
+        ordered.push(s)
+      }
     }
-    finalSlides = reordered
+
+    // Finale always last
+    if (slideMap.has("finale") || enabledSlides.find((s) => s.id === "finale")) {
+      const finale = enabledSlides.find((s) => s.id === "finale")
+      if (finale) ordered.push(finale)
+    }
+
+    return ordered
   }
 
-  return finalSlides
+  return enabledSlides
 }
