@@ -235,6 +235,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
       <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 30%, #05050ee0 80%)" }} />
 
       <style>{`
+        @keyframes badge-shine { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
         @keyframes poster-fly-in {
           0% { transform: scale(0.3) translateY(40px); opacity: 0; filter: brightness(2) drop-shadow(0 0 30px ${accent}); }
           40% { transform: scale(1.3) translateY(-10px); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 20px ${accent}); }
