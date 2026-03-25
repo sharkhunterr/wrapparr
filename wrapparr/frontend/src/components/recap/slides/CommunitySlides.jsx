@@ -351,39 +351,34 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
     const max = data[0]?.v || 1
     return (
       <div className={sectionClass} style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-        {data.map((u, i) => {
-          return (
-            <div key={u.n} style={{
-              animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
-              padding: u.isMe ? "5px 8px" : 0,
-              borderRadius: u.isMe ? 10 : 0,
-              background: u.isMe ? accent + "14" : "transparent",
-              border: u.isMe ? "1px solid " + accent + "35" : "1px solid transparent",
-              boxShadow: u.isMe ? `0 0 16px ${accent}20` : "none",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, position: "relative" }}>
-                <span style={{
-                  fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  fontWeight: u.isMe ? 800 : (i === 0 ? 800 : 500),
-                  color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"),
-                }}>
-                  {u.n}{u.isMe && <span style={{ fontSize: 9, color: accent, marginLeft: 4, fontWeight: 700 }}>· moi</span>}
-                </span>
-                <span style={{ fontSize: 9, color: u.isMe ? accent + "80" : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
-              </div>
-              <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
-                <div style={{
-                  height: "100%", borderRadius: 3,
-                  background: accent, opacity: u.isMe ? 1 : (opacities[i] || 0.15),
-                  width: (u.v / max * 100) + "%",
-                  transformOrigin: "left", animation: "bar-grow .7s ease " + (delayBase + 0.2 + i * 0.05) + "s both",
-                  boxShadow: u.isMe ? `0 0 10px ${accent}60` : "none",
-                }} />
-              </div>
+        {data.map((u, i) => (
+          <div key={u.n} style={{
+            animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
+            padding: "4px 8px", borderRadius: 8,
+            background: u.isMe ? accent + "10" : "transparent",
+            border: u.isMe ? "1px solid " + accent + "25" : "1px solid transparent",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+              <span style={{
+                fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                fontWeight: u.isMe ? 800 : (i === 0 ? 800 : 500),
+                color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"),
+              }}>
+                {u.n}{u.isMe && <span style={{ fontSize: 9, color: accent, marginLeft: 4, fontWeight: 700 }}>· moi</span>}
+              </span>
+              <span style={{ fontSize: 9, color: u.isMe ? accent + "80" : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
             </div>
-          )
-        })}
+            <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", borderRadius: 3,
+                background: accent, opacity: u.isMe ? 1 : (opacities[i] || 0.15),
+                width: (u.v / max * 100) + "%",
+                transformOrigin: "left", animation: "bar-grow .7s ease " + (delayBase + 0.2 + i * 0.05) + "s both",
+              }} />
+            </div>
+          </div>
+        ))}
       </div>
     )
   }

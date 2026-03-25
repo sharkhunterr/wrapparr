@@ -131,6 +131,7 @@ export default function RecapPlayer() {
 
   const [year, setYear] = useState(parseInt(paramYear, 10) || null)
   const [recapData, setRecapData] = useState(null)
+  const [myRecapUserId, setMyRecapUserId] = useState(null)
   const [theme, setTheme] = useState(null)
   const [slideConfigs, setSlideConfigs] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -198,6 +199,16 @@ export default function RecapPlayer() {
             data = { ...userData, users: data.users }
             // Remove "name" field that's not needed for rendering
             delete data.name
+            setMyRecapUserId(userId)
+          } else if (data.users) {
+            // Fallback: try to find by display_name match
+            const meNameNorm = me?.display_name?.toLowerCase().trim()
+            for (const [uid, udata] of Object.entries(data.users)) {
+              if (udata.name && udata.name.toLowerCase().trim() === meNameNorm) {
+                setMyRecapUserId(uid)
+                break
+              }
+            }
           }
           setRecapData(data)
         }
@@ -238,7 +249,7 @@ export default function RecapPlayer() {
   }
 
   // Build slide list from data + config
-  const slides = buildSlides(recapData, theme, slideConfigs, user, year)
+  const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId)
 
   const goTo = useCallback((n) => {
     if (n < 0 || n >= slides.length || fade) return
@@ -454,7 +465,7 @@ function getAccentOverride(slideSettings, slideId) {
   return slideSettings[slideId]?.accentOverride || ""
 }
 
-function buildSlides(data, theme, slideConfigs, user, year) {
+function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   if (!data) return []
   const slideSettings = slideConfigs?.settings || slideConfigs || {}
   const slideOrder = slideConfigs?.order || []
@@ -794,20 +805,17 @@ function buildSlides(data, theme, slideConfigs, user, year) {
 
   // ═══ COMMUNITY SECTION — Comparaison multi-utilisateurs ═══
   const communityAccent = accents.compare || "#60a5fa"
-  const currentUserId = user?.id ? String(user.id) : null
+  const currentUserId = myRecapUserId || (user?.id ? String(user.id) : null)
   const meNorm = userName.toLowerCase().trim()
   const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => {
     const name = udata.name || uid
-    const matchById = uid === currentUserId
-    const matchByName = meNorm && name.toLowerCase().trim() === meNorm
     return {
       name,
       uid,
-      isMe: matchById || matchByName,
+      isMe: uid === currentUserId || (meNorm && name.toLowerCase().trim() === meNorm),
       data: udata.tautulli || udata.plex || udata.jellyfin || {},
     }
   }).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
-  // Find me name for matching in slides
   const myNameInData = allUsersData.find((u) => u.isMe)?.name || userName
 
   if (allUsersData.length >= 2) {
