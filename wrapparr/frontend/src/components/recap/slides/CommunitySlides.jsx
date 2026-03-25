@@ -618,4 +618,130 @@ function MultiUserTooltip({ active, payload, label, users = [] }) {
 /* ═══════════════════════════════════════════════════════
    STYLES
    ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   5. YEAR COMPARISON — Comparaison annee vs annee
+   ═══════════════════════════════════════════════════════ */
+export function CommunityCompareSlide({ accent, compareData, year, mediaType = "films" }) {
+  const active = useActive()
+  const isSeries = mediaType === "series"
+  const label = isSeries ? "series" : "films"
+
+  const yvy = compareData?.year_vs_year
+  if (!yvy) return null
+
+  const curItems = isSeries ? (yvy.series?.current || yvy.total_items?.current || 0) : (yvy.films?.current || yvy.total_items?.current || 0)
+  const prevItems = isSeries ? (yvy.series?.previous || yvy.total_items?.previous || 0) : (yvy.films?.previous || yvy.total_items?.previous || 0)
+  const curHours = yvy.total_hours?.current || 0
+  const prevHours = yvy.total_hours?.previous || 0
+  const diffItems = prevItems > 0 ? Math.round(((curItems - prevItems) / prevItems) * 100) : 0
+  const diffHours = prevHours > 0 ? Math.round(((curHours - prevHours) / prevHours) * 100) : 0
+
+  const monthly = yvy.monthly || []
+  const genres = (yvy.genres || []).slice(0, 6)
+  const maxMonthly = Math.max(1, ...monthly.flatMap((m) => [m.current || 0, m.previous || 0]))
+  const maxGenre = Math.max(1, ...genres.flatMap((g) => [g.current || 0, g.previous || 0]))
+
+  // Colors: current = accent, previous = complementary
+  const prevColor = accent + "60"
+
+  return <div style={{ maxWidth: 440, width: "100%" }}>
+    <div className="s0" style={{ marginBottom: 10 }}>
+      <Tag accent={accent} year={year} />
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+        {year} vs <span style={{ color: accent }}>{year - 1}</span>
+      </h2>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>Comparaison {label}</div>
+    </div>
+
+    {/* Totaux avec diff badges */}
+    <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
+        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{label}</span>
+        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {prevItems}</span>
+        {diffItems !== 0 && (
+          <span style={{ fontSize: 9, fontWeight: 700, color: diffItems > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: 8, background: diffItems > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
+            {diffItems > 0 ? "+" : ""}{diffItems}%
+          </span>
+        )}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <span style={{ fontSize: 16, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
+        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {Math.round(prevHours)}h</span>
+        {diffHours !== 0 && (
+          <span style={{ fontSize: 9, fontWeight: 700, color: diffHours > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: 8, background: diffHours > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
+            {diffHours > 0 ? "+" : ""}{diffHours}%
+          </span>
+        )}
+      </div>
+    </div>
+
+    {/* Legende */}
+    <div style={{ display: "flex", gap: 12, marginBottom: 8 }}>
+      <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: accent }}><span style={{ width: 10, height: 4, borderRadius: 2, background: accent }} />{year}</span>
+      <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: "rgba(255,255,255,0.4)" }}><span style={{ width: 10, height: 4, borderRadius: 2, background: prevColor }} />{year - 1}</span>
+    </div>
+
+    {/* Activite mensuelle comparee */}
+    {monthly.length > 0 && (
+      <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
+        <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
+        <div style={{ display: "flex", gap: 3, marginTop: 6, alignItems: "flex-end", height: 70 }}>
+          {monthly.map((m, i) => {
+            const hCur = (m.current || 0) / maxMonthly * 60
+            const hPrev = (m.previous || 0) / maxMonthly * 60
+            return <div key={m.m} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+              <div style={{ display: "flex", gap: 1, alignItems: "flex-end", height: 60 }}>
+                <div style={{ width: "45%", background: accent, borderRadius: "2px 2px 0 0", height: hCur + "px", transition: "height 0.8s ease " + (i * 0.05) + "s", minHeight: 1 }} />
+                <div style={{ width: "45%", background: prevColor, borderRadius: "2px 2px 0 0", height: hPrev + "px", transition: "height 0.8s ease " + (i * 0.05) + "s", minHeight: 1 }} />
+              </div>
+              <span style={{ fontSize: 6, color: "rgba(255,255,255,0.25)" }}>{m.m}</span>
+            </div>
+          })}
+        </div>
+      </div>
+    )}
+
+    {/* Genres compares */}
+    {genres.length > 0 && (
+      <div className="s2" style={{ padding: "10px 10px 6px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
+        <Lbl c={accent} size={8}>Genres</Lbl>
+        <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 6 }}>
+          {genres.map((g, i) => (
+            <div key={g.n} style={{ animation: "slide-up .4s ease " + (0.1 + i * 0.05) + "s both" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                <span style={{ fontSize: 11, fontWeight: i === 0 ? 700 : 400, color: i === 0 ? accent : "rgba(255,255,255,0.6)", flex: 1 }}>{g.n}</span>
+                <span style={{ fontSize: 9, fontFamily: "JetBrains Mono,monospace", color: accent }}>{g.current || 0}</span>
+                <span style={{ fontSize: 9, fontFamily: "JetBrains Mono,monospace", color: "rgba(255,255,255,0.3)" }}>vs {g.previous || 0}</span>
+              </div>
+              <div style={{ display: "flex", gap: 2 }}>
+                <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.04)", borderRadius: 2, overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 2, background: accent, width: ((g.current || 0) / maxGenre * 100) + "%", transformOrigin: "left", animation: "bar-grow .7s ease " + (0.2 + i * 0.05) + "s both" }} />
+                </div>
+                <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.04)", borderRadius: 2, overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 2, background: prevColor, width: ((g.previous || 0) / maxGenre * 100) + "%", transformOrigin: "left", animation: "bar-grow .7s ease " + (0.25 + i * 0.05) + "s both" }} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Profil ciné/série — année moyenne comparée */}
+    {yvy.avg_year && (
+      <div className="s3" style={{ display: "flex", gap: 8 }}>
+        <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: accent + "08", border: "1px solid " + accent + "20" }}>
+          <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Annee moyenne {year}</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: accent, lineHeight: 1 }}>{yvy.avg_year.current}</div>
+        </div>
+        <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Annee moyenne {year - 1}</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>{yvy.avg_year.previous}</div>
+        </div>
+      </div>
+    )}
+  </div>
+}
+
 const statPill = { display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid" }

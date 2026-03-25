@@ -22,7 +22,7 @@ import CompareSlide from "./slides/CompareSlide"
 import CompareServiceSlide from "./slides/CompareServiceSlide"
 import RankingSlide from "./slides/RankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
-import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide } from "./slides/CommunitySlides"
+import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/CommunitySlides"
 
 // ── AMBIENT EFFECTS (from prototype) ──
 function Orbs({ accent }) {
@@ -871,6 +871,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         id: "community-genres-films", accent: communityAccent, bg: baseBg,
         component: <CommunityGenresSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
+      // Comparison films year vs year
+      const filmCompareData = data.comparison?.tautulli || data.comparison?.plex || data.comparison?.jellyfin
+      if (filmCompareData) {
+        slides.push({
+          id: "community-compare-films", accent: communityAccent, bg: baseBg,
+          component: <CommunityCompareSlide accent={communityAccent} compareData={filmCompareData} year={year} mediaType="films" />,
+        })
+      }
     }
 
     // Series community slides
@@ -896,6 +904,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         id: "community-genres-series", accent: accents.series || "#fb923c", bg: baseBg,
         component: <CommunityGenresSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
+      // Comparison series year vs year
+      const seriesCompareData = data.comparison?.tautulli || data.comparison?.plex || data.comparison?.jellyfin
+      if (seriesCompareData) {
+        slides.push({
+          id: "community-compare-series", accent: accents.series || "#fb923c", bg: baseBg,
+          component: <CommunityCompareSlide accent={accents.series || "#fb923c"} compareData={seriesCompareData} year={year} mediaType="series" />,
+        })
+      }
     }
   }
 

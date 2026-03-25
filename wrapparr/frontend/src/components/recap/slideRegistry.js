@@ -405,6 +405,17 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
 
+  {
+    id: "community-compare-films", label: "Comparaison films (annee vs annee)", group: "global",
+    desc: "Comparaison films avec l'annee precedente : activite, genres, totaux",
+    params: [],
+  },
+  {
+    id: "community-compare-series", label: "Comparaison series (annee vs annee)", group: "global",
+    desc: "Comparaison series avec l'annee precedente : activite, genres, totaux",
+    params: [],
+  },
+
   // Global slides
   {
     id: "compare", label: "Comparaison", group: "global",
