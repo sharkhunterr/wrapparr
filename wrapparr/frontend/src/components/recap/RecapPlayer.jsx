@@ -833,12 +833,17 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     }
   }
 
-  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => ({
-    name: udata.name || uid,
-    uid,
-    isMe: uid === foundMyUid,
-    data: udata.tautulli || udata.plex || udata.jellyfin || {},
-  })).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
+  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => {
+    const svcData = udata.tautulli || udata.plex || udata.jellyfin || {}
+    return { name: udata.name || uid, uid, isMe: uid === foundMyUid, data: svcData }
+  }).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
+  if (allUsersData.length > 0) {
+    console.log("[Community] allUsersData:", allUsersData.map((u) => ({
+      name: u.name, hasExtra: !!u.data.extra, totalItems: u.data.total_items,
+      hasFilmsTop: u.data.extra?.films?.top?.length, hasSeriesTop: u.data.extra?.series?.top?.length,
+      genres: u.data.genres?.length, monthly: u.data.monthly?.length,
+    })))
+  }
   const myNameInData = allUsersData.find((u) => u.isMe)?.name || userName
 
   if (allUsersData.length >= 2) {
