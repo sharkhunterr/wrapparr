@@ -22,6 +22,7 @@ import CompareSlide from "./slides/CompareSlide"
 import CompareServiceSlide from "./slides/CompareServiceSlide"
 import RankingSlide from "./slides/RankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
+import { CommunityActivitySlide, CommunityTopSlide, CommunityRankingsSlide, CommunityGenresSlide } from "./slides/CommunitySlides"
 
 // ── AMBIENT EFFECTS (from prototype) ──
 function Orbs({ accent }) {
@@ -788,6 +789,63 @@ function buildSlides(data, theme, slideConfigs, user, year) {
           component: <CompareServiceSlide accent={svcAccent} compareData={svcCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} />,
         })
       }
+    }
+  }
+
+  // ═══ COMMUNITY SECTION — Comparaison multi-utilisateurs ═══
+  const communityAccent = accents.compare || "#60a5fa"
+  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => ({
+    name: udata.name || uid,
+    data: udata.tautulli || udata.plex || udata.jellyfin || {},
+  })).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
+
+  if (allUsersData.length >= 2) {
+    // Category slide for community section
+    slides.push({
+      id: "cat-community", accent: communityAccent, bg: baseBg, cat: true, fullscreen: true,
+      component: <CategorySlide accent={communityAccent} icon="👥" label="COMMUNAUTE" sub="Comparaison entre utilisateurs" />,
+    })
+
+    // Films community slides
+    const hasFilmsData = allUsersData.some((u) => (u.data.extra?.films?.total || u.data.total_items || 0) > 0)
+    if (hasFilmsData) {
+      slides.push({
+        id: "community-activity-films", accent: communityAccent, bg: baseBg,
+        component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+      })
+      slides.push({
+        id: "community-top-films", accent: communityAccent, bg: baseBg,
+        component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+      })
+      slides.push({
+        id: "community-rankings-films", accent: communityAccent, bg: baseBg,
+        component: <CommunityRankingsSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+      })
+      slides.push({
+        id: "community-genres-films", accent: communityAccent, bg: baseBg,
+        component: <CommunityGenresSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+      })
+    }
+
+    // Series community slides
+    const hasSeriesData = allUsersData.some((u) => (u.data.extra?.series?.episodes || 0) > 0)
+    if (hasSeriesData) {
+      slides.push({
+        id: "community-activity-series", accent: accents.series || "#fb923c", bg: baseBg,
+        component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+      })
+      slides.push({
+        id: "community-top-series", accent: accents.series || "#fb923c", bg: baseBg,
+        component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+      })
+      slides.push({
+        id: "community-rankings-series", accent: accents.series || "#fb923c", bg: baseBg,
+        component: <CommunityRankingsSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+      })
+      slides.push({
+        id: "community-genres-series", accent: accents.series || "#fb923c", bg: baseBg,
+        component: <CommunityGenresSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+      })
     }
   }
 

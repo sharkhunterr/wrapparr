@@ -344,6 +344,57 @@ export const SLIDE_REGISTRY = [
     ],
   },
 
+  // Community slides
+  {
+    id: "cat-community", label: "Annonce communaute", group: "global", cat: true,
+    desc: "Slide d'annonce de la section comparaison entre utilisateurs",
+    params: [
+      { key: "customIcon", label: "Icone (emoji)", type: "text", default: "👥" },
+      { key: "customLabel", label: "Titre", type: "text", default: "COMMUNAUTE" },
+      { key: "customSub", label: "Sous-titre", type: "text", default: "Comparaison entre utilisateurs" },
+    ],
+  },
+  {
+    id: "community-activity-films", label: "Activite communaute (films)", group: "global",
+    desc: "Activite mensuelle de tous les utilisateurs superposee — films",
+    params: [],
+  },
+  {
+    id: "community-top-films", label: "Top films populaires", group: "global",
+    desc: "Films les plus vus par la communaute avec affiches et details",
+    params: [],
+  },
+  {
+    id: "community-rankings-films", label: "Classement films", group: "global",
+    desc: "Classement des utilisateurs en nombre de vues et heures — films",
+    params: [],
+  },
+  {
+    id: "community-genres-films", label: "Genres communaute (films)", group: "global",
+    desc: "Genres preferes de la communaute avec classement — films",
+    params: [],
+  },
+  {
+    id: "community-activity-series", label: "Activite communaute (series)", group: "global",
+    desc: "Activite mensuelle de tous les utilisateurs superposee — series",
+    params: [],
+  },
+  {
+    id: "community-top-series", label: "Top series populaires", group: "global",
+    desc: "Series les plus vues par la communaute avec affiches et details",
+    params: [],
+  },
+  {
+    id: "community-rankings-series", label: "Classement series", group: "global",
+    desc: "Classement des utilisateurs en nombre de vues et heures — series",
+    params: [],
+  },
+  {
+    id: "community-genres-series", label: "Genres communaute (series)", group: "global",
+    desc: "Genres preferes de la communaute avec classement — series",
+    params: [],
+  },
+
   // Global slides
   {
     id: "compare", label: "Comparaison", group: "global",
