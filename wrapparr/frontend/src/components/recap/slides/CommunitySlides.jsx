@@ -354,15 +354,12 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
           return (
             <div key={u.n} style={{
               animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
-              position: "relative", overflow: "hidden",
-              padding: "5px 8px",
-              borderRadius: 10,
-              background: isMe ? accent + "18" : "transparent",
-              border: isMe ? "1px solid " + accent + "40" : "1px solid transparent",
-              boxShadow: isMe ? `0 0 20px ${accent}25, inset 0 0 20px ${accent}08` : "none",
+              padding: isMe ? "5px 8px" : 0,
+              borderRadius: isMe ? 10 : 0,
+              background: isMe ? accent + "14" : "transparent",
+              border: isMe ? "1px solid " + accent + "35" : "1px solid transparent",
+              boxShadow: isMe ? `0 0 16px ${accent}20` : "none",
             }}>
-              {/* Shine effect on me row */}
-              {isMe && <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}20 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1s infinite", pointerEvents: "none" }} />}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, position: "relative" }}>
                 <span style={{
                   fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
