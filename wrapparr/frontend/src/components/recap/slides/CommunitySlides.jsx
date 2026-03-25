@@ -233,7 +233,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
 
       {/* Poster wall background */}
       {allPosters.length >= 4 && (
-        <div style={{ position: "fixed", inset: 0, overflow: "hidden", zIndex: -2, opacity: phase >= 1 ? 0.06 : 0.15, transition: "opacity 1.5s ease", display: "flex", flexDirection: "column", justifyContent: "center", pointerEvents: "none" }}>
+        <div style={{ position: "fixed", inset: 0, overflow: "hidden", zIndex: 0, opacity: phase >= 1 ? 0.06 : 0.15, transition: "opacity 1.5s ease", display: "flex", flexDirection: "column", justifyContent: "center", pointerEvents: "none" }}>
           {[0, 1, 2, 3, 4, 5].map((row) => (
             <div key={row} style={{ display: "flex", gap: 8, padding: "4px 0", animation: `comm-scroll-${row % 2 === 0 ? "l" : "r"} ${20 + row * 3}s linear infinite`, width: "max-content" }}>
               {[...allPosters, ...allPosters, ...allPosters, ...allPosters].slice(row * 3, row * 3 + 20).map((f, i) => (
@@ -245,7 +245,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
       )}
 
       {/* Subtle vignette over wall — no opaque backdrop */}
-      <div style={{ position: "fixed", inset: 0, zIndex: -1, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 30%, #05050ee0 80%)" }} />
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 30%, #05050ee0 80%)" }} />
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 16, position: "relative", zIndex: 5 }}>

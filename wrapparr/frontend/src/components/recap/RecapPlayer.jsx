@@ -40,7 +40,7 @@ function Stars() {
   </div>
 }
 
-function Spotlights({ accent, intensity = 1 }) {
+function Spotlights({ accent, intensity = 1, fixed = false }) {
   const a = (v) => Math.round(v * intensity).toString(16).padStart(2, "0")
   const beams = [
     { left: "12%", w: "18vw", anim: "beam-1", dur: "11s", delay: "0s", op: a(38) },
@@ -48,7 +48,7 @@ function Spotlights({ accent, intensity = 1 }) {
     { left: "88%", w: "20vw", anim: "beam-2", dur: "9s", delay: "1.2s", op: a(34) },
   ]
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 1 }}>
+    <div style={{ position: fixed ? "fixed" : "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: fixed ? 2 : 1 }}>
       {beams.map((b, i) => {
         const bg = "linear-gradient(180deg," + accent + b.op + " 0%," + accent + "07 50%,transparent 75%)"
         const anim = b.anim + " " + b.dur + " ease-in-out " + b.delay + " infinite"
@@ -337,7 +337,7 @@ export default function RecapPlayer() {
       {/* ── AMBIENT EFFECTS (like prototype) ── */}
       <Stars />
       <Orbs accent={accent} />
-      {needSpotlights && <Spotlights accent={accent} intensity={spotlightIntensity} />}
+      {needSpotlights && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
       {isFinale && <ConfettiEffect />}
       {isFinale && <FireworksEffect active={true} />}
       <Grain />
