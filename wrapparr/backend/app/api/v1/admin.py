@@ -69,7 +69,7 @@ async def create_user(
 
 @router.patch("/users/{user_id}", response_model=UserResponse)
 async def update_user(
-    user_id: uuid.UUID, role: str | None = None, is_active: bool | None = None, password: str | None = None,
+    user_id: uuid.UUID, updates: dict,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(User).where(User.id == user_id))
@@ -77,12 +77,12 @@ async def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
 
-    if role is not None:
-        user.role = role
-    if is_active is not None:
-        user.is_active = is_active
-    if password is not None:
-        user.hashed_password = hash_password(password)
+    if "role" in updates:
+        user.role = updates["role"]
+    if "is_active" in updates:
+        user.is_active = updates["is_active"]
+    if "password" in updates:
+        user.hashed_password = hash_password(updates["password"])
 
     await db.commit()
     await db.refresh(user)
