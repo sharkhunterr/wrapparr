@@ -317,7 +317,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
 
 /* ═══════════════════════════════════════════════════════
    3. RANKINGS — Classements vues + heures
-   Style identique a CommunityGenresSlide (barres horizontales)
+   Memes dimensions que CommunityGenresSlide
    ═══════════════════════════════════════════════════════ */
 export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType = "films" }) {
   const active = useActive()
@@ -336,122 +336,91 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
     v: Math.round(isSeries ? (u.data?.extra?.series?.hours || 0) : (u.data?.extra?.films?.hours || u.data?.total_hours || 0)),
   })).filter((u) => u.v > 0).sort((a, b) => b.v - a.v)
 
-  const medals = ["🥇", "🥈", "🥉"]
   const myRankViews = byViews.findIndex((u) => u.n === me) + 1
   const myRankHours = byHours.findIndex((u) => u.n === me) + 1
-  const totalViews = byViews.reduce((s, u) => s + u.v, 0)
-  const totalHours = byHours.reduce((s, u) => s + u.v, 0)
-  const opacities = [1, 0.75, 0.55, 0.4, 0.3, 0.22, 0.18, 0.15]
+  const opacities = [1, 0.8, 0.65, 0.5, 0.4, 0.32, 0.25, 0.2]
+
+  function RankBar({ data, unitSuffix, sectionClass, delayBase }) {
+    const max = data[0]?.v || 1
+    return (
+      <div className={sectionClass} style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+        {data.map((u, i) => {
+          const isMe = u.n === me
+          return (
+            <div key={u.n} style={{
+              animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
+              position: "relative",
+              padding: isMe ? "4px 6px" : 0,
+              borderRadius: isMe ? 8 : 0,
+              background: isMe ? accent + "0c" : "transparent",
+              border: isMe ? "1px solid " + accent + "25" : "1px solid transparent",
+              boxShadow: isMe ? `0 0 16px ${accent}18` : "none",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 12, fontWeight: i === 0 ? 800 : 500, color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.7)"), flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {u.n}{isMe && <span style={{ fontSize: 9, color: accent + "70", marginLeft: 4 }}>moi</span>}
+                </span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
+              </div>
+              <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{
+                  height: "100%", borderRadius: 3,
+                  background: accent, opacity: isMe ? 1 : (opacities[i] || 0.15),
+                  width: (u.v / max * 100) + "%",
+                  transformOrigin: "left", animation: "bar-grow .7s ease " + (delayBase + 0.2 + i * 0.05) + "s both",
+                  boxShadow: isMe ? `0 0 8px ${accent}50` : "none",
+                }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
 
   return <div style={{ maxWidth: 440, width: "100%" }}>
-    <div className="s0" style={{ marginBottom: 10 }}>
+    <div className="s0" style={{ marginBottom: 8 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
         Qui regarde le plus de <span style={{ color: accent }}>{label}</span> ?
       </h2>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{allUsers.length} utilisateurs</div>
     </div>
 
-    {/* Position badges */}
+    {/* Position badges — shine effect like bilan cinema */}
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
       {myRankViews > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: accent + "14", border: "1px solid " + accent + "30", boxShadow: `0 0 12px ${accent}15` }}>
-          <span style={{ fontSize: 15, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{myRankViews}</span>
-          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>en {viewLabel}</span>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
+          <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>#{myRankViews}</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en {viewLabel}</span>
         </div>
       )}
       {myRankHours > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: accent + "14", border: "1px solid " + accent + "30", boxShadow: `0 0 12px ${accent}15` }}>
-          <span style={{ fontSize: 15, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{myRankHours}</span>
-          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>en heures</span>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
+          <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>#{myRankHours}</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en heures</span>
         </div>
       )}
-      <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: 13, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalViews.toLocaleString("fr-FR")}</span>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{viewLabel}</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: 13, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalHours.toLocaleString("fr-FR")}h</span>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>cumulees</span>
-      </div>
     </div>
 
-    {/* Ranking by views — bar style like genres */}
-    {byViews.length > 0 && (
-      <div className="s1" style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
-        <Lbl c={accent} size={9}>{isSeries ? "📺" : "🎬"} {isSeries ? "Episodes vus" : "Films vus"}</Lbl>
-        {byViews.map((u, i) => {
-          const isMe = u.n === me
-          const max = byViews[0]?.v || 1
-          return (
-            <div key={u.n} style={{ animation: "slide-up .4s ease " + (0.1 + i * 0.05) + "s both" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                <span style={{ fontSize: 14, width: 22, textAlign: "center", flexShrink: 0 }}>{i < 3 ? medals[i] : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{i + 1}</span>}</span>
-                <span style={{
-                  fontSize: 13, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  fontWeight: isMe ? 800 : 500, color: isMe ? accent : "rgba(255,255,255,0.7)",
-                  textShadow: isMe ? `0 0 12px ${accent}50` : "none",
-                }}>
-                  {u.n}{isMe && <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 4 }}>moi</span>}
-                </span>
-                <span style={{
-                  fontSize: 13, fontWeight: 800, fontFamily: "JetBrains Mono,monospace",
-                  color: isMe ? accent : "rgba(255,255,255,0.5)", flexShrink: 0,
-                }}>{u.v.toLocaleString("fr-FR")}</span>
-              </div>
-              <div style={{ height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden" }}>
-                <div style={{
-                  height: "100%", borderRadius: 4,
-                  background: isMe ? accent : accent,
-                  opacity: isMe ? 1 : (opacities[i] || 0.15),
-                  width: (u.v / max * 100) + "%",
-                  transformOrigin: "left", animation: "bar-grow .7s ease " + (0.3 + i * 0.05) + "s both",
-                  boxShadow: isMe ? `0 0 10px ${accent}50` : "none",
-                }} />
-              </div>
-            </div>
-          )
-        })}
+    {/* Ranking by views */}
+    {byViews.length > 0 && <>
+      <Lbl c={accent} size={8}>{isSeries ? "Episodes vus" : "Films vus"}</Lbl>
+      <div style={{ marginTop: 4, marginBottom: 12 }}>
+        <RankBar data={byViews} unitSuffix="" sectionClass="s1" delayBase={0.1} />
       </div>
-    )}
+    </>}
 
-    {/* Ranking by hours — bar style like genres */}
-    {byHours.length > 0 && (
-      <div className="s2" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <Lbl c={accent} size={9}>⏱️ Heures passees</Lbl>
-        {byHours.map((u, i) => {
-          const isMe = u.n === me
-          const max = byHours[0]?.v || 1
-          return (
-            <div key={u.n} style={{ animation: "slide-up .4s ease " + (0.15 + i * 0.05) + "s both" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                <span style={{ fontSize: 14, width: 22, textAlign: "center", flexShrink: 0 }}>{i < 3 ? medals[i] : <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{i + 1}</span>}</span>
-                <span style={{
-                  fontSize: 13, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  fontWeight: isMe ? 800 : 500, color: isMe ? accent : "rgba(255,255,255,0.7)",
-                  textShadow: isMe ? `0 0 12px ${accent}50` : "none",
-                }}>
-                  {u.n}{isMe && <span style={{ fontSize: 9, opacity: 0.6, marginLeft: 4 }}>moi</span>}
-                </span>
-                <span style={{
-                  fontSize: 13, fontWeight: 800, fontFamily: "JetBrains Mono,monospace",
-                  color: isMe ? accent : "rgba(255,255,255,0.5)", flexShrink: 0,
-                }}>{u.v.toLocaleString("fr-FR")}h</span>
-              </div>
-              <div style={{ height: 6, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden" }}>
-                <div style={{
-                  height: "100%", borderRadius: 4,
-                  background: isMe ? accent : accent,
-                  opacity: isMe ? 1 : (opacities[i] || 0.15),
-                  width: (u.v / max * 100) + "%",
-                  transformOrigin: "left", animation: "bar-grow .7s ease " + (0.35 + i * 0.05) + "s both",
-                  boxShadow: isMe ? `0 0 10px ${accent}50` : "none",
-                }} />
-              </div>
-            </div>
-          )
-        })}
+    {/* Ranking by hours */}
+    {byHours.length > 0 && <>
+      <Lbl c={accent} size={8}>Heures passees</Lbl>
+      <div style={{ marginTop: 4 }}>
+        <RankBar data={byHours} unitSuffix="h" sectionClass="s2" delayBase={0.15} />
       </div>
-    )}
+    </>}
   </div>
 }
 
