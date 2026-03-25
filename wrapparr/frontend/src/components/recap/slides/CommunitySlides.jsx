@@ -231,14 +231,16 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
         </div>
       )}
 
-      {/* Backdrop from #1 */}
-      {backdrop && phase >= 1 && <div style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 0, pointerEvents: "none" }}>
-        <img src={backdrop} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.1, filter: "blur(2px)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "#05050ecc" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,#05050e80 0%,transparent 30%,transparent 70%,#05050eff 100%)" }} />
-      </div>}
+      {/* Subtle vignette over wall — no opaque backdrop */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 30%, #05050ee0 80%)" }} />
 
-      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "70vw", height: "55vh", pointerEvents: "none", zIndex: 1, background: "radial-gradient(ellipse at 50% 0%," + accent + "25 0%,transparent 70%)" }} />
+      <style>{`
+        @keyframes poster-fly-in {
+          0% { transform: scale(0.3) translateY(40px); opacity: 0; filter: brightness(2) drop-shadow(0 0 30px ${accent}); }
+          40% { transform: scale(1.3) translateY(-10px); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 20px ${accent}); }
+          100% { transform: scale(1) translateY(0); opacity: 1; filter: brightness(1) drop-shadow(0 0 8px ${accent}80); }
+        }
+      `}</style>
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 16, position: "relative", zIndex: 5 }}>
@@ -262,7 +264,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
                 <div key={col} style={{ flex: isOne ? 1.15 : 1, display: "flex", flexDirection: "column", alignItems: "center", opacity: show ? 1 : 0, transition: "opacity .4s ease" }}>
                   {isOne && show && <div style={{ fontSize: 22, marginBottom: 3, animation: "crown-bounce 1.8s ease-in-out infinite", filter: "drop-shadow(0 0 12px " + accent + ")" }}>👑</div>}
                   {show && <div style={{ fontSize: isOne ? 32 : 22, fontWeight: 800, marginBottom: 4, color: accent, textShadow: "0 0 30px " + accent, animation: "rank-stamp .5s cubic-bezier(0.34,1.56,0.64,1) both" }}>#{rank}</div>}
-                  {show && <div style={{ animation: "poster-appear .65s cubic-bezier(0.34,1.3,0.64,1) both", marginBottom: 6 }}>
+                  {show && <div style={{ animation: "poster-fly-in .9s cubic-bezier(0.34,1.3,0.64,1) both", marginBottom: 6 }}>
                     <PosterImg src={item.thumb} size={posterSize} />
                   </div>}
                   <div style={{
@@ -320,75 +322,118 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
   const active = useActive()
   const isSeries = mediaType === "series"
   const label = isSeries ? "series" : "films"
+  const viewLabel = isSeries ? "episodes" : "films"
 
-  // Build rankings
+  // Build rankings — filter out users with 0
   const byViews = allUsers.map((u) => ({
     n: u.name,
     v: isSeries ? (u.data?.extra?.series?.episodes || 0) : (u.data?.extra?.films?.total || u.data?.total_items || 0),
-  })).sort((a, b) => b.v - a.v)
+  })).filter((u) => u.v > 0).sort((a, b) => b.v - a.v)
 
   const byHours = allUsers.map((u) => ({
     n: u.name,
     v: Math.round(isSeries ? (u.data?.extra?.series?.hours || 0) : (u.data?.extra?.films?.hours || u.data?.total_hours || 0)),
-  })).sort((a, b) => b.v - a.v)
+  })).filter((u) => u.v > 0).sort((a, b) => b.v - a.v)
 
   const medals = ["🥇", "🥈", "🥉"]
   const myRankViews = byViews.findIndex((u) => u.n === me) + 1
   const myRankHours = byHours.findIndex((u) => u.n === me) + 1
 
+  // Total communaute
+  const totalViews = byViews.reduce((s, u) => s + u.v, 0)
+  const totalHours = byHours.reduce((s, u) => s + u.v, 0)
+
+  function RankingBlock({ title, data, unit, icon }) {
+    const max = data[0]?.v || 1
+    return (
+      <div className="s1" style={{ padding: "14px 14px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+          <span style={{ fontSize: 16 }}>{icon}</span>
+          <Lbl c={accent} size={9} upper={false}>{title}</Lbl>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+          {data.map((u, i) => {
+            const isMe = u.n === me
+            const pct = u.v / max * 100
+            return <div key={u.n} style={{
+              padding: "8px 12px", borderRadius: 12,
+              background: isMe ? accent + "12" : "rgba(255,255,255,0.02)",
+              border: isMe ? "1px solid " + accent + "35" : "1px solid rgba(255,255,255,0.05)",
+              boxShadow: isMe ? "0 0 20px " + accent + "15" : "none",
+              animation: "slide-up .4s ease " + (0.08 + i * 0.07) + "s both",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                <div style={{ width: 24, textAlign: "center", fontSize: 16, flexShrink: 0 }}>
+                  {i < 3 ? medals[i] : <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{i + 1}</span>}
+                </div>
+                <span style={{
+                  fontSize: 13, fontWeight: isMe ? 800 : 500, flex: 1,
+                  color: isMe ? accent : "white",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {u.n}
+                  {isMe && <span style={{ fontSize: 9, color: accent + "70", marginLeft: 4 }}>moi</span>}
+                </span>
+                <span style={{
+                  fontSize: 14, fontWeight: 800, fontFamily: "JetBrains Mono,monospace",
+                  color: isMe ? accent : "white", flexShrink: 0,
+                }}>
+                  {u.v.toLocaleString("fr-FR")}<span style={{ fontSize: 10, fontWeight: 400, color: "rgba(255,255,255,0.4)" }}>{unit}</span>
+                </span>
+              </div>
+              <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{
+                  height: "100%", borderRadius: 3,
+                  background: isMe
+                    ? `linear-gradient(90deg, ${accent}, ${accent}cc)`
+                    : `linear-gradient(90deg, ${accent}50, ${accent}25)`,
+                  width: pct + "%",
+                  transformOrigin: "left", animation: "bar-grow .8s ease " + (0.3 + i * 0.07) + "s both",
+                  boxShadow: isMe ? `0 0 8px ${accent}40` : "none",
+                }} />
+              </div>
+            </div>
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return <div style={{ maxWidth: 440, width: "100%" }}>
-    <div className="s0" style={{ marginBottom: 12 }}>
+    <div className="s0" style={{ marginBottom: 14 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-        Classement <span style={{ color: accent }}>{label}</span>
+      <h2 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+        Qui regarde le plus de <span style={{ color: accent }}>{label}</span> ?
       </h2>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>
-        Tu es <span style={{ color: accent, fontWeight: 700 }}>#{myRankViews}</span> en vues et <span style={{ color: accent, fontWeight: 700 }}>#{myRankHours}</span> en heures
+
+      {/* Position badge */}
+      {myRankViews > 0 && (
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, padding: "6px 14px", borderRadius: 20, background: accent + "14", border: "1px solid " + accent + "30" }}>
+          <span style={{ fontSize: 13, fontWeight: 800, color: accent }}>#{myRankViews}</span>
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>en {viewLabel} sur {byViews.length}</span>
+          {myRankHours > 0 && myRankHours !== myRankViews && <>
+            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: accent }}>#{myRankHours}</span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>en heures</span>
+          </>}
+        </div>
+      )}
+
+      {/* Totaux communaute */}
+      <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+          <span style={{ fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalViews.toLocaleString("fr-FR")}</span> {viewLabel} au total
+        </div>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+          <span style={{ fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalHours.toLocaleString("fr-FR")}h</span> cumulees
+        </div>
       </div>
     </div>
 
-    <div style={{ display: "flex", gap: 8 }}>
-      {/* Ranking by views */}
-      <div className="s1" style={{ flex: 1, padding: "10px 10px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <Lbl c={accent} size={8}>{isSeries ? "Episodes vus" : "Films vus"}</Lbl>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 6 }}>
-          {byViews.map((u, i) => {
-            const isMe = u.n === me
-            const max = byViews[0]?.v || 1
-            return <div key={u.n} style={{ animation: "slide-up .4s ease " + (0.1 + i * 0.06) + "s both" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <span style={{ fontSize: 10, width: 16, textAlign: "center", flexShrink: 0 }}>{i < 3 ? medals[i] : <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 9 }}>{i + 1}</span>}</span>
-                <span style={{ fontSize: 10, color: isMe ? accent : "rgba(255,255,255,0.6)", fontWeight: isMe ? 700 : 400, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.n}</span>
-                <span style={{ fontSize: 9, color: isMe ? accent : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{u.v}</span>
-              </div>
-              <div style={{ height: 2, background: "rgba(255,255,255,0.04)", borderRadius: 2, overflow: "hidden", marginLeft: 20 }}>
-                <div style={{ height: "100%", background: isMe ? accent : accent + "40", width: (u.v / max * 100) + "%", borderRadius: 2, transformOrigin: "left", animation: "bar-grow .7s ease " + (0.3 + i * 0.06) + "s both" }} />
-              </div>
-            </div>
-          })}
-        </div>
-      </div>
-
-      {/* Ranking by hours */}
-      <div className="s1" style={{ flex: 1, padding: "10px 10px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <Lbl c={accent} size={8}>Heures</Lbl>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 6 }}>
-          {byHours.map((u, i) => {
-            const isMe = u.n === me
-            const max = byHours[0]?.v || 1
-            return <div key={u.n} style={{ animation: "slide-up .4s ease " + (0.1 + i * 0.06) + "s both" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                <span style={{ fontSize: 10, width: 16, textAlign: "center", flexShrink: 0 }}>{i < 3 ? medals[i] : <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 9 }}>{i + 1}</span>}</span>
-                <span style={{ fontSize: 10, color: isMe ? accent : "rgba(255,255,255,0.6)", fontWeight: isMe ? 700 : 400, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.n}</span>
-                <span style={{ fontSize: 9, color: isMe ? accent : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{u.v}h</span>
-              </div>
-              <div style={{ height: 2, background: "rgba(255,255,255,0.04)", borderRadius: 2, overflow: "hidden", marginLeft: 20 }}>
-                <div style={{ height: "100%", background: isMe ? accent : accent + "40", width: (u.v / max * 100) + "%", borderRadius: 2, transformOrigin: "left", animation: "bar-grow .7s ease " + (0.3 + i * 0.06) + "s both" }} />
-              </div>
-            </div>
-          })}
-        </div>
-      </div>
+    {/* Two ranking blocks stacked */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {byViews.length > 0 && <RankingBlock title={isSeries ? "Episodes vus" : "Films vus"} data={byViews} unit="" icon={isSeries ? "📺" : "🎬"} />}
+      {byHours.length > 0 && <RankingBlock title="Temps passe" data={byHours} unit="h" icon="⏱️" />}
     </div>
   </div>
 }

@@ -810,12 +810,12 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     const hasFilmsData = allUsersData.some((u) => (u.data.extra?.films?.total || u.data.total_items || 0) > 0)
     if (hasFilmsData) {
       slides.push({
-        id: "community-activity-films", accent: communityAccent, bg: baseBg,
-        component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
-      })
-      slides.push({
         id: "community-top-films", accent: communityAccent, bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
+      })
+      slides.push({
+        id: "community-activity-films", accent: communityAccent, bg: baseBg,
+        component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={userName} mediaType="films" />,
       })
       slides.push({
         id: "community-rankings-films", accent: communityAccent, bg: baseBg,
@@ -831,12 +831,12 @@ function buildSlides(data, theme, slideConfigs, user, year) {
     const hasSeriesData = allUsersData.some((u) => (u.data.extra?.series?.episodes || 0) > 0)
     if (hasSeriesData) {
       slides.push({
-        id: "community-activity-series", accent: accents.series || "#fb923c", bg: baseBg,
-        component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
-      })
-      slides.push({
         id: "community-top-series", accent: accents.series || "#fb923c", bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
+      })
+      slides.push({
+        id: "community-activity-series", accent: accents.series || "#fb923c", bg: baseBg,
+        component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={userName} mediaType="series" />,
       })
       slides.push({
         id: "community-rankings-series", accent: accents.series || "#fb923c", bg: baseBg,
