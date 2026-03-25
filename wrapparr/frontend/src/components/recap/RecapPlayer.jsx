@@ -322,8 +322,9 @@ export default function RecapPlayer() {
   const isCat = !!curr.cat
   const isPod = curr.id?.includes("-pod")
   const isFinale = curr.id === "finale"
-  const needSpotlights = isCat || isPod || isFinale
-  const spotlightIntensity = isCat ? 0.9 : isPod ? 1.2 : isFinale ? 0.65 : 0.7
+  const isCommunityTop = curr.id?.startsWith("community-top-")
+  const needSpotlights = isCat || isPod || isFinale || isCommunityTop
+  const spotlightIntensity = isCat ? 0.9 : (isPod || isCommunityTop) ? 1.2 : isFinale ? 0.65 : 0.7
 
   return (
     <div
