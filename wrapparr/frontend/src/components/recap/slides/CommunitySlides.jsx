@@ -244,8 +244,8 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
         </div>
       )}
 
-      {/* Subtle vignette over wall — no opaque backdrop */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 30%, #05050ee0 80%)" }} />
+      {/* Subtle vignette — edges only, no center darkening */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", background: "linear-gradient(180deg, #05050e90 0%, transparent 15%, transparent 85%, #05050e90 100%)" }} />
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 16, position: "relative", zIndex: 5 }}>
