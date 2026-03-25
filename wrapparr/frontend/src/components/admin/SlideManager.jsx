@@ -138,7 +138,7 @@ export default function SlideManager() {
   // Load services + saved config + active theme
   useEffect(() => {
     Promise.all([
-      api("/services").catch(() => []),
+      api("/admin/all-services").catch(() => api("/services").catch(() => [])),
       api("/admin/config").catch(() => ({})),
       api("/themes").catch(() => []),
       api("/auth/me").catch(() => ({})),

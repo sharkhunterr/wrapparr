@@ -89,6 +89,13 @@ async def update_user(
     return UserResponse.model_validate(user)
 
 
+@router.get("/all-services")
+async def list_all_services(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    """List all services across all users (for admin slide manager)."""
+    result = await db.execute(select(ServiceConnector).where(ServiceConnector.is_active.is_(True)))
+    return [{"id": str(s.id), "service_type": s.service_type, "base_url": s.base_url, "is_active": s.is_active} for s in result.scalars().all()]
+
+
 @router.get("/service-users")
 async def get_service_users(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
     """List users from each connected service."""
