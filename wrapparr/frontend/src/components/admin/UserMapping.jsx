@@ -54,7 +54,7 @@ export default function UserMapping() {
   const removeMapping = (userId, serviceType) => {
     setMappings((prev) => {
       const next = { ...prev, [userId]: { ...(prev[userId] || {}) } }
-      delete next[userId][serviceType]
+      next[userId][serviceType] = ""
       return next
     })
     setSaved(false)
