@@ -10,6 +10,7 @@ class RecapListItem(BaseModel):
     year: int
     status: str
     progress: int
+    is_active: bool = False
     completed_at: datetime | None = None
 
     model_config = {"from_attributes": True}

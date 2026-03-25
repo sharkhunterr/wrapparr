@@ -133,6 +133,17 @@ export default function RecapPlayer() {
   const [theme, setTheme] = useState(null)
   const [slideConfigs, setSlideConfigs] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  // Sync year state when URL param changes
+  useEffect(() => {
+    const newYear = parseInt(paramYear, 10) || null
+    if (newYear && newYear !== year) {
+      setYear(newYear)
+      setSlide(0)
+      setLoading(true)
+      setRecapData(null)
+    }
+  }, [paramYear])
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState(null)
   const [slide, setSlide] = useState(0)

@@ -8,6 +8,7 @@ import LoginPage from "./components/auth/LoginPage"
 import RecapPlayer from "./components/recap/RecapPlayer"
 import ShareView from "./components/ShareView"
 import useAuthStore from "./stores/authStore"
+import { api } from "./services/api"
 
 import Dashboard from "./components/admin/Dashboard"
 import UserManagement from "./components/admin/UserManagement"
@@ -44,11 +45,56 @@ function UserHome() {
   const { user, loading } = useRequireAuth()
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+  const location = useLocation()
+  const [availableRecaps, setAvailableRecaps] = useState([])
+
+  useEffect(() => {
+    if (!user?.id) return
+    api("/recaps").then((recaps) => {
+      // Show all completed recaps, sorted by year descending
+      const visible = recaps
+        .filter((r) => r.status === "completed")
+        .sort((a, b) => b.year - a.year)
+      setAvailableRecaps(visible)
+    }).catch((e) => console.warn("Failed to load recaps list:", e))
+  }, [user?.id])
+
+  // Determine currently viewed year from URL or first available (most recent)
+  const paramYear = location.pathname.startsWith("/recap/") ? location.pathname.split("/recap/")[1] : null
+  const currentYear = paramYear ? parseInt(paramYear, 10) : (availableRecaps[0]?.year || null)
+
+  const handleYearChange = (e) => {
+    const y = e.target.value
+    if (y) navigate(`/recap/${y}`)
+    else navigate("/")
+  }
+
   if (loading || !user) return null
   return (
     <>
       <RecapPlayer />
-      <div style={{ position: "fixed", top: 12, right: 44, zIndex: 200, display: "flex", gap: 6 }}>
+      <div style={{ position: "fixed", top: 12, right: 44, zIndex: 9999, display: "flex", gap: 6, alignItems: "center" }}>
+        {availableRecaps.length > 0 && (
+          <select
+            value={currentYear || ""}
+            onChange={handleYearChange}
+            style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6, color: "rgba(255,255,255,0.5)", fontSize: 9, padding: "4px 6px",
+              cursor: "pointer", fontFamily: "Nunito,sans-serif", outline: "none",
+              appearance: "none", WebkitAppearance: "none",
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+              backgroundRepeat: "no-repeat", backgroundPosition: "right 4px center",
+              paddingRight: 16,
+            }}
+          >
+            {availableRecaps.map((r) => (
+              <option key={r.year} value={r.year} style={{ background: "#15151e", color: "white" }}>
+                {r.year}
+              </option>
+            ))}
+          </select>
+        )}
         {user.role === "admin" && (
           <button onClick={() => navigate("/admin")} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 8px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
             <Settings size={11} /> Admin
