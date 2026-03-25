@@ -162,10 +162,14 @@ export default function RecapPlayer() {
           api("/recaps/slide-config").catch(() => ({ settings: {}, order: [] })),
         ])
         const me = await api("/auth/me")
-        const activeTheme = themes.find((t) => t.id === me.theme_pack_id) || themes[0]
-        setTheme(activeTheme?.config || null)
-        // slideCfg is now { settings: {...}, order: [...] } or legacy plain object
+        // slideCfg is now { settings: {...}, order: [...], active_theme: ... }
         const parsedCfg = slideCfg?.settings ? slideCfg : { settings: slideCfg || {}, order: [] }
+        // Theme: use admin-defined global theme, fallback to user's, fallback to first
+        const adminThemeId = parsedCfg.active_theme || null
+        const activeTheme = themes.find((t) => t.id === adminThemeId)
+          || themes.find((t) => t.id === me.theme_pack_id)
+          || themes[0]
+        setTheme(activeTheme?.config || null)
         setSlideConfigs(parsedCfg)
 
         let recapResult = null
@@ -807,12 +811,19 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   const communityAccent = accents.compare || "#60a5fa"
   const currentUserId = myRecapUserId || (user?.id ? String(user.id) : null)
   const meNorm = userName.toLowerCase().trim()
+  const meEmail = user?.email?.toLowerCase().trim() || ""
+  if (data.users) {
+    console.log("[Community] Matching user — currentUserId:", currentUserId, "userName:", userName, "email:", meEmail, "keys in data.users:", Object.keys(data.users), "names:", Object.values(data.users).map((u) => u.name))
+  }
   const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => {
     const name = udata.name || uid
+    const matchById = uid === currentUserId
+    const matchByName = meNorm && name.toLowerCase().trim() === meNorm
+    const matchByEmail = meEmail && udata.email && udata.email.toLowerCase().trim() === meEmail
     return {
       name,
       uid,
-      isMe: uid === currentUserId || (meNorm && name.toLowerCase().trim() === meNorm),
+      isMe: matchById || matchByName || matchByEmail,
       data: udata.tautulli || udata.plex || udata.jellyfin || {},
     }
   }).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []

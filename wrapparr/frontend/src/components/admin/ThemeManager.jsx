@@ -10,13 +10,21 @@ export default function ThemeManager() {
 
   useEffect(() => {
     api("/themes").then(setThemes).catch(() => {})
-    api("/auth/me").then((u) => setActiveId(u.theme_pack_id)).catch(() => {})
+    // Load global active theme, fallback to admin's own
+    api("/admin/config").then((cfg) => {
+      if (cfg.active_theme) setActiveId(cfg.active_theme)
+      else api("/auth/me").then((u) => setActiveId(u.theme_pack_id)).catch(() => {})
+    }).catch(() => {
+      api("/auth/me").then((u) => setActiveId(u.theme_pack_id)).catch(() => {})
+    })
   }, [])
 
   const selectTheme = async (id) => {
     setSaving(true)
     try {
       await api("/themes/users/me/theme", { method: "PUT", body: { theme_pack_id: id } })
+      // Also save as global theme for all users
+      await api("/admin/config", { method: "PATCH", body: { active_theme: id } })
       setActiveId(id)
     } catch (e) {
       alert(e.message)
