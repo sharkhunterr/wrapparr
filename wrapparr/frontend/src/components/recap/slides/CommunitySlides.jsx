@@ -4,6 +4,23 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 const USER_COLORS = ["#E5A00D", "#60a5fa", "#f472b6", "#4ade80", "#a78bfa", "#fb923c", "#38bdf8", "#f87171", "#34d399", "#fbbf24"]
 
+// Inject global keyframes once
+if (typeof document !== "undefined" && !document.getElementById("community-keyframes")) {
+  const style = document.createElement("style")
+  style.id = "community-keyframes"
+  style.textContent = `
+    @keyframes badge-shine { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+    @keyframes comm-scroll-l { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes comm-scroll-r { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+    @keyframes poster-fly-in {
+      0% { transform: scale(0.3) translateY(40px); opacity: 0; filter: brightness(2); }
+      40% { transform: scale(1.3) translateY(-10px); opacity: 1; filter: brightness(1.5); }
+      100% { transform: scale(1) translateY(0); opacity: 1; filter: brightness(1); }
+    }
+  `
+  document.head.appendChild(style)
+}
+
 function PosterImg({ src, size = 50 }) {
   const [err, setErr] = useState(false)
   if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 6, flexShrink: 0, background: "rgba(255,255,255,0.06)" }} />
@@ -224,24 +241,11 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
               ))}
             </div>
           ))}
-          <style>{`
-            @keyframes comm-scroll-l { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-            @keyframes comm-scroll-r { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
-          `}</style>
         </div>
       )}
 
       {/* Subtle vignette over wall — no opaque backdrop */}
       <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", background: "radial-gradient(ellipse at center, transparent 30%, #05050ee0 80%)" }} />
-
-      <style>{`
-        @keyframes badge-shine { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
-        @keyframes poster-fly-in {
-          0% { transform: scale(0.3) translateY(40px); opacity: 0; filter: brightness(2) drop-shadow(0 0 30px ${accent}); }
-          40% { transform: scale(1.3) translateY(-10px); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 20px ${accent}); }
-          100% { transform: scale(1) translateY(0); opacity: 1; filter: brightness(1) drop-shadow(0 0 8px ${accent}80); }
-        }
-      `}</style>
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 16, position: "relative", zIndex: 5 }}>
