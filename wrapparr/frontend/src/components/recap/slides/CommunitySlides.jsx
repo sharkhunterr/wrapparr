@@ -331,6 +331,8 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
   const viewLabel = isSeries ? "episodes" : "films"
 
   // Build rankings — filter out users with 0, propagate isMe
+  console.log("[Rankings]", mediaType, "me:", me, "allUsers isMe:", allUsers.map((u) => ({ name: u.name, isMe: u.isMe })),
+    "myRankViews will be:", allUsers.map((u) => ({ n: u.name, isMe: u.isMe, v: isSeries ? (u.data?.extra?.series?.episodes || 0) : (u.data?.extra?.films?.total || u.data?.total_items || 0) })))
   const byViews = allUsers.map((u) => ({
     n: u.name,
     v: isSeries ? (u.data?.extra?.series?.episodes || 0) : (u.data?.extra?.films?.total || u.data?.total_items || 0),

@@ -809,29 +809,36 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
   // ═══ COMMUNITY SECTION — Comparaison multi-utilisateurs ═══
   const communityAccent = accents.compare || "#60a5fa"
-  // Match current user in data.users: try uid, then name, then email
-  const myUid = myRecapUserId || (user?.id ? String(user.id) : null)
-  const myName = userName.toLowerCase().trim()
-  const myEmail = (user?.email || "").toLowerCase().trim()
+
+  // Match current user in data.users — all matching done here, no external state needed
+  const _uid = user?.id ? String(user.id) : ""
+  const _name = userName.toLowerCase().trim()
+  const _email = (user?.email || "").toLowerCase().trim()
+  // Also use myRecapUserId which was found during data loading
+  const _recapUid = myRecapUserId || ""
+
   let foundMyUid = null
   if (data.users) {
     for (const [uid, udata] of Object.entries(data.users)) {
       const n = (udata.name || "").toLowerCase().trim()
-      if (uid === myUid || (myName && n === myName) || (myEmail && (udata.email || "").toLowerCase().trim() === myEmail)) {
-        foundMyUid = uid
-        break
-      }
+      const e = (udata.email || "").toLowerCase().trim()
+      const match = uid === _uid || uid === _recapUid
+        || (_name && n === _name)
+        || (_email && e && e === _email)
+      if (match) { foundMyUid = uid; break }
     }
+    console.log("[Community] user.id:", _uid, "recapUid:", _recapUid, "name:", _name, "email:", _email,
+      "→ foundMyUid:", foundMyUid,
+      "| data.users keys:", Object.keys(data.users),
+      "| data.users names:", Object.values(data.users).map((u) => u.name))
   }
-  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => {
-    const name = udata.name || uid
-    return {
-      name,
-      uid,
-      isMe: uid === foundMyUid,
-      data: udata.tautulli || udata.plex || udata.jellyfin || {},
-    }
-  }).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
+
+  const allUsersData = data.users ? Object.entries(data.users).map(([uid, udata]) => ({
+    name: udata.name || uid,
+    uid,
+    isMe: uid === foundMyUid,
+    data: udata.tautulli || udata.plex || udata.jellyfin || {},
+  })).filter((u) => u.data && (u.data.total_items > 0 || u.data.total_hours > 0 || u.data.extra)) : []
   const myNameInData = allUsersData.find((u) => u.isMe)?.name || userName
 
   if (allUsersData.length >= 2) {
