@@ -380,6 +380,11 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
   {
+    id: "community-mostviewed-series", label: "Series les plus vues", group: "global",
+    desc: "Top 10 series par nombre de vues avec details par utilisateur",
+    params: [],
+  },
+  {
     id: "community-activity-series", label: "Activite communaute (series)", group: "global",
     desc: "Activite mensuelle de tous les utilisateurs superposee — series",
     params: [],

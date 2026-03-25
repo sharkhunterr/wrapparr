@@ -881,6 +881,10 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
       slides.push({
+        id: "community-mostviewed-series", accent: accents.series || "#fb923c", bg: baseBg,
+        component: <CommunityMostViewedSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
+      })
+      slides.push({
         id: "community-activity-series", accent: accents.series || "#fb923c", bg: baseBg,
         component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
