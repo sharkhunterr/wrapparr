@@ -341,7 +341,7 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
         itemMap.set(key, { t: item.t, thumb: item.thumb, y: item.y, r: item.r, totalViews: 0, perUser: [] })
       }
       const entry = itemMap.get(key)
-      const views = item.plays || item.v || 1
+      const views = isSeries ? (item.ep || item.plays || item.v || 1) : (item.plays || item.v || 1)
       entry.totalViews += views
       entry.perUser.push({ name: u.name, views, isMe: u.isMe || u.name === me })
       if (!entry.thumb && item.thumb) entry.thumb = item.thumb
@@ -357,7 +357,7 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
         {isSeries ? "Series" : "Films"} les plus <span style={{ color: accent }}>vus</span>
       </h2>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>Top 10 par nombre de vues · {allUsers.length} utilisateurs</div>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>Top 10 par {isSeries ? "episodes vus" : "nombre de vues"} · {allUsers.length} utilisateurs</div>
     </div>
 
     <div className="s1" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -384,7 +384,7 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
             <div style={{ display: "flex", gap: 6, marginTop: 2, alignItems: "center" }}>
               {item.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono,monospace" }}>{item.y}</span>}
               {item.r > 0 && <span style={{ fontSize: 9, color: "#fbbf24", fontWeight: 600 }}>★ {item.r}</span>}
-              <span style={{ fontSize: 10, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{item.totalViews} vue{item.totalViews > 1 ? "s" : ""}</span>
+              <span style={{ fontSize: 10, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{item.totalViews} {isSeries ? "ep." : "vue"}{!isSeries && item.totalViews > 1 ? "s" : ""}</span>
             </div>
 
             {/* Per-user view badges */}
@@ -397,7 +397,7 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
                   color: pu.isMe ? accent : "rgba(255,255,255,0.5)",
                   fontWeight: pu.isMe ? 700 : 400,
                 }}>
-                  {pu.name} · {pu.views}
+                  {pu.name} · {pu.views}{isSeries ? " ep." : ""}
                 </span>
               ))}
             </div>
