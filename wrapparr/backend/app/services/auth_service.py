@@ -88,6 +88,22 @@ async def refresh_access_token(db: AsyncSession, refresh_token: str) -> str:
     return create_access_token(str(user.id), user.role)
 
 
+async def issue_tokens_for_user(db: AsyncSession, user: User) -> tuple[str, str]:
+    """Issue access + refresh tokens for an existing user (used by SSO callback)."""
+    access = create_access_token(str(user.id), user.role)
+    refresh = create_refresh_token(str(user.id))
+
+    rt = RefreshToken(
+        user_id=user.id,
+        token_hash=_hash_token(refresh),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days),
+    )
+    db.add(rt)
+    await db.commit()
+
+    return access, refresh
+
+
 async def revoke_refresh_token(db: AsyncSession, refresh_token: str) -> None:
     token_hash = _hash_token(refresh_token)
     result = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))

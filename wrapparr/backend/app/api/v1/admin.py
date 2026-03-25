@@ -1,17 +1,20 @@
 import uuid
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.encryption import decrypt, encrypt
 from app.core.security import hash_password, require_admin
+from app.models.auth import OIDCProvider
 from app.models.mapping import UserServiceMapping
 from app.models.recap import HistorySnapshot, YearlyRecap
 from app.models.service import ServiceConnector
 from app.models.share import GlobalConfig
 from app.models.user import User
-from app.schemas.auth import UserResponse
+from app.schemas.auth import OIDCProviderCreate, OIDCProviderResponse, OIDCProviderUpdate, UserResponse
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -285,3 +288,129 @@ async def update_config(updates: dict, _admin=Depends(require_admin), db: AsyncS
             db.add(GlobalConfig(key=key, value=value))
     await db.commit()
     return {"status": "ok"}
+
+
+# ── OIDC Provider management ──
+
+@router.get("/oidc-providers", response_model=list[OIDCProviderResponse])
+async def list_oidc_providers(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(OIDCProvider).order_by(OIDCProvider.created_at.desc()))
+    return [OIDCProviderResponse.model_validate(p) for p in result.scalars().all()]
+
+
+@router.post("/oidc-providers", response_model=OIDCProviderResponse, status_code=status.HTTP_201_CREATED)
+async def create_oidc_provider(
+    data: OIDCProviderCreate,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    existing = await db.execute(select(OIDCProvider).where(OIDCProvider.name == data.name))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Un provider avec ce nom existe déjà")
+
+    provider = OIDCProvider(
+        name=data.name,
+        issuer_url=data.issuer_url.rstrip("/"),
+        client_id=data.client_id,
+        client_secret=encrypt(data.client_secret),
+        scopes=data.scopes,
+    )
+    db.add(provider)
+    await db.commit()
+    await db.refresh(provider)
+    return OIDCProviderResponse.model_validate(provider)
+
+
+@router.patch("/oidc-providers/{provider_id}", response_model=OIDCProviderResponse)
+async def update_oidc_provider(
+    provider_id: uuid.UUID, data: OIDCProviderUpdate,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == provider_id))
+    provider = result.scalar_one_or_none()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider introuvable")
+
+    if data.name is not None:
+        provider.name = data.name
+    if data.issuer_url is not None:
+        provider.issuer_url = data.issuer_url.rstrip("/")
+    if data.client_id is not None:
+        provider.client_id = data.client_id
+    if data.client_secret is not None:
+        provider.client_secret = encrypt(data.client_secret)
+    if data.scopes is not None:
+        provider.scopes = data.scopes
+    if data.is_active is not None:
+        provider.is_active = data.is_active
+
+    await db.commit()
+    await db.refresh(provider)
+    return OIDCProviderResponse.model_validate(provider)
+
+
+@router.delete("/oidc-providers/{provider_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_oidc_provider(
+    provider_id: uuid.UUID,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == provider_id))
+    provider = result.scalar_one_or_none()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider introuvable")
+    await db.delete(provider)
+    await db.commit()
+
+
+@router.post("/oidc-providers/{provider_id}/test")
+async def test_oidc_provider(
+    provider_id: uuid.UUID,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    """Test OIDC discovery for a saved provider."""
+    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == provider_id))
+    provider = result.scalar_one_or_none()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider introuvable")
+
+    issuer_url = provider.issuer_url.rstrip("/")
+
+    # Try multiple discovery URL patterns (Authentik, Keycloak, standard)
+    discovery_urls = [
+        f"{issuer_url}/.well-known/openid-configuration",
+    ]
+    # Authentik: issuer is the application slug URL
+    # Keycloak: issuer may be /realms/<realm>
+    # Some providers serve discovery at the root
+    if not issuer_url.endswith("/.well-known/openid-configuration"):
+        # Also try with trailing slash variant
+        discovery_urls.append(f"{issuer_url}/.well-known/openid-configuration/")
+
+    last_error = "Aucune reponse valide"
+    tried = []
+
+    for url in discovery_urls:
+        for verify_ssl in (True, False):
+            try:
+                async with httpx.AsyncClient(verify=verify_ssl, timeout=10, follow_redirects=True) as http:
+                    resp = await http.get(url)
+                    tried.append(f"{url} -> {resp.status_code}")
+                    if resp.status_code == 200:
+                        disco = resp.json()
+                        return {
+                            "status": "ok",
+                            "ssl_verified": verify_ssl,
+                            "issuer": disco.get("issuer", ""),
+                            "authorization_endpoint": disco.get("authorization_endpoint", ""),
+                            "token_endpoint": disco.get("token_endpoint", ""),
+                            "userinfo_endpoint": disco.get("userinfo_endpoint", ""),
+                        }
+                    last_error = f"HTTP {resp.status_code}"
+            except Exception as e:
+                tried.append(f"{url} -> {e}")
+                last_error = str(e)
+
+    return {
+        "status": "error",
+        "detail": f"Impossible de joindre le provider. Erreur: {last_error}",
+        "tried": tried,
+    }

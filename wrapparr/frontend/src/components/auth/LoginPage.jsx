@@ -1,6 +1,8 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { ShieldCheck } from "lucide-react"
 import useAuthStore from "../../stores/authStore"
+import { api, setAccessToken } from "../../services/api"
 
 export default function LoginPage() {
   const [mode, setMode] = useState("login")
@@ -9,8 +11,26 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const { login, register } = useAuthStore()
+  const [ssoProviders, setSsoProviders] = useState([])
+  const { login, register, fetchMe } = useAuthStore()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Load SSO providers
+  useEffect(() => {
+    api("/auth/sso/providers")
+      .then(setSsoProviders)
+      .catch(() => {})
+  }, [])
+
+  // Handle SSO callback token
+  useEffect(() => {
+    const ssoToken = searchParams.get("sso_token")
+    if (ssoToken) {
+      setAccessToken(ssoToken)
+      fetchMe().then(() => navigate("/", { replace: true }))
+    }
+  }, [searchParams, fetchMe, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -28,6 +48,10 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSsoLogin = (providerId) => {
+    window.location.href = `/api/v1/auth/sso/${providerId}/authorize?origin=${encodeURIComponent(window.location.origin)}`
   }
 
   const accent = "#E5A00D"
@@ -60,6 +84,41 @@ export default function LoginPage() {
           }}>
             {error}
           </div>
+        )}
+
+        {/* SSO Buttons */}
+        {ssoProviders.length > 0 && (
+          <>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+              {ssoProviders.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => handleSsoLogin(p.id)}
+                  style={{
+                    width: "100%", padding: "11px 0", borderRadius: 10,
+                    border: "1px solid rgba(96,165,250,0.25)", background: "rgba(96,165,250,0.08)",
+                    color: "#93c5fd", fontWeight: 600, fontSize: 14,
+                    fontFamily: "Nunito, sans-serif", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(96,165,250,0.15)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(96,165,250,0.08)"}
+                >
+                  <ShieldCheck size={16} strokeWidth={2} />
+                  Se connecter avec {p.name}
+                </button>
+              ))}
+            </div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 12, marginBottom: 20,
+            }}>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: "JetBrains Mono,monospace" }}>ou</span>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+            </div>
+          </>
         )}
 
         {mode === "register" && (
