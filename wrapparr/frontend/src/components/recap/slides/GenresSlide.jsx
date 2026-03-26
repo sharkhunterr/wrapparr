@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import { useComparison } from "../SharedUI"
 
 // Generate a palette of colors derived from the accent
 function buildPalette(accent) {
@@ -38,6 +39,14 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
 
   const COLORS = buildPalette(accent)
 
+  // Comparison data — previous year genres
+  const comp = useComparison()
+  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevGenres = (prevSvc?.films?.genres || prevSvc?.genres || [])
+    .filter((g) => (g.previous || 0) > 0)
+    .sort((a, b) => (b.previous || 0) - (a.previous || 0))
+    .slice(0, 6)
+
   if (!data.length) return null
 
   return (
@@ -53,6 +62,26 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
       {mode === "bubbles" && <BubblesMode data={data} accent={accent} speed={speed} colors={COLORS} />}
       {mode === "orbit" && <OrbitMode data={data} accent={accent} speed={speed} colors={COLORS} />}
       {mode === "podium" && <PodiumMode data={data} accent={accent} speed={speed} colors={COLORS} />}
+
+      {/* Previous year top 6 genres */}
+      {prevGenres.length > 0 && (
+        <>
+          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "14px 0 10px" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
+            {prevGenres.map((g, i) => (
+              <span key={g.n + i} style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "3px 8px", borderRadius: 8,
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                fontSize: 9, color: "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400,
+              }}>
+                {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{g.previous}</span>
+              </span>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
