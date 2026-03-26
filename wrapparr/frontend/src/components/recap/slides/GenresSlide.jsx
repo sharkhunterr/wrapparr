@@ -308,7 +308,7 @@ function RaceMode({ data, accent, speed, config = {}, colors: COLORS }) {
               zIndex: isWinner ? 2 : 1,
             }}>
               <div style={{ width: 26, textAlign: "center", flexShrink: 0 }}>
-                {finished && g.rank < 3 ? <span style={{ fontSize: 16 }}>{medals[g.rank]}</span> : <span style={{ fontSize: 11, fontWeight: 700, color: (racing || finished) ? g.color : "rgba(255,255,255,0.1)", fontFamily: "JetBrains Mono,monospace" }}>P{positionMap[g.rank] + 1}</span>}
+                {finished ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 7, fontSize: 10, fontWeight: 800, fontFamily: "JetBrains Mono,monospace", background: g.rank < 3 ? g.color + "20" : "rgba(255,255,255,0.04)", border: "1.5px solid " + (g.rank < 3 ? g.color + "50" : "rgba(255,255,255,0.08)"), color: g.rank < 3 ? g.color : "rgba(255,255,255,0.25)", boxShadow: g.rank === 0 ? "0 0 10px " + g.color + "40" : "none" }}>{g.rank + 1}</span> : <span style={{ fontSize: 11, fontWeight: 700, color: (racing || finished) ? g.color : "rgba(255,255,255,0.1)", fontFamily: "JetBrains Mono,monospace" }}>P{positionMap[g.rank] + 1}</span>}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
@@ -352,22 +352,6 @@ function RaceMode({ data, accent, speed, config = {}, colors: COLORS }) {
           const c = COLORS[i % COLORS.length], x = 10 + Math.random() * 80, y = Math.random() * 50
           return <div key={"fw" + i} style={{ position: "absolute", left: x + "%", top: y + "%", width: 6, height: 6, borderRadius: "50%", background: c, zIndex: 18, pointerEvents: "none", boxShadow: "0 0 15px 8px " + c + "50", animation: "confetti-burst " + (1 + Math.random()) + "s ease " + (0.2 + Math.random()) + "s forwards" }} />
         })}
-        <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8, animation: "slide-up 0.5s ease 0.3s both", position: "relative", zIndex: 25 }}>
-          <div style={{ padding: "14px 16px", borderRadius: 12, textAlign: "center", background: "linear-gradient(135deg," + COLORS[0] + "18," + accent + "10)", border: "1px solid " + COLORS[0] + "35", boxShadow: "0 0 30px " + COLORS[0] + "15" }}>
-            <div style={{ fontSize: 28, marginBottom: 4 }}>{medals[0]}</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: COLORS[0] }}>{data[0].n}</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{data[0].v} vues</div>
-          </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            {data.slice(1, 3).map((g, i) => (
-              <div key={g.n} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, textAlign: "center", background: COLORS[i + 1] + "10", border: "1px solid " + COLORS[i + 1] + "20", animation: "slide-up 0.4s ease " + (0.6 + i * 0.15) + "s both" }}>
-                <span style={{ fontSize: 14 }}>{medals[i + 1]}</span>
-                <div style={{ fontSize: 11, fontWeight: 600, color: COLORS[i + 1], marginTop: 2 }}>{g.n}</div>
-                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>{g.v}</div>
-              </div>
-            ))}
-          </div>
-        </div>
       </>}
     </div>
   )
