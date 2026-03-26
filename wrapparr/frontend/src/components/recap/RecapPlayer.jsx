@@ -345,8 +345,8 @@ export default function RecapPlayer() {
       <Stars />
       <Orbs accent={accent} />
       {needSpotlights && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
-      {isFinale && <ConfettiEffect />}
-      {isFinale && <FireworksEffect active={true} />}
+      {isFinale && (slideConfigs?.settings?.finale?.confetti !== false) && <ConfettiEffect />}
+      {isFinale && (slideConfigs?.settings?.finale?.fireworks !== false) && <FireworksEffect active={true} />}
       <Grain />
 
       {/* Dot nav */}

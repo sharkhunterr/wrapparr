@@ -430,7 +430,10 @@ export const SLIDE_REGISTRY = [
   {
     id: "finale", label: "Finale", group: "global", locked: true,
     desc: "Ecran final avec recap global et feux d'artifice",
-    params: [],
+    params: [
+      { key: "confetti", label: "Confettis", type: "bool", default: true },
+      { key: "fireworks", label: "Feux d'artifice", type: "bool", default: true },
+    ],
   },
 ]
 
