@@ -1,5 +1,39 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, createContext, useContext } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, AreaChart, Area, CartesianGrid } from "recharts"
+
+// ── Comparison Context ──
+// Shares inline comparison state across all slides
+const ComparisonCtx = createContext({ enabled: false, active: false, data: null, year: 0 })
+export const ComparisonProvider = ComparisonCtx.Provider
+export function useComparison() { return useContext(ComparisonCtx) }
+
+// ── Inline comparison helpers ──
+// Small grey badge showing previous year value + diff %
+export function CompBadge({ current, previous, suffix = "", style = {}, format }) {
+  const { active } = useComparison()
+  if (!active || previous == null || previous === 0) return null
+  const diff = current != null && previous > 0 ? Math.round(((current - previous) / previous) * 100) : null
+  const fmtVal = format ? format(previous) : (typeof previous === "number" ? (Number.isInteger(previous) ? previous : previous.toFixed(1)) : previous)
+  return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 9, color: "rgba(255,255,255,0.3)", marginLeft: 4, ...style }}>
+    <span style={{ fontFamily: "JetBrains Mono,monospace" }}>{fmtVal}{format ? "" : suffix}</span>
+    {diff != null && diff !== 0 && <span style={{ fontSize: 8, fontWeight: 700, color: diff > 0 ? "#4ade80" : "#f87171", padding: "0px 4px", borderRadius: 6, background: diff > 0 ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)" }}>{diff > 0 ? "+" : ""}{diff}%</span>}
+  </span>
+}
+
+// Small legend showing current vs previous year (only when comparison active)
+export function CompLegend({ accent, year }) {
+  const { active } = useComparison()
+  if (!active) return null
+  return <div style={{ display: "flex", gap: 10, marginTop: 4, justifyContent: "flex-end" }}>
+    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
+      <span style={{ width: 10, height: 2.5, borderRadius: 2, background: accent }} />{year}
+    </span>
+    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
+      <svg width="10" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="10" y2="1.5" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeDasharray="2 1.5" /></svg>
+      {year - 1}
+    </span>
+  </div>
+}
 
 // ── Hooks ──
 export function useActive() {
@@ -60,18 +94,28 @@ function CTip({ active, payload, label, unit = "h" }) {
 }
 
 // ── Charts ──
-export function AreaG({ data, dataKey = "v", accent, height = 52, unit = "h", id }) {
-  return <ResponsiveContainer width="100%" height={height}><AreaChart data={data} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit} />} /><Area type="monotone" dataKey={dataKey} stroke={accent} strokeWidth={2} fill={"url(#" + id + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
+export function AreaG({ data, dataKey = "v", accent, height = 52, unit = "h", id, prevData, prevDataKey = "v" }) {
+  const comp = useComparison()
+  // Merge previous year data if comparison active
+  const showPrev = (comp.active && prevData && prevData.length > 0)
+  const mergedData = showPrev ? data.map((d, i) => ({ ...d, _prev: prevData[i]?.[prevDataKey] || 0 })) : data
+  return <ResponsiveContainer width="100%" height={height}><AreaChart data={mergedData} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit} />} />{showPrev && <Area type="monotone" dataKey="_prev" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="4 3" fill="rgba(255,255,255,0.03)" dot={false} animationBegin={300} animationDuration={1000} />}<Area type="monotone" dataKey={dataKey} stroke={accent} strokeWidth={2} fill={"url(#" + id + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
 }
 
-export function DayChart({ data, accent, height = 55, unit }) {
-  const maxVal = Math.max(...data.map((d) => d.v || 0))
-  return <ResponsiveContainer width="100%" height={height}><BarChart data={data} margin={{ left: -10, right: 0, top: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,.4)", fontSize: 9 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} /><Bar dataKey="v" radius={[3, 3, 0, 0]} animationBegin={200} animationDuration={1200} animationEasing="ease-out">{data.map((d, i) => <Cell key={i} fill={d.v === maxVal ? accent : accent + "55"} />)}</Bar></BarChart></ResponsiveContainer>
+export function DayChart({ data, accent, height = 55, unit, prevData, prevDataKey = "v" }) {
+  const comp = useComparison()
+  const showPrev = comp.active && prevData && prevData.length > 0
+  const mergedData = showPrev ? data.map((d, i) => ({ ...d, _prev: prevData[i]?.[prevDataKey] || 0 })) : data
+  const maxVal = Math.max(...mergedData.map((d) => d.v || 0))
+  return <ResponsiveContainer width="100%" height={height}><BarChart data={mergedData} margin={{ left: -10, right: 0, top: 0, bottom: 0 }} barGap={1} barCategoryGap="20%"><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,.4)", fontSize: 9 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} /><Bar dataKey="v" radius={[3, 3, 0, 0]} animationBegin={200} animationDuration={1200} animationEasing="ease-out">{mergedData.map((d, i) => <Cell key={i} fill={d.v === maxVal ? accent : accent + "55"} />)}</Bar>{showPrev && <Bar dataKey="_prev" radius={[3, 3, 0, 0]} animationBegin={300} animationDuration={1000}>{mergedData.map((d, i) => <Cell key={i} fill="rgba(255,255,255,0.12)" />)}</Bar>}</BarChart></ResponsiveContainer>
 }
 
-export function TimeChart({ data, accent, height = 50, unit }) {
+export function TimeChart({ data, accent, height = 50, unit, prevData, prevDataKey = "v" }) {
+  const comp = useComparison()
+  const showPrev = comp.active && prevData && prevData.length > 0
+  const mergedData = showPrev ? data.map((d, i) => ({ ...d, _prev: prevData[i]?.[prevDataKey] || 0 })) : data
   const gId = "tg" + accent.replace(/[^a-f0-9]/gi, "")
-  return <ResponsiveContainer width="100%" height={height}><AreaChart data={data} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={gId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="h" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} /><Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill={"url(#" + gId + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
+  return <ResponsiveContainer width="100%" height={height}><AreaChart data={mergedData} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={gId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="h" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} />{showPrev && <Area type="monotone" dataKey="_prev" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="4 3" fill="rgba(255,255,255,0.03)" dot={false} animationBegin={300} animationDuration={1000} />}<Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill={"url(#" + gId + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
 }
 
 export function MiniRank({ data, accent, unit = "h", label = "Classement", me = "" }) {

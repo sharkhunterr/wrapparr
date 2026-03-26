@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import { useComparison, CompBadge } from "../SharedUI"
 
 function formatBudget(n) {
   if (!n) return "0"
@@ -91,22 +92,39 @@ function MoneyRain({ active, accent }) {
   )
 }
 
-function BracketBar({ label, count, maxCount, accent, delay, animated }) {
-  const pct = (count / Math.max(1, maxCount)) * 100
+function BracketBar({ label, count, maxCount, accent, delay, animated, prevCount }) {
+  const allMax = Math.max(maxCount, prevCount || 0)
+  const pct = (count / Math.max(1, allMax)) * 100
+  const prevPct = prevCount != null ? (prevCount / Math.max(1, allMax)) * 100 : 0
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, animation: animated ? `slide-up 0.4s ease ${delay}s both` : "none" }}>
       <div style={{ width: 55, fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "right", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{label}</div>
-      <div style={{ flex: 1, height: 24, background: "rgba(255,255,255,0.03)", borderRadius: 6, overflow: "hidden", position: "relative" }}>
-        <div style={{
-          height: "100%", borderRadius: 6,
-          background: `linear-gradient(90deg, ${accent}50, ${accent})`,
-          width: animated ? pct + "%" : "0%",
-          transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay}s`,
-          boxShadow: `0 0 12px ${accent}25`,
-        }} />
-        <div style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", fontSize: 10, fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
-          {count} film{count > 1 ? "s" : ""}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+        <div style={{ height: 20, background: "rgba(255,255,255,0.03)", borderRadius: 5, overflow: "hidden", position: "relative" }}>
+          <div style={{
+            height: "100%", borderRadius: 5,
+            background: `linear-gradient(90deg, ${accent}50, ${accent})`,
+            width: animated ? pct + "%" : "0%",
+            transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay}s`,
+            boxShadow: `0 0 12px ${accent}25`,
+          }} />
+          <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 9, fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
+            {count}
+          </div>
         </div>
+        {prevCount != null && (
+          <div style={{ height: 14, background: "rgba(255,255,255,0.02)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
+            {prevCount > 0 && <div style={{
+              height: "100%", borderRadius: 4,
+              background: "rgba(255,255,255,0.12)",
+              width: animated ? prevPct + "%" : "0%",
+              transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay + 0.15}s`,
+            }} />}
+            <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 600, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace" }}>
+              {prevCount}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -199,6 +217,11 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
   const displayMode = config.displayMode || "bars"
   const [phase, setPhase] = useState(0)
 
+  // Comparison data
+  const comp = useComparison()
+  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevBudgets = prevSvc?.budgets?.previous || null
+
   useEffect(() => {
     const t = []
     t.push(setTimeout(() => setPhase(1), 400))
@@ -232,9 +255,13 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
           border: `1px solid ${accent}20`, boxShadow: `0 0 40px ${accent}08`,
         }}>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".15em", marginBottom: 6 }}>Budget moyen des films vus</div>
-          {phase >= 1 ? <AnimatedCounter target={budgets.average} accent={accent} /> : <span style={{ fontSize: 32, color: "rgba(255,255,255,0.1)" }}>...</span>}
-          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", marginTop: 4 }}>
-            sur {budgets.count} films · total cumule {formatBudget(budgets.total)}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            {phase >= 1 ? <AnimatedCounter target={budgets.average} accent={accent} /> : <span style={{ fontSize: 32, color: "rgba(255,255,255,0.1)" }}>...</span>}
+            <CompBadge current={budgets.average} previous={prevBudgets?.average} format={formatBudget} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, fontSize: 9, color: "rgba(255,255,255,0.25)", marginTop: 4 }}>
+            <span>sur {budgets.count} films · total cumule {formatBudget(budgets.total)}</span>
+            <CompBadge current={budgets.total} previous={prevBudgets?.total} format={formatBudget} />
           </div>
         </div>
 
@@ -248,9 +275,11 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
               <BudgetLineChart allBudgets={budgets.all_budgets} average={budgets.average} accent={accent} animated={phase >= 2} />
             ) : budgets.distribution.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                {budgets.distribution.map((b, i) => (
-                  <BracketBar key={b.label} label={b.label} count={b.count} maxCount={maxBracket} accent={accent} delay={i * 0.12} animated={phase >= 2} />
-                ))}
+                {budgets.distribution.map((b, i) => {
+                  const prevDist = prevBudgets?.distribution || []
+                  const prevB = prevDist.find((p) => p.label === b.label)
+                  return <BracketBar key={b.label} label={b.label} count={b.count} maxCount={maxBracket} accent={accent} delay={i * 0.12} animated={phase >= 2} prevCount={comp.active ? (prevB?.count ?? 0) : undefined} />
+                })}
               </div>
             ) : null}
           </div>

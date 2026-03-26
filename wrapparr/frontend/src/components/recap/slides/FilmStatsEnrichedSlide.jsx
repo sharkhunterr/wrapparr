@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useActive, AN, Tag, Lbl, Pill, AreaG } from "../SharedUI"
+import { useActive, AN, Tag, Lbl, Pill, AreaG, useComparison, CompBadge } from "../SharedUI"
 
 const DEFAULT_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
@@ -147,6 +147,14 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   const countries = data.extra?.countries || []
   const avgYear = allFilms.length > 0 ? Math.round(allFilms.filter((f) => f.y > 1900).reduce((s, f) => s + f.y, 0) / allFilms.filter((f) => f.y > 1900).length) : null
 
+  // Comparison data
+  const comp = useComparison()
+  const mediaKey = isSeries ? "series" : "films"
+  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevMedia = prevSvc?.[mediaKey] || {}
+  const prevItems = prevMedia.previous
+  const prevHours = prevMedia.hours?.previous
+
   return <div style={{ maxWidth: 440, width: "100%", position: "relative" }}>
     <PosterWall films={allFilms} />
 
@@ -162,10 +170,12 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
             <span style={{ fontSize: 28, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
             <span style={{ fontSize: 10, fontWeight: 600, color: accent + "90" }}>{unitLabel}</span>
+            <CompBadge current={totalItems} previous={prevItems} />
           </div>
           <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
             <span style={{ fontSize: 28, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
+            <CompBadge current={totalHours} previous={prevHours} suffix="h" />
           </div>
           <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
           {/* Category badge with shine */}

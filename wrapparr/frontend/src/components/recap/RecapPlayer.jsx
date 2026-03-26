@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import { createPortal } from "react-dom"
 import { useParams } from "react-router-dom"
 import { api } from "../../services/api"
 import useAuthStore from "../../stores/authStore"
@@ -23,6 +24,7 @@ import CompareServiceSlide from "./slides/CompareServiceSlide"
 import RankingSlide from "./slides/RankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/CommunitySlides"
+import { ComparisonProvider } from "./SharedUI"
 
 // ── AMBIENT EFFECTS (from prototype) ──
 function Orbs({ accent }) {
@@ -151,6 +153,7 @@ export default function RecapPlayer() {
   const [slide, setSlide] = useState(0)
   const [fade, setFade] = useState(false)
   const [dir, setDir] = useState(1)
+  const [comparisonActive, setComparisonActive] = useState(false)
   const touchY = useRef(null)
 
   // Load recap data — try active first, then specific year, then latest
@@ -200,7 +203,7 @@ export default function RecapPlayer() {
           if (data.users && userId && data.users[userId]) {
             // Use this user's specific data, keep global/users for comparison
             const userData = data.users[userId]
-            data = { ...userData, users: data.users }
+            data = { ...userData, users: data.users, comparison: data.comparison }
             // Remove "name" field that's not needed for rendering
             delete data.name
             setMyRecapUserId(userId)
@@ -326,6 +329,10 @@ export default function RecapPlayer() {
   const needSpotlights = isCat || isPod || isFinale || isCommunityTop
   const spotlightIntensity = isCat ? 0.9 : (isPod || isCommunityTop) ? 1.2 : isFinale ? 0.65 : 0.7
 
+  // Inline comparison: available if comparison data exists
+  const hasComparison = !!recapData?.comparison
+  const comparisonCtx = { enabled: hasComparison, active: comparisonActive && hasComparison, data: recapData?.comparison, year }
+
   return (
     <div
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY }}
@@ -363,22 +370,27 @@ export default function RecapPlayer() {
         {isPod && <span style={{ color: accent, marginLeft: 8 }}>PODIUM</span>}
       </div>
 
+      {/* Comparison toggle — emits to the top-right bar slot in App.jsx */}
+      <ComparisonButton active={comparisonActive} onToggle={() => setComparisonActive((v) => !v)} accent={accent} year={year} visible={hasComparison} />
+
       {/* Arrows */}
       {slide > 0 && <button onClick={() => goTo(slide - 1)} style={arrowBtn({ top: "calc(50% - 44px)" })}>↑</button>}
       {slide < slides.length - 1 && <button onClick={() => goTo(slide + 1)} style={arrowBtn({ top: "calc(50% + 4px)" })}>↓</button>}
 
       {/* Slide content */}
-      <div style={{
-        position: "relative", zIndex: 10, width: "100%", height: "100vh",
-        display: (isCat || isPod || isFinale) ? "block" : "flex",
-        alignItems: "center", justifyContent: "center",
-        padding: (isCat || isPod || isFinale) ? "0" : "20px 44px 20px 18px",
-        opacity: fade ? 0 : 1, transform: fade ? `translateY(${dir * 16}px)` : "translateY(0)",
-        transition: "opacity .23s ease, transform .23s ease",
-        overflowY: (isCat || isPod || isFinale) ? "hidden" : "auto",
-      }}>
-        {curr.component}
-      </div>
+      <ComparisonProvider value={comparisonCtx}>
+        <div style={{
+          position: "relative", zIndex: 10, width: "100%", height: "100vh",
+          display: (isCat || isPod || isFinale) ? "block" : "flex",
+          alignItems: "center", justifyContent: "center",
+          padding: (isCat || isPod || isFinale) ? "0" : "20px 44px 20px 18px",
+          opacity: fade ? 0 : 1, transform: fade ? `translateY(${dir * 16}px)` : "translateY(0)",
+          transition: "opacity .23s ease, transform .23s ease",
+          overflowY: (isCat || isPod || isFinale) ? "hidden" : "auto",
+        }}>
+          {curr.component}
+        </div>
+      </ComparisonProvider>
 
       {/* Swipe hint */}
       {!isCat && !isPod && !isFinale && slide > 0 && slide < slides.length - 1 && (
@@ -388,6 +400,32 @@ export default function RecapPlayer() {
       )}
     </div>
   )
+}
+
+function ComparisonButton({ active, onToggle, accent, year, visible }) {
+  const [el, setEl] = useState(null)
+  useEffect(() => {
+    const slot = document.getElementById("recap-topbar-extra")
+    if (slot) setEl(slot)
+  }, [])
+  if (!visible) return null
+  const btn = <button
+    onClick={onToggle}
+    title={active ? "Masquer la comparaison" : "Comparer avec " + (year - 1)}
+    style={{
+      background: active ? accent + "15" : "rgba(255,255,255,0.06)",
+      border: `1px solid ${active ? accent + "40" : "rgba(255,255,255,0.1)"}`,
+      borderRadius: 6, color: active ? accent : "rgba(255,255,255,0.4)",
+      fontSize: 9, padding: "4px 8px", cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 4,
+      transition: "all .2s ease",
+    }}
+  >
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
+    vs {year - 1}
+  </button>
+  if (el) return createPortal(btn, el)
+  return null
 }
 
 function arrowBtn(pos) {

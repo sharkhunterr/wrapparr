@@ -378,6 +378,30 @@ class RecapPipeline:
             if cur_peak or prev_peak:
                 entry["peak"] = {"current": cur_peak, "previous": prev_peak}
 
+            # Day of week comparison
+            cur_dow = cur_m.get("day_of_week", [])
+            prev_dow = prev_m.get("day_of_week", [])
+            if cur_dow and prev_dow:
+                entry["day_of_week"] = []
+                for i in range(min(len(cur_dow), len(prev_dow))):
+                    entry["day_of_week"].append({
+                        "d": cur_dow[i].get("d", ""),
+                        "current": cur_dow[i].get("v", 0),
+                        "previous": prev_dow[i].get("v", 0),
+                    })
+
+            # Time of day comparison
+            cur_tod = cur_m.get("time_of_day", [])
+            prev_tod = prev_m.get("time_of_day", [])
+            if cur_tod and prev_tod:
+                entry["time_of_day"] = []
+                for i in range(min(len(cur_tod), len(prev_tod))):
+                    entry["time_of_day"].append({
+                        "h": cur_tod[i].get("h", ""),
+                        "current": cur_tod[i].get("v", 0),
+                        "previous": prev_tod[i].get("v", 0),
+                    })
+
             comp[mtype] = entry
 
         # Helper to enrich ratings with thumbs from top lists
@@ -444,8 +468,18 @@ class RecapPipeline:
         prev_budgets = prev_extra.get("budgets", {})
         if cur_budgets or prev_budgets:
             comp["budgets"] = {
-                "current": {"average": cur_budgets.get("average", 0), "count": cur_budgets.get("count", 0)},
-                "previous": {"average": prev_budgets.get("average", 0), "count": prev_budgets.get("count", 0)},
+                "current": {
+                    "average": cur_budgets.get("average", 0),
+                    "count": cur_budgets.get("count", 0),
+                    "total": cur_budgets.get("total", 0),
+                    "distribution": cur_budgets.get("distribution", []),
+                },
+                "previous": {
+                    "average": prev_budgets.get("average", 0),
+                    "count": prev_budgets.get("count", 0),
+                    "total": prev_budgets.get("total", 0),
+                    "distribution": prev_budgets.get("distribution", []),
+                },
             }
 
         # Countries comparison (top 3)

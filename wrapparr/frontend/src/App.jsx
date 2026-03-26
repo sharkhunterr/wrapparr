@@ -74,6 +74,7 @@ function UserHome() {
     <>
       <RecapPlayer />
       <div style={{ position: "fixed", top: 12, right: 44, zIndex: 9999, display: "flex", gap: 6, alignItems: "center" }}>
+        <span id="recap-topbar-extra" style={{ display: "contents" }} />
         {availableRecaps.length > 0 && (
           <select
             value={currentYear || ""}

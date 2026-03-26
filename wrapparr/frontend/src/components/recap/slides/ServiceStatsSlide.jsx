@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useActive, AN, Tag, Lbl, BigNum, VsB, Pill, AreaG } from "../SharedUI"
+import { useActive, AN, Tag, Lbl, BigNum, VsB, Pill, AreaG, useComparison, CompBadge } from "../SharedUI"
 
 function PosterImg({ src, size = 52, radius = 7 }) {
   const [err, setErr] = useState(false)
@@ -9,14 +9,20 @@ function PosterImg({ src, size = 52, radius = 7 }) {
 
 export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
   const active = useActive()
+  const comp = useComparison()
   const top = data.top || []
   const monthly = data.monthly || []
+
+  // Find previous year comparison data for this service
+  const prevData = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevItems = prevData?.total_items?.previous
+  const prevHours = prevData?.total_hours?.previous
 
   return <div style={{ maxWidth: 430, width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}><Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginTop: 4 }}>
-        <div><BigNum value={data.total_items || 0} accent={accent} active={active} /><Lbl>total</Lbl></div>
-        {(data.total_hours || 0) > 0 && <div style={{ marginBottom: 3 }}><div style={{ fontSize: 22, fontWeight: 700, color: accent + "bb" }}>{active ? <AN t={Math.round(data.total_hours)} s="h" /> : "0h"}</div><Lbl>heures</Lbl></div>}
+        <div><BigNum value={data.total_items || 0} accent={accent} active={active} /><CompBadge current={data.total_items} previous={prevItems} /><Lbl>total</Lbl></div>
+        {(data.total_hours || 0) > 0 && <div style={{ marginBottom: 3 }}><div style={{ fontSize: 22, fontWeight: 700, color: accent + "bb" }}>{active ? <AN t={Math.round(data.total_hours)} s="h" /> : "0h"}<CompBadge current={data.total_hours} previous={prevHours} suffix="h" /></div><Lbl>heures</Lbl></div>}
       </div>
       {data.vs_last_year ? <div style={{ display: "flex", gap: 6, marginTop: 7, flexWrap: "wrap" }}><VsB value={data.vs_last_year} /></div> : null}
     </div>
@@ -49,7 +55,7 @@ export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
 
     {monthly.length > 0 && <div className="glass s3" style={{ padding: "10px 12px" }}>
       <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
-      <AreaG data={monthly} dataKey="v" accent={accent} height={50} unit=" items" id={"m-" + label} />
+      <AreaG data={monthly} dataKey="v" accent={accent} height={50} unit=" items" id={"m-" + label} prevData={prevData?.monthly} prevDataKey="previous" />
     </div>}
   </div>
 }
