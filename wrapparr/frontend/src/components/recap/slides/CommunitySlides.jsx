@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useActive, AN, Tag, Lbl, DayChart, TimeChart, AreaG } from "../SharedUI"
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
 
@@ -79,14 +79,20 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
   const months = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"]
   const multiMonthlyData = months.map((m, i) => {
     const entry = { m }
+    let total = 0
     for (const u of allUsers) {
       const monthly = isSeries ? (u.data?.extra?.series?.monthly || []) : (u.data?.extra?.films?.monthly || u.data?.monthly || [])
-      entry[u.name] = monthly.find((d) => d.m === m)?.v || monthly[i]?.v || 0
+      const val = monthly.find((d) => d.m === m)?.v || monthly[i]?.v || 0
+      entry[u.name] = val
+      total += val
     }
+    entry._total = total
     return entry
   })
 
   const gId = "comm-act-" + mediaType
+  const [hidden, setHidden] = useState({})
+  const toggleLine = useCallback((key) => setHidden((h) => ({ ...h, [key]: !h[key] })), [])
 
   return <div style={{ maxWidth: 440, width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
@@ -116,7 +122,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
     {/* Activite mensuelle superposee */}
     <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
       <Lbl c={accent} size={8}>Activite mensuelle par utilisateur</Lbl>
-      <ResponsiveContainer width="100%" height={90}>
+      <ResponsiveContainer width="100%" height={140}>
         <AreaChart data={multiMonthlyData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
           <defs>
             {allUsers.map((u, i) => (
@@ -125,20 +131,34 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
                 <stop offset="100%" stopColor={USER_COLORS[i % USER_COLORS.length]} stopOpacity={0.02} />
               </linearGradient>
             ))}
+            <linearGradient id={gId + "-total"} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="white" stopOpacity={0.12} />
+              <stop offset="100%" stopColor="white" stopOpacity={0.01} />
+            </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal vertical={false} />
           <XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} />
           <Tooltip content={<MultiUserTooltip />} />
+          {/* Total curve */}
+          {!hidden._total && <Area type="monotone" dataKey="_total" stroke="rgba(255,255,255,0.5)" strokeWidth={2} strokeDasharray="4 3"
+            fill={`url(#${gId}-total)`} dot={false} animationBegin={100} animationDuration={1200} name="Total" />}
+          {/* Per-user curves */}
           {allUsers.map((u, i) => (
-            <Area key={u.name} type="monotone" dataKey={u.name} stroke={USER_COLORS[i % USER_COLORS.length]} strokeWidth={1.5}
+            !hidden[u.name] && <Area key={u.name} type="monotone" dataKey={u.name} stroke={USER_COLORS[i % USER_COLORS.length]} strokeWidth={1.5}
               fill={`url(#${gId + i})`} dot={false} animationBegin={200 + i * 100} animationDuration={1200} />
           ))}
         </AreaChart>
       </ResponsiveContainer>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4, justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4, justifyContent: "center" }}>
+        {/* Total legend */}
+        <div onClick={() => toggleLine("_total")} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", opacity: hidden._total ? 0.3 : 1, transition: "opacity .2s" }}>
+          <svg width="10" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="10" y2="1.5" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="3 2" /></svg>
+          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Total</span>
+        </div>
+        {/* Per-user legends */}
         {allUsers.map((u, i) => (
-          <div key={u.name} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div key={u.name} onClick={() => toggleLine(u.name)} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", opacity: hidden[u.name] ? 0.3 : 1, transition: "opacity .2s" }}>
             <div style={{ width: 8, height: 3, borderRadius: 2, background: USER_COLORS[i % USER_COLORS.length] }} />
             <span style={{ fontSize: 9, color: (u.isMe || u.name === me) ? "white" : "rgba(255,255,255,0.4)", fontWeight: (u.isMe || u.name === me) ? 700 : 400 }}>{u.name}</span>
           </div>
