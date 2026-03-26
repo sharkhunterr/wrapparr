@@ -515,8 +515,8 @@ class RecapPipeline:
                 prev_countries = mt_countries_prev
         if cur_countries or prev_countries:
             comp["countries"] = {
-                "current": [{"n": c.get("name", c.get("code", "")), "v": c.get("count", 0)} for c in cur_countries],
-                "previous": [{"n": c.get("name", c.get("code", "")), "v": c.get("count", 0)} for c in prev_countries],
+                "current": [{"n": c.get("name", c.get("code", "")), "c": c.get("code", ""), "v": c.get("count", 0)} for c in cur_countries],
+                "previous": [{"n": c.get("name", c.get("code", "")), "c": c.get("code", ""), "v": c.get("count", 0)} for c in prev_countries],
             }
 
         return comp

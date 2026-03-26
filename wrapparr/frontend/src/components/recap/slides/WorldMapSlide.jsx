@@ -31,9 +31,14 @@ const FLAGS = {
   HK: "🇭🇰", TW: "🇹🇼", CO: "🇨🇴", CL: "🇨🇱", PE: "🇵🇪",
 }
 
+import { useComparison } from "../SharedUI"
+
 export default function WorldMapSlide({ accent, data, year, config = {} }) {
   const animSpeed = config.animationSpeed || 15000
   const countries = data?.extra?.countries || []
+  const comp = useComparison()
+  const prevCountries = comp.active ? (comp.data?.tautulli?.countries || comp.data?.plex?.countries || comp.data?.jellyfin?.countries || null) : null
+  const prevTop3 = prevCountries?.previous?.slice(0, 3) || []
   const N = countries.length
 
   const [phase, setPhase] = useState(0)
@@ -195,6 +200,26 @@ export default function WorldMapSlide({ accent, data, year, config = {} }) {
         <div style={{ marginTop: 10, fontSize: 10, color: "rgba(255,255,255,0.3)", textAlign: "center" }}>
           {countries.length} pays representes
         </div>
+      )}
+
+      {/* Previous year top 3 countries */}
+      {done && prevTop3.length > 0 && (
+        <>
+          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "10px 0" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
+            {prevTop3.map((c, i) => (
+              <span key={c.n + i} style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "3px 8px", borderRadius: 8,
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                fontSize: 9, color: "rgba(255,255,255,0.4)",
+              }}>
+                {c.c && FLAGS[c.c] ? <span>{FLAGS[c.c]}</span> : null}{c.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{c.v}</span>
+              </span>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
