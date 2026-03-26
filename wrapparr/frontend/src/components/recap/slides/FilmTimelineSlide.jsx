@@ -214,12 +214,38 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
               })}
             </div>
 
-            {/* X axis ticks (decades only) */}
-            <div style={{ position: "relative", height: 12, marginTop: 2 }}>
+            {/* X axis = track line + ticks + labels — unified */}
+            <div style={{ position: "relative", marginTop: 2 }}>
+              {/* The line itself */}
+              <div style={{ height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 1, position: "relative" }}>
+                <div style={{
+                  position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 1,
+                  width: cursorPos + "%",
+                  background: "linear-gradient(90deg, " + accent + "30, " + accent + ")",
+                }} />
+                {comp.active && prevAvgYear > 0 && phase >= 2 && (
+                  <div style={{
+                    position: "absolute", top: "50%", left: ((prevAvgYear - minYearCfg) / range * 100) + "%",
+                    transform: "translate(-50%, -50%)",
+                    width: 10, height: 10, borderRadius: "50%",
+                    background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)",
+                    zIndex: 4,
+                  }} />
+                )}
+                <div style={{
+                  position: "absolute", top: "50%", left: cursorPos + "%",
+                  transform: "translate(-50%, -50%)",
+                  width: 12, height: 12, borderRadius: "50%",
+                  background: accent, border: "2px solid white",
+                  boxShadow: "0 0 10px " + accent + "80",
+                  zIndex: 5,
+                }} />
+              </div>
+              {/* Ticks below the line */}
               {ALL_DECADES.filter((d) => d >= minYearCfg && d <= maxYearCfg).map((decade) => {
                 const left = ((decade - minYearCfg) / range) * 100
                 return <div key={decade} style={{ position: "absolute", left: left + "%", top: 0, display: "flex", flexDirection: "column", alignItems: "center", transform: "translateX(-50%)" }}>
-                  <div style={{ width: 1, height: 4, background: "rgba(255,255,255,0.12)" }} />
+                  <div style={{ width: 1, height: 5, background: "rgba(255,255,255,0.15)" }} />
                   <div style={{ fontSize: 6, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", marginTop: 1 }}>{decade}</div>
                 </div>
               })}
@@ -227,35 +253,12 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
           </div>
         </div>
 
-        {/* Track line — aligned with bars (offset by Y axis width) */}
-        <div style={{ marginLeft: 22, marginTop: 14, height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 1, position: "relative" }}>
-          <div style={{
-            position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 1,
-            width: cursorPos + "%",
-            background: "linear-gradient(90deg, " + accent + "30, " + accent + ")",
-          }} />
-          {comp.active && prevAvgYear > 0 && phase >= 2 && (
-            <div style={{
-              position: "absolute", top: "50%", left: ((prevAvgYear - minYearCfg) / range * 100) + "%",
-              transform: "translate(-50%, -50%)",
-              width: 10, height: 10, borderRadius: "50%",
-              background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)",
-              zIndex: 4,
-            }} />
-          )}
-          <div style={{
-            position: "absolute", top: "50%", left: cursorPos + "%",
-            transform: "translate(-50%, -50%)",
-            width: 12, height: 12, borderRadius: "50%",
-            background: accent, border: "2px solid white",
-            boxShadow: "0 0 10px " + accent + "80",
-            zIndex: 5,
-          }} />
-        </div>
+        {/* Spacer for ticks labels */}
+        <div style={{ height: 16 }} />
 
         {/* Legend */}
         {comp.active && prevYearDist && done && (
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 4 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
               <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
             </span>
