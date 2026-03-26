@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useComparison } from "../SharedUI"
 
 // Default timings (overridable via config)
 const DEFAULT_CONFIG = {
@@ -20,6 +21,9 @@ const PODIUM_H = [88, 110, 132]
 
 export default function PodiumSlide({ accent, bg, data = [], title, icon, jokes = [], statLabel, statKey, statSuffix = "", config = {}, backdrop }) {
   const cfg = { ...DEFAULT_CONFIG, ...config }
+  const comp = useComparison()
+  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevTop = prevSvc?.films?.top?.previous || []
   const [phase, setPhase] = useState(0)
   const [jokeIdx, setJokeIdx] = useState(0)
   const [jokeVisible, setJokeVisible] = useState(true)
@@ -121,6 +125,44 @@ export default function PodiumSlide({ accent, bg, data = [], title, icon, jokes 
               <div style={{ color: "white", fontWeight: 600, fontSize: 12 }}>{data[3].t}</div>
             </div>
             {data[3][statKey] != null && <div style={{ marginLeft: "auto", color: accent, fontFamily: "JetBrains Mono,monospace", fontSize: 11 }}>{data[3][statKey]}{statSuffix}</div>}
+          </div>
+        )}
+
+        {/* Previous year top 3 */}
+        {revealed[2] && prevTop.length > 0 && (
+          <div style={{ marginTop: 14, animation: "slide-up .4s ease .4s both" }}>
+            <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginBottom: 10 }} />
+            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".1em", textAlign: "center", marginBottom: 8 }}>Top {prevTop.length > 1 ? prevTop.length : ""} de {comp.year - 1}</div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+              {prevTop.map((film, i) => (
+                <div key={film.t + i} style={{
+                  flex: 1, maxWidth: 110, textAlign: "center",
+                  animation: "slide-up .3s ease " + (0.5 + i * 0.1) + "s both",
+                }}>
+                  <div style={{ position: "relative", display: "inline-block" }}>
+                    {film.thumb ? (
+                      <img src={film.thumb} alt="" style={{
+                        width: "100%", height: 70, borderRadius: 6, objectFit: "cover",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        filter: "saturate(0.3) brightness(0.7)",
+                      }} onError={(e) => { e.target.style.display = "none" }} />
+                    ) : (
+                      <div style={{ width: "100%", height: 70, borderRadius: 6, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: "rgba(255,255,255,0.15)" }}>🎬</div>
+                    )}
+                    <div style={{
+                      position: "absolute", top: -5, left: -5,
+                      width: 18, height: 18, borderRadius: "50%",
+                      background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.5)",
+                      fontFamily: "JetBrains Mono,monospace",
+                    }}>{i + 1}</div>
+                  </div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.35)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{film.t}</div>
+                  <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace" }}>{film.plays} {statSuffix || "vues"}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>}
