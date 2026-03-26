@@ -72,7 +72,7 @@ function Grain() {
 const CC = ["#E5A00D", "#34d399", "#c084fc", "#f87171", "#60a5fa", "#fb923c", "#fff", "#fbbf24", "#f472b6"]
 function ConfettiEffect() {
   const p = useRef(Array.from({ length: 80 }, () => ({ x: Math.random() * 100, dur: 2 + Math.random() * 3.5, delay: Math.random() * 4, size: 4 + Math.random() * 9, color: CC[Math.floor(Math.random() * CC.length)], round: Math.random() > 0.5 }))).current
-  return <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2, overflow: "hidden" }}>
+  return <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 4, overflow: "hidden" }}>
     {p.map((c, i) => <div key={i} style={{ position: "absolute", left: `${c.x}%`, top: "-20px", width: c.size, height: c.size * (c.round ? 1 : 0.38), background: c.color, borderRadius: c.round ? "50%" : 2, animation: `confetti-f ${c.dur}s ease-in ${c.delay}s infinite` }} />)}
   </div>
 }
@@ -98,7 +98,7 @@ function FireworksEffect({ active }) {
     }
     let last = 0
     const draw = (now) => {
-      ctx.fillStyle = "rgba(0,0,0,0.075)"; ctx.fillRect(0, 0, c.width, c.height)
+      ctx.clearRect(0, 0, c.width, c.height)
       if (now - last > 650) { launch(); last = now }
       pts.current = pts.current.filter((p) => p.alpha > 0.012)
       pts.current.forEach((p) => {
@@ -979,10 +979,10 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     })
   }
 
-  // Finale
+  // Finale — activeServices will be injected after slide filtering
   slides.push({
     id: "finale", accent: primary, bg: baseBg, fullscreen: true,
-    component: <FinaleSlide accent={primary} userName={userName} year={year} globalStats={globalStats} recapData={data} onRestart={null} />,
+    _finaleProps: { accent: primary, userName, year, globalStats, recapData: data },
   })
 
   // ── Apply accent overrides from slide settings ──
@@ -1003,6 +1003,19 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
   // Filter out disabled slides (but keep locked: intro, finale)
   const enabledSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
+
+  // Detect active services from enabled slide IDs (e.g. "tautulli-pod" -> "tautulli")
+  const SVC_NAMES = ["tautulli", "plex", "jellyfin", "romm", "audiobookshelf", "komga", "booklore"]
+  const detectedServices = [...new Set(enabledSlides.map((s) => SVC_NAMES.find((svc) => s.id.startsWith(svc))).filter(Boolean))]
+
+  // Inject FinaleSlide component with activeServices
+  for (const s of enabledSlides) {
+    if (s.id === "finale" && s._finaleProps) {
+      const p = s._finaleProps
+      s.component = <FinaleSlide {...p} activeServices={detectedServices} onRestart={null} />
+      delete s._finaleProps
+    }
+  }
 
   // Apply saved order if available
   if (slideOrder && slideOrder.length > 0) {

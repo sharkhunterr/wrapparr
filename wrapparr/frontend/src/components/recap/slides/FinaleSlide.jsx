@@ -1,79 +1,65 @@
 import { useState } from "react"
 import { useActive, AN } from "../SharedUI"
 
-function PosterStrip({ posters, accent }) {
-  if (!posters.length) return null
-  // Duplicate for seamless infinite scroll
-  const items = [...posters, ...posters]
+function PosterWall({ posters }) {
+  if (!posters || posters.length < 3) return null
+  const items = [...posters, ...posters, ...posters].filter((p) => p.thumb)
+  if (items.length < 6) return null
 
   return (
     <div style={{
-      position: "absolute", bottom: 0, left: 0, right: 0, height: 95, overflow: "hidden", zIndex: 1,
-      mask: "linear-gradient(90deg,transparent,black 12%,black 88%,transparent)",
-      WebkitMask: "linear-gradient(90deg,transparent,black 12%,black 88%,transparent)",
+      position: "fixed", inset: 0, overflow: "hidden", zIndex: 0, opacity: 0.1,
+      display: "flex", flexDirection: "column", justifyContent: "center",
     }}>
-      <div style={{
-        display: "flex", gap: 8, animation: "poster-strip 25s linear infinite",
-        width: "max-content", padding: "8px 0",
-      }}>
-        {items.map((p, i) => (
-          <PosterCard key={i} src={p.thumb} title={p.t} accent={accent} emoji={p.emoji} />
-        ))}
-      </div>
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((row) => (
+        <div key={row} style={{
+          display: "flex", gap: 8, padding: "4px 0",
+          animation: `poster-scroll-${row % 2 === 0 ? "left" : "right"} ${18 + row * 3}s linear infinite`,
+          width: "max-content",
+        }}>
+          {items.concat(items).slice(row * 5, row * 5 + 24).map((f, i) => (
+            <img key={i} src={f.thumb} alt="" style={{
+              width: 70, height: 100, borderRadius: 6, objectFit: "cover", flexShrink: 0,
+            }} onError={(e) => { e.target.style.display = "none" }} />
+          ))}
+        </div>
+      ))}
+      <style>{`
+        @keyframes poster-scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes poster-scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+      `}</style>
     </div>
   )
 }
 
-function PosterCard({ src, title, accent, emoji }) {
-  const [err, setErr] = useState(false)
-  return (
-    <div style={{
-      width: 54, height: 76, borderRadius: 7, flexShrink: 0, overflow: "hidden",
-      boxShadow: `0 4px 18px ${accent}25`, opacity: 0.6,
-      border: "1px solid rgba(255,255,255,0.1)",
-    }}>
-      {src && !err ? (
-        <img src={src} alt={title} onError={() => setErr(true)}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-      ) : (
-        <div style={{
-          width: "100%", height: "100%", background: "linear-gradient(135deg,#1a1a2e,#16213e)",
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
-        }}>{emoji || "🎬"}</div>
-      )}
-    </div>
-  )
-}
-
-function collectPosters(recapData) {
+function collectPosters(recapData, activeServices) {
   if (!recapData) return []
   const posters = []
-  const SERVICE_EMOJI = {
-    tautulli: "🎬", plex: "🎬", jellyfin: "📺",
-    romm: "🎮", audiobookshelf: "🎧", komga: "📚", booklore: "📖",
-  }
+  // Map "plex" back to "tautulli" since data keys use tautulli
+  const ACTIVE_MAP = { plex: "tautulli", films: "tautulli" }
+  const activeSvcs = new Set((activeServices || []).flatMap((s) => [s, ACTIVE_MAP[s] || s]))
 
   for (const [svc, data] of Object.entries(recapData)) {
-    if (svc === "global" || !data || typeof data !== "object") continue
-    const emoji = SERVICE_EMOJI[svc] || "🎬"
+    if (svc === "global" || svc === "users" || svc === "comparison" || !data || typeof data !== "object") continue
+    if (activeServices && !activeSvcs.has(svc)) continue
 
     // Films
     const filmsTop = data.extra?.films?.top || []
     for (const f of filmsTop.slice(0, 8)) {
-      if (f.thumb) posters.push({ thumb: f.thumb, t: f.t, emoji })
+      if (f.thumb) posters.push({ thumb: f.thumb, t: f.t })
     }
 
     // Series
     const seriesTop = data.extra?.series?.top || []
     for (const s of seriesTop.slice(0, 4)) {
-      if (s.thumb) posters.push({ thumb: s.thumb, t: s.t, emoji })
+      if (s.thumb) posters.push({ thumb: s.thumb, t: s.t })
     }
 
     // Top items (other services)
     if (!filmsTop.length && !seriesTop.length) {
       const top = data.top || []
       for (const t of top.slice(0, 4)) {
-        if (t.thumb) posters.push({ thumb: t.thumb, t: t.t, emoji })
+        if (t.thumb) posters.push({ thumb: t.thumb, t: t.t })
       }
     }
   }
@@ -81,15 +67,15 @@ function collectPosters(recapData) {
   return posters
 }
 
-export default function FinaleSlide({ accent, userName, year, globalStats, recapData, onRestart }) {
+export default function FinaleSlide({ accent, userName, year, globalStats, recapData, activeServices, onRestart }) {
   const active = useActive()
-  const posters = collectPosters(recapData)
+  const posters = collectPosters(recapData, activeServices)
 
   return (
     <div style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
 
-      {/* Poster filmstrip */}
-      <PosterStrip posters={posters} accent={accent} />
+      {/* Poster wall background */}
+      <PosterWall posters={posters} />
 
       {/* Content */}
       <div style={{ position: "relative", zIndex: 5, textAlign: "center", maxWidth: 400, width: "100%", padding: "0 20px" }}>
