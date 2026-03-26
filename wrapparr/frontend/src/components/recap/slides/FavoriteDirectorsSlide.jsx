@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useComparison } from "../SharedUI"
 
 const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23222' width='80' height='80'/%3E%3Ccircle cx='40' cy='30' r='14' fill='%23444'/%3E%3Cellipse cx='40' cy='70' rx='22' ry='18' fill='%23444'/%3E%3C/svg%3E"
 
@@ -91,6 +92,9 @@ export default function FavoriteDirectorsSlide({ accent, data, year, config = {}
   const minAppearances = config.minAppearances || 2
   const maxCards = config.maxCards || 6
   const directors = (data?.extra?.directors || []).filter((d) => d.count >= minAppearances).slice(0, maxCards)
+  const comp = useComparison()
+  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevDirectors = (prevSvc?.films?.directors?.previous || prevSvc?.directors?.previous || []).slice(0, 3)
 
   const [phase, setPhase] = useState(0)
   const [revealedCount, setRevealedCount] = useState(0)
@@ -140,6 +144,24 @@ export default function FavoriteDirectorsSlide({ accent, data, year, config = {}
           {directors.length} realisateurs presents dans plusieurs de tes films
         </div>
       )}
+
+      {/* Previous year top 3 directors */}
+      {done && prevDirectors.length > 0 && (<>
+        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "12px 0" }} />
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 6 }}>{year - 1}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {prevDirectors.map((d, i) => (
+            <div key={d.n + i} style={{ display: "flex", alignItems: "center", gap: 8, animation: "slide-up 0.4s ease " + (i * 0.1) + "s both" }}>
+              <span style={{ width: 16, fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", textAlign: "center", flexShrink: 0 }}>{i + 1}</span>
+              <img src={d.photo || FALLBACK_AVATAR} alt="" style={{ width: 26, height: 26, borderRadius: "50%", objectFit: "cover", flexShrink: 0, opacity: 0.6 }} onError={(e) => { e.target.src = FALLBACK_AVATAR }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.45)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.n}</div>
+              </div>
+              <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{d.count} films</span>
+            </div>
+          ))}
+        </div>
+      </>)}
     </div>
   )
 }
