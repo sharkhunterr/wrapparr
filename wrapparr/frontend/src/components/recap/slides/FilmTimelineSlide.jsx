@@ -43,27 +43,27 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
   const newestFilm = filmsWithYear.length > 0 ? filmsWithYear.reduce((a, b) => ((a.y || a.year) > (b.y || b.year) ? a : b)) : null
   const profile = getProfile(avgYear, profiles)
 
-  // Decade buckets
-  const decadeBuckets = {}
-  for (const [y, count] of Object.entries(yearCounts)) {
-    const decade = Math.floor(parseInt(y) / 10) * 10
-    decadeBuckets[decade] = (decadeBuckets[decade] || 0) + count
-  }
-  const maxBucket = Math.max(1, ...Object.values(decadeBuckets))
+  // Auto-detect year range from data (oldest film year, floored to decade)
+  const dataYears = Object.keys(yearCounts).map(Number).filter((y) => y > 1890)
+  const oldestDataYear = dataYears.length > 0 ? Math.floor(Math.min(...dataYears) / 10) * 10 : 1990
+  const minYearCfg = config.minYear || oldestDataYear
+  const maxYearCfg = new Date().getFullYear()
 
-  const minYear = config.minYear || 1940
-  const maxYear = Math.max(2030, new Date().getFullYear())
-  const range = maxYear - minYear
-  const DECADES = ALL_DECADES.filter((d) => d >= minYear)
+  // Build all years array from minYear to maxYear
+  const allYears = []
+  for (let y = minYearCfg; y <= maxYearCfg; y++) allYears.push(y)
+  const maxBucket = Math.max(1, ...Object.values(yearCounts).map(Number))
 
   // Comparison data
   const comp = useComparison()
   const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
-  const prevDecades = prevSvc?.films?.decades?.previous || null
-  const prevBuckets = prevDecades?.buckets || {}
-  const prevAvgYear = prevDecades?.avg_year || 0
+  const prevYearDist = prevSvc?.films?.year_dist?.previous || null
+  const prevYearBuckets = prevYearDist?.years || {}
+  const prevAvgYear = prevYearDist?.avg_year || 0
   const prevProfile = prevAvgYear > 0 ? getProfile(prevAvgYear, profiles) : null
-  const maxBucketAll = comp.active ? Math.max(maxBucket, ...Object.values(prevBuckets).map(Number)) : maxBucket
+  const maxBucketAll = comp.active ? Math.max(maxBucket, ...Object.values(prevYearBuckets).map(Number)) : maxBucket
+
+  const range = maxYearCfg - minYearCfg
 
   // Animation
   const [phase, setPhase] = useState(0) // 0=idle, 1=cursor, 2=profile, 3=bars, 4=done
@@ -77,7 +77,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
       setPhase(1)
       startRef.current = performance.now()
       const dur = animSpeed * 0.4
-      const targetPos = ((avgYear - minYear) / range) * 100
+      const targetPos = ((avgYear - minYearCfg) / range) * 100
       const tick = (now) => {
         const p = Math.min(1, (now - startRef.current) / dur)
         setCursorPos((1 - Math.pow(1 - p, 3)) * targetPos)
@@ -113,10 +113,13 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ fontSize: 26 }}>{profile.emoji}</div>
-            <div>
+            <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: accent }}>{profile.name}</div>
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", lineHeight: 1.3 }}>{profile.desc}</div>
-              <div style={{ fontSize: 9, color: accent + "90", fontFamily: "JetBrains Mono,monospace", marginTop: 3 }}>Annee moyenne : {avgYear}</div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{avgYear}</div>
+              <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
             </div>
           </div>
         </div>
@@ -131,81 +134,115 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ fontSize: 18, opacity: 0.5 }}>{prevProfile.emoji}</div>
-            <div>
+            <div style={{ flex: 1 }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>{prevProfile.name} <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)" }}>({year - 1})</span></div>
-              <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace", marginTop: 2 }}>Annee moyenne : {prevAvgYear}</div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{prevAvgYear}</div>
+              <div style={{ fontSize: 7, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
             </div>
           </div>
         </div>
       )}
 
       {/* Timeline with vertical bars */}
-      <div style={{ position: "relative", padding: "0 8px" }}>
+      <div className="glass" style={{ padding: "10px 12px", marginBottom: 10 }}>
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.32)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>Films par annee de sortie</div>
 
-        {/* Vertical bars area — positioned above the track line */}
-        <div style={{ position: "relative", height: TIMELINE_H, marginBottom: 4 }}>
-          {DECADES.map((decade, i) => {
-            const count = decadeBuckets[decade] || 0
-            const prevCount = comp.active ? (prevBuckets[String(decade)] || 0) : 0
-            const effectiveMax = comp.active ? maxBucketAll : maxBucket
-            const pct = count > 0 ? (count / effectiveMax) * 100 : 0
-            const prevPct = prevCount > 0 ? (prevCount / effectiveMax) * 100 : 0
-            const left = ((decade - minYear) / range) * 100
-            const barW = (10 / range) * 100 // width = 10 years
-            const isAvgDecade = Math.floor(avgYear / 10) * 10 === decade
-            const color = isAvgDecade ? accent : (count > 0 ? accent + "70" : "rgba(255,255,255,0.04)")
-            const delay = i * 0.06
-            const showPrev = comp.active && prevDecades
+        {/* Vertical bars area — one thin bar per year */}
+        {/* Chart area with Y labels on left */}
+        <div style={{ display: "flex", gap: 0 }}>
+          {/* Y axis labels */}
+          <div style={{ width: 22, position: "relative", height: TIMELINE_H, flexShrink: 0 }}>
+            {[0.25, 0.5, 0.75, 1].map((pct) => (
+              <div key={pct} style={{ position: "absolute", right: 4, bottom: (pct * TIMELINE_H - 5) + "px", fontSize: 7, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace" }}>{Math.round(maxBucketAll * pct)}</div>
+            ))}
+          </div>
 
-            return (
-              <div key={decade} style={{
-                position: "absolute", bottom: 0, left: left + "%", width: Math.max(barW, 3) + "%",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
-                height: "100%",
-              }}>
-                <div style={{ display: "flex", gap: 1, alignItems: "flex-end", height: "100%", width: "100%" }}>
-                  {/* Current year bar */}
-                  <div style={{
-                    flex: 1, borderRadius: "3px 3px 0 0",
-                    background: color,
-                    height: (barsGrowing || done) ? Math.max(count > 0 ? 3 : 0, pct * TIMELINE_H / 100) + "px" : "0px",
-                    transition: "height 0.8s cubic-bezier(0.25,0.46,0.45,0.94) " + delay + "s",
-                    boxShadow: isAvgDecade ? "0 0 8px " + accent + "40" : "none",
-                  }} />
-                  {/* Previous year bar */}
-                  {showPrev && (
-                    <div style={{
-                      flex: 1, borderRadius: "3px 3px 0 0",
-                      background: prevCount > 0 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.03)",
-                      height: (barsGrowing || done) ? Math.max(prevCount > 0 ? 3 : 0, prevPct * TIMELINE_H / 100) + "px" : "0px",
-                      transition: "height 0.8s cubic-bezier(0.25,0.46,0.45,0.94) " + (delay + 0.1) + "s",
-                    }} />
-                  )}
-                </div>
+          {/* Bars + grid + vertical indicators */}
+          <div style={{ flex: 1, position: "relative", height: TIMELINE_H }}>
+            {/* Horizontal grid lines */}
+            {[0.25, 0.5, 0.75, 1].map((pct) => (
+              <div key={pct} style={{ position: "absolute", left: 0, right: 0, bottom: (pct * TIMELINE_H) + "px", height: 1, background: "rgba(255,255,255,0.04)" }} />
+            ))}
+            {/* Average year vertical line + label */}
+            {phase >= 2 && avgYear >= minYearCfg && avgYear <= maxYearCfg && (
+              <div style={{ position: "absolute", left: ((avgYear - minYearCfg) / range * 100) + "%", top: 0, bottom: 0, zIndex: 3, pointerEvents: "none" }}>
+                <div style={{ position: "absolute", left: -1, top: 0, bottom: 0, width: 2, background: accent + "50", animation: "pulse-line 2s ease-in-out infinite" }} />
+                <div style={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontWeight: 700, color: accent, fontFamily: "JetBrains Mono,monospace", whiteSpace: "nowrap", textShadow: "0 0 8px rgba(0,0,0,0.8)" }}>{avgYear}</div>
               </div>
-            )
-          })}
+            )}
+            {/* Previous avg year vertical line */}
+            {comp.active && prevAvgYear > 0 && phase >= 2 && prevAvgYear >= minYearCfg && prevAvgYear <= maxYearCfg && (
+              <div style={{ position: "absolute", left: ((prevAvgYear - minYearCfg) / range * 100) + "%", top: 0, bottom: 0, zIndex: 2, pointerEvents: "none" }}>
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: "rgba(255,255,255,0.15)", borderLeft: "1px dashed rgba(255,255,255,0.25)" }} />
+                <div style={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", fontSize: 7, fontWeight: 600, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", whiteSpace: "nowrap" }}>{prevAvgYear}</div>
+              </div>
+            )}
+            {/* Bars */}
+            <div style={{ display: "flex", alignItems: "flex-end", height: "100%", gap: 1, position: "relative", zIndex: 1 }}>
+              {allYears.map((yr, i) => {
+                const count = yearCounts[yr] || 0
+                const prevCount = comp.active ? (parseInt(prevYearBuckets[String(yr)]) || 0) : 0
+                const effectiveMax = comp.active ? maxBucketAll : maxBucket
+                const pct = count > 0 ? (count / effectiveMax) * 100 : 0
+                const prevPct = prevCount > 0 ? (prevCount / effectiveMax) * 100 : 0
+                const isAvgYear = yr === avgYear
+                const color = isAvgYear ? accent : (count > 0 ? accent + "70" : "transparent")
+                const delay = Math.min(i * 0.008, 0.8)
+                const showPrev = comp.active && prevYearDist
+
+                return (
+                  <div key={yr} style={{ flex: 1, display: "flex", gap: 0, alignItems: "flex-end", height: "100%" }}>
+                    <div style={{
+                      flex: 1, borderRadius: "1px 1px 0 0",
+                      background: color,
+                      height: (barsGrowing || done) ? Math.max(count > 0 ? 2 : 0, pct * TIMELINE_H / 100) + "px" : "0px",
+                      transition: "height 0.6s ease " + delay + "s",
+                      boxShadow: isAvgYear ? "0 0 6px " + accent + "50" : "none",
+                    }} />
+                    {showPrev && (
+                      <div style={{
+                        flex: 1, borderRadius: "1px 1px 0 0",
+                        background: prevCount > 0 ? "rgba(255,255,255,0.2)" : "transparent",
+                        height: (barsGrowing || done) ? Math.max(prevCount > 0 ? 2 : 0, prevPct * TIMELINE_H / 100) + "px" : "0px",
+                        transition: "height 0.6s ease " + (delay + 0.05) + "s",
+                      }} />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* X axis ticks (decades only) */}
+            <div style={{ position: "relative", height: 12, marginTop: 2 }}>
+              {ALL_DECADES.filter((d) => d >= minYearCfg && d <= maxYearCfg).map((decade) => {
+                const left = ((decade - minYearCfg) / range) * 100
+                return <div key={decade} style={{ position: "absolute", left: left + "%", top: 0, display: "flex", flexDirection: "column", alignItems: "center", transform: "translateX(-50%)" }}>
+                  <div style={{ width: 1, height: 4, background: "rgba(255,255,255,0.12)" }} />
+                  <div style={{ fontSize: 6, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", marginTop: 1 }}>{decade}</div>
+                </div>
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Track line */}
-        <div style={{ height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 1, position: "relative" }}>
-          {/* Colored fill */}
+        {/* Track line — aligned with bars (offset by Y axis width) */}
+        <div style={{ marginLeft: 22, marginTop: 14, height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 1, position: "relative" }}>
           <div style={{
             position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 1,
             width: cursorPos + "%",
             background: "linear-gradient(90deg, " + accent + "30, " + accent + ")",
           }} />
-          {/* Previous year cursor dot (grey) */}
           {comp.active && prevAvgYear > 0 && phase >= 2 && (
             <div style={{
-              position: "absolute", top: "50%", left: ((prevAvgYear - minYear) / range * 100) + "%",
+              position: "absolute", top: "50%", left: ((prevAvgYear - minYearCfg) / range * 100) + "%",
               transform: "translate(-50%, -50%)",
               width: 10, height: 10, borderRadius: "50%",
               background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)",
               zIndex: 4,
             }} />
           )}
-          {/* Cursor dot */}
           <div style={{
             position: "absolute", top: "50%", left: cursorPos + "%",
             transform: "translate(-50%, -50%)",
@@ -216,20 +253,9 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
           }} />
         </div>
 
-        {/* Decade labels below track */}
-        <div style={{ position: "relative", height: 16, marginTop: 4 }}>
-          {DECADES.map((decade) => {
-            const left = ((decade - minYear) / range) * 100
-            return <div key={decade} style={{
-              position: "absolute", left: left + "%", transform: "translateX(-50%)",
-              fontSize: 7, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace",
-            }}>{decade}</div>
-          })}
-        </div>
-
         {/* Legend */}
-        {comp.active && prevDecades && done && (
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
+        {comp.active && prevYearDist && done && (
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
               <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
             </span>
@@ -240,15 +266,6 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
         )}
 
       </div>
-
-      {/* Summary stat */}
-      {done && totalCount > 0 && (
-        <div style={{ marginTop: 14, padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", animation: "slide-up 0.4s ease 0.3s both" }}>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>
-            {totalCount} {isSeries ? "series analysees" : "films analyses"} — annee moyenne <span style={{ color: accent, fontWeight: 700 }}>{avgYear}</span>
-          </div>
-        </div>
-      )}
 
       {/* Oldest vs Newest film */}
       {done && oldestFilm && newestFilm && oldestFilm !== newestFilm && (
