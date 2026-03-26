@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import { useComparison } from "../SharedUI"
 
 const DEFAULT_BRACKETS = [
   { min: 0, max: 4, label: "Navet", emoji: "🥬" },
@@ -20,7 +21,7 @@ function getBracket(rating, brackets) {
 }
 
 // Semi-circular gauge SVG using strokeDasharray for smooth animation
-function Gauge({ value, max = 10, accent, animated, size = 200 }) {
+function Gauge({ value, max = 10, accent, animated, size = 200, prevValue }) {
   const cx = size / 2
   const cy = size / 2 + 10
   const r = size / 2 - 18
@@ -85,6 +86,20 @@ function Gauge({ value, max = 10, accent, animated, size = 200 }) {
       <text x={cx} y={cy + 6} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.3)" fontSize={10} fontFamily="JetBrains Mono,monospace">
         / {max}
       </text>
+      {/* Previous year indicator line */}
+      {prevValue > 0 && animated && (() => {
+        const prevAngle = Math.PI - (prevValue / max) * Math.PI
+        const x1 = cx + (r - 16) * Math.cos(prevAngle)
+        const y1 = cy - (r - 16) * Math.sin(prevAngle)
+        const x2 = cx + (r + 16) * Math.cos(prevAngle)
+        const y2 = cy - (r + 16) * Math.sin(prevAngle)
+        const lx = cx + (r - 28) * Math.cos(prevAngle)
+        const ly = cy - (r - 28) * Math.sin(prevAngle)
+        return <g style={{ animation: "slide-up 0.4s ease 1.5s both" }}>
+          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.4)" strokeWidth={2} strokeDasharray="3 2" />
+          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.35)" fontSize={9} fontWeight={700} fontFamily="JetBrains Mono,monospace">{prevValue.toFixed(1)}</text>
+        </g>
+      })()}
     </svg>
   )
 }
@@ -118,12 +133,20 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
   // Compute average
   const avg = ratings.reduce((s, r) => s + r.r, 0) / ratings.length
 
+  // Comparison data
+  const comp = useComparison()
+  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevRatingsStats = prevSvc?.films?.ratings_stats?.previous || null
+  const prevAvg = prevRatingsStats?.avg || 0
+  const prevDist = prevRatingsStats?.distribution || []
+
   // Build bracket distribution
-  const distribution = brackets.map((b) => {
+  const distribution = brackets.map((b, bi) => {
     const films = ratings.filter((r) => r.r >= b.min && r.r < (b.max === 10 ? 10.1 : b.max))
-    return { ...b, count: films.length, films }
+    return { ...b, count: films.length, films, prevCount: prevDist[bi] ?? null }
   })
-  const maxCount = Math.max(1, ...distribution.map((d) => d.count))
+  const allMaxCount = Math.max(1, ...distribution.map((d) => d.count), ...prevDist.map(Number))
+  const maxCount = allMaxCount
 
   // Find dominant bracket for the average
   const avgBracket = getBracket(avg, brackets)
@@ -142,7 +165,20 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
       </div>
 
       {/* Gauge */}
-      <Gauge value={avg} accent={accent} animated={gaugeAnimated} />
+      <Gauge value={avg} accent={accent} animated={gaugeAnimated} prevValue={comp.active ? prevAvg : 0} />
+
+      {/* Gauge legend when comparison active */}
+      {comp.active && prevAvg > 0 && gaugeAnimated && (
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: -2, marginBottom: 4, animation: "slide-up 0.4s ease 1.6s both" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 8, color: accent }}>
+            <span style={{ width: 10, height: 2.5, borderRadius: 2, background: accent }} />{year}
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 8, color: "rgba(255,255,255,0.35)" }}>
+            <svg width="10" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="10" y2="1.5" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeDasharray="2 1.5" /></svg>
+            {year - 1}
+          </span>
+        </div>
+      )}
 
       {/* Profile badge */}
       {gaugeAnimated && (
@@ -176,28 +212,53 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
                 <div style={{ width: 60, fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>
                   {b.min}-{b.max}
                 </div>
-                <div style={{ flex: 1, height: 18, background: "rgba(255,255,255,0.03)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
-                  <div style={{
-                    height: "100%", borderRadius: 4,
-                    background: `linear-gradient(90deg, ${b.color}90, ${b.color})`,
-                    width: done ? pct + "%" : "0%",
-                    transition: "width 0.8s cubic-bezier(0.25,0.46,0.45,0.94) " + delay + "s",
-                    boxShadow: b.count > 0 ? `0 0 8px ${b.color}30` : "none",
-                  }} />
-                  {done && b.count > 0 && (
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                  <div style={{ height: 18, background: "rgba(255,255,255,0.03)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
                     <div style={{
-                      position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                      fontSize: 9, fontWeight: 700, color: "white",
-                      fontFamily: "JetBrains Mono,monospace",
-                      textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                    }}>
-                      {b.count} film{b.count > 1 ? "s" : ""}
+                      height: "100%", borderRadius: 4,
+                      background: `linear-gradient(90deg, ${b.color}90, ${b.color})`,
+                      width: done ? pct + "%" : "0%",
+                      transition: "width 0.8s cubic-bezier(0.25,0.46,0.45,0.94) " + delay + "s",
+                      boxShadow: b.count > 0 ? `0 0 8px ${b.color}30` : "none",
+                    }} />
+                    {done && b.count > 0 && (
+                      <div style={{
+                        position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
+                        fontSize: 9, fontWeight: 700, color: "white",
+                        fontFamily: "JetBrains Mono,monospace",
+                        textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+                      }}>
+                        {b.count}
+                      </div>
+                    )}
+                  </div>
+                  {comp.active && b.prevCount != null && (
+                    <div style={{ height: 12, background: "rgba(255,255,255,0.02)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                      {b.prevCount > 0 && <div style={{
+                        height: "100%", borderRadius: 3,
+                        background: "rgba(255,255,255,0.12)",
+                        width: done ? ((b.prevCount / maxCount) * 100) + "%" : "0%",
+                        transition: "width 0.8s cubic-bezier(0.25,0.46,0.45,0.94) " + (delay + 0.15) + "s",
+                      }} />}
+                      <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 600, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace" }}>
+                        {b.prevCount}
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
             )
           })}
+          {comp.active && prevDist.length > 0 && (
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 4 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
+                <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
+                <span style={{ width: 10, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />{year - 1}
+              </span>
+            </div>
+          )}
         </div>
       )}
 

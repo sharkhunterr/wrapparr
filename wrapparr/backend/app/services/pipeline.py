@@ -455,9 +455,11 @@ class RecapPipeline:
                     if cur_list or prev_list:
                         comp[mtype][key] = {"current": cur_list, "previous": prev_list}
 
-            # Ratings (per-media)
-            cur_ratings = src_cur.get("ratings", [])[:3]
-            prev_ratings = src_prev.get("ratings", [])[:3]
+            # Ratings (per-media) — top rated + average + distribution
+            cur_all_r = src_cur.get("ratings", [])
+            prev_all_r = src_prev.get("ratings", [])
+            cur_ratings = cur_all_r[:3]
+            prev_ratings = prev_all_r[:3]
             if cur_ratings or prev_ratings:
                 comp[mtype]["top_rated"] = {
                     "current": _enrich_ratings(cur_ratings, cur_extra),
@@ -465,15 +467,31 @@ class RecapPipeline:
                 }
 
             # Worst rated
-            cur_all_ratings = src_cur.get("ratings", [])
-            prev_all_ratings = src_prev.get("ratings", [])
-            cur_worst = [r for r in cur_all_ratings if (r.get("r") or 0) > 0][-1:] if cur_all_ratings else []
-            prev_worst = [r for r in prev_all_ratings if (r.get("r") or 0) > 0][-1:] if prev_all_ratings else []
+            cur_worst = [r for r in cur_all_r if (r.get("r") or 0) > 0][-1:] if cur_all_r else []
+            prev_worst = [r for r in prev_all_r if (r.get("r") or 0) > 0][-1:] if prev_all_r else []
             if cur_worst or prev_worst:
                 comp[mtype]["worst_rated"] = {
                     "current": _enrich_ratings(cur_worst, cur_extra),
                     "previous": _enrich_ratings(prev_worst, prev_extra),
                 }
+
+            # Ratings stats: average + bracket distribution
+            def _ratings_stats(all_ratings):
+                valid = [r for r in all_ratings if (r.get("r") or 0) > 0]
+                if not valid:
+                    return None
+                avg = round(sum(r["r"] for r in valid) / len(valid), 2)
+                # Distribution by bracket
+                BRACKETS = [(0, 4), (4, 6), (6, 7), (7, 8), (8, 10.1)]
+                dist = []
+                for bmin, bmax in BRACKETS:
+                    dist.append(sum(1 for r in valid if r["r"] >= bmin and r["r"] < bmax))
+                return {"avg": avg, "count": len(valid), "distribution": dist}
+
+            cur_stats = _ratings_stats(cur_all_r)
+            prev_stats = _ratings_stats(prev_all_r)
+            if cur_stats or prev_stats:
+                comp[mtype]["ratings_stats"] = {"current": cur_stats, "previous": prev_stats}
 
         # Keep root-level for backward compat
         if "films" in comp and "actors" in comp["films"]:

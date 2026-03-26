@@ -227,6 +227,18 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
           })}
         </div>
 
+        {/* Legend */}
+        {comp.active && prevDecades && done && (
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
+              <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
+              <span style={{ width: 10, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />{year - 1}
+            </span>
+          </div>
+        )}
+
       </div>
 
       {/* Summary stat */}

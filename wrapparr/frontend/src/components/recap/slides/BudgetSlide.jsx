@@ -280,6 +280,16 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
                   const prevB = prevDist.find((p) => p.label === b.label)
                   return <BracketBar key={b.label} label={b.label} count={b.count} maxCount={maxBracket} accent={accent} delay={i * 0.12} animated={phase >= 2} prevCount={comp.active ? (prevB?.count ?? 0) : undefined} />
                 })}
+                {comp.active && prevBudgets && (
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 4 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
+                      <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
+                      <span style={{ width: 10, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />{year - 1}
+                    </span>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
