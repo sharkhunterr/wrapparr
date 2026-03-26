@@ -144,6 +144,16 @@ class RecapPipeline:
                             if uid == admin_uid or not root_comparison:
                                 root_comparison.update(comparison)
                 if root_comparison:
+                    # Aggregate community top films/series for both years
+                    for svc_key in root_comparison:
+                        if svc_key in ("global",):
+                            continue
+                        root_comparison[svc_key]["top_films"] = self._aggregate_community_top(
+                            users_data, prev_users, prev_year_data, admin_uid, svc_key, "films"
+                        )
+                        root_comparison[svc_key]["top_series"] = self._aggregate_community_top(
+                            users_data, prev_users, prev_year_data, admin_uid, svc_key, "series"
+                        )
                     recap_data["comparison"] = root_comparison
 
             # Step 3: Posters
@@ -312,19 +322,108 @@ class RecapPipeline:
                     "previous": prev_monthly[i].get("v", 0),
                 })
 
-        # Films/series specific
-        if cur_extra.get("films"):
-            comp["films"] = {
-                "current": cur_extra["films"].get("total", 0),
-                "previous": prev_extra.get("films", {}).get("total", 0),
+        # Films/series specific (count + per-media monthly, genres, hours)
+        for mtype in ("films", "series"):
+            cur_m = cur_extra.get(mtype, {})
+            prev_m = prev_extra.get(mtype, {})
+            if not cur_m:
+                continue
+            count_key = "total" if mtype == "films" else "episodes"
+            entry = {
+                "current": cur_m.get(count_key, 0),
+                "previous": prev_m.get(count_key, 0),
             }
-        if cur_extra.get("series"):
-            comp["series"] = {
-                "current": cur_extra["series"].get("episodes", 0),
-                "previous": prev_extra.get("series", {}).get("episodes", 0),
+            # Per-media hours
+            entry["hours"] = {
+                "current": cur_m.get("hours", 0),
+                "previous": prev_m.get("hours", 0),
             }
+            # Per-media monthly
+            cm = cur_m.get("monthly", [])
+            pm = prev_m.get("monthly", [])
+            if cm and pm:
+                entry["monthly"] = []
+                for i in range(min(len(cm), len(pm))):
+                    entry["monthly"].append({
+                        "m": cm[i].get("m", ""),
+                        "current": cm[i].get("v", 0),
+                        "previous": pm[i].get("v", 0),
+                    })
+            # Per-media genres
+            cur_g_list = cur_m.get("genres", current.get("genres", []))
+            prev_g_list = prev_m.get("genres", previous.get("genres", []))
+            cur_g = {g["n"]: g["v"] for g in cur_g_list}
+            prev_g = {g["n"]: g["v"] for g in prev_g_list}
+            all_g = sorted(
+                set(list(cur_g.keys()) + list(prev_g.keys())),
+                key=lambda n: -(cur_g.get(n, 0) + prev_g.get(n, 0)),
+            )
+            entry["genres"] = [
+                {"n": n, "current": cur_g.get(n, 0), "previous": prev_g.get(n, 0)}
+                for n in all_g[:8]
+            ]
+            comp[mtype] = entry
 
         return comp
+
+    @staticmethod
+    def _aggregate_community_top(
+        users_data: dict, prev_users: dict, prev_year_data: dict,
+        admin_uid: str, svc_key: str, media_type: str,
+    ) -> dict:
+        """Aggregate top films/series across all users for current and previous year.
+
+        Returns {
+            "current": {"by_views": [...top3], "by_users": [...top3]},
+            "previous": {"by_views": [...top3], "by_users": [...top3]},
+        }
+        """
+        def _collect(all_users_data: dict, svc: str, mtype: str) -> dict:
+            """Collect items across users, return {by_views: [...], by_users: [...]}."""
+            item_map: dict[str, dict] = {}
+            extra_key = "films" if mtype == "films" else "series"
+            for uid, udata in all_users_data.items():
+                svc_data = udata.get(svc, {})
+                extra = svc_data.get("extra", {}).get(extra_key, {})
+                top = extra.get("top", [])
+                if not top and mtype == "films":
+                    top = svc_data.get("top", [])
+                for item in top:
+                    key = (item.get("t") or "").lower().strip()
+                    if not key:
+                        continue
+                    if key not in item_map:
+                        item_map[key] = {
+                            "t": item.get("t", ""),
+                            "thumb": item.get("thumb", ""),
+                            "y": item.get("y", 0),
+                            "total_views": 0,
+                            "users": set(),
+                        }
+                    views = item.get("ep") or item.get("plays") or item.get("v") or 1
+                    item_map[key]["total_views"] += views
+                    item_map[key]["users"].add(uid)
+                    if not item_map[key]["thumb"] and item.get("thumb"):
+                        item_map[key]["thumb"] = item["thumb"]
+
+            items = list(item_map.values())
+            for it in items:
+                it["user_count"] = len(it["users"])
+                del it["users"]
+
+            by_views = sorted(items, key=lambda x: -x["total_views"])[:3]
+            by_users = sorted(items, key=lambda x: (-x["user_count"], -x["total_views"]))[:3]
+            return {"by_views": by_views, "by_users": by_users}
+
+        current = _collect(users_data, svc_key, media_type)
+
+        # Previous year: try per-user data first, fallback to root-level
+        prev_all = prev_users if prev_users else {}
+        if not prev_all and prev_year_data:
+            prev_all = {admin_uid: prev_year_data}
+        previous = _collect(prev_all, svc_key, media_type)
+
+        return {"current": current, "previous": previous}
 
     @staticmethod
     def _extract_user_metrics(svc_data: dict) -> dict:
