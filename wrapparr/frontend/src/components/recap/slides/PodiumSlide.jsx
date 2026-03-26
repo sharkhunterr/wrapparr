@@ -11,10 +11,11 @@ const DEFAULT_CONFIG = {
   reveal3: 2000,       // ms delay for #1
 }
 
-function PosterImg({ src, size = 56, accent }) {
+function PosterImg({ src, size = 56, accent, noFrame }) {
   const [err, setErr] = useState(false)
-  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 8, background: accent + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.35, boxShadow: "0 8px 32px " + accent + "55,0 0 0 2px " + accent + "40" }}>🎬</div>
-  return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: 8, objectFit: "cover", boxShadow: "0 8px 32px " + accent + "55,0 0 0 2px " + accent + "40" }} />
+  const shadow = noFrame ? "0 8px 32px " + accent + "55" : "0 8px 32px " + accent + "55,0 0 0 2px " + accent + "40"
+  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 8, background: accent + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.35, boxShadow: shadow }}>🎬</div>
+  return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: 8, objectFit: "cover", display: "block", boxShadow: shadow }} />
 }
 
 const PODIUM_H = [88, 110, 132]
@@ -100,8 +101,22 @@ export default function PodiumSlide({ accent, bg, data = [], title, icon, jokes 
               <div key={col} style={{ flex: isOne ? 1.15 : 1, display: "flex", flexDirection: "column", alignItems: "center", opacity: revealed[rIdx] ? 1 : 0 }}>
                 {isOne && revealed[rIdx] && <div style={{ fontSize: 24, marginBottom: 4, animation: "crown-bounce 1.8s ease-in-out infinite", filter: "drop-shadow(0 0 12px " + accent + ")" }}>👑</div>}
                 {revealed[rIdx] && <div style={{ fontSize: isOne ? 38 : 28, fontWeight: 800, marginBottom: 6, color: accent, textShadow: "0 0 30px " + accent, animation: "rank-stamp .5s cubic-bezier(0.34,1.56,0.64,1) both" }}>#{rank}</div>}
-                {revealed[rIdx] && <div style={{ animation: "poster-appear .65s cubic-bezier(0.34,1.3,0.64,1) both", marginBottom: 8, position: "relative" }}>
-                  <PosterImg src={item.thumb} size={posterSize} accent={accent} />
+                {revealed[rIdx] && <div style={{ animation: "poster-appear .65s cubic-bezier(0.34,1.3,0.64,1) both", marginBottom: 8, position: "relative", width: posterSize, height: posterSize * 1.45 }}>
+                  {isOne && <>
+                    {/* Static accent border */}
+                    <div style={{ position: "absolute", inset: -2, borderRadius: 10, border: `2px solid ${accent}60`, zIndex: 0 }} />
+                    {/* Rotating white shine on border */}
+                    <div style={{
+                      position: "absolute", inset: -2, borderRadius: 10, zIndex: 0, overflow: "hidden",
+                      WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                      WebkitMaskComposite: "xor", maskComposite: "exclude", padding: 2,
+                    }}>
+                      <div style={{ position: "absolute", inset: -40, background: "conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.9) 4%, white 6%, rgba(255,255,255,0.9) 8%, transparent 12%, transparent 100%)", animation: "glow-spin 2.5s linear infinite" }} />
+                    </div>
+                  </>}
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    <PosterImg src={item.thumb} size={posterSize} accent={accent} noFrame={isOne} />
+                  </div>
                 </div>}
                 <div style={{ width: "100%", borderRadius: "6px 6px 0 0", height: PODIUM_H[rIdx], background: revealed[rIdx] ? "linear-gradient(180deg," + accent + "38 0%," + accent + "18 100%)" : "rgba(255,255,255,0.04)", border: "1px solid " + (revealed[rIdx] ? accent + "55" : "rgba(255,255,255,0.05)"), borderBottom: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "10px 6px", animation: revealed[rIdx] ? "platform-rise .7s cubic-bezier(0.34,1.3,0.64,1) both" : "none" }}>
                   {revealed[rIdx] && <>
