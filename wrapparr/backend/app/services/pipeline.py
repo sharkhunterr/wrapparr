@@ -372,6 +372,26 @@ class RecapPipeline:
                     "previous": [{"t": f.get("t", ""), "thumb": f.get("thumb", ""), "plays": f.get("plays") or f.get("ep") or f.get("v", 0)} for f in prev_top],
                 }
 
+            # Decade distribution (for timeline/profile slide)
+            def _build_decades(top_list):
+                buckets = {}
+                total_w, total_c = 0, 0
+                for f in top_list:
+                    y = f.get("y") or f.get("year", 0)
+                    if y and y > 1890:
+                        plays = f.get("plays", 1) or 1
+                        decade = (y // 10) * 10
+                        buckets[decade] = buckets.get(decade, 0) + plays
+                        total_w += y * plays
+                        total_c += plays
+                avg = round(total_w / total_c) if total_c > 0 else 0
+                return {"buckets": {str(k): v for k, v in sorted(buckets.items())}, "avg_year": avg, "count": total_c}
+
+            cur_decades = _build_decades(cur_m.get("top", []))
+            prev_decades = _build_decades(prev_m.get("top", []))
+            if cur_decades["count"] > 0 or prev_decades["count"] > 0:
+                entry["decades"] = {"current": cur_decades, "previous": prev_decades}
+
             # Peak stats
             cur_peak = cur_m.get("peak_stats", {})
             prev_peak = prev_m.get("peak_stats", {})
