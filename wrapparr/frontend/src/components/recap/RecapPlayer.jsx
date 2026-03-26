@@ -640,9 +640,10 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       // Comparison slide (films)
       const filmCompare = data.comparison?.[svc]
       if (filmCompare) {
+        const bilanConfig = getSlideConfig(sc, svc + "-stats-enriched")
         slides.push({
           id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <CompareServiceSlide accent={svcAccent} compareData={filmCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} />,
+          component: <CompareServiceSlide accent={svcAccent} compareData={filmCompare} year={year} mediaType="films" config={getSlideConfig(sc, svc + "-compare")} bilanCategories={bilanConfig.categories} />,
         })
       }
 
@@ -741,9 +742,10 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         // Comparison series
         const seriesCompare = data.comparison?.[svc]
         if (seriesCompare) {
+          const seriesBilanConfig = getSlideConfig(sc, svc + "-series-stats-enriched")
           slides.push({
             id: svc + "-series-compare", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} config={getSlideConfig(sc, svc + "-series-compare")} />,
+            component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} mediaType="series" config={getSlideConfig(sc, svc + "-series-compare")} bilanCategories={seriesBilanConfig.categories} />,
           })
         }
 

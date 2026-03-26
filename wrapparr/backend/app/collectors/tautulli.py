@@ -279,14 +279,24 @@ class TautulliCollector(BaseCollector):
         if not tmdb:
             return {}
         poster = tmdb.get("poster_path", "")
+        countries = tmdb.get("production_countries", []) or []
+        origin = tmdb.get("origin_country", []) or []
+        networks = tmdb.get("networks", []) or []
         return {
             "title": tmdb.get("name", ""),
             "year": int(tmdb.get("first_air_date", "0000")[:4]) if tmdb.get("first_air_date") else 0,
+            "last_year": int(tmdb.get("last_air_date", "0000")[:4]) if tmdb.get("last_air_date") else 0,
             "genres": [g["name"] for g in tmdb.get("genres", [])],
             "audience_rating": str(round(tmdb.get("vote_average", 0), 1)) if tmdb.get("vote_average") else "",
             "rating": "",
             "thumb": f"https://image.tmdb.org/t/p/w300{poster}" if poster else "",
             "art": "",
+            "number_of_seasons": tmdb.get("number_of_seasons", 0),
+            "number_of_episodes": tmdb.get("number_of_episodes", 0),
+            "status": tmdb.get("status", ""),
+            "production_countries": [{"code": c.get("iso_3166_1", ""), "name": c.get("name", "")} for c in countries],
+            "origin_country": origin,
+            "networks": [n.get("name", "") for n in networks],
             "_source": "tmdb",
         }
 
@@ -318,11 +328,17 @@ class TautulliCollector(BaseCollector):
         monthly = self._build_monthly(records)
         ranking = self._build_ranking(raw)
 
-        # Films-only stats for the habits slide
+        # Films-only stats
         films_day_of_week = self._build_day_of_week(films)
         films_time_of_day = self._build_time_of_day(films)
         films_monthly = self._build_monthly(films)
         films_peak_stats = self._build_peak_stats(films)
+
+        # Series-only stats
+        series_day_of_week = self._build_day_of_week(series)
+        series_time_of_day = self._build_time_of_day(series)
+        series_monthly = self._build_monthly(series)
+        series_peak_stats = self._build_peak_stats(series)
 
         total_h_films = sum(r.get("duration", 0) for r in films) / 3600
         total_h_series = sum(r.get("duration", 0) for r in series) / 3600
@@ -342,7 +358,16 @@ class TautulliCollector(BaseCollector):
             ranking=ranking,
             extra={
                 "films": {"total": len(films), "hours": round(total_h_films, 1), "top": all_films, "monthly": films_monthly, "day_of_week": films_day_of_week, "time_of_day": films_time_of_day, "peak_stats": films_peak_stats},
-                "series": {"episodes": len(series), "hours": round(total_h_series, 1), "top": all_series},
+                "series": {
+                    "episodes": len(series), "hours": round(total_h_series, 1), "top": all_series,
+                    "monthly": series_monthly, "day_of_week": series_day_of_week,
+                    "time_of_day": series_time_of_day, "peak_stats": series_peak_stats,
+                    "genres": self._build_genres(series, metadata)[:6],
+                    "ratings": self._build_series_ratings(all_series),
+                    "countries": self._build_series_countries(all_series),
+                    "actors": self._build_actors(series, raw.get("credits", {})),
+                    "directors": self._build_directors(series, raw.get("credits", {})),
+                },
                 "backdrop": backdrop,
                 "top_genres": genres[:6],
                 "series_genres": self._build_genres(series, metadata)[:6],
@@ -355,6 +380,39 @@ class TautulliCollector(BaseCollector):
                 "peak_stats": self._build_peak_stats(records),
             },
         )
+
+    @staticmethod
+    def _build_series_ratings(all_series: list) -> list:
+        """Extract ratings from enriched series list."""
+        ratings = []
+        for s in all_series:
+            r = s.get("r") or 0
+            if r and float(r) > 0:
+                ratings.append({"t": s["t"], "r": round(float(r), 1), "thumb": s.get("thumb", "")})
+        return sorted(ratings, key=lambda x: -x["r"])
+
+    @staticmethod
+    def _build_series_countries(all_series: list) -> list:
+        """Build country counts from enriched series (origin_country + production_countries)."""
+        count = Counter()
+        names = {}
+        for s in all_series:
+            # Use origin_country first, fallback to production_countries
+            origins = s.get("origin_country", [])
+            prod_countries = s.get("countries", [])
+            codes = set()
+            for code in origins:
+                if code:
+                    codes.add(code)
+                    names[code] = code
+            for c in prod_countries:
+                code = c.get("code", "")
+                if code:
+                    codes.add(code)
+                    names[code] = c.get("name", code)
+            for code in codes:
+                count[code] += 1
+        return sorted([{"code": k, "name": names.get(k, k), "count": v} for k, v in count.items()], key=lambda x: -x["count"])
 
     @staticmethod
     def _build_budgets(all_films: list) -> dict:
@@ -413,7 +471,7 @@ class TautulliCollector(BaseCollector):
         for f in all_films:
             r = f.get("r") or 0
             if r and float(r) > 0:
-                ratings.append({"t": f["t"], "r": round(float(r), 1)})
+                ratings.append({"t": f["t"], "r": round(float(r), 1), "thumb": f.get("thumb", "")})
         return sorted(ratings, key=lambda x: -x["r"])
 
     def _build_actors(self, records: list, credits_by_rk: dict) -> list:
@@ -568,11 +626,18 @@ class TautulliCollector(BaseCollector):
                 raw_r = meta.get("audience_rating") or meta.get("rating") or 0
                 info[show] = {
                     "t": show,
+                    "y": meta.get("year") or 0,
                     "g": ", ".join(meta.get("genres", [])[:2]) if meta.get("genres") else "",
                     "r": self._to_rating(raw_r),
                     "ep": 0,
                     "thumb": self._poster_url(meta.get("thumb") or r.get("grandparent_thumb") or r.get("thumb", "")),
                     "art": self._poster_url(meta.get("art", "")),
+                    "seasons": meta.get("number_of_seasons", 0),
+                    "total_episodes": meta.get("number_of_episodes", 0),
+                    "status": meta.get("status", ""),
+                    "networks": meta.get("networks", []),
+                    "countries": meta.get("production_countries", []),
+                    "origin_country": meta.get("origin_country", []),
                     "_enriched": bool(meta),
                 }
             info[show]["ep"] = plays[show]

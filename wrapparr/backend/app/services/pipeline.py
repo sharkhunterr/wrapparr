@@ -362,7 +362,108 @@ class RecapPipeline:
                 {"n": n, "current": cur_g.get(n, 0), "previous": prev_g.get(n, 0)}
                 for n in all_g[:8]
             ]
+
+            # Top 3 most watched
+            cur_top = cur_m.get("top", [])[:3]
+            prev_top = prev_m.get("top", [])[:3]
+            if cur_top or prev_top:
+                entry["top"] = {
+                    "current": [{"t": f.get("t", ""), "thumb": f.get("thumb", ""), "plays": f.get("plays") or f.get("ep") or f.get("v", 0)} for f in cur_top],
+                    "previous": [{"t": f.get("t", ""), "thumb": f.get("thumb", ""), "plays": f.get("plays") or f.get("ep") or f.get("v", 0)} for f in prev_top],
+                }
+
+            # Peak stats
+            cur_peak = cur_m.get("peak_stats", {})
+            prev_peak = prev_m.get("peak_stats", {})
+            if cur_peak or prev_peak:
+                entry["peak"] = {"current": cur_peak, "previous": prev_peak}
+
             comp[mtype] = entry
+
+        # Helper to enrich ratings with thumbs from top lists
+        def _enrich_ratings(ratings: list, extra: dict) -> list:
+            thumb_map = {}
+            for mtype in ("films", "series"):
+                for item in extra.get(mtype, {}).get("top", []):
+                    thumb_map[item.get("t", "").lower()] = item.get("thumb", "")
+            for item in extra.get("top", []):
+                thumb_map[item.get("t", "").lower()] = item.get("thumb", "")
+            return [{"t": r.get("t", ""), "r": r.get("r", 0), "thumb": thumb_map.get(r.get("t", "").lower(), "")} for r in ratings]
+
+        def _extract_people(extra: dict, key: str) -> list:
+            return [{"n": a.get("name", ""), "count": a.get("count", 0), "photo": a.get("photo", "")} for a in extra.get(key, [])[:5]]
+
+        # Per-media actors, directors, ratings (films from root extra, series from extra.series)
+        for mtype in ("films", "series"):
+            if mtype not in comp:
+                continue
+            if mtype == "films":
+                src_cur, src_prev = cur_extra, prev_extra
+            else:
+                src_cur = cur_extra.get("series", {})
+                src_prev = prev_extra.get("series", {})
+
+            # Actors & directors (films only)
+            if mtype == "films":
+                for key in ("actors", "directors"):
+                    cur_list = _extract_people(cur_extra, key)
+                    prev_list = _extract_people(prev_extra, key)
+                    if cur_list or prev_list:
+                        comp[mtype][key] = {"current": cur_list, "previous": prev_list}
+
+            # Ratings (per-media)
+            cur_ratings = src_cur.get("ratings", [])[:3]
+            prev_ratings = src_prev.get("ratings", [])[:3]
+            if cur_ratings or prev_ratings:
+                comp[mtype]["top_rated"] = {
+                    "current": _enrich_ratings(cur_ratings, cur_extra),
+                    "previous": _enrich_ratings(prev_ratings, prev_extra),
+                }
+
+            # Worst rated
+            cur_all_ratings = src_cur.get("ratings", [])
+            prev_all_ratings = src_prev.get("ratings", [])
+            cur_worst = [r for r in cur_all_ratings if (r.get("r") or 0) > 0][-1:] if cur_all_ratings else []
+            prev_worst = [r for r in prev_all_ratings if (r.get("r") or 0) > 0][-1:] if prev_all_ratings else []
+            if cur_worst or prev_worst:
+                comp[mtype]["worst_rated"] = {
+                    "current": _enrich_ratings(cur_worst, cur_extra),
+                    "previous": _enrich_ratings(prev_worst, prev_extra),
+                }
+
+        # Keep root-level for backward compat
+        if "films" in comp and "actors" in comp["films"]:
+            comp["actors"] = comp["films"]["actors"]
+            comp["directors"] = comp["films"].get("directors", {})
+        if "films" in comp and "top_rated" in comp["films"]:
+            comp["top_rated"] = comp["films"]["top_rated"]
+            comp["worst_rated"] = comp["films"].get("worst_rated", {})
+
+        # Budget comparison (films only)
+        cur_budgets = cur_extra.get("budgets", {})
+        prev_budgets = prev_extra.get("budgets", {})
+        if cur_budgets or prev_budgets:
+            comp["budgets"] = {
+                "current": {"average": cur_budgets.get("average", 0), "count": cur_budgets.get("count", 0)},
+                "previous": {"average": prev_budgets.get("average", 0), "count": prev_budgets.get("count", 0)},
+            }
+
+        # Countries comparison (top 3)
+        cur_countries = cur_extra.get("countries", [])[:3]
+        prev_countries = prev_extra.get("countries", [])[:3]
+        # Also check series-specific countries
+        for mtype in ("films", "series"):
+            mt_countries = cur_extra.get(mtype, {}).get("countries", [])[:3]
+            if mt_countries and not cur_countries:
+                cur_countries = mt_countries
+            mt_countries_prev = prev_extra.get(mtype, {}).get("countries", [])[:3]
+            if mt_countries_prev and not prev_countries:
+                prev_countries = mt_countries_prev
+        if cur_countries or prev_countries:
+            comp["countries"] = {
+                "current": [{"n": c.get("name", c.get("code", "")), "v": c.get("count", 0)} for c in cur_countries],
+                "previous": [{"n": c.get("name", c.get("code", "")), "v": c.get("count", 0)} for c in prev_countries],
+            }
 
         return comp
 
