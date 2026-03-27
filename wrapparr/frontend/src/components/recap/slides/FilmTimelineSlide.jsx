@@ -93,7 +93,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
 
   const barsGrowing = phase >= 3
   const done = phase >= 4
-  const TIMELINE_H = 80 // max bar height in px
+  const TIMELINE_H = 110 // max bar height in px
 
   return (
     <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
@@ -272,20 +272,20 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
 
       {/* Oldest vs Newest film */}
       {done && oldestFilm && newestFilm && oldestFilm !== newestFilm && (
-        <div style={{ display: "flex", gap: 8, marginTop: 10, animation: "slide-up 0.4s ease 0.5s both" }}>
+        <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.5s both" }}>
           {[{ film: oldestFilm, label: "Le plus ancien", icon: "🎞️" }, { film: newestFilm, label: "Le plus recent", icon: "🆕" }].map(({ film, label, icon }) => (
-            <div key={label} style={{ flex: 1, display: "flex", gap: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+            <div key={label} style={{ flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(14px)" }}>
               {film.thumb ? (
-                <img src={film.thumb} alt="" style={{ width: 30, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+                <img src={film.thumb} alt="" style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }} onError={(e) => { e.target.style.display = "none" }} />
               ) : (
-                <div style={{ width: 30, height: 44, borderRadius: 4, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{icon}</div>
+                <div style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{icon}</div>
               )}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{film.t}</div>
-                <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{film.y || film.year}</span>
-                  {film.r > 0 && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>★ {film.r}</span>}
+              <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
+                <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{film.t}</div>
+                <div style={{ display: "flex", gap: 5, marginTop: 3 }}>
+                  <span style={{ fontSize: "clamp(10px, 1.3vw, 12px)", fontWeight: 700, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{film.y || film.year}</span>
+                  {film.r > 0 && <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.35)" }}>★ {film.r}</span>}
                 </div>
               </div>
             </div>
