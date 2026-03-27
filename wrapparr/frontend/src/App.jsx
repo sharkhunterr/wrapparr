@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink, Outlet, useNavigate, u
 import { useEffect, useState } from "react"
 import {
   LayoutDashboard, Link2, Users2, Film, Palette, UserCog,
-  KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard,
+  KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music,
 } from "lucide-react"
 import LoginPage from "./components/auth/LoginPage"
 import RecapPlayer from "./components/recap/RecapPlayer"
@@ -19,6 +19,7 @@ import UserMapping from "./components/admin/UserMapping"
 import SlideManager from "./components/admin/SlideManager"
 import ConnectionConfig from "./components/admin/ConnectionConfig"
 import RecapManager from "./components/admin/RecapManager"
+import MusicManager from "./components/admin/MusicManager"
 
 /* ── Auth guard ── */
 function useRequireAuth({ requireAdmin = false } = {}) {
@@ -126,6 +127,7 @@ const NAV_ITEMS = [
     { to: "/admin/recaps", icon: Clapperboard, label: "Gestion recaps", short: "Recaps" },
     { to: "/admin/slides", icon: Film, label: "Slides & paramètres", short: "Slides" },
     { to: "/admin/themes", icon: Palette, label: "Thèmes", short: "Thèmes" },
+    { to: "/admin/music", icon: Music, label: "Musique", short: "Musique" },
   ]},
   { section: "Système", items: [
     { to: "/admin/users", icon: UserCog, label: "Utilisateurs", short: "Users" },
@@ -306,6 +308,7 @@ export default function App() {
           <Route path="recaps" element={<RecapManager />} />
           <Route path="slides" element={<SlideManager />} />
           <Route path="themes" element={<ThemeManager />} />
+          <Route path="music" element={<MusicManager />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="connections" element={<ConnectionConfig />} />
           <Route path="config" element={<ConfigPanel />} />

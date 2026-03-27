@@ -154,6 +154,7 @@ export default function RecapPlayer() {
   const [fade, setFade] = useState(false)
   const [dir, setDir] = useState(1)
   const [comparisonActive, setComparisonActive] = useState(false)
+  const [recapConfig, setRecapConfig] = useState({})
   const touchY = useRef(null)
 
   // Load recap data — try active first, then specific year, then latest
@@ -174,6 +175,11 @@ export default function RecapPlayer() {
           || themes[0]
         setTheme(activeTheme?.config || null)
         setSlideConfigs(parsedCfg)
+
+        // Apply admin defaults
+        const recapCfg = parsedCfg.recap_config || {}
+        if (recapCfg.comparison_default_on) setComparisonActive(true)
+        setRecapConfig(recapCfg)
 
         let recapResult = null
 
@@ -345,6 +351,9 @@ export default function RecapPlayer() {
       <Stars />
       <Orbs accent={accent} />
       {needSpotlights && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
+      {/* Music player */}
+      {recapConfig.recap_music && <MusicPlayer musicConfig={recapConfig.recap_music} currentSlideId={curr.id} />}
+
       {isFinale && (slideConfigs?.settings?.finale?.confetti !== false) && <ConfettiEffect />}
       {isFinale && (slideConfigs?.settings?.finale?.fireworks !== false) && <FireworksEffect active={true} />}
       <Grain />
@@ -400,6 +409,112 @@ export default function RecapPlayer() {
       )}
     </div>
   )
+}
+
+function extractYouTubeId(url) {
+  if (!url) return null
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+function MusicPlayer({ musicConfig, currentSlideId }) {
+  const mode = musicConfig?.mode || "single"
+  const tracks = musicConfig?.tracks || {}
+  const [playing, setPlaying] = useState(false)
+  const audioRef = useRef(null)
+  const [el, setEl] = useState(null)
+
+  useEffect(() => {
+    const slot = document.getElementById("recap-topbar-extra")
+    if (slot) setEl(slot)
+  }, [])
+
+  // Determine audio path based on mode + current slide
+  let audioPath = ""
+  if (mode === "single") {
+    const t = tracks._background
+    audioPath = (t?.enabled !== false) ? (t?.audioPath || "") : ""
+  } else {
+    const section = currentSlideId?.startsWith("cat-") ? "films"
+      : currentSlideId?.includes("-series") ? "series"
+      : currentSlideId?.startsWith("community") ? "community"
+      : currentSlideId === "finale" ? "finale"
+      : currentSlideId === "intro" ? "intro"
+      : currentSlideId?.includes("tautulli") || currentSlideId?.includes("plex") || currentSlideId?.includes("jellyfin") ? "films"
+      : ""
+    const t = tracks[section]
+    audioPath = (t?.enabled !== false ? t?.audioPath : "") || tracks._background?.audioPath || ""
+  }
+
+  const hasAnyTrack = Object.values(tracks).some((t) => t?.audioPath && t?.enabled !== false)
+
+  // Try to play audio, register click handler as fallback
+  const tryPlay = useCallback(() => {
+    if (!audioRef.current) return
+    audioRef.current.volume = 0.3
+    const p = audioRef.current.play()
+    if (p) p.catch(() => {}) // Ignore autoplay errors
+  }, [])
+
+  // When playing state or audioPath changes
+  useEffect(() => {
+    if (!audioRef.current || !audioPath) return
+    if (playing) tryPlay()
+    else audioRef.current.pause()
+  }, [playing, audioPath, tryPlay])
+
+  // Register global click handler to start audio on first interaction
+  useEffect(() => {
+    if (!hasAnyTrack || !audioPath) return
+    setPlaying(true)
+    const handler = () => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.volume = 0.3
+        audioRef.current.play().catch(() => {})
+      }
+    }
+    // Listen on capture phase to catch all clicks
+    document.addEventListener("click", handler, { capture: true, once: false })
+    document.addEventListener("touchstart", handler, { capture: true, once: false })
+    return () => {
+      document.removeEventListener("click", handler, { capture: true })
+      document.removeEventListener("touchstart", handler, { capture: true })
+    }
+  }, [hasAnyTrack, audioPath])
+
+  if (!hasAnyTrack) return null
+
+  const togglePlay = () => {
+    const next = !playing
+    setPlaying(next)
+    if (next && audioRef.current) {
+      audioRef.current.play().catch(() => {})
+    }
+  }
+
+  const btn = <button
+    onClick={togglePlay}
+    title={playing ? "Couper la musique" : "Activer la musique"}
+    style={{
+      background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
+      border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
+      borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
+      fontSize: 9, padding: "4px 8px", cursor: "pointer",
+      display: "flex", alignItems: "center", gap: 4,
+      transition: "all .2s ease",
+    }}
+  >
+    {playing ? (
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
+    ) : (
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
+    )}
+  </button>
+
+  return <>
+    {audioPath && <audio ref={audioRef} src={audioPath} loop preload="auto" />}
+    {el ? createPortal(btn, el) : null}
+  </>
 }
 
 function ComparisonButton({ active, onToggle, accent, year, visible }) {

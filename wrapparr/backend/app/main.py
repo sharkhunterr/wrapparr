@@ -99,6 +99,7 @@ DEFAULT_CONFIG = {
     "allow_registration": True,
     "allow_user_themes": True,
     "allow_user_comparison": True,
+    "comparison_default_on": False,
     "recap_schedule": "0 2 1 1 *",
     "max_history_years": 5,
     "public_share_expiry_days": 30,

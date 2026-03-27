@@ -1,6 +1,9 @@
+import os
+import re
+
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 
 from app.core.config import settings
 from app.core.security import get_current_user
@@ -46,3 +49,17 @@ async def get_poster(
         await redis.setex(cache_key, CACHE_TTL, image_data.decode("latin-1"))
 
         return Response(content=image_data, media_type=resp.headers.get("content-type", "image/jpeg"))
+
+
+MUSIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "music_cache")
+
+
+@router.get("/music/{filename}")
+async def serve_music_public(filename: str):
+    """Serve a downloaded music file."""
+    if not re.match(r"^[a-zA-Z0-9_-]+\.mp3$", filename):
+        raise HTTPException(400, "Invalid filename")
+    path = os.path.join(MUSIC_DIR, filename)
+    if not os.path.exists(path):
+        raise HTTPException(404, "File not found")
+    return FileResponse(path, media_type="audio/mpeg")

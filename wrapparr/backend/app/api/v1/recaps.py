@@ -38,10 +38,20 @@ async def get_slide_config_public(_user: User = Depends(get_current_user), db: A
     order_cfg = result2.scalar_one_or_none()
     result3 = await db.execute(select(GlobalConfig).where(GlobalConfig.key == "active_theme"))
     theme_cfg = result3.scalar_one_or_none()
+    # Public recap settings
+    public_keys = ["comparison_default_on", "recap_music"]
+    public_config = {}
+    for pk in public_keys:
+        r = await db.execute(select(GlobalConfig).where(GlobalConfig.key == pk))
+        gc = r.scalar_one_or_none()
+        if gc is not None:
+            public_config[pk] = gc.value
+
     return {
         "settings": cfg.value if cfg else {},
         "order": order_cfg.value if order_cfg else [],
         "active_theme": theme_cfg.value if theme_cfg else None,
+        "recap_config": public_config,
     }
 
 

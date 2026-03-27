@@ -1,7 +1,11 @@
+import asyncio
+import os
+import re
 import uuid
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -295,6 +299,80 @@ async def update_config(updates: dict, _admin=Depends(require_admin), db: AsyncS
             db.add(GlobalConfig(key=key, value=value))
     await db.commit()
     return {"status": "ok"}
+
+
+# ── Music download ──
+
+MUSIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "music_cache")
+os.makedirs(MUSIC_DIR, exist_ok=True)
+
+
+def _extract_youtube_id(url: str) -> str | None:
+    m = re.search(r"(?:youtu\.be/|youtube\.com/(?:embed/|v/|watch\?v=|shorts/))([a-zA-Z0-9_-]{11})", url)
+    return m.group(1) if m else None
+
+
+@router.post("/music/download")
+async def download_music(updates: dict, _admin=Depends(require_admin)):
+    """Download audio from YouTube URL using yt-dlp."""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning("Music download called with: %s", updates)
+    url = updates.get("url", "")
+    video_id = _extract_youtube_id(url)
+    if not video_id:
+        raise HTTPException(400, "Invalid YouTube URL")
+
+    output_path = os.path.join(MUSIC_DIR, f"{video_id}.mp3")
+    audio_url = f"/api/v1/media/music/{video_id}.mp3"
+
+    # Already downloaded?
+    if os.path.exists(output_path):
+        logger.warning("File already exists: %s", output_path)
+        return {"status": "ok", "video_id": video_id, "path": audio_url}
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "yt-dlp", "-x", "--audio-format", "mp3", "--audio-quality", "5",
+            "-o", output_path.replace(".mp3", ".%(ext)s"),
+            url,
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise HTTPException(500, f"yt-dlp error: {stderr.decode()[:500]}")
+
+        # yt-dlp might create with different extension then convert
+        if not os.path.exists(output_path):
+            # Look for any file with this video_id
+            for f in os.listdir(MUSIC_DIR):
+                if f.startswith(video_id):
+                    actual = os.path.join(MUSIC_DIR, f)
+                    if actual != output_path:
+                        os.rename(actual, output_path)
+                    break
+
+        if not os.path.exists(output_path):
+            raise HTTPException(500, "Download completed but file not found")
+
+        return {"status": "ok", "video_id": video_id, "path": audio_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Music download error")
+        raise HTTPException(500, str(e))
+
+
+@router.get("/music/file/{filename}")
+async def serve_music(filename: str):
+    """Serve a downloaded music file."""
+    # Sanitize filename
+    if not re.match(r"^[a-zA-Z0-9_-]+\.mp3$", filename):
+        raise HTTPException(400, "Invalid filename")
+    path = os.path.join(MUSIC_DIR, filename)
+    if not os.path.exists(path):
+        raise HTTPException(404, "File not found")
+    return FileResponse(path, media_type="audio/mpeg")
 
 
 # ── OIDC Provider management ──

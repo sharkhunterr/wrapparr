@@ -6,6 +6,7 @@ const CONFIG_FIELDS = [
   { key: "allow_registration", label: "Inscription ouverte", type: "bool" },
   { key: "allow_user_themes", label: "Themes personnels", type: "bool" },
   { key: "allow_user_comparison", label: "Comparaison inter-utilisateurs", type: "bool" },
+  { key: "comparison_default_on", label: "Comparaison activee par defaut", type: "bool" },
   { key: "recap_schedule", label: "Planification recap (cron)", type: "text" },
   { key: "max_history_years", label: "Historique max (annees)", type: "number" },
   { key: "public_share_expiry_days", label: "Expiration partage (jours)", type: "number" },
@@ -53,7 +54,8 @@ export default function ConfigPanel() {
               </button>
             ) : (
               <input value={config[f.key] ?? ""} onChange={(e) => update(f.key, f.type === "number" ? parseInt(e.target.value) || 0 : e.target.value)}
-                style={{ width: 130, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "white", fontSize: 12, fontFamily: "JetBrains Mono,monospace", textAlign: "right", outline: "none" }} />
+                placeholder={f.key.includes("url") ? "https://youtube.com/watch?v=..." : ""}
+                style={{ width: f.key.includes("url") ? 260 : 130, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "white", fontSize: 12, fontFamily: "JetBrains Mono,monospace", textAlign: f.type === "number" ? "right" : "left", outline: "none" }} />
             )}
           </div>
         ))}
