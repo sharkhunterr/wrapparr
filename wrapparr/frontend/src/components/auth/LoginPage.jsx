@@ -83,8 +83,10 @@ export default function LoginPage() {
         background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
         backdropFilter: "blur(18px)",
       }}>
-        <div style={{ textAlign: "center", marginBottom: 6 }}>
-          <img src="/logo-text.svg" alt="Wrapparr" style={{ height: 32 }} />
+        <div style={{ textAlign: "center", marginBottom: 10 }}>
+          <span style={{ fontSize: 28, fontWeight: 800, fontFamily: "Nunito, sans-serif", letterSpacing: -1 }}>
+            <span style={{ color: accent }}>W</span><span style={{ color: "white" }}>rap</span><span style={{ background: "linear-gradient(135deg, #E5A00D, #fb923c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>parr</span>
+          </span>
         </div>
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center", marginBottom: 28 }}>
           {mode === "login" ? "Connectez-vous pour voir votre recap" : "Créez votre compte"}
