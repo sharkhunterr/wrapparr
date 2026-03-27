@@ -933,7 +933,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesCountries.length > 0) {
           slides.push({
             id: svc + "-series-worldmap", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <WorldMapSlide accent={seriesAccent} data={{ extra: { countries: seriesCountries } }} year={year} config={getSlideConfig(sc, svc + "-series-worldmap")} />,
+            component: <WorldMapSlide accent={seriesAccent} data={{ extra: { countries: seriesCountries } }} year={year} config={getSlideConfig(sc, svc + "-series-worldmap")} mediaType="series" />,
           })
         }
 

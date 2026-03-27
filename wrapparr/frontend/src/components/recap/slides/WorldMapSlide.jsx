@@ -33,7 +33,7 @@ const FLAGS = {
 
 import { useComparison } from "../SharedUI"
 
-export default function WorldMapSlide({ accent, data, year, config = {} }) {
+export default function WorldMapSlide({ accent, data, year, config = {}, mediaType = "films" }) {
   const animSpeed = config.animationSpeed || 15000
   const countries = data?.extra?.countries || []
   const comp = useComparison()
@@ -97,7 +97,7 @@ export default function WorldMapSlide({ accent, data, year, config = {} }) {
       <div className="s0" style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-          Tes films a travers <span style={{ color: accent }}>le monde</span>
+          Tes {mediaType === "series" ? "series" : "films"} a travers <span style={{ color: accent }}>le monde</span>
         </h2>
       </div>
 
