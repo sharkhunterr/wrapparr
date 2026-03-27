@@ -379,8 +379,9 @@ export default function RecapPlayer() {
         {isPod && <span style={{ color: accent, marginLeft: 8 }}>PODIUM</span>}
       </div>
 
-      {/* Comparison toggle — emits to the top-right bar slot in App.jsx */}
+      {/* Top-right bar buttons — emits to the slot in App.jsx */}
       <ComparisonButton active={comparisonActive} onToggle={() => setComparisonActive((v) => !v)} accent={accent} year={year} visible={hasComparison} />
+      <FullscreenButton />
 
       {/* Arrows */}
       {slide > 0 && <button onClick={() => goTo(slide - 1)} style={arrowBtn({ top: "calc(50% - 44px)" })}>↑</button>}
@@ -397,7 +398,9 @@ export default function RecapPlayer() {
           transition: "opacity .23s ease, transform .23s ease",
           overflowY: (isCat || isPod || isFinale) ? "hidden" : "auto",
         }}>
-          {curr.component}
+          {curr._introProps
+            ? <IntroSlide {...curr._introProps} onStart={() => goTo(1)} />
+            : curr.component}
         </div>
       </ComparisonProvider>
 
@@ -448,73 +451,129 @@ function MusicPlayer({ musicConfig, currentSlideId }) {
 
   const hasAnyTrack = Object.values(tracks).some((t) => t?.audioPath && t?.enabled !== false)
 
-  // Try to play audio, register click handler as fallback
-  const tryPlay = useCallback(() => {
+  // Play/pause audio
+  const doPlay = useCallback(() => {
     if (!audioRef.current) return
     audioRef.current.volume = 0.3
-    const p = audioRef.current.play()
-    if (p) p.catch(() => {}) // Ignore autoplay errors
+    audioRef.current.play().catch(() => {})
+  }, [])
+
+  const doPause = useCallback(() => {
+    if (!audioRef.current) return
+    audioRef.current.pause()
   }, [])
 
   // When playing state or audioPath changes
   useEffect(() => {
     if (!audioRef.current || !audioPath) return
-    if (playing) tryPlay()
-    else audioRef.current.pause()
-  }, [playing, audioPath, tryPlay])
+    if (playing) doPlay()
+    else doPause()
+  }, [playing, audioPath, doPlay, doPause])
 
-  // Register global click handler to start audio on first interaction
+  // Start playing on first user interaction (click anywhere)
   useEffect(() => {
     if (!hasAnyTrack || !audioPath) return
     setPlaying(true)
-    const handler = () => {
-      if (audioRef.current && audioRef.current.paused) {
+    const startOnInteraction = () => {
+      if (audioRef.current && audioRef.current.paused && playing) {
         audioRef.current.volume = 0.3
         audioRef.current.play().catch(() => {})
       }
     }
-    // Listen on capture phase to catch all clicks
-    document.addEventListener("click", handler, { capture: true, once: false })
-    document.addEventListener("touchstart", handler, { capture: true, once: false })
+    document.addEventListener("click", startOnInteraction, { capture: true })
+    document.addEventListener("touchstart", startOnInteraction, { capture: true })
     return () => {
-      document.removeEventListener("click", handler, { capture: true })
-      document.removeEventListener("touchstart", handler, { capture: true })
+      document.removeEventListener("click", startOnInteraction, { capture: true })
+      document.removeEventListener("touchstart", startOnInteraction, { capture: true })
     }
   }, [hasAnyTrack, audioPath])
+
+  // Pause when tab is hidden, resume when visible
+  useEffect(() => {
+    const handler = () => {
+      if (!audioRef.current) return
+      if (document.hidden) doPause()
+      else if (playing) doPlay()
+    }
+    document.addEventListener("visibilitychange", handler)
+    return () => document.removeEventListener("visibilitychange", handler)
+  }, [playing, doPlay, doPause])
 
   if (!hasAnyTrack) return null
 
   const togglePlay = () => {
     const next = !playing
     setPlaying(next)
-    if (next && audioRef.current) {
-      audioRef.current.play().catch(() => {})
-    }
+    if (next) doPlay()
+    else doPause()
   }
 
-  const btn = <button
-    onClick={togglePlay}
-    title={playing ? "Couper la musique" : "Activer la musique"}
-    style={{
-      background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
-      border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
-      borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
-      fontSize: 9, padding: "4px 8px", cursor: "pointer",
-      display: "flex", alignItems: "center", gap: 4,
-      transition: "all .2s ease",
-    }}
-  >
-    {playing ? (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
-    ) : (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
+  const musicGroup = <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+    {/* Sound bar animation */}
+    {playing && (
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 1, height: 14, padding: "0 2px" }}>
+        {[0, 0.2, 0.4, 0.1].map((d, i) => (
+          <div key={i} style={{
+            width: 2, borderRadius: 1,
+            background: "rgba(255,255,255,0.4)",
+            animation: `soundbar ${0.4 + i * 0.15}s ease-in-out ${d}s infinite alternate`,
+          }} />
+        ))}
+      </div>
     )}
-  </button>
+    <button
+      onClick={togglePlay}
+      title={playing ? "Couper la musique" : "Activer la musique"}
+      style={{
+        background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
+        border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
+        borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
+        fontSize: 9, padding: "4px 6px", cursor: "pointer",
+        display: "flex", alignItems: "center",
+        transition: "all .2s ease",
+      }}
+    >
+      {playing ? (
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
+      ) : (
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
+      )}
+    </button>
+  </div>
 
   return <>
     {audioPath && <audio ref={audioRef} src={audioPath} loop preload="auto" />}
-    {el ? createPortal(btn, el) : null}
+    {el ? createPortal(musicGroup, el) : null}
   </>
+}
+
+function FullscreenButton() {
+  const [el, setEl] = useState(null)
+  const [isFs, setIsFs] = useState(false)
+  useEffect(() => {
+    const slot = document.getElementById("recap-topbar-extra")
+    if (slot) setEl(slot)
+    const handler = () => setIsFs(!!document.fullscreenElement)
+    document.addEventListener("fullscreenchange", handler)
+    return () => document.removeEventListener("fullscreenchange", handler)
+  }, [])
+  const toggle = () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+    else document.documentElement.requestFullscreen().catch(() => {})
+  }
+  const btn = <button onClick={toggle} title={isFs ? "Quitter le plein ecran" : "Plein ecran"} style={{
+    background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 6px",
+    cursor: "pointer", display: "flex", alignItems: "center", transition: "all .2s ease",
+  }}>
+    {isFs ? (
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" /></svg>
+    ) : (
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>
+    )}
+  </button>
+  if (el) return createPortal(btn, el)
+  return null
 }
 
 function ComparisonButton({ active, onToggle, accent, year, visible }) {
@@ -662,7 +721,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   // 0 — Intro
   slides.push({
     id: "intro", accent: primary, bg: baseBg, fullscreen: false,
-    component: <IntroSlide accent={primary} userName={userName} year={year} onStart={null} hasComparison={!!data.comparison} />,
+    _introProps: { accent: primary, userName, year, hasComparison: !!data.comparison },
   })
 
   // Per-service: Category → Podium → Stats → Deep
