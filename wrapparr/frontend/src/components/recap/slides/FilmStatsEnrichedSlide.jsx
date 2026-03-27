@@ -105,11 +105,11 @@ const ICONS = {
 function MiniStat({ iconKey, value, label, accent }) {
   const iconFn = ICONS[iconKey] || ICONS.chart
   return (
-    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(3px, 0.8vw, 6px)", padding: "clamp(3px, 0.6vw, 5px) clamp(5px, 1vw, 8px)", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", minWidth: 0, overflow: "hidden" }}>
+    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(5px, 1vw, 8px)", padding: "clamp(6px, 1vw, 9px) clamp(7px, 1.2vw, 10px)", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", minWidth: 0, overflow: "hidden" }}>
       <div style={{ flexShrink: 0 }}>{iconFn(accent)}</div>
       <div style={{ minWidth: 0, overflow: "hidden" }}>
-        <div style={{ fontSize: "clamp(10px, 1.4vw, 13px)", fontWeight: 800, color: "white", lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
-        <div style={{ fontSize: "clamp(7px, 0.9vw, 9px)", color: accent, lineHeight: 1.1, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</div>
+        <div style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 800, color: "white", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+        <div style={{ fontSize: "clamp(8px, 1.1vw, 10px)", color: accent, lineHeight: 1.15, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</div>
       </div>
     </div>
   )
@@ -188,8 +188,9 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
             <span style={{ fontSize: "clamp(16px, 3.5vw, 22px)", position: "relative" }}>{category.emoji}</span>
             <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: accent, position: "relative" }}>{category.name}</span>
           </div>
-          <div style={{ padding: "clamp(5px, 0.8vw, 8px) clamp(10px, 1.5vw, 14px)", borderRadius: 16, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
-            <span style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: 20, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+            <span style={{ fontSize: "clamp(16px, 3.5vw, 22px)" }}>⏱️</span>
+            <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
           </div>
         </div>
       </div>
