@@ -279,19 +279,19 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       {/* Stamp animation */}
       {stamped && (config.showStamp !== false) && (
         <div style={{
-          position: "absolute", top: 30, right: -5,
-          transform: "rotate(15deg)",
+          position: "absolute", top: "45%", right: -8,
+          transform: "rotate(-22deg)",
           zIndex: 10, pointerEvents: "none",
           animation: "stamp-hit 0.4s cubic-bezier(0.17, 0.67, 0.21, 1.2) both",
         }}>
           <div style={{
-            padding: "5px 18px", borderRadius: 6,
-            border: `2px solid ${accent}`,
+            padding: "clamp(6px, 1.2vw, 10px) clamp(20px, 4vw, 30px)", borderRadius: 8,
+            border: `3px solid ${accent}`,
             color: accent,
-            fontSize: 14, fontWeight: 900, fontFamily: "JetBrains Mono,monospace",
-            textTransform: "uppercase", letterSpacing: "0.12em",
-            textShadow: `0 0 12px ${accent}50`,
-            boxShadow: `0 0 16px ${accent}20`,
+            fontSize: "clamp(18px, 4vw, 24px)", fontWeight: 900, fontFamily: "JetBrains Mono,monospace",
+            textTransform: "uppercase", letterSpacing: "0.15em",
+            textShadow: `0 0 16px ${accent}50`,
+            boxShadow: `0 0 20px ${accent}20`,
             background: accent + "0a",
             position: "relative", overflow: "hidden",
           }}>
@@ -302,14 +302,14 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       )}
       <style>{`
         @keyframes stamp-hit {
-          0% { transform: rotate(15deg) scale(3); opacity: 0; }
-          60% { transform: rotate(15deg) scale(0.95); opacity: 0.8; }
-          80% { transform: rotate(15deg) scale(1.02); opacity: 0.7; }
-          100% { transform: rotate(15deg) scale(1); opacity: 0.7; }
+          0% { transform: rotate(-22deg) scale(3); opacity: 0; }
+          60% { transform: rotate(-22deg) scale(0.95); opacity: 0.8; }
+          80% { transform: rotate(-22deg) scale(1.02); opacity: 0.7; }
+          100% { transform: rotate(-22deg) scale(1); opacity: 0.7; }
         }
         @keyframes stamp-pulse {
-          0%, 100% { transform: rotate(15deg) scale(1); opacity: 0.7; }
-          50% { transform: rotate(15deg) scale(1.06); opacity: 0.9; }
+          0%, 100% { transform: rotate(-22deg) scale(1); opacity: 0.7; }
+          50% { transform: rotate(-22deg) scale(1.06); opacity: 0.9; }
         }
       `}</style>
     </div>
