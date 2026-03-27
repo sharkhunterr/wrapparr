@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useRef, useCallback } from "react"
 import { useActive, AN } from "../SharedUI"
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from "recharts"
+import html2canvas from "html2canvas"
 
 function PosterWall({ posters }) {
   if (!posters || posters.length < 3) return null
@@ -95,6 +96,87 @@ function MiniPoster({ src, size = 32 }) {
 export default function FinaleSlide({ accent, userName, year, globalStats, recapData, activeServices, onRestart }) {
   const active = useActive()
   const posters = collectPosters(recapData, activeServices)
+  const contentRef = useRef(null)
+  const [sharing, setSharing] = useState(false)
+
+  const [shareMenu, setShareMenu] = useState(false)
+  const [shareBlob, setShareBlob] = useState(null)
+
+  const captureImage = useCallback(async () => {
+    if (!contentRef.current) return null
+    setSharing(true)
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        backgroundColor: "#05050e",
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      })
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"))
+      setShareBlob(blob)
+      setSharing(false)
+      return blob
+    } catch (e) {
+      console.warn("Capture error:", e)
+      setSharing(false)
+      return null
+    }
+  }, [])
+
+  const handleShare = useCallback(async () => {
+    const blob = await captureImage()
+    if (!blob) return
+    const file = new File([blob], `wrapparr-${year}.png`, { type: "image/png" })
+
+    // Try Web Share API with files (Android/iOS native share sheet)
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `Mon Wrapparr ${year}`,
+          text: `Mon recap ${year} sur Wrapparr !`,
+          files: [file],
+        })
+        return
+      }
+    } catch (e) {
+      if (e.name === "AbortError") return
+    }
+
+    // Try Web Share API without files (share text/url)
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Mon Wrapparr ${year}`,
+          text: `Mon recap ${year} sur Wrapparr !`,
+        })
+        return
+      }
+    } catch (e) {
+      if (e.name === "AbortError") return
+    }
+
+    // Desktop fallback: show share menu
+    setShareMenu(true)
+  }, [year, captureImage])
+
+  const downloadImage = () => {
+    if (!shareBlob) return
+    const url = URL.createObjectURL(shareBlob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `wrapparr-${year}.png`
+    a.click()
+    URL.revokeObjectURL(url)
+    setShareMenu(false)
+  }
+
+  const copyImage = async () => {
+    if (!shareBlob) return
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": shareBlob })])
+      setShareMenu(false)
+    } catch { downloadImage() }
+  }
 
   // Extract film/series data from first available service
   const svcData = recapData?.tautulli || recapData?.plex || recapData?.jellyfin || {}
@@ -138,7 +220,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
       <PosterWall posters={posters} />
 
       {/* Scrollable content */}
-      <div style={{ position: "relative", zIndex: 5, width: "100%", maxWidth: 500, padding: "20px 16px 40px", overflowY: "auto", maxHeight: "100vh" }}>
+      <div ref={contentRef} style={{ position: "relative", zIndex: 5, width: "100%", maxWidth: 500, padding: "20px 16px 40px", overflowY: "auto", maxHeight: "100vh" }}>
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 12 }}>
@@ -307,9 +389,33 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
         </div>
 
         {/* Buttons */}
-        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-          <button style={{ padding: "10px 24px", borderRadius: 40, border: "none", cursor: "pointer", background: "linear-gradient(135deg," + accent + ",#fb923c)", color: "#000", fontSize: 13, fontWeight: 800, boxShadow: "0 0 40px " + accent + "40" }}>Partager</button>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", position: "relative" }}>
+          <button onClick={handleShare} disabled={sharing} style={{ padding: "10px 24px", borderRadius: 40, border: "none", cursor: "pointer", background: "linear-gradient(135deg," + accent + ",#fb923c)", color: "#000", fontSize: 13, fontWeight: 800, boxShadow: "0 0 40px " + accent + "40", opacity: sharing ? 0.6 : 1 }}>
+            {sharing ? "Capture..." : "Partager"}
+          </button>
           {onRestart && <button onClick={onRestart} style={{ padding: "10px 24px", borderRadius: 40, cursor: "pointer", background: "transparent", color: "rgba(255,255,255,.35)", fontSize: 12, border: "1px solid rgba(255,255,255,.1)" }}>Rejouer</button>}
+
+          {/* Share menu fallback (desktop) */}
+          {shareMenu && (
+            <div style={{
+              position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+              padding: "8px", borderRadius: 12, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
+              backdropFilter: "blur(16px)", display: "flex", flexDirection: "column", gap: 4, minWidth: 160,
+              animation: "slide-up 0.3s ease both", zIndex: 20,
+            }}>
+              <button onClick={copyImage} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(255,255,255,0.05)", color: "white", fontSize: 11, fontWeight: 500, textAlign: "left" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
+                Copier l'image
+              </button>
+              <button onClick={downloadImage} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(255,255,255,0.05)", color: "white", fontSize: 11, fontWeight: 500, textAlign: "left" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+                Telecharger
+              </button>
+              <button onClick={() => setShareMenu(false)} style={{ padding: "4px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "none", color: "rgba(255,255,255,0.3)", fontSize: 9 }}>
+                Fermer
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

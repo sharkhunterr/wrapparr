@@ -23,12 +23,29 @@ export default function LoginPage() {
       .catch(() => {})
   }, [])
 
-  // Handle SSO callback token
+  // Handle SSO callback — exchange ephemeral code for tokens
   useEffect(() => {
-    const ssoToken = searchParams.get("sso_token")
-    if (ssoToken) {
-      setAccessToken(ssoToken)
-      fetchMe().then(() => navigate("/", { replace: true }))
+    const ssoCode = searchParams.get("sso_code")
+    if (ssoCode) {
+      // Remove code from URL immediately
+      window.history.replaceState({}, "", "/login")
+      // Exchange code for real tokens
+      fetch("/api/v1/auth/sso/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: ssoCode }),
+        credentials: "include",
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.access_token) {
+            setAccessToken(data.access_token)
+            fetchMe().then(() => navigate("/", { replace: true }))
+          } else {
+            setError("Erreur SSO : code invalide ou expire")
+          }
+        })
+        .catch(() => setError("Erreur SSO"))
     }
   }, [searchParams, fetchMe, navigate])
 

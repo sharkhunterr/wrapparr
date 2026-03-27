@@ -100,6 +100,38 @@ async def refresh(
     return TokenResponse(access_token=access)
 
 
+@router.post("/sso/exchange")
+async def sso_exchange(request: Request, response: Response):
+    """Exchange a one-time SSO code for access + refresh tokens. Code is deleted after use."""
+    body = await request.json()
+    code = body.get("code", "")
+    if not code:
+        raise HTTPException(400, "Missing code")
+
+    redis = request.app.state.redis
+    data = await redis.get(f"sso_code:{code}")
+    if not data:
+        raise HTTPException(401, "Code invalide ou expire")
+
+    # Delete immediately (one-time use)
+    await redis.delete(f"sso_code:{code}")
+
+    parts = data.split("||")
+    if len(parts) != 2:
+        raise HTTPException(500, "Invalid stored data")
+
+    access, refresh = parts
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=7 * 24 * 3600,
+    )
+    return {"access_token": access}
+
+
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(
     response: Response,
@@ -320,15 +352,12 @@ async def sso_callback(
 
     access, refresh = await issue_tokens_for_user(db, user)
 
-    # Redirect to frontend with token
+    # Generate ephemeral code (one-time use, expires in 60s)
+    import secrets
+    sso_code = secrets.token_urlsafe(32)
+    redis = request.app.state.redis
+    await redis.setex(f"sso_code:{sso_code}", 60, f"{access}||{refresh}")
+
     from fastapi.responses import RedirectResponse
-    response = RedirectResponse(url=f"{base_url}/login?sso_token={access}")
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=7 * 24 * 3600,
-    )
+    response = RedirectResponse(url=f"{base_url}/login?sso_code={sso_code}")
     return response
