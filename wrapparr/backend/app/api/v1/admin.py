@@ -326,10 +326,30 @@ async def download_music(updates: dict, _admin=Depends(require_admin)):
     output_path = os.path.join(MUSIC_DIR, f"{video_id}.mp3")
     audio_url = f"/api/v1/media/music/{video_id}.mp3"
 
+    # Get video metadata (title + duration)
+    title = ""
+    duration = 0
+    try:
+        meta_proc = await asyncio.create_subprocess_exec(
+            "yt-dlp", "--print", "title", "--print", "duration", "--no-download", url,
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        )
+        meta_out, _ = await meta_proc.communicate()
+        lines = meta_out.decode().strip().split("\n")
+        if len(lines) >= 1:
+            title = lines[0].strip()
+        if len(lines) >= 2:
+            try:
+                duration = int(float(lines[1].strip()))
+            except (ValueError, IndexError):
+                pass
+    except Exception:
+        pass
+
     # Already downloaded?
     if os.path.exists(output_path):
         logger.warning("File already exists: %s", output_path)
-        return {"status": "ok", "video_id": video_id, "path": audio_url}
+        return {"status": "ok", "video_id": video_id, "path": audio_url, "title": title, "duration": duration}
 
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -344,7 +364,6 @@ async def download_music(updates: dict, _admin=Depends(require_admin)):
 
         # yt-dlp might create with different extension then convert
         if not os.path.exists(output_path):
-            # Look for any file with this video_id
             for f in os.listdir(MUSIC_DIR):
                 if f.startswith(video_id):
                     actual = os.path.join(MUSIC_DIR, f)
@@ -355,7 +374,7 @@ async def download_music(updates: dict, _admin=Depends(require_admin)):
         if not os.path.exists(output_path):
             raise HTTPException(500, "Download completed but file not found")
 
-        return {"status": "ok", "video_id": video_id, "path": audio_url}
+        return {"status": "ok", "video_id": video_id, "path": audio_url, "title": title, "duration": duration}
     except HTTPException:
         raise
     except Exception as e:

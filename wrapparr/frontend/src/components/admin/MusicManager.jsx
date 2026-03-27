@@ -22,6 +22,15 @@ function extractYouTubeId(url) {
   return m ? m[1] : null
 }
 
+function formatDuration(seconds) {
+  if (!seconds) return ""
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  if (h > 0) return `${h}h${String(m).padStart(2, "0")}m${String(s).padStart(2, "0")}s`
+  return `${m}m${String(s).padStart(2, "0")}s`
+}
+
 export default function MusicManager() {
   // config = { mode, tracks: { section: { url, enabled, name } }, pool: [{ url, name, id }] }
   const [config, setConfig] = useState({ mode: "single", tracks: {}, pool: [] })
@@ -53,7 +62,9 @@ export default function MusicManager() {
     try {
       const result = await api("/admin/music/download", { method: "POST", body: { url: newUrl } })
       const audioPath = result.path || `/api/v1/media/music/${videoId}.mp3`
-      await save({ ...config, pool: [...config.pool, { url: newUrl, audioPath, name: "", id: Date.now().toString() }] })
+      const name = result.title || ""
+      const duration = result.duration || 0
+      await save({ ...config, pool: [...config.pool, { url: newUrl, audioPath, name, duration, id: Date.now().toString() }] })
       setNewUrl("")
     } catch (e) {
       alert("Erreur de telechargement : " + (e.message || e))
@@ -174,7 +185,10 @@ export default function MusicManager() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <input value={p.name} onChange={(e) => updatePoolName(i, e.target.value)} placeholder="Nom de la musique..."
                       style={{ width: "100%", background: "none", border: "none", color: "white", fontSize: 11, fontWeight: 600, outline: "none", padding: 0 }} />
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.url}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 1 }}>
+                      <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{p.url}</span>
+                      {p.duration > 0 && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0, padding: "1px 5px", borderRadius: 4, background: "rgba(255,255,255,0.04)" }}>{formatDuration(p.duration)}</span>}
+                    </div>
                   </div>
                   <button onClick={() => removeFromPool(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.15)", padding: 2 }}>
                     <Trash2 size={13} />
@@ -193,7 +207,9 @@ export default function MusicManager() {
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {sections.map((section) => {
               const track = config.tracks?.[section]
-              const assignedName = track ? (config.pool.find((p) => p.url === track.url)?.name || extractYouTubeId(track.url) || "?") : null
+              const poolItem = track ? config.pool.find((p) => p.url === track.url) : null
+              const assignedName = poolItem?.name || extractYouTubeId(track?.url) || "?"
+              const assignedDuration = poolItem?.duration || 0
               return (
                 <div key={section} style={{
                   display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderRadius: 8,
@@ -207,6 +223,7 @@ export default function MusicManager() {
                       <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 6, background: track.enabled ? "rgba(34,197,94,0.08)" : "rgba(255,255,255,0.02)", border: "1px solid " + (track.enabled ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.06)"), flex: 1, minWidth: 0 }}>
                         <Play size={9} color={track.enabled ? "#4ade80" : "rgba(255,255,255,0.15)"} />
                         <span style={{ fontSize: 10, color: track.enabled ? "#4ade80" : "rgba(255,255,255,0.25)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{assignedName}</span>
+                        {assignedDuration > 0 && <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{formatDuration(assignedDuration)}</span>}
                       </div>
                       <button onClick={() => toggleTrack(section)} style={{
                         background: "none", border: "none", cursor: "pointer", padding: 2,
@@ -226,7 +243,7 @@ export default function MusicManager() {
                     }}>
                       <option value="">Choisir une musique...</option>
                       {config.pool.map((p, i) => (
-                        <option key={i} value={i} style={{ background: "#15151e", color: "white" }}>{p.name || extractYouTubeId(p.url) || p.url}</option>
+                        <option key={i} value={i} style={{ background: "#15151e", color: "white" }}>{p.name || extractYouTubeId(p.url) || p.url}{p.duration ? ` (${formatDuration(p.duration)})` : ""}</option>
                       ))}
                     </select>
                   )}
