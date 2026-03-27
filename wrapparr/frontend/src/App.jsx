@@ -99,11 +99,11 @@ function UserHome() {
         )}
         {user.role === "admin" && (
           <button onClick={() => navigate("/admin")} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 9px)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-            <Settings size={13} /> Admin
+            <Settings size={12} /> Admin
           </button>
         )}
         <button onClick={async () => { await logout(); navigate("/login") }} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 9px)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-          <LogOut size={13} />
+          <LogOut size={12} />
         </button>
       </div>
     </>

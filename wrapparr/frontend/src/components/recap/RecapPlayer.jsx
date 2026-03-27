@@ -551,7 +551,7 @@ function MusicPlayer({ musicConfig, currentSlideId }) {
         background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
         border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
         borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
-        fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(5px, 0.8vw, 7px)", cursor: "pointer",
+        fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 9px)", cursor: "pointer",
         display: "flex", alignItems: "center",
         transition: "all .2s ease",
       }}
@@ -586,7 +586,7 @@ function FullscreenButton() {
   }
   const btn = <button onClick={toggle} title={isFs ? "Quitter le plein ecran" : "Plein ecran"} style={{
     background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(5px, 0.8vw, 7px)",
+    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 9px)",
     cursor: "pointer", display: "flex", alignItems: "center", transition: "all .2s ease",
   }}>
     {isFs ? (
