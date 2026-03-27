@@ -155,7 +155,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
       if (e.name === "AbortError") return
     }
 
-    // Desktop fallback: show share menu
+    // Fallback (HTTP or desktop without Web Share API)
     setShareMenu(true)
   }, [year, captureImage])
 
