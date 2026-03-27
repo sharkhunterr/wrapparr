@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, AreaChart, Area, CartesianGrid } from "recharts"
+import { useLabels } from "./ThemeContext"
 
 // ── Comparison Context ──
 // Shares inline comparison state across all slides
@@ -68,8 +69,10 @@ export function AN({ t, s = "" }) {
 export const Lbl = ({ c = "rgba(255,255,255,0.32)", size = 10, children, upper = true }) =>
   <div style={{ color: c, fontSize: `clamp(${Math.max(7, size - 2)}px, ${size / 8}vw, ${size + 2}px)`, textTransform: upper ? "uppercase" : "none", letterSpacing: "0.12em" }}>{children}</div>
 
-export const Tag = ({ accent, year = 2024 }) =>
-  <div style={{ color: accent, fontSize: "clamp(8px, 1vw, 10px)", letterSpacing: "0.3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 7, opacity: 0.8 }}>WRAPPARR · {year}</div>
+export function Tag({ accent, year = 2024 }) {
+  const L = useLabels()
+  return <div style={{ color: accent, fontSize: "clamp(8px, 1vw, 10px)", letterSpacing: "0.3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 7, opacity: 0.8 }}>{L.brand} · {year}</div>
+}
 
 export const Pill = ({ children, accent }) =>
   <span style={{ display: "inline-block", padding: "clamp(2px, 0.4vw, 4px) clamp(7px, 1.2vw, 12px)", borderRadius: 18, background: accent + "1e", border: "1px solid " + accent + "38", color: accent, fontSize: "clamp(9px, 1.1vw, 11px)" }}>{children}</span>
@@ -87,9 +90,9 @@ export function BigNum({ value, suffix = "", accent, active, delay = 0.05 }) {
 // ── Tooltip ──
 function CTip({ active, payload, label, unit = "h" }) {
   if (!active || !payload?.length) return null
-  return <div style={{ background: "#0d0d1a", border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: "5px 10px", fontSize: 10, fontFamily: "JetBrains Mono,monospace" }}>
-    <div style={{ color: "rgba(255,255,255,.4)", marginBottom: 2 }}>{label}</div>
-    {payload.map((p) => <div key={p.dataKey} style={{ color: p.color || "white", fontWeight: 600 }}>{p.value}{unit}</div>)}
+  return <div style={{ background: "var(--th-tooltip-bg, #0d0d1a)", border: "1px solid var(--th-tooltip-border, rgba(255,255,255,.1))", borderRadius: "var(--th-radius-xs, 8px)", padding: "5px 10px", fontSize: 10, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>
+    <div style={{ color: "var(--th-text-tertiary, rgba(255,255,255,.4))", marginBottom: 2 }}>{label}</div>
+    {payload.map((p) => <div key={p.dataKey} style={{ color: p.color || "var(--th-text, white)", fontWeight: 600 }}>{p.value}{unit}</div>)}
   </div>
 }
 

@@ -1,16 +1,17 @@
 import { useState } from "react"
 import { useActive, Tag, Lbl } from "../SharedUI"
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from "recharts"
+import { useLabels } from "../ThemeContext"
 
 function PosterImg({ src, size = 28 }) {
   const [err, setErr] = useState(false)
-  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 5, flexShrink: 0, background: "rgba(255,255,255,0.06)" }} />
+  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 5, flexShrink: 0, background: "var(--th-border-dim)" }} />
   return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }} />
 }
 
 function PersonImg({ src, size = 24 }) {
   const [err, setErr] = useState(false)
-  if (!src || err) return <div style={{ width: size, height: size, borderRadius: "50%", flexShrink: 0, background: "rgba(255,255,255,0.06)" }} />
+  if (!src || err) return <div style={{ width: size, height: size, borderRadius: "50%", flexShrink: 0, background: "var(--th-border-dim)" }} />
   return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }} />
 }
 
@@ -18,14 +19,14 @@ function RankBadge({ pos, accent, isCurrent }) {
   return <span style={{
     display: "inline-flex", alignItems: "center", justifyContent: "center",
     width: 18, height: 18, borderRadius: 6, fontSize: 9, fontWeight: 800,
-    fontFamily: "JetBrains Mono,monospace", flexShrink: 0,
-    background: pos === 0 ? (isCurrent ? accent + "20" : "rgba(255,255,255,0.08)") : "rgba(255,255,255,0.04)",
-    color: pos === 0 ? (isCurrent ? accent : "rgba(255,255,255,0.5)") : "rgba(255,255,255,0.3)",
-    border: "1px solid " + (pos === 0 ? (isCurrent ? accent + "40" : "rgba(255,255,255,0.12)") : "rgba(255,255,255,0.06)"),
+    fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", flexShrink: 0,
+    background: pos === 0 ? (isCurrent ? accent + "20" : "var(--th-surface)") : "var(--th-surface-subtle)",
+    color: pos === 0 ? (isCurrent ? accent : "var(--th-text-secondary)") : "var(--th-text-muted)",
+    border: "1px solid " + (pos === 0 ? (isCurrent ? accent + "40" : "var(--th-border)") : "var(--th-border-dim)"),
   }}>{pos + 1}</span>
 }
 
-const card = { padding: "10px 10px 8px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }
+const card = { padding: "10px 10px 8px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }
 
 const DEFAULT_FILM_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", emoji: "🍿" },
@@ -47,6 +48,7 @@ const DEFAULT_SERIES_CATEGORIES = [
 
 export default function CompareServiceSlide({ accent, compareData, year, mediaType = "films", config = {}, bilanCategories }) {
   const active = useActive()
+  const L = useLabels()
 
   // Support both { year_vs_year: {...} } and flat data
   const raw = compareData?.year_vs_year || compareData
@@ -97,23 +99,23 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
     {/* Header */}
     <div className="s0" style={{ marginBottom: 10 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
         <span style={{ color: accent }}>{year}</span> vs {year - 1}
       </h2>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>Comparaison {label}</div>
+      <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>Comparaison {label}</div>
     </div>
 
     {/* Totaux */}
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{isSeriesSlide ? "ep." : label}</span>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {prevItems}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? curItems : 0}</span>
+        <span style={{ fontSize: 9, color: "var(--th-text-tertiary)" }}>{isSeriesSlide ? "ep." : label}</span>
+        <span style={{ fontSize: 9, color: "var(--th-text-dim)" }}>vs {prevItems}</span>
         {diffItems !== 0 && <DiffBadge value={diffItems} />}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {Math.round(prevHours)}h</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? Math.round(curHours) : 0}h</span>
+        <span style={{ fontSize: 9, color: "var(--th-text-dim)" }}>vs {Math.round(prevHours)}h</span>
         {diffHours !== 0 && <DiffBadge value={diffHours} />}
       </div>
     </div>
@@ -123,8 +125,8 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: accent }}>
         <span style={{ width: 14, height: 2.5, borderRadius: 2, background: accent }} />{year}
       </span>
-      <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: "rgba(255,255,255,0.35)" }}>
-        <svg width="14" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="14" y2="1.5" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
+      <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: "var(--th-text-muted)" }}>
+        <svg width="14" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="14" y2="1.5" stroke="var(--th-text-dim)" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
         {year - 1}
       </span>
     </div>
@@ -145,11 +147,11 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
                 <stop offset="100%" stopColor="rgba(255,255,255,0.4)" stopOpacity={0.01} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--th-surface-subtle)" horizontal vertical={false} />
             <XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} />
             <Area type="monotone" dataKey="current" stroke={accent} strokeWidth={2} fill={"url(#svc-cur-" + mediaType + ")"} dot={false} animationBegin={200} animationDuration={1200} />
-            <Area type="monotone" dataKey="previous" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} strokeDasharray="4 3" fill={"url(#svc-prev-" + mediaType + ")"} dot={false} animationBegin={400} animationDuration={1200} />
+            <Area type="monotone" dataKey="previous" stroke="var(--th-text-dim)" strokeWidth={1.5} strokeDasharray="4 3" fill={"url(#svc-prev-" + mediaType + ")"} dot={false} animationBegin={400} animationDuration={1200} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -172,11 +174,11 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       ].filter(Boolean)
       const fmtBudget = (v) => { if (!v) return "—"; if (v >= 1e9) return (v / 1e9).toFixed(1) + "Md$"; if (v >= 1e6) return Math.round(v / 1e6) + "M$"; if (v >= 1e3) return Math.round(v / 1e3) + "k$"; return v + "$" }
       const catBadge = (cat, isCur) => cat ? (
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 8, background: isCur ? `linear-gradient(135deg, ${accent}25, ${accent}12)` : "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))", border: `1px solid ${isCur ? accent + "35" : "rgba(255,255,255,0.08)"}`, backdropFilter: "blur(8px)" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: "var(--th-radius-xs)", background: isCur ? `linear-gradient(135deg, ${accent}25, ${accent}12)` : "linear-gradient(135deg, var(--th-border-dim), var(--th-surface-dim))", border: `1px solid ${isCur ? accent + "35" : "var(--th-border-subtle)"}`, backdropFilter: "var(--th-glass-blur)" }}>
           <span style={{ fontSize: 12, filter: isCur ? `drop-shadow(0 1px 4px ${accent}40)` : "none" }}>{cat.emoji}</span>
           <span style={{ fontSize: 9, fontWeight: 700, color: isCur ? accent : "rgba(255,255,255,0.45)", lineHeight: 1 }}>{cat.name}</span>
         </span>
-      ) : <span style={{ fontSize: 9, color: "rgba(255,255,255,0.15)" }}>—</span>
+      ) : <span style={{ fontSize: 9, color: "var(--th-text-faint)" }}>—</span>
 
       // Add category row at top if available
       const allRows = [
@@ -192,29 +194,29 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
         <div style={{ display: "flex", gap: 8, marginTop: 6, marginBottom: 6 }}>
           <div style={{ width: 75 }} />
           <div style={{ flex: 1, fontSize: 8, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: ".05em" }}>{year}</div>
-          <div style={{ flex: 1, fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</div>
+          <div style={{ flex: 1, fontSize: 8, fontWeight: 700, color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</div>
         </div>
         {allRows.map((row, ri) => (
-          <div key={ri} style={{ display: "flex", gap: 8, alignItems: (row.type === "category" || row.type === "genres") ? "flex-start" : "center", marginBottom: 6, padding: "4px 0", borderTop: ri > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-            <div style={{ width: 75, fontSize: 9, color: "rgba(255,255,255,0.35)", flexShrink: 0, paddingTop: (row.type === "category" || row.type === "genres") ? 4 : 0 }}>{row.label}</div>
+          <div key={ri} style={{ display: "flex", gap: 8, alignItems: (row.type === "category" || row.type === "genres") ? "flex-start" : "center", marginBottom: 6, padding: "4px 0", borderTop: ri > 0 ? "1px solid var(--th-surface-subtle)" : "none" }}>
+            <div style={{ width: 75, fontSize: 9, color: "var(--th-text-muted)", flexShrink: 0, paddingTop: (row.type === "category" || row.type === "genres") ? 4 : 0 }}>{row.label}</div>
             {row.type === "category" ? <>
               <div style={{ flex: 1, minWidth: 0 }}>{catBadge(category.current, true)}</div>
               <div style={{ flex: 1, minWidth: 0 }}>{catBadge(category.previous, false)}</div>
             </> : row.type === "budget" ? <>
-              <div style={{ flex: 1, fontSize: 11, fontWeight: 700, fontFamily: "JetBrains Mono,monospace", color: accent }}>{fmtBudget(budgets.current?.average)}</div>
-              <div style={{ flex: 1, fontSize: 11, fontWeight: 700, fontFamily: "JetBrains Mono,monospace", color: "rgba(255,255,255,0.4)" }}>{fmtBudget(budgets.previous?.average)}</div>
+              <div style={{ flex: 1, fontSize: 11, fontWeight: 700, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", color: accent }}>{fmtBudget(budgets.current?.average)}</div>
+              <div style={{ flex: 1, fontSize: 11, fontWeight: 700, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", color: "var(--th-text-tertiary)" }}>{fmtBudget(budgets.previous?.average)}</div>
             </> : row.type === "genres" ? <>
               <div style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", gap: 3 }}>
                 {curGenres.map((g, i) => (
-                  <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: 9, background: i === 0 ? accent + "18" : "rgba(255,255,255,0.04)", border: "1px solid " + (i === 0 ? accent + "30" : "rgba(255,255,255,0.08)"), color: i === 0 ? accent : "rgba(255,255,255,0.6)", fontWeight: i === 0 ? 700 : 500 }}>
-                    {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 8, color: accent }}>{g.current}</span>
+                  <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: 9, background: i === 0 ? accent + "18" : "var(--th-surface-subtle)", border: "1px solid " + (i === 0 ? accent + "30" : "var(--th-border-subtle)"), color: i === 0 ? accent : "rgba(255,255,255,0.6)", fontWeight: i === 0 ? 700 : 500 }}>
+                    {g.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: 8, color: accent }}>{g.current}</span>
                   </span>
                 ))}
               </div>
               <div style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", gap: 3 }}>
                 {prevGenres.map((g, i) => (
-                  <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: 9, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)", fontWeight: i === 0 ? 600 : 400 }}>
-                    {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 8, color: "rgba(255,255,255,0.35)" }}>{g.previous}</span>
+                  <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: 9, background: "var(--th-surface-dim)", border: "1px solid var(--th-border-dim)", color: "rgba(255,255,255,0.45)", fontWeight: i === 0 ? 600 : 400 }}>
+                    {g.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: 8, color: "var(--th-text-muted)" }}>{g.previous}</span>
                   </span>
                 ))}
               </div>
@@ -227,12 +229,12 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
                       : <PosterImg src={it.thumb} size={20} />
                     }
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 600, color: isCur ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t || it.n}</div>
-                      <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: isCur ? "var(--th-text)" : "var(--th-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t || it.n}</div>
+                      <div style={{ fontSize: 8, color: "var(--th-text-muted)" }}>
                         {row.type === "rated" ? `${it.r}/10` : row.type === "person" ? `${it.count} ${isSeriesSlide ? "series" : "films"}` : `${it.plays} ${isSeriesSlide ? "ep." : "vue" + ((it.plays || 0) > 1 ? "s" : "")}`}
                       </div>
                     </div>
-                  </> : <span style={{ fontSize: 9, color: "rgba(255,255,255,0.15)" }}>—</span>}
+                  </> : <span style={{ fontSize: 9, color: "var(--th-text-faint)" }}>—</span>}
                 </div>
               ))}
             </>}
@@ -241,13 +243,13 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
 
         {/* Top 3 pays en badges */}
         {(countries.current?.length > 0 || countries.previous?.length > 0) && (
-          <div style={{ display: "flex", gap: 8, padding: "4px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-            <div style={{ width: 75, fontSize: 9, color: "rgba(255,255,255,0.35)", flexShrink: 0, paddingTop: 2 }}>Pays</div>
+          <div style={{ display: "flex", gap: 8, padding: "4px 0", borderTop: "1px solid var(--th-surface-subtle)" }}>
+            <div style={{ width: 75, fontSize: 9, color: "var(--th-text-muted)", flexShrink: 0, paddingTop: 2 }}>Pays</div>
             {[{ items: countries.current || [], isCur: true }, { items: countries.previous || [], isCur: false }].map(({ items, isCur }, ci) => (
               <div key={ci} style={{ flex: 1, display: "flex", flexWrap: "wrap", gap: 4 }}>
                 {items.map((c, i) => (
-                  <span key={c.n + i} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: 9, background: i === 0 && isCur ? accent + "18" : "rgba(255,255,255,0.04)", border: "1px solid " + (i === 0 && isCur ? accent + "30" : "rgba(255,255,255,0.06)"), color: isCur ? (i === 0 ? accent : "rgba(255,255,255,0.55)") : "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400 }}>
-                    {c.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontSize: 8, fontWeight: 700, color: isCur ? accent : "rgba(255,255,255,0.3)" }}>{c.v}</span>
+                  <span key={c.n + i} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: 9, background: i === 0 && isCur ? accent + "18" : "var(--th-surface-subtle)", border: "1px solid " + (i === 0 && isCur ? accent + "30" : "var(--th-border-dim)"), color: isCur ? (i === 0 ? accent : "rgba(255,255,255,0.55)") : "var(--th-text-tertiary)", fontWeight: i === 0 ? 600 : 400 }}>
+                    {c.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontSize: 8, fontWeight: 700, color: isCur ? accent : "var(--th-text-muted)" }}>{c.v}</span>
                   </span>
                 ))}
               </div>
@@ -261,10 +263,10 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
     {(peak.current?.hour != null || peak.previous?.hour != null) && (
       <div className="s8" style={{ ...card, display: "flex", gap: 8 }}>
         {[{ p: peak.current, yr: year, cur: true }, { p: peak.previous, yr: year - 1, cur: false }].map(({ p, yr, cur }) => (
-          p?.hour != null && <div key={yr} style={{ flex: 1, padding: "8px 10px", borderRadius: 10, background: cur ? accent + "08" : "rgba(255,255,255,0.02)", border: "1px solid " + (cur ? accent + "20" : "rgba(255,255,255,0.06)") }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Heure de pointe {yr}</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: cur ? accent : "rgba(255,255,255,0.5)", lineHeight: 1 }}>{p.hour}h</div>
-            {p.count != null && <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", marginTop: 2 }}>{p.count} {isSeriesSlide ? "ep." : "vues"}</div>}
+          p?.hour != null && <div key={yr} style={{ flex: 1, padding: "8px 10px", borderRadius: "var(--th-radius-sm)", background: cur ? accent + "08" : "var(--th-surface-dim)", border: "1px solid " + (cur ? accent + "20" : "var(--th-border-dim)") }}>
+            <div style={{ fontSize: 8, color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Heure de pointe {yr}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: cur ? accent : "var(--th-text-secondary)", lineHeight: 1 }}>{p.hour}h</div>
+            {p.count != null && <div style={{ fontSize: 8, color: "var(--th-text-dim)", marginTop: 2 }}>{p.count} {isSeriesSlide ? "ep." : "vues"}</div>}
           </div>
         ))}
       </div>
@@ -276,7 +278,7 @@ function DiffBadge({ value }) {
   return <span style={{
     fontSize: 9, fontWeight: 700,
     color: value > 0 ? "#4ade80" : "#f87171",
-    padding: "1px 6px", borderRadius: 8,
+    padding: "1px 6px", borderRadius: "var(--th-radius-xs)",
     background: value > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)",
   }}>{value > 0 ? "+" : ""}{value}%</span>
 }
@@ -284,14 +286,14 @@ function DiffBadge({ value }) {
 function TopColumn({ items, yearLabel, isCurrent, accent, isSeries }) {
   if (!items || items.length === 0) return null
   return <div style={{ flex: 1, minWidth: 0 }}>
-    <div style={{ fontSize: 8, fontWeight: 700, color: isCurrent ? accent : "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>{yearLabel}</div>
+    <div style={{ fontSize: 8, fontWeight: 700, color: isCurrent ? accent : "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>{yearLabel}</div>
     {items.map((it, i) => (
       <div key={it.t + i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
         <RankBadge pos={i} accent={accent} isCurrent={isCurrent} />
         <PosterImg src={it.thumb} size={28} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t}</div>
-          <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{it.plays} {isSeries ? "ep." : "vue" + (it.plays > 1 ? "s" : "")}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "var(--th-text)" : "var(--th-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t}</div>
+          <div style={{ fontSize: 8, color: "var(--th-text-muted)" }}>{it.plays} {isSeries ? "ep." : "vue" + (it.plays > 1 ? "s" : "")}</div>
         </div>
       </div>
     ))}
@@ -301,14 +303,14 @@ function TopColumn({ items, yearLabel, isCurrent, accent, isSeries }) {
 function PersonColumn({ items, yearLabel, isCurrent, accent, unit = "films" }) {
   if (!items || items.length === 0) return null
   return <div style={{ flex: 1, minWidth: 0 }}>
-    <div style={{ fontSize: 8, fontWeight: 700, color: isCurrent ? accent : "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>{yearLabel}</div>
+    <div style={{ fontSize: 8, fontWeight: 700, color: isCurrent ? accent : "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>{yearLabel}</div>
     {items.map((p, i) => (
       <div key={p.n + i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
         <RankBadge pos={i} accent={accent} isCurrent={isCurrent} />
         <PersonImg src={p.photo} size={24} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{p.n}</div>
-          <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{p.count} {unit}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "var(--th-text)" : "var(--th-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{p.n}</div>
+          <div style={{ fontSize: 8, color: "var(--th-text-muted)" }}>{p.count} {unit}</div>
         </div>
       </div>
     ))}

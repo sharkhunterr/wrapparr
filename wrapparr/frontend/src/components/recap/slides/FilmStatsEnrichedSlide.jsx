@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useActive, AN, Tag, Lbl, Pill, AreaG, useComparison, CompBadge, CompLegend } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 const DEFAULT_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
@@ -47,7 +48,7 @@ function GenreDonut({ genres, accent, maxShow = 4 }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 14px)", width: "100%" }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={stroke} />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--th-surface-subtle)" strokeWidth={stroke} />
         {items.map((g, i) => {
           const pct = g.v / total
           const dashLen = circ * pct - 1.5
@@ -62,8 +63,8 @@ function GenreDonut({ genres, accent, maxShow = 4 }) {
         {items.map((g, i) => (
           <div key={g.n} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 8, height: 8, borderRadius: 2, background: accent, opacity: opacities[i] || 0.15, flexShrink: 0 }} />
-            <span style={{ fontSize: "clamp(10px, 1.4vw, 13px)", color: i === 0 ? "white" : "rgba(255,255,255,0.5)", fontWeight: i === 0 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>{g.n}</span>
-            <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{g.v}</span>
+            <span style={{ fontSize: "clamp(10px, 1.4vw, 13px)", color: i === 0 ? "var(--th-text)" : "var(--th-text-secondary)", fontWeight: i === 0 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>{g.n}</span>
+            <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "var(--th-text-muted)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", flexShrink: 0 }}>{g.v}</span>
           </div>
         ))}
       </div>
@@ -105,10 +106,10 @@ const ICONS = {
 function MiniStat({ iconKey, value, label, accent }) {
   const iconFn = ICONS[iconKey] || ICONS.chart
   return (
-    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(5px, 1vw, 8px)", padding: "clamp(6px, 1vw, 9px) clamp(7px, 1.2vw, 10px)", borderRadius: 10, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)", minWidth: 0, overflow: "hidden" }}>
+    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(5px, 1vw, 8px)", padding: "clamp(6px, 1vw, 9px) clamp(7px, 1.2vw, 10px)", borderRadius: "var(--th-radius-sm)", background: "var(--th-surface-hover)", border: "1px solid var(--th-border-strong)", backdropFilter: "var(--th-glass-blur)", minWidth: 0, overflow: "hidden" }}>
       <div style={{ flexShrink: 0 }}>{iconFn(accent)}</div>
       <div style={{ minWidth: 0, overflow: "hidden" }}>
-        <div style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 800, color: "white", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+        <div style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
         <div style={{ fontSize: "clamp(8px, 1.1vw, 10px)", color: accent, lineHeight: 1.15, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</div>
       </div>
     </div>
@@ -118,6 +119,7 @@ function MiniStat({ iconKey, value, label, accent }) {
 export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {}, mediaType = "films" }) {
   const isSeries = mediaType === "series"
   const active = useActive()
+  const L = useLabels()
   const [stamped, setStamped] = useState(false)
   useEffect(() => { const t = setTimeout(() => setStamped(true), 3500); return () => clearTimeout(t) }, [])
   const categories = config.categories || (isSeries ? DEFAULT_SERIES_CATEGORIES : DEFAULT_CATEGORIES)
@@ -132,7 +134,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   // Labels adaptes films vs series
   const itemLabel = isSeries ? "episodes" : "films"
   const bilanLabel = isSeries ? "series" : "cinema"
-  const unitLabel = isSeries ? "ep." : "vus"
+  const unitLabel = isSeries ? "ep." : L.viewed
   const perMonthLabel = isSeries ? "ep. / mois" : "films / mois"
 
   // Quick stats
@@ -163,52 +165,52 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
     <div style={{ position: "relative", zIndex: 1 }}>
       <div className="s0" style={{ marginBottom: 8 }}>
         <Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
-        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05, marginTop: 4 }}>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05, marginTop: 4 }}>
           Ton bilan <span style={{ color: accent }}>{bilanLabel}</span>
         </h2>
 
         {/* Stats */}
         <div style={{ display: "flex", alignItems: "baseline", gap: "clamp(6px, 1.5vw, 12px)", marginTop: 6, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-            <span style={{ fontSize: "clamp(26px, 7vw, 36px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
+            <span style={{ fontSize: "clamp(26px, 7vw, 36px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
             <span style={{ fontSize: "clamp(10px, 1.3vw, 13px)", fontWeight: 600, color: accent + "90" }}>{unitLabel}</span>
             <CompBadge current={totalItems} previous={prevItems} />
           </div>
-          <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
+          <div style={{ height: 20, width: 1, background: "var(--th-surface)" }} />
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-            <span style={{ fontSize: "clamp(26px, 7vw, 36px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
+            <span style={{ fontSize: "clamp(26px, 7vw, 36px)", fontWeight: 800, color: "var(--th-text)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", lineHeight: 1 }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
             <CompBadge current={totalHours} previous={prevHours} suffix="h" />
           </div>
         </div>
 
         {/* Category badge + equivalent — below stats, bigger */}
         <div style={{ display: "flex", gap: "clamp(4px, 1vw, 8px)", marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: 20, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 16px ${accent}20`, overflow: "hidden" }}>
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: "var(--th-radius-pill)", background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 16px ${accent}20`, overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
             <span style={{ fontSize: "clamp(16px, 3.5vw, 22px)", position: "relative" }}>{category.emoji}</span>
             <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: accent, position: "relative" }}>{category.name}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: 20, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: "var(--th-radius-pill)", background: "var(--th-surface-hover)", border: "1px solid var(--th-border-strong)", backdropFilter: "var(--th-glass-blur)" }}>
             <span style={{ fontSize: "clamp(16px, 3.5vw, 22px)" }}>⏱️</span>
-            <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
+            <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: "var(--th-text)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{equiv}</span>
           </div>
         </div>
       </div>
 
       {/* Genre donut + quick stats — stacks on mobile */}
       <div className="s1" style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "stretch", flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: 14, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)" }}>
+        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: "var(--th-radius)", background: "var(--th-surface-hover)", border: "1px solid var(--th-border-strong)", backdropFilter: "var(--th-glass-blur)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <GenreDonut genres={genres} accent={accent} />
           </div>
           {/* Previous year genres comparison */}
           {comp.active && prevGenres.length > 0 && (<>
-            <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "8px 0 6px" }} />
+            <div style={{ height: 1, background: "var(--th-border-dim)", margin: "8px 0 6px" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-              <span style={{ fontSize: "clamp(7px, 0.9vw, 9px)", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
+              <span style={{ fontSize: "clamp(7px, 0.9vw, 9px)", color: "var(--th-text-dim)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
               {prevGenres.map((g, i) => (
-                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: "clamp(8px, 1vw, 10px)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400 }}>
-                  {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: "clamp(7px, 0.9vw, 9px)", color: "rgba(255,255,255,0.3)" }}>{g.previous}</span>
+                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: "clamp(8px, 1vw, 10px)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", color: "var(--th-text-tertiary)", fontWeight: i === 0 ? 600 : 400 }}>
+                  {g.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: "clamp(7px, 0.9vw, 9px)", color: "var(--th-text-muted)" }}>{g.previous}</span>
                 </span>
               ))}
             </div>
@@ -225,8 +227,8 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
             {topDirector && <MiniStat iconKey="clapperboard" value={topDirector.name} label={topDirector.count + " " + itemLabel} accent={accent} />}
           </div>
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-            {bestMonth && <MiniStat iconKey="calendar" value={bestMonth.month} label={bestMonth.views + " vues"} accent={accent} />}
-            {bestDay && <MiniStat iconKey="calendar" value={bestDay.day + " " + bestDay.month.slice(0, 3)} label={bestDay.views + " vues · " + bestDay.hours + "h"} accent={accent} />}
+            {bestMonth && <MiniStat iconKey="calendar" value={bestMonth.month} label={bestMonth.views + " " + L.viewsUnit} accent={accent} />}
+            {bestDay && <MiniStat iconKey="calendar" value={bestDay.day + " " + bestDay.month.slice(0, 3)} label={bestDay.views + " " + L.viewsUnit + " · " + bestDay.hours + "h"} accent={accent} />}
           </div>
           {countries.length > 0 && (
             <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
@@ -241,9 +243,9 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         const monthly = data.extra?.films?.monthly || data.monthly || []
         if (monthly.length < 3) return null
         return (
-          <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)" }}>
+          <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: "var(--th-radius)", background: "var(--th-surface-hover)", border: "1px solid var(--th-border-strong)", backdropFilter: "var(--th-glass-blur)" }}>
             <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
-            <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit=" vues" id={"stats-enriched-" + label} prevData={prevMonthly} prevDataKey="previous" />
+            <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit={" " + L.viewsUnit} id={"stats-enriched-" + label} prevData={prevMonthly} prevDataKey="previous" />
             <CompLegend accent={accent} year={year} />
           </div>
         )
@@ -254,18 +256,18 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         <div className="s2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           {top.slice(0, 4).map((item, i) => (
             <div key={item.t || i} style={{
-              padding: "7px", display: "flex", gap: 7, borderRadius: 10,
-              background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)",
+              padding: "7px", display: "flex", gap: 7, borderRadius: "var(--th-radius-sm)",
+              background: "var(--th-surface-hover)", backdropFilter: "var(--th-glass-blur)",
               animation: "slide-up .4s ease " + (0.15 + i * 0.08) + "s both",
-              border: i === 0 ? `1px solid ${accent}35` : "1px solid rgba(255,255,255,0.18)",
+              border: i === 0 ? `1px solid ${accent}35` : "1px solid var(--th-border-strong)",
               boxShadow: i === 0 ? `0 0 14px ${accent}12` : undefined,
               position: "relative", overflow: "hidden",
             }}>
               {i === 0 && <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 30%, ${accent}15 50%, transparent 70%)`, animation: "badge-shine 4s ease-in-out 2s infinite", pointerEvents: "none" }} />}
               <PosterImg src={item.thumb} size={34} />
               <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-                <div style={{ fontSize: 9, color: accent, fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "white", lineHeight: 1.15, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
+                <div style={{ fontSize: 9, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>#{i + 1}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--th-text)", lineHeight: 1.15, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
                 <div style={{ display: "flex", gap: 3, marginTop: 2 }}>
                   {item.r > 0 && <span style={{ fontSize: 9, color: "#fbbf24", fontWeight: 600 }}>★{item.r}</span>}
                   {item.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{item.y}</span>}
@@ -285,10 +287,10 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
           animation: "stamp-hit 0.4s cubic-bezier(0.17, 0.67, 0.21, 1.2) both",
         }}>
           <div style={{
-            padding: "clamp(6px, 1.2vw, 10px) clamp(20px, 4vw, 30px)", borderRadius: 8,
+            padding: "clamp(6px, 1.2vw, 10px) clamp(20px, 4vw, 30px)", borderRadius: "var(--th-radius-xs)",
             border: `3px solid ${accent}`,
             color: accent,
-            fontSize: "clamp(18px, 4vw, 24px)", fontWeight: 900, fontFamily: "JetBrains Mono,monospace",
+            fontSize: "clamp(18px, 4vw, 24px)", fontWeight: 900, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)",
             textTransform: "uppercase", letterSpacing: "0.15em",
             textShadow: `0 0 16px ${accent}50`,
             boxShadow: `0 0 20px ${accent}20`,

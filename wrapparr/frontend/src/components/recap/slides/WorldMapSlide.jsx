@@ -32,6 +32,7 @@ const FLAGS = {
 }
 
 import { useComparison } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 export default function WorldMapSlide({ accent, data, year, config = {}, mediaType = "films" }) {
   const animSpeed = config.animationSpeed || 15000
@@ -40,6 +41,7 @@ export default function WorldMapSlide({ accent, data, year, config = {}, mediaTy
   const prevCountries = comp.active ? (comp.data?.tautulli?.countries || comp.data?.plex?.countries || comp.data?.jellyfin?.countries || null) : null
   const prevTop3 = prevCountries?.previous?.slice(0, 3) || []
   const N = countries.length
+  const L = useLabels()
 
   const [phase, setPhase] = useState(0)
   const [revealedCount, setRevealedCount] = useState(0)
@@ -95,9 +97,9 @@ export default function WorldMapSlide({ accent, data, year, config = {}, mediaTy
   return (
     <div style={{ maxWidth: "clamp(320px, 92vw, 700px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
-        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-          Tes {mediaType === "series" ? "series" : "films"} a travers <span style={{ color: accent }}>le monde</span>
+        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
+          Tes {mediaType === "series" ? "series" : "films"} {L.worldTitle} <span style={{ color: accent }}>{L.theWorld}</span>
         </h2>
       </div>
 
@@ -166,14 +168,14 @@ export default function WorldMapSlide({ accent, data, year, config = {}, mediaTy
             if (!isShown) return null
             return (
               <div key={c.code} style={{
-                flex: 1, padding: "10px 8px", borderRadius: 10, textAlign: "center",
-                background: i === 0 ? accent + "12" : "rgba(255,255,255,0.02)",
-                border: "1px solid " + (i === 0 ? accent + "30" : "rgba(255,255,255,0.05)"),
+                flex: 1, padding: "10px 8px", borderRadius: "var(--th-radius-sm)", textAlign: "center",
+                background: i === 0 ? accent + "12" : "var(--th-surface-dim)",
+                border: "1px solid " + (i === 0 ? accent + "30" : "var(--th-border-dim)"),
                 animation: "slide-up 0.4s ease " + (i * 0.15) + "s both",
               }}>
                 <div style={{ fontSize: 20, marginBottom: 2 }}>{FLAGS[c.code] || ""}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: i === 0 ? accent : "white" }}>{c.name}</div>
-                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", fontFamily: "JetBrains Mono,monospace" }}>{c.count} films</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: i === 0 ? accent : "var(--th-text)" }}>{c.name}</div>
+                <div style={{ fontSize: 9, color: "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{c.count} {L.films}</div>
               </div>
             )
           })}
@@ -186,19 +188,19 @@ export default function WorldMapSlide({ accent, data, year, config = {}, mediaTy
           {countries.slice(3).map((c) => (
             <span key={c.code} style={{
               display: "inline-flex", alignItems: "center", gap: 4,
-              padding: "3px 8px", borderRadius: 12,
-              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)",
-              fontSize: 10, color: "rgba(255,255,255,0.5)",
+              padding: "3px 8px", borderRadius: "var(--th-radius-sm)",
+              background: "var(--th-surface-dim)", border: "1px solid var(--th-border-dim)",
+              fontSize: 10, color: "var(--th-text-secondary)",
             }}>
-              {FLAGS[c.code] || ""} {c.name} <span style={{ color: accent, fontFamily: "JetBrains Mono,monospace" }}>{c.count}</span>
+              {FLAGS[c.code] || ""} {c.name} <span style={{ color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{c.count}</span>
             </span>
           ))}
         </div>
       )}
 
       {done && (
-        <div style={{ marginTop: 10, fontSize: 10, color: "rgba(255,255,255,0.3)", textAlign: "center" }}>
-          {countries.length} pays representes
+        <div style={{ marginTop: 10, fontSize: 10, color: "var(--th-text-muted)", textAlign: "center" }}>
+          {countries.length} {L.countriesRepresented}
         </div>
       )}
 
@@ -207,15 +209,15 @@ export default function WorldMapSlide({ accent, data, year, config = {}, mediaTy
         <>
           <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "10px 0" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
+            <span style={{ fontSize: 8, color: "var(--th-text-dim)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
             {prevTop3.map((c, i) => (
               <span key={c.n + i} style={{
                 display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "3px 8px", borderRadius: 8,
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                fontSize: 9, color: "rgba(255,255,255,0.4)",
+                padding: "3px 8px", borderRadius: "var(--th-radius-xs)",
+                background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)",
+                fontSize: 9, color: "var(--th-text-tertiary)",
               }}>
-                {c.c && FLAGS[c.c] ? <span>{FLAGS[c.c]}</span> : null}{c.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{c.v}</span>
+                {c.c && FLAGS[c.c] ? <span>{FLAGS[c.c]}</span> : null}{c.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: 8, color: "var(--th-text-muted)" }}>{c.v}</span>
               </span>
             ))}
           </div>

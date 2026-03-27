@@ -1,15 +1,17 @@
 import { useState } from "react"
 import { useActive, AN, Tag, Lbl, BigNum, VsB, Pill, AreaG, useComparison, CompBadge } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 function PosterImg({ src, size = 52, radius = 7 }) {
   const [err, setErr] = useState(false)
-  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: radius, flexShrink: 0, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.4, color: "rgba(255,255,255,0.15)" }}>?</div>
+  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: radius, flexShrink: 0, background: "var(--th-surface)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.4, color: "var(--th-text-faint)" }}>?</div>
   return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: radius, objectFit: "cover", flexShrink: 0, boxShadow: "0 4px 14px rgba(0,0,0,0.4)" }} />
 }
 
 export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
   const active = useActive()
   const comp = useComparison()
+  const L = useLabels()
   const top = data.top || []
   const monthly = data.monthly || []
 
@@ -32,14 +34,14 @@ export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
         <div key={item.t || i} className="glass" style={{ padding: "10px 12px", display: "flex", gap: 10, animation: "slide-up .5s ease " + (0.2 + i * 0.1) + "s both" }}>
           <PosterImg src={item.thumb} size={48} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: accent, fontSize: 8, fontFamily: "JetBrains Mono,monospace", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 3 }}>#{i + 1} · {item.y || year}</div>
-            <div style={{ color: "white", fontWeight: 800, fontSize: 12, lineHeight: 1.25, marginBottom: 4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
+            <div style={{ color: accent, fontSize: 8, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 3 }}>#{i + 1} · {item.y || year}</div>
+            <div style={{ color: "var(--th-text)", fontWeight: 800, fontSize: 12, lineHeight: 1.25, marginBottom: 4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
               {item.g && <Pill accent={accent}>{item.g}</Pill>}
               {item.r > 0 && <Pill accent="#fbbf24">★ {item.r}</Pill>}
-              {item.plays > 1 && <Pill accent="rgba(255,255,255,0.3)">{item.plays}x vus</Pill>}
-              {item.h > 0 && <Pill accent="rgba(255,255,255,0.3)">{item.h}h</Pill>}
-              {item.ep > 0 && <Pill accent="rgba(255,255,255,0.3)">{item.ep} ep</Pill>}
+              {item.plays > 1 && <Pill accent="var(--th-text-muted)">{item.plays}x vus</Pill>}
+              {item.h > 0 && <Pill accent="var(--th-text-muted)">{item.h}h</Pill>}
+              {item.ep > 0 && <Pill accent="var(--th-text-muted)">{item.ep} ep</Pill>}
             </div>
           </div>
         </div>

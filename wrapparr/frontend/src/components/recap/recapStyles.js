@@ -34,7 +34,7 @@ export const RECAP_CSS = `
 .s0{animation:slide-up .5s ease .00s both}.s1{animation:slide-up .5s ease .10s both}
 .s2{animation:slide-up .5s ease .20s both}.s3{animation:slide-up .5s ease .30s both}
 .s4{animation:slide-up .5s ease .40s both}.s5{animation:slide-up .5s ease .50s both}
-.glass{background:rgba(255,255,255,0.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.12);border-radius:14px}
+.glass{background:var(--th-glass-bg,rgba(255,255,255,0.08));backdrop-filter:var(--th-glass-blur,blur(14px));-webkit-backdrop-filter:var(--th-glass-blur,blur(14px));border:1px solid var(--th-glass-border,rgba(255,255,255,0.12));border-radius:var(--th-radius,14px)}
 
 /* ── Responsive slide wrapper ── */
 .slide-wrap{max-width:clamp(320px, 85vw, 540px);width:100%}

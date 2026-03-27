@@ -1,0 +1,1269 @@
+// ── Theme system: design tokens + labels + effects ──
+// Each theme defines CSS custom properties, effect flags, labels, and extra CSS
+
+export const THEMES = {
+  "glass-dark": {
+    id: "glass-dark",
+    name: "Glass Dark",
+    description: "Effet verre depoli sur fond sombre",
+    preview: "linear-gradient(135deg, #0a0a1a, #15152a)",
+
+    // CSS custom properties (injected on .recap-root)
+    css: {
+      // Surfaces
+      "--th-surface": "rgba(255,255,255,0.08)",
+      "--th-surface-hover": "rgba(255,255,255,0.12)",
+      "--th-surface-dim": "rgba(255,255,255,0.03)",
+      "--th-surface-subtle": "rgba(255,255,255,0.04)",
+      "--th-surface-faint": "rgba(255,255,255,0.015)",
+      // Borders
+      "--th-border": "rgba(255,255,255,0.12)",
+      "--th-border-dim": "rgba(255,255,255,0.06)",
+      "--th-border-subtle": "rgba(255,255,255,0.08)",
+      "--th-border-strong": "rgba(255,255,255,0.18)",
+      // Text
+      "--th-text": "white",
+      "--th-text-secondary": "rgba(255,255,255,0.5)",
+      "--th-text-tertiary": "rgba(255,255,255,0.4)",
+      "--th-text-muted": "rgba(255,255,255,0.3)",
+      "--th-text-dim": "rgba(255,255,255,0.25)",
+      "--th-text-faint": "rgba(255,255,255,0.2)",
+      // Effects
+      "--th-blur": "14px",
+      "--th-radius": "14px",
+      "--th-radius-sm": "10px",
+      "--th-radius-xs": "6px",
+      "--th-radius-pill": "20px",
+      // Bar graphs
+      "--th-bar-bg": "rgba(255,255,255,0.03)",
+      "--th-bar-prev": "rgba(255,255,255,0.12)",
+      // Fonts
+      "--th-font-body": "Nunito,sans-serif",
+      "--th-font-mono": "JetBrains Mono,monospace",
+      // Glass
+      "--th-glass-bg": "rgba(255,255,255,0.08)",
+      "--th-glass-border": "rgba(255,255,255,0.12)",
+      "--th-glass-blur": "blur(14px)",
+      // Tooltip
+      "--th-tooltip-bg": "#0d0d1a",
+      "--th-tooltip-border": "rgba(255,255,255,0.1)",
+    },
+
+    effects: {
+      stars: true,
+      orbs: true,
+      grain: true,
+      spotlights: true,
+      confetti: true,
+      fireworks: true,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: false,
+    },
+
+    // Extra CSS to inject (theme-specific animations/overlays)
+    cssExtra: "",
+
+    // Labels — French casual (default)
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "vus",
+      episodes: "ep.",
+      hours: "passees",
+      monthlyActivity: "Activite mensuelle",
+      favoriteDay: "Jour prefere",
+      consumptionTime: "Heure de consommation",
+      goldenMonth: "Mois en or",
+      recordDay: "Journee record",
+      whenYouConsume: "Quand tu",
+      consume: "consommes",
+      budgetTitle: "Le budget de",
+      yourFilms: "tes films",
+      ratingsTitle: "Tes notes",
+      worldTitle: "a travers",
+      theWorld: "le monde",
+      countriesRepresented: "pays representes",
+      bestNote: "Meilleure note",
+      worstNote: "Pire note",
+      mostExpensive: "Les plus chers",
+      leastExpensive: "Les moins chers",
+      bestROI: "Meilleur retour sur investissement",
+      avgBudget: "Budget moyen des films vus",
+      totalCumulated: "total cumule",
+      distributionTitle: "Repartition par budget",
+      budgetPerFilm: "Budget par film",
+      on: "sur",
+      films: "films",
+      rated: "notes",
+      average: "moyenne",
+      viewsUnit: "vues",
+      hoursUnit: "h",
+      ofTotal: "du total",
+      viewing: "de visionnage",
+    },
+  },
+
+  "neon-retro": {
+    id: "neon-retro",
+    name: "Neon Retro",
+    description: "Synthwave, grille perspective, neons scintillants",
+    preview: "linear-gradient(180deg, #0a0020 0%, #1a0040 50%, #2d0060 100%)",
+
+    css: {
+      "--th-surface": "rgba(180,100,255,0.07)",
+      "--th-surface-hover": "rgba(180,100,255,0.12)",
+      "--th-surface-dim": "rgba(180,100,255,0.025)",
+      "--th-surface-subtle": "rgba(180,100,255,0.04)",
+      "--th-surface-faint": "rgba(180,100,255,0.015)",
+      "--th-border": "rgba(255,0,220,0.25)",
+      "--th-border-dim": "rgba(255,0,220,0.1)",
+      "--th-border-subtle": "rgba(255,0,220,0.15)",
+      "--th-border-strong": "rgba(255,0,220,0.35)",
+      "--th-text": "#f0e0ff",
+      "--th-text-secondary": "rgba(240,224,255,0.65)",
+      "--th-text-tertiary": "rgba(240,224,255,0.5)",
+      "--th-text-muted": "rgba(240,224,255,0.32)",
+      "--th-text-dim": "rgba(240,224,255,0.22)",
+      "--th-text-faint": "rgba(240,224,255,0.14)",
+      "--th-blur": "0px",
+      "--th-radius": "2px",
+      "--th-radius-sm": "2px",
+      "--th-radius-xs": "1px",
+      "--th-radius-pill": "2px",
+      "--th-bar-bg": "rgba(180,100,255,0.06)",
+      "--th-bar-prev": "rgba(0,255,255,0.15)",
+      "--th-font-body": "'Orbitron',sans-serif",
+      "--th-font-mono": "'Share Tech Mono',monospace",
+      "--th-glass-bg": "rgba(10,0,30,0.88)",
+      "--th-glass-border": "rgba(255,0,220,0.25)",
+      "--th-glass-blur": "blur(0px)",
+      "--th-tooltip-bg": "#0a0020",
+      "--th-tooltip-border": "rgba(255,0,220,0.25)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: false,
+      grain: false,
+      spotlights: true,
+      confetti: false,
+      fireworks: true,
+      scanlines: true,
+      grid: true,
+      vhs: false,
+      filmGrain: false,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
+.th-scanlines{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0.035;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,0,220,0.06) 2px,rgba(255,0,220,0.06) 4px)}
+.th-grid{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.th-grid::before{content:'';position:absolute;left:-20%;right:-20%;bottom:0;height:70vh;background-image:linear-gradient(rgba(180,100,255,0.35) 1px,transparent 1px),linear-gradient(90deg,rgba(180,100,255,0.35) 1px,transparent 1px);background-size:60px 60px;transform:perspective(300px) rotateX(60deg);transform-origin:center bottom;animation:th-grid-flow 3s linear infinite}
+@keyframes th-grid-flow{0%{background-position:0 0}100%{background-position:0 60px}}
+.th-grid::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,0,32,0.85) 0%,rgba(10,0,32,0.3) 40%,transparent 65%,transparent 100%);pointer-events:none}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 20px rgba(255,0,220,0.5),0 0 40px rgba(255,0,220,0.2)!important;animation:th-neon-flicker 4s ease-in-out infinite!important}
+@keyframes th-neon-flicker{0%,100%{opacity:1;text-shadow:0 0 20px rgba(255,0,220,0.5),0 0 40px rgba(255,0,220,0.2)}92%{opacity:1}93%{opacity:0.7;text-shadow:0 0 10px rgba(255,0,220,0.3)}94%{opacity:1}96%{opacity:0.85;text-shadow:0 0 30px rgba(255,0,220,0.6)}97%{opacity:1}}
+.glass{box-shadow:0 0 15px rgba(255,0,220,0.08),inset 0 0 15px rgba(180,100,255,0.04)!important;border-color:rgba(255,0,220,0.2)!important}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "decoded",
+      episodes: "ep.",
+      hours: "connectees",
+      monthlyActivity: "Frequence mensuelle",
+      favoriteDay: "Jour de connexion",
+      consumptionTime: "Heure de scan",
+      goldenMonth: "Overload",
+      recordDay: "Peak system",
+      whenYouConsume: "Quand tu",
+      consume: "te connectes",
+      budgetTitle: "Le prix de",
+      yourFilms: "tes donnees",
+      ratingsTitle: "Tes scores",
+      worldTitle: "a travers",
+      theWorld: "la matrice",
+      countriesRepresented: "noeuds actifs",
+      bestNote: "High score",
+      worstNote: "Game over",
+      mostExpensive: "Premium tier",
+      leastExpensive: "Free tier",
+      bestROI: "Meilleur rendement systeme",
+      avgBudget: "Cout moyen par entree",
+      totalCumulated: "cumul",
+      distributionTitle: "Distribution des couts",
+      budgetPerFilm: "Cout unitaire",
+      on: "sur",
+      films: "entrees",
+      rated: "scores",
+      average: "moyenne",
+      viewsUnit: "scans",
+      hoursUnit: "h",
+      ofTotal: "du flux",
+      viewing: "de stream",
+    },
+  },
+
+  "cinema-classic": {
+    id: "cinema-classic",
+    name: "Cinema Classic",
+    description: "Pellicule, grain, ambiance salle obscure",
+    preview: "linear-gradient(135deg, #1a0f05, #2a1a0a)",
+
+    css: {
+      "--th-surface": "rgba(255,220,160,0.06)",
+      "--th-surface-hover": "rgba(255,220,160,0.1)",
+      "--th-surface-dim": "rgba(255,220,160,0.02)",
+      "--th-surface-subtle": "rgba(255,220,160,0.03)",
+      "--th-surface-faint": "rgba(255,220,160,0.01)",
+      "--th-border": "rgba(255,220,160,0.15)",
+      "--th-border-dim": "rgba(255,220,160,0.06)",
+      "--th-border-subtle": "rgba(255,220,160,0.08)",
+      "--th-border-strong": "rgba(255,220,160,0.22)",
+      "--th-text": "#ffeedd",
+      "--th-text-secondary": "rgba(255,238,221,0.6)",
+      "--th-text-tertiary": "rgba(255,238,221,0.45)",
+      "--th-text-muted": "rgba(255,238,221,0.3)",
+      "--th-text-dim": "rgba(255,238,221,0.22)",
+      "--th-text-faint": "rgba(255,238,221,0.15)",
+      "--th-blur": "8px",
+      "--th-radius": "8px",
+      "--th-radius-sm": "6px",
+      "--th-radius-xs": "4px",
+      "--th-radius-pill": "16px",
+      "--th-bar-bg": "rgba(255,220,160,0.04)",
+      "--th-bar-prev": "rgba(255,220,160,0.12)",
+      "--th-font-body": "'Playfair Display',Georgia,serif",
+      "--th-font-mono": "'Courier Prime',Courier,monospace",
+      "--th-glass-bg": "rgba(30,20,10,0.75)",
+      "--th-glass-border": "rgba(255,220,160,0.15)",
+      "--th-glass-blur": "blur(8px)",
+      "--th-tooltip-bg": "#1a0f05",
+      "--th-tooltip-border": "rgba(255,220,160,0.15)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: true,
+      grain: true,
+      spotlights: true,
+      confetti: true,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Courier+Prime:wght@400;700&display=swap');
+.th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.08;mix-blend-mode:overlay;animation:th-film-flicker 0.15s infinite}
+@keyframes th-film-flicker{0%{opacity:0.06}50%{opacity:0.1}100%{opacity:0.07}}
+.th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.5) 100%)}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "projetes",
+      episodes: "ep.",
+      hours: "en salle",
+      monthlyActivity: "Programmation mensuelle",
+      favoriteDay: "Jour de seance",
+      consumptionTime: "Horaire de projection",
+      goldenMonth: "Mois d'or",
+      recordDay: "Seance marathon",
+      whenYouConsume: "Quand tu",
+      consume: "regardes",
+      budgetTitle: "Le budget de",
+      yourFilms: "tes bobines",
+      ratingsTitle: "Tes critiques",
+      worldTitle: "a travers",
+      theWorld: "le monde",
+      countriesRepresented: "pays a l'affiche",
+      bestNote: "Palme d'or",
+      worstNote: "Navet de l'annee",
+      mostExpensive: "Grosses productions",
+      leastExpensive: "Films independants",
+      bestROI: "Meilleur succes au box-office",
+      avgBudget: "Budget moyen des films projetes",
+      totalCumulated: "budget total",
+      distributionTitle: "Repartition des productions",
+      budgetPerFilm: "Budget par bobine",
+      on: "sur",
+      films: "films",
+      rated: "critiques",
+      average: "note moyenne",
+      viewsUnit: "seances",
+      hoursUnit: "h",
+      ofTotal: "de la saison",
+      viewing: "de projection",
+    },
+  },
+  "weyland-yutani": {
+    id: "weyland-yutani",
+    name: "Weyland-Yutani",
+    description: "Terminal MUTHUR, phosphore vert, interface Nostromo",
+    preview: "linear-gradient(180deg, #000800 0%, #001a00 50%, #000a00 100%)",
+
+    css: {
+      "--th-surface": "rgba(0,255,65,0.05)",
+      "--th-surface-hover": "rgba(0,255,65,0.09)",
+      "--th-surface-dim": "rgba(0,255,65,0.02)",
+      "--th-surface-subtle": "rgba(0,255,65,0.03)",
+      "--th-surface-faint": "rgba(0,255,65,0.012)",
+      "--th-border": "rgba(0,255,65,0.18)",
+      "--th-border-dim": "rgba(0,255,65,0.07)",
+      "--th-border-subtle": "rgba(0,255,65,0.1)",
+      "--th-border-strong": "rgba(0,255,65,0.28)",
+      "--th-text": "#33ff66",
+      "--th-text-secondary": "rgba(51,255,102,0.65)",
+      "--th-text-tertiary": "rgba(51,255,102,0.48)",
+      "--th-text-muted": "rgba(51,255,102,0.3)",
+      "--th-text-dim": "rgba(51,255,102,0.2)",
+      "--th-text-faint": "rgba(51,255,102,0.13)",
+      "--th-blur": "0px",
+      "--th-radius": "0px",
+      "--th-radius-sm": "0px",
+      "--th-radius-xs": "0px",
+      "--th-radius-pill": "0px",
+      "--th-bar-bg": "rgba(0,255,65,0.04)",
+      "--th-bar-prev": "rgba(0,255,65,0.1)",
+      "--th-font-body": "'VT323',monospace",
+      "--th-font-mono": "'VT323',monospace",
+      "--th-glass-bg": "rgba(0,8,0,0.92)",
+      "--th-glass-border": "rgba(0,255,65,0.18)",
+      "--th-glass-blur": "blur(0px)",
+      "--th-tooltip-bg": "#000a00",
+      "--th-tooltip-border": "rgba(0,255,65,0.2)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: false,
+      grain: false,
+      spotlights: false,
+      confetti: false,
+      fireworks: false,
+      scanlines: true,
+      grid: false,
+      vhs: true,
+      filmGrain: false,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+.th-scanlines{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0.06;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,255,65,0.04) 1px,rgba(0,255,65,0.04) 2px)}
+.th-vhs{position:fixed;inset:0;pointer-events:none;z-index:44}
+.th-vhs::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.55) 100%)}
+.th-vhs::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:rgba(0,255,65,0.08);animation:th-crt-line 6s linear infinite;box-shadow:0 0 15px 3px rgba(0,255,65,0.06)}
+@keyframes th-crt-line{0%{top:-2%}100%{top:102%}}
+.recap-root{text-shadow:0 0 6px rgba(0,255,65,0.5)!important}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 10px rgba(0,255,65,0.7),0 0 25px rgba(0,255,65,0.3)!important;animation:th-terminal-glow 3s ease-in-out infinite!important}
+@keyframes th-terminal-glow{0%,100%{text-shadow:0 0 10px rgba(0,255,65,0.7),0 0 25px rgba(0,255,65,0.3)}50%{text-shadow:0 0 14px rgba(0,255,65,0.9),0 0 35px rgba(0,255,65,0.4)}}
+.glass{box-shadow:0 0 12px rgba(0,255,65,0.05),inset 0 1px 0 rgba(0,255,65,0.08)!important}
+.recap-root::before{content:'WEYLAND-YUTANI CORP · INTERFACE MUTHUR 6000';position:fixed;top:8px;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:10px;color:rgba(0,255,65,0.15);letter-spacing:0.3em;z-index:200;pointer-events:none}
+`,
+
+    labels: {
+      brand: "W-Y CORP",
+      viewed: "analyses",
+      episodes: "seq.",
+      hours: "logged",
+      monthlyActivity: "Rapport mensuel",
+      favoriteDay: "Jour d'activite primaire",
+      consumptionTime: "Fenetre d'analyse",
+      goldenMonth: "Mois optimal",
+      recordDay: "Pic d'activite",
+      whenYouConsume: "Sujet:",
+      consume: "en observation",
+      budgetTitle: "Cout d'exploitation",
+      yourFilms: "des specimens",
+      ratingsTitle: "Evaluation des",
+      worldTitle: "deployes sur",
+      theWorld: "le secteur",
+      countriesRepresented: "zones couvertes",
+      bestNote: "Specimen de classe A",
+      worstNote: "Specimen defectueux",
+      mostExpensive: "Budget eleve",
+      leastExpensive: "Budget reduit",
+      bestROI: "Meilleur retour sur investissement",
+      avgBudget: "Cout moyen d'acquisition",
+      totalCumulated: "budget total",
+      distributionTitle: "Repartition par cout",
+      budgetPerFilm: "Cout par specimen",
+      on: "sur",
+      films: "specimens",
+      rated: "evalues",
+      average: "note moyenne",
+      viewsUnit: "analyses",
+      hoursUnit: "h",
+      ofTotal: "du programme",
+      viewing: "d'observation",
+    },
+  },
+
+  "pirate": {
+    id: "pirate",
+    name: "Pirate",
+    description: "Parchemin, carte au tresor, butin et aventure",
+    preview: "linear-gradient(135deg, #2a1a08 0%, #3d2810 50%, #1a0e04 100%)",
+
+    css: {
+      "--th-surface": "rgba(210,170,100,0.08)",
+      "--th-surface-hover": "rgba(210,170,100,0.13)",
+      "--th-surface-dim": "rgba(210,170,100,0.03)",
+      "--th-surface-subtle": "rgba(210,170,100,0.05)",
+      "--th-surface-faint": "rgba(210,170,100,0.02)",
+      "--th-border": "rgba(210,170,100,0.2)",
+      "--th-border-dim": "rgba(210,170,100,0.08)",
+      "--th-border-subtle": "rgba(210,170,100,0.12)",
+      "--th-border-strong": "rgba(210,170,100,0.3)",
+      "--th-text": "#f5e6c8",
+      "--th-text-secondary": "rgba(245,230,200,0.65)",
+      "--th-text-tertiary": "rgba(245,230,200,0.5)",
+      "--th-text-muted": "rgba(245,230,200,0.33)",
+      "--th-text-dim": "rgba(245,230,200,0.22)",
+      "--th-text-faint": "rgba(245,230,200,0.14)",
+      "--th-blur": "4px",
+      "--th-radius": "6px",
+      "--th-radius-sm": "4px",
+      "--th-radius-xs": "3px",
+      "--th-radius-pill": "14px",
+      "--th-bar-bg": "rgba(210,170,100,0.06)",
+      "--th-bar-prev": "rgba(210,170,100,0.12)",
+      "--th-font-body": "'Pirata One',Georgia,serif",
+      "--th-font-mono": "'IM Fell English SC',serif",
+      "--th-glass-bg": "rgba(42,26,8,0.85)",
+      "--th-glass-border": "rgba(210,170,100,0.2)",
+      "--th-glass-blur": "blur(4px)",
+      "--th-tooltip-bg": "#1a0e04",
+      "--th-tooltip-border": "rgba(210,170,100,0.2)",
+    },
+
+    effects: {
+      stars: true,
+      orbs: true,
+      grain: true,
+      spotlights: false,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: true,
+      waves: true,
+      compass: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English+SC&display=swap');
+.th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.05;mix-blend-mode:overlay;animation:th-parch-flicker 8s ease-in-out infinite}
+@keyframes th-parch-flicker{0%,100%{opacity:0.04}50%{opacity:0.07}}
+.th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 40%,rgba(26,14,4,0.65) 100%)}
+.recap-root::before{content:'\\2620';position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:min(60vw,400px);color:rgba(210,170,100,0.015);z-index:0;pointer-events:none}
+.glass{border-style:dashed!important;border-width:1px!important}
+.recap-root h2,.recap-root h1{text-shadow:1px 1px 0 rgba(0,0,0,0.5),0 0 15px rgba(210,170,100,0.15)!important}
+.recap-root h2,.recap-root h1{animation:th-scroll-unroll 1.2s cubic-bezier(0.16,1,0.3,1) both!important}
+.recap-root .s0 h2,.recap-root .s0 h1{animation-delay:0.1s!important}
+@keyframes th-scroll-unroll{0%{clip-path:polygon(48% 0%,52% 0%,52% 100%,48% 100%);opacity:0;filter:blur(2px) sepia(0.5)}30%{opacity:1;filter:blur(0px) sepia(0.2)}100%{clip-path:polygon(0% 0%,100% 0%,100% 100%,0% 100%);filter:blur(0px) sepia(0)}}
+.recap-root .glass{animation:th-parch-reveal 0.8s ease-out both!important}
+.recap-root .s1 .glass{animation-delay:0.15s!important}
+.recap-root .s2 .glass{animation-delay:0.25s!important}
+.recap-root .s3 .glass{animation-delay:0.35s!important}
+@keyframes th-parch-reveal{0%{clip-path:inset(0 50% 0 50%);opacity:0}100%{clip-path:inset(0 0% 0 0%);opacity:1}}
+.th-waves{position:fixed;bottom:0;left:0;right:0;height:80px;z-index:1;pointer-events:none;overflow:hidden}
+.th-wave{position:absolute;bottom:0;left:-5%;width:110%;height:100%}
+.th-wave svg{width:100%;height:100%;display:block}
+.th-wave:nth-child(1){animation:th-wave-drift 7s ease-in-out infinite;opacity:0.12}
+.th-wave:nth-child(2){animation:th-wave-drift 5s ease-in-out infinite reverse;opacity:0.08;bottom:-8px}
+@keyframes th-wave-drift{0%,100%{transform:translateX(0)}50%{transform:translateX(3%)}}
+.th-compass{position:fixed;bottom:20px;right:20px;width:50px;height:50px;z-index:2;pointer-events:none;opacity:0.08;animation:th-compass-spin 30s linear infinite}
+@keyframes th-compass-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "pilles",
+      episodes: "chap.",
+      hours: "en mer",
+      monthlyActivity: "Journal de bord",
+      favoriteDay: "Jour de pillage",
+      consumptionTime: "Heure de maree",
+      goldenMonth: "Lune d'or",
+      recordDay: "Jour de butin",
+      whenYouConsume: "Quand tu",
+      consume: "pilles",
+      budgetTitle: "Le tresor de",
+      yourFilms: "ton equipage",
+      ratingsTitle: "Tes butins",
+      worldTitle: "a travers",
+      theWorld: "les sept mers",
+      countriesRepresented: "ports conquis",
+      bestNote: "Perle rare",
+      worstNote: "Fond de cale",
+      mostExpensive: "Tresor du capitaine",
+      leastExpensive: "Pieces de cuivre",
+      bestROI: "Meilleur butin par doublons investis",
+      avgBudget: "Doublons moyens par prise",
+      totalCumulated: "tresor total",
+      distributionTitle: "Repartition du butin",
+      budgetPerFilm: "Doublons par prise",
+      on: "sur",
+      films: "prises",
+      rated: "jugees",
+      average: "note du quartier-maitre",
+      viewsUnit: "abordages",
+      hoursUnit: "h",
+      ofTotal: "du butin",
+      viewing: "de navigation",
+    },
+  },
+
+  "arcade-8bit": {
+    id: "arcade-8bit",
+    name: "Arcade 8-bit",
+    description: "Borne d'arcade, pixels, couleurs saturees",
+    preview: "linear-gradient(180deg, #000000 0%, #1a0030 50%, #000020 100%)",
+
+    css: {
+      "--th-surface": "rgba(255,255,0,0.06)",
+      "--th-surface-hover": "rgba(255,255,0,0.1)",
+      "--th-surface-dim": "rgba(255,255,0,0.02)",
+      "--th-surface-subtle": "rgba(255,255,0,0.03)",
+      "--th-surface-faint": "rgba(255,255,0,0.015)",
+      "--th-border": "rgba(255,255,0,0.2)",
+      "--th-border-dim": "rgba(255,255,0,0.08)",
+      "--th-border-subtle": "rgba(255,255,0,0.12)",
+      "--th-border-strong": "rgba(255,255,0,0.3)",
+      "--th-text": "#ffffff",
+      "--th-text-secondary": "rgba(255,255,255,0.7)",
+      "--th-text-tertiary": "rgba(255,255,255,0.5)",
+      "--th-text-muted": "rgba(255,255,255,0.35)",
+      "--th-text-dim": "rgba(255,255,255,0.25)",
+      "--th-text-faint": "rgba(255,255,255,0.15)",
+      "--th-blur": "0px",
+      "--th-radius": "0px",
+      "--th-radius-sm": "0px",
+      "--th-radius-xs": "0px",
+      "--th-radius-pill": "0px",
+      "--th-bar-bg": "rgba(255,255,0,0.05)",
+      "--th-bar-prev": "rgba(0,200,255,0.15)",
+      "--th-font-body": "'Press Start 2P',monospace",
+      "--th-font-mono": "'Press Start 2P',monospace",
+      "--th-glass-bg": "rgba(0,0,20,0.9)",
+      "--th-glass-border": "rgba(255,255,0,0.2)",
+      "--th-glass-blur": "blur(0px)",
+      "--th-tooltip-bg": "#000010",
+      "--th-tooltip-border": "rgba(255,255,0,0.2)",
+    },
+
+    effects: {
+      stars: true,
+      orbs: false,
+      grain: false,
+      spotlights: false,
+      confetti: true,
+      fireworks: false,
+      scanlines: true,
+      grid: false,
+      vhs: false,
+      filmGrain: false,
+      glitchText: true,
+      arcadeBorder: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+.th-scanlines{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0.03;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.15) 3px,rgba(0,0,0,0.15) 4px)}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:3px 3px 0 rgba(255,0,0,0.4),-1px -1px 0 rgba(0,100,255,0.3)!important;image-rendering:pixelated}
+.glass{border:2px solid rgba(255,255,0,0.2)!important;box-shadow:4px 4px 0 rgba(0,0,0,0.5)!important}
+.recap-root::after{content:'INSERT COIN';position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:8px;color:rgba(255,255,0,0.12);letter-spacing:0.2em;z-index:200;pointer-events:none;animation:th-blink 1.2s step-end infinite}
+@keyframes th-blink{0%,100%{opacity:1}50%{opacity:0}}
+.recap-root h2,.recap-root h1{animation:th-glitch 6s ease-in-out infinite!important}
+@keyframes th-glitch{0%,87%,91%,95%,100%{transform:translate(0,0) skew(0deg)}88%{transform:translate(-3px,1px) skew(2deg)}89%{transform:translate(3px,-1px) skew(-1deg)}90%{transform:translate(0,0)}92%{transform:translate(2px,2px) skew(-2deg)}93%{transform:translate(-2px,0) skew(1deg)}94%{transform:translate(0,0)}}
+.th-arcade-border{position:fixed;inset:0;pointer-events:none;z-index:46;border:3px solid rgba(255,255,0,0.08);box-shadow:inset 0 0 30px rgba(255,255,0,0.03),inset 0 0 60px rgba(255,0,200,0.02)}
+.th-arcade-border::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#ff0000 0 8px,#ffff00 8px 16px,#00ff00 16px 24px,#0080ff 24px 32px);opacity:0.15}
+.th-arcade-border::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#0080ff 0 8px,#00ff00 8px 16px,#ffff00 16px 24px,#ff0000 24px 32px);opacity:0.15}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "clear",
+      episodes: "lvl",
+      hours: "de jeu",
+      monthlyActivity: "Score mensuel",
+      favoriteDay: "Jour de high score",
+      consumptionTime: "Heure de partie",
+      goldenMonth: "Boss final",
+      recordDay: "Perfect run",
+      whenYouConsume: "Quand tu",
+      consume: "joues",
+      budgetTitle: "Les credits de",
+      yourFilms: "ta partie",
+      ratingsTitle: "Tes scores",
+      worldTitle: "a travers",
+      theWorld: "les niveaux",
+      countriesRepresented: "mondes explores",
+      bestNote: "S-Rank",
+      worstNote: "Game Over",
+      mostExpensive: "Boss premium",
+      leastExpensive: "Mob basique",
+      bestROI: "Meilleur ratio XP/temps",
+      avgBudget: "Credits moyens par run",
+      totalCumulated: "credits total",
+      distributionTitle: "Distribution des credits",
+      budgetPerFilm: "Credits par run",
+      on: "sur",
+      films: "runs",
+      rated: "rank",
+      average: "score moyen",
+      viewsUnit: "parties",
+      hoursUnit: "h",
+      ofTotal: "du total",
+      viewing: "de gameplay",
+    },
+  },
+
+  "matrix": {
+    id: "matrix",
+    name: "Matrix",
+    description: "Pluie de code, pilule rouge, eveil numerique",
+    preview: "linear-gradient(180deg, #000000 0%, #001500 60%, #000a00 100%)",
+
+    css: {
+      "--th-surface": "rgba(0,200,0,0.05)",
+      "--th-surface-hover": "rgba(0,200,0,0.09)",
+      "--th-surface-dim": "rgba(0,200,0,0.02)",
+      "--th-surface-subtle": "rgba(0,200,0,0.03)",
+      "--th-surface-faint": "rgba(0,200,0,0.012)",
+      "--th-border": "rgba(0,200,0,0.15)",
+      "--th-border-dim": "rgba(0,200,0,0.06)",
+      "--th-border-subtle": "rgba(0,200,0,0.09)",
+      "--th-border-strong": "rgba(0,200,0,0.25)",
+      "--th-text": "#00dd00",
+      "--th-text-secondary": "rgba(0,221,0,0.6)",
+      "--th-text-tertiary": "rgba(0,221,0,0.45)",
+      "--th-text-muted": "rgba(0,221,0,0.3)",
+      "--th-text-dim": "rgba(0,221,0,0.2)",
+      "--th-text-faint": "rgba(0,221,0,0.12)",
+      "--th-blur": "0px",
+      "--th-radius": "0px",
+      "--th-radius-sm": "0px",
+      "--th-radius-xs": "0px",
+      "--th-radius-pill": "0px",
+      "--th-bar-bg": "rgba(0,200,0,0.04)",
+      "--th-bar-prev": "rgba(0,200,0,0.1)",
+      "--th-font-body": "'Share Tech Mono',monospace",
+      "--th-font-mono": "'Share Tech Mono',monospace",
+      "--th-glass-bg": "rgba(0,5,0,0.9)",
+      "--th-glass-border": "rgba(0,200,0,0.15)",
+      "--th-glass-blur": "blur(0px)",
+      "--th-tooltip-bg": "#000500",
+      "--th-tooltip-border": "rgba(0,200,0,0.15)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: false,
+      grain: false,
+      spotlights: false,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: false,
+      matrixRain: true,
+      digitalGlitch: true,
+      greenPulse: true,
+      screenOff: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+.th-matrix-rain{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;opacity:0.12}
+.th-matrix-col{position:absolute;top:-100%;font-family:'Share Tech Mono',monospace;font-size:14px;color:#00ff00;writing-mode:vertical-lr;text-orientation:upright;line-height:1.1;animation:th-matrix-fall linear infinite;text-shadow:0 0 8px rgba(0,255,0,0.5)}
+@keyframes th-matrix-fall{0%{transform:translateY(-100%)}100%{transform:translateY(calc(100vh + 100%))}}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 12px rgba(0,255,0,0.6),0 0 30px rgba(0,255,0,0.2)!important}
+.glass{box-shadow:0 0 10px rgba(0,200,0,0.05)!important}
+.th-green-pulse{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 50% 50%,rgba(0,255,0,0.04) 0%,transparent 60%);animation:th-gpulse 5s ease-in-out infinite}
+@keyframes th-gpulse{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.15)}}
+.th-digital-glitch{position:fixed;inset:0;pointer-events:none;z-index:47;animation:th-dglitch 8s step-end infinite;opacity:0}
+@keyframes th-dglitch{0%,94.5%,96%,97.5%,99%,100%{opacity:0}95%{opacity:1;background:linear-gradient(transparent 0%,rgba(0,255,0,0.03) 50%,transparent 50.5%,transparent 100%);transform:translateX(-2px)}96.5%{opacity:1;background:linear-gradient(transparent 0%,transparent 30%,rgba(0,255,0,0.04) 30.5%,transparent 31%,transparent 100%);transform:translateX(3px)}98%{opacity:1;background:linear-gradient(transparent 0%,transparent 70%,rgba(0,255,0,0.05) 70.5%,transparent 71%,transparent 100%);transform:translateX(-1px)}}
+.th-screen-off{position:fixed;inset:0;pointer-events:none;z-index:48;background:#000;animation:th-crt-boot 20s ease-in-out infinite}
+@keyframes th-crt-boot{0%,4%{opacity:0}4.5%{opacity:1}5%{opacity:1;clip-path:inset(49.5% 0 49.5% 0)}5.5%{opacity:1;clip-path:inset(40% 10% 40% 10%)}6%{opacity:0.8;clip-path:inset(0)}6.5%{opacity:0}93%{opacity:0}93.5%{opacity:0.3}94%{opacity:0.8;clip-path:inset(0)}94.5%{opacity:1;clip-path:inset(48% 5% 48% 5%)}95%{opacity:1;clip-path:inset(49.8% 0 49.8% 0)}95.5%{opacity:0}100%{opacity:0}}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "decryptes",
+      episodes: "seq.",
+      hours: "dans la Matrice",
+      monthlyActivity: "Flux mensuel",
+      favoriteDay: "Jour d'eveil",
+      consumptionTime: "Heure de connexion",
+      goldenMonth: "Le mois de l'Elu",
+      recordDay: "Glitch temporel",
+      whenYouConsume: "Quand tu",
+      consume: "te branches",
+      budgetTitle: "Le cout de",
+      yourFilms: "la simulation",
+      ratingsTitle: "Tes evaluations",
+      worldTitle: "a travers",
+      theWorld: "la Matrice",
+      countriesRepresented: "noeuds infiltres",
+      bestNote: "L'Elu",
+      worstNote: "Erreur systeme",
+      mostExpensive: "Pilule rouge",
+      leastExpensive: "Pilule bleue",
+      bestROI: "Meilleur ratio eveil/risque",
+      avgBudget: "Cout moyen de la simulation",
+      totalCumulated: "energie totale",
+      distributionTitle: "Distribution des flux",
+      budgetPerFilm: "Energie par cycle",
+      on: "sur",
+      films: "cycles",
+      rated: "evalues",
+      average: "score moyen",
+      viewsUnit: "connexions",
+      hoursUnit: "h",
+      ofTotal: "du flux total",
+      viewing: "de simulation",
+    },
+  },
+
+  "stranger-things": {
+    id: "stranger-things",
+    name: "Upside Down",
+    description: "Lumieres de Noel, Monde a l'envers, annees 80",
+    preview: "linear-gradient(180deg, #0a0000 0%, #1a0505 50%, #0d0000 100%)",
+
+    css: {
+      "--th-surface": "rgba(255,50,50,0.06)",
+      "--th-surface-hover": "rgba(255,50,50,0.1)",
+      "--th-surface-dim": "rgba(255,50,50,0.02)",
+      "--th-surface-subtle": "rgba(255,50,50,0.03)",
+      "--th-surface-faint": "rgba(255,50,50,0.015)",
+      "--th-border": "rgba(255,50,50,0.18)",
+      "--th-border-dim": "rgba(255,50,50,0.07)",
+      "--th-border-subtle": "rgba(255,50,50,0.1)",
+      "--th-border-strong": "rgba(255,50,50,0.28)",
+      "--th-text": "#ffe0e0",
+      "--th-text-secondary": "rgba(255,224,224,0.6)",
+      "--th-text-tertiary": "rgba(255,224,224,0.45)",
+      "--th-text-muted": "rgba(255,224,224,0.3)",
+      "--th-text-dim": "rgba(255,224,224,0.2)",
+      "--th-text-faint": "rgba(255,224,224,0.13)",
+      "--th-blur": "6px",
+      "--th-radius": "4px",
+      "--th-radius-sm": "3px",
+      "--th-radius-xs": "2px",
+      "--th-radius-pill": "4px",
+      "--th-bar-bg": "rgba(255,50,50,0.05)",
+      "--th-bar-prev": "rgba(255,200,50,0.12)",
+      "--th-font-body": "'ITC Benguiat',Georgia,serif",
+      "--th-font-mono": "'Courier Prime',Courier,monospace",
+      "--th-glass-bg": "rgba(15,2,2,0.88)",
+      "--th-glass-border": "rgba(255,50,50,0.18)",
+      "--th-glass-blur": "blur(6px)",
+      "--th-tooltip-bg": "#0a0000",
+      "--th-tooltip-border": "rgba(255,50,50,0.18)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: true,
+      grain: true,
+      spotlights: true,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: true,
+      xmasLights: true,
+      spores: true,
+      dimensionCrack: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+.th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.06;mix-blend-mode:overlay;animation:th-grain-flick 0.1s infinite}
+@keyframes th-grain-flick{0%{opacity:0.05}50%{opacity:0.08}100%{opacity:0.06}}
+.th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 45%,rgba(10,0,0,0.6) 100%)}
+.th-xmas-lights{position:fixed;top:0;left:0;right:0;height:4px;z-index:200;pointer-events:none;display:flex;gap:0}
+.th-xmas-bulb{flex:1;height:4px;border-radius:0 0 50% 50%;animation:th-bulb-glow 2s ease-in-out infinite alternate}
+@keyframes th-bulb-glow{0%{opacity:0.3;box-shadow:0 0 4px currentColor}100%{opacity:1;box-shadow:0 0 12px currentColor,0 2px 20px currentColor}}
+.recap-root h2,.recap-root h1{text-shadow:0 0 20px rgba(255,40,40,0.5),0 0 50px rgba(255,40,40,0.15)!important;letter-spacing:0.05em!important}
+.th-spore{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,200,150,0.6) 0%,rgba(255,150,100,0.1) 60%,transparent 100%);animation:th-spore-rise linear infinite;pointer-events:none}
+@keyframes th-spore-rise{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:0.6}80%{opacity:0.3}100%{transform:translateY(-110vh) scale(0.3);opacity:0}}
+/* crack is rendered as SVG React component */
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "vus",
+      episodes: "ep.",
+      hours: "dans l'Upside Down",
+      monthlyActivity: "Signaux mensuels",
+      favoriteDay: "Jour de contact",
+      consumptionTime: "Heure d'apparition",
+      goldenMonth: "Mois du portail",
+      recordDay: "Breche dimensionnelle",
+      whenYouConsume: "Quand tu",
+      consume: "explores",
+      budgetTitle: "Le prix de",
+      yourFilms: "la breche",
+      ratingsTitle: "Tes decouvertes",
+      worldTitle: "a travers",
+      theWorld: "les dimensions",
+      countriesRepresented: "portails ouverts",
+      bestNote: "Chef d'oeuvre",
+      worstNote: "Piege du Demogorgon",
+      mostExpensive: "Grosses expeditions",
+      leastExpensive: "Missions de recon",
+      bestROI: "Meilleur retour de l'Upside Down",
+      avgBudget: "Cout moyen par mission",
+      totalCumulated: "budget total",
+      distributionTitle: "Repartition des missions",
+      budgetPerFilm: "Cout par expedition",
+      on: "sur",
+      films: "expeditions",
+      rated: "evaluees",
+      average: "note moyenne",
+      viewsUnit: "contacts",
+      hoursUnit: "h",
+      ofTotal: "du portail",
+      viewing: "d'exploration",
+    },
+  },
+
+  "starwars": {
+    id: "starwars",
+    name: "Galaxie lointaine",
+    description: "Hyperespace, hologrammes, Force et Rebellion",
+    preview: "linear-gradient(180deg, #000005 0%, #000820 50%, #000005 100%)",
+
+    css: {
+      "--th-surface": "rgba(100,180,255,0.06)",
+      "--th-surface-hover": "rgba(100,180,255,0.1)",
+      "--th-surface-dim": "rgba(100,180,255,0.02)",
+      "--th-surface-subtle": "rgba(100,180,255,0.035)",
+      "--th-surface-faint": "rgba(100,180,255,0.015)",
+      "--th-border": "rgba(100,180,255,0.16)",
+      "--th-border-dim": "rgba(100,180,255,0.06)",
+      "--th-border-subtle": "rgba(100,180,255,0.1)",
+      "--th-border-strong": "rgba(100,180,255,0.25)",
+      "--th-text": "#c8e0ff",
+      "--th-text-secondary": "rgba(200,224,255,0.6)",
+      "--th-text-tertiary": "rgba(200,224,255,0.45)",
+      "--th-text-muted": "rgba(200,224,255,0.3)",
+      "--th-text-dim": "rgba(200,224,255,0.2)",
+      "--th-text-faint": "rgba(200,224,255,0.13)",
+      "--th-blur": "10px",
+      "--th-radius": "6px",
+      "--th-radius-sm": "4px",
+      "--th-radius-xs": "3px",
+      "--th-radius-pill": "14px",
+      "--th-bar-bg": "rgba(100,180,255,0.04)",
+      "--th-bar-prev": "rgba(255,200,50,0.1)",
+      "--th-font-body": "'Orbitron',sans-serif",
+      "--th-font-mono": "'Share Tech Mono',monospace",
+      "--th-glass-bg": "rgba(0,5,20,0.85)",
+      "--th-glass-border": "rgba(100,180,255,0.16)",
+      "--th-glass-blur": "blur(10px)",
+      "--th-tooltip-bg": "#000510",
+      "--th-tooltip-border": "rgba(100,180,255,0.16)",
+    },
+
+    effects: {
+      stars: true,
+      orbs: false,
+      grain: false,
+      spotlights: true,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: false,
+      hyperspace: true,
+      holoScan: true,
+      starStreaks: true,
+      sabers: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
+.th-hyperspace{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.th-hyperspace::before{content:'';position:absolute;top:50%;left:50%;width:2px;height:2px;background:white;border-radius:50%;box-shadow:${Array.from({length:80},()=>{const a=Math.random()*360;const d=Math.random()*50+5;const x=Math.cos(a*Math.PI/180)*d;const y=Math.sin(a*Math.PI/180)*d;return `${x}vw ${y}vh 0 0 rgba(200,230,255,${(0.03+Math.random()*0.06).toFixed(3)})`}).join(',')};animation:th-hyper-pulse 8s ease-in-out infinite}
+@keyframes th-hyper-pulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 15px rgba(100,180,255,0.4),0 0 35px rgba(100,180,255,0.1)!important}
+.glass{box-shadow:0 0 12px rgba(100,180,255,0.05),inset 0 0 20px rgba(100,180,255,0.02)!important}
+.th-holo-scan .glass{position:relative;overflow:hidden}
+.th-holo-scan .glass::after{content:'';position:absolute;top:-100%;left:0;right:0;height:40%;background:linear-gradient(180deg,transparent,rgba(100,180,255,0.04),transparent);animation:th-holo-line 4s linear infinite;pointer-events:none}
+@keyframes th-holo-line{0%{top:-40%}100%{top:140%}}
+/* starStreaks + sabers rendered as React components */
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "visionnes",
+      episodes: "ep.",
+      hours: "dans l'hyperespace",
+      monthlyActivity: "Transmissions mensuelles",
+      favoriteDay: "Jour de la Force",
+      consumptionTime: "Heure du Conseil",
+      goldenMonth: "Mois de la Republique",
+      recordDay: "Bataille decisive",
+      whenYouConsume: "Quand tu",
+      consume: "explores la galaxie",
+      budgetTitle: "Les credits de",
+      yourFilms: "la Rebellion",
+      ratingsTitle: "Tes holocrons",
+      worldTitle: "a travers",
+      theWorld: "la galaxie",
+      countriesRepresented: "systemes visites",
+      bestNote: "Voie de la Force",
+      worstNote: "Cote obscur",
+      mostExpensive: "Flotte imperiale",
+      leastExpensive: "Chasseurs rebelles",
+      bestROI: "Meilleur ratio credits/parsec",
+      avgBudget: "Credits moyens par mission",
+      totalCumulated: "credits totaux",
+      distributionTitle: "Repartition des credits",
+      budgetPerFilm: "Credits par mission",
+      on: "sur",
+      films: "missions",
+      rated: "evaluees",
+      average: "score moyen",
+      viewsUnit: "transmissions",
+      hoursUnit: "h",
+      ofTotal: "de la flotte",
+      viewing: "en hyperespace",
+    },
+  },
+
+  "silent-film": {
+    id: "silent-film",
+    name: "Cinema Muet",
+    description: "Chaplin, pellicule, ardoises, noir et blanc",
+    preview: "linear-gradient(135deg, #0a0a0a 0%, #222222 50%, #111111 100%)",
+
+    css: {
+      "--th-surface": "rgba(255,255,255,0.07)",
+      "--th-surface-hover": "rgba(255,255,255,0.11)",
+      "--th-surface-dim": "rgba(255,255,255,0.03)",
+      "--th-surface-subtle": "rgba(255,255,255,0.04)",
+      "--th-surface-faint": "rgba(255,255,255,0.02)",
+      "--th-border": "rgba(255,255,255,0.15)",
+      "--th-border-dim": "rgba(255,255,255,0.06)",
+      "--th-border-subtle": "rgba(255,255,255,0.09)",
+      "--th-border-strong": "rgba(255,255,255,0.22)",
+      "--th-text": "#e8e0d0",
+      "--th-text-secondary": "rgba(232,224,208,0.65)",
+      "--th-text-tertiary": "rgba(232,224,208,0.5)",
+      "--th-text-muted": "rgba(232,224,208,0.35)",
+      "--th-text-dim": "rgba(232,224,208,0.22)",
+      "--th-text-faint": "rgba(232,224,208,0.14)",
+      "--th-blur": "0px",
+      "--th-radius": "2px",
+      "--th-radius-sm": "2px",
+      "--th-radius-xs": "1px",
+      "--th-radius-pill": "2px",
+      "--th-bar-bg": "rgba(255,255,255,0.06)",
+      "--th-bar-prev": "rgba(255,255,255,0.12)",
+      "--th-font-body": "'Special Elite',monospace",
+      "--th-font-mono": "'Special Elite',monospace",
+      "--th-glass-bg": "rgba(25,22,18,0.88)",
+      "--th-glass-border": "rgba(255,255,255,0.12)",
+      "--th-glass-blur": "blur(0px)",
+      "--th-tooltip-bg": "#141210",
+      "--th-tooltip-border": "rgba(255,255,255,0.12)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: false,
+      grain: false,
+      spotlights: true,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: true,
+      filmStrip: true,
+      silentSlate: false,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+.th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.15;mix-blend-mode:overlay;animation:th-sf-grain 0.08s steps(1) infinite}
+@keyframes th-sf-grain{0%{opacity:0.12;transform:translate(0,0)}25%{opacity:0.16;transform:translate(-1px,1px)}50%{opacity:0.1;transform:translate(1px,-1px)}75%{opacity:0.15;transform:translate(-1px,-1px)}100%{opacity:0.13;transform:translate(1px,1px)}}
+.th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 25%,rgba(0,0,0,0.75) 100%)}
+.recap-root{filter:saturate(0) sepia(0.25)!important}
+.th-film-strip{position:fixed;top:0;height:100vh;z-index:46;pointer-events:none;width:22px;background:rgba(15,12,8,0.95);overflow:hidden}
+.th-film-strip.left{left:0;border-right:1px solid rgba(255,255,255,0.08)}
+.th-film-strip.right{right:0;border-left:1px solid rgba(255,255,255,0.08)}
+.th-film-hole{width:12px;height:9px;margin:4px auto;border-radius:1px;background:rgba(40,35,28,0.9);border:1px solid rgba(255,255,255,0.06)}
+.th-slate{position:fixed;inset:0;z-index:100;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(12,10,8,0.97);transition:opacity 0.08s ease}
+.th-slate-inner{text-align:center;font-family:'Special Elite',monospace;color:#d8d0c0;padding:40px 60px;border:4px double rgba(200,190,170,0.25);border-radius:4px;background:rgba(20,18,14,0.95);max-width:80vw;position:relative;box-shadow:0 0 60px rgba(0,0,0,0.5)}
+.recap-root h2,.recap-root h1{position:relative!important;display:inline-block!important}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "projetes",
+      episodes: "actes",
+      hours: "en salle",
+      monthlyActivity: "Programme mensuel",
+      favoriteDay: "Jour de seance",
+      consumptionTime: "Horaire de projection",
+      goldenMonth: "Saison d'or",
+      recordDay: "Seance marathon",
+      whenYouConsume: "Quand tu",
+      consume: "assistes",
+      budgetTitle: "Le budget de",
+      yourFilms: "la production",
+      ratingsTitle: "Les critiques de",
+      worldTitle: "a travers",
+      theWorld: "le monde",
+      countriesRepresented: "salles dans le monde",
+      bestNote: "Chef d'oeuvre",
+      worstNote: "Navet",
+      mostExpensive: "Superproductions",
+      leastExpensive: "Courts-metrages",
+      bestROI: "Meilleur succes public",
+      avgBudget: "Budget moyen par production",
+      totalCumulated: "budget total",
+      distributionTitle: "Repartition des productions",
+      budgetPerFilm: "Budget par film",
+      on: "sur",
+      films: "bobines",
+      rated: "critiquees",
+      average: "note moyenne",
+      viewsUnit: "seances",
+      hoursUnit: "h",
+      ofTotal: "de la saison",
+      viewing: "de projection",
+    },
+  },
+
+  "sin-city": {
+    id: "sin-city",
+    name: "Sin City",
+    description: "Noir total, contraste dur, touche de couleur",
+    preview: "linear-gradient(135deg, #000000 0%, #1a1a1a 40%, #000000 100%)",
+
+    css: {
+      "--th-surface": "rgba(255,255,255,0.08)",
+      "--th-surface-hover": "rgba(255,255,255,0.12)",
+      "--th-surface-dim": "rgba(255,255,255,0.03)",
+      "--th-surface-subtle": "rgba(255,255,255,0.04)",
+      "--th-surface-faint": "rgba(255,255,255,0.02)",
+      "--th-border": "rgba(255,255,255,0.14)",
+      "--th-border-dim": "rgba(255,255,255,0.06)",
+      "--th-border-subtle": "rgba(255,255,255,0.08)",
+      "--th-border-strong": "rgba(255,255,255,0.2)",
+      "--th-text": "#ffffff",
+      "--th-text-secondary": "rgba(255,255,255,0.6)",
+      "--th-text-tertiary": "rgba(255,255,255,0.45)",
+      "--th-text-muted": "rgba(255,255,255,0.3)",
+      "--th-text-dim": "rgba(255,255,255,0.2)",
+      "--th-text-faint": "rgba(255,255,255,0.13)",
+      "--th-blur": "0px",
+      "--th-radius": "0px",
+      "--th-radius-sm": "0px",
+      "--th-radius-xs": "0px",
+      "--th-radius-pill": "0px",
+      "--th-bar-bg": "rgba(255,255,255,0.06)",
+      "--th-bar-prev": "rgba(255,255,255,0.1)",
+      "--th-font-body": "'Bebas Neue',Impact,sans-serif",
+      "--th-font-mono": "'Share Tech Mono',monospace",
+      "--th-glass-bg": "rgba(8,8,8,0.9)",
+      "--th-glass-border": "rgba(255,255,255,0.1)",
+      "--th-glass-blur": "blur(0px)",
+      "--th-tooltip-bg": "#080808",
+      "--th-tooltip-border": "rgba(255,255,255,0.1)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: false,
+      grain: false,
+      spotlights: false,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: true,
+      noirRain: true,
+      noirDesaturate: true,
+    },
+
+    cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap');
+.th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.1;mix-blend-mode:overlay;animation:th-noir-grain 0.12s steps(1) infinite}
+@keyframes th-noir-grain{0%{opacity:0.07}50%{opacity:0.12}100%{opacity:0.08}}
+.th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 25%,rgba(0,0,0,0.7) 100%)}
+.recap-root.th-noir-on{filter:saturate(0.15) contrast(1.25)!important}
+.recap-root h2,.recap-root h1,.recap-root h3{text-transform:uppercase!important;letter-spacing:0.08em!important;text-shadow:2px 2px 0 rgba(0,0,0,0.9),4px 4px 0 rgba(0,0,0,0.4)!important}
+.glass{border-left:3px solid rgba(255,255,255,0.15)!important;border-right:none!important;border-top:none!important;border-bottom:none!important;border-radius:0!important}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "traques",
+      episodes: "ep.",
+      hours: "dans la nuit",
+      monthlyActivity: "Rapport mensuel",
+      favoriteDay: "Nuit de garde",
+      consumptionTime: "Heure du crime",
+      goldenMonth: "Mois noir",
+      recordDay: "Nuit blanche",
+      whenYouConsume: "Quand tu",
+      consume: "surveilles",
+      budgetTitle: "Le prix du",
+      yourFilms: "sang",
+      ratingsTitle: "Le verdict",
+      worldTitle: "a travers",
+      theWorld: "Basin City",
+      countriesRepresented: "quartiers infiltres",
+      bestNote: "Justice rendue",
+      worstNote: "Bavure",
+      mostExpensive: "Gros calibres",
+      leastExpensive: "Petites frappes",
+      bestROI: "Meilleur retour de flamme",
+      avgBudget: "Prix moyen de la traque",
+      totalCumulated: "cout total",
+      distributionTitle: "Repartition des affaires",
+      budgetPerFilm: "Prix par affaire",
+      on: "sur",
+      films: "affaires",
+      rated: "jugees",
+      average: "note du jury",
+      viewsUnit: "filatures",
+      hoursUnit: "h",
+      ofTotal: "du dossier",
+      viewing: "de planque",
+    },
+  },
+
+  "abyss": {
+    id: "abyss",
+    name: "Abysse",
+    description: "Fond marin, bioluminescence, profondeurs",
+    preview: "linear-gradient(180deg, #000510 0%, #001030 50%, #000818 100%)",
+
+    css: {
+      "--th-surface": "rgba(0,150,255,0.05)",
+      "--th-surface-hover": "rgba(0,150,255,0.09)",
+      "--th-surface-dim": "rgba(0,150,255,0.02)",
+      "--th-surface-subtle": "rgba(0,150,255,0.03)",
+      "--th-surface-faint": "rgba(0,150,255,0.012)",
+      "--th-border": "rgba(0,180,255,0.14)",
+      "--th-border-dim": "rgba(0,180,255,0.05)",
+      "--th-border-subtle": "rgba(0,180,255,0.08)",
+      "--th-border-strong": "rgba(0,180,255,0.22)",
+      "--th-text": "#c0e8ff",
+      "--th-text-secondary": "rgba(192,232,255,0.6)",
+      "--th-text-tertiary": "rgba(192,232,255,0.45)",
+      "--th-text-muted": "rgba(192,232,255,0.28)",
+      "--th-text-dim": "rgba(192,232,255,0.18)",
+      "--th-text-faint": "rgba(192,232,255,0.12)",
+      "--th-blur": "12px",
+      "--th-radius": "12px",
+      "--th-radius-sm": "8px",
+      "--th-radius-xs": "5px",
+      "--th-radius-pill": "18px",
+      "--th-bar-bg": "rgba(0,150,255,0.04)",
+      "--th-bar-prev": "rgba(0,255,200,0.1)",
+      "--th-font-body": "'Nunito',sans-serif",
+      "--th-font-mono": "'JetBrains Mono',monospace",
+      "--th-glass-bg": "rgba(0,8,25,0.82)",
+      "--th-glass-border": "rgba(0,180,255,0.12)",
+      "--th-glass-blur": "blur(12px)",
+      "--th-tooltip-bg": "#000818",
+      "--th-tooltip-border": "rgba(0,180,255,0.12)",
+    },
+
+    effects: {
+      stars: false,
+      orbs: false,
+      grain: false,
+      spotlights: false,
+      confetti: false,
+      fireworks: false,
+      scanlines: false,
+      grid: false,
+      vhs: false,
+      filmGrain: false,
+      caustics: true,
+      biolum: true,
+      bubbles: true,
+    },
+
+    cssExtra: `
+.th-caustics{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.04;background:radial-gradient(ellipse at 30% 20%,rgba(0,200,255,0.15),transparent 40%),radial-gradient(ellipse at 70% 60%,rgba(0,255,200,0.1),transparent 35%),radial-gradient(ellipse at 50% 80%,rgba(0,150,255,0.12),transparent 40%);animation:th-caustic-move 12s ease-in-out infinite;background-size:80% 80%}
+@keyframes th-caustic-move{0%{background-position:0% 0%,100% 100%,50% 50%}33%{background-position:30% 20%,70% 30%,20% 80%}66%{background-position:60% 40%,30% 70%,80% 20%}100%{background-position:0% 0%,100% 100%,50% 50%}}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 15px rgba(0,180,255,0.35),0 0 40px rgba(0,180,255,0.1)!important}
+.glass{box-shadow:0 0 20px rgba(0,150,255,0.04),inset 0 0 15px rgba(0,180,255,0.02)!important}
+`,
+
+    labels: {
+      brand: "WRAPPARR",
+      viewed: "explores",
+      episodes: "ep.",
+      hours: "en immersion",
+      monthlyActivity: "Courants mensuels",
+      favoriteDay: "Jour de plongee",
+      consumptionTime: "Heure de maree",
+      goldenMonth: "Pleine lune",
+      recordDay: "Expedition record",
+      whenYouConsume: "Quand tu",
+      consume: "plonges",
+      budgetTitle: "Le tresor de",
+      yourFilms: "l'ocean",
+      ratingsTitle: "Tes decouvertes",
+      worldTitle: "a travers",
+      theWorld: "les abysses",
+      countriesRepresented: "fosses explorees",
+      bestNote: "Perle abyssale",
+      worstNote: "Epave oubliee",
+      mostExpensive: "Expeditions profondes",
+      leastExpensive: "Plongees cotieres",
+      bestROI: "Meilleur ratio profondeur/decouverte",
+      avgBudget: "Cout moyen par plongee",
+      totalCumulated: "budget total",
+      distributionTitle: "Repartition des expeditions",
+      budgetPerFilm: "Cout par plongee",
+      on: "sur",
+      films: "plongees",
+      rated: "evaluees",
+      average: "note moyenne",
+      viewsUnit: "immersions",
+      hoursUnit: "h",
+      ofTotal: "des profondeurs",
+      viewing: "d'exploration",
+    },
+  },
+}
+
+// Get theme by ID, fallback to glass-dark
+export function getTheme(id) {
+  return THEMES[id] || THEMES["glass-dark"]
+}
+
+// Get all available themes as array
+export function getAllThemes() {
+  return Object.values(THEMES)
+}
+
+// Generate CSS variables string from theme
+export function themeToCSS(theme) {
+  if (!theme?.css) return ""
+  return Object.entries(theme.css).map(([k, v]) => `${k}:${v}`).join(";")
+}

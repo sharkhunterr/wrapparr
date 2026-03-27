@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useComparison } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 // Generate a palette of colors derived from the accent
 function buildPalette(accent) {
@@ -32,6 +33,7 @@ function buildPalette(accent) {
 }
 
 export default function GenresSlide({ accent, genres = [], year, config = {} }) {
+  const L = useLabels()
   const mode = config.displayMode || "race"
   const maxGenres = config.maxGenres || 6
   const speed = config.animationSpeed || 25000
@@ -52,8 +54,8 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
   return (
     <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
-        <h2 style={{ fontSize: "clamp(20px, 6vw, 32px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
+        <h2 style={{ fontSize: "clamp(20px, 6vw, 32px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
           Tes genres <span style={{ color: accent }}>preferes</span>
         </h2>
       </div>
@@ -66,17 +68,17 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
       {/* Previous year top 6 genres */}
       {prevGenres.length > 0 && (
         <>
-          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "14px 0 10px" }} />
+          <div style={{ height: 1, background: "var(--th-border-dim)", margin: "14px 0 10px" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
+            <span style={{ fontSize: 8, color: "var(--th-text-dim)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
             {prevGenres.map((g, i) => (
               <span key={g.n + i} style={{
                 display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "3px 8px", borderRadius: 8,
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                fontSize: 9, color: "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400,
+                padding: "3px 8px", borderRadius: "var(--th-radius-xs)",
+                background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)",
+                fontSize: 9, color: "var(--th-text-tertiary)", fontWeight: i === 0 ? 600 : 400,
               }}>
-                {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{g.previous}</span>
+                {g.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: 8, color: "var(--th-text-muted)" }}>{g.previous}</span>
               </span>
             ))}
           </div>
@@ -291,12 +293,12 @@ function RaceMode({ data, accent, speed, config = {}, colors: COLORS }) {
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", fontWeight: 500, lineHeight: 1.4 }}>{commentary}</div>
           </div>
         )}
-        {finished && <div style={{ fontSize: 9, letterSpacing: "0.2em", fontFamily: "JetBrains Mono,monospace", color: accent, animation: "slide-up .4s ease both" }}>RESULTATS FINAUX</div>}
+        {finished && <div style={{ fontSize: 9, letterSpacing: "0.2em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", color: accent, animation: "slide-up .4s ease both" }}>RESULTATS FINAUX</div>}
       </div>
 
       {/* Track */}
       <div style={{ position: "relative", height: N * ROW_H }}>
-        {data.map((_, i) => <div key={"l" + i} style={{ position: "absolute", left: 36, right: 0, top: i * ROW_H + ROW_H / 2, height: 1, background: "rgba(255,255,255,0.02)" }} />)}
+        {data.map((_, i) => <div key={"l" + i} style={{ position: "absolute", left: 36, right: 0, top: i * ROW_H + ROW_H / 2, height: 1, background: "var(--th-surface-dim)" }} />)}
         {items.map((g) => {
           const isWinner = finished && g.rank === 0
           return (
@@ -308,14 +310,14 @@ function RaceMode({ data, accent, speed, config = {}, colors: COLORS }) {
               zIndex: isWinner ? 2 : 1,
             }}>
               <div style={{ width: 26, textAlign: "center", flexShrink: 0 }}>
-                {finished ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 7, fontSize: 10, fontWeight: 800, fontFamily: "JetBrains Mono,monospace", background: g.rank < 3 ? g.color + "20" : "rgba(255,255,255,0.04)", border: "1.5px solid " + (g.rank < 3 ? g.color + "50" : "rgba(255,255,255,0.08)"), color: g.rank < 3 ? g.color : "rgba(255,255,255,0.25)", boxShadow: g.rank === 0 ? "0 0 10px " + g.color + "40" : "none" }}>{g.rank + 1}</span> : <span style={{ fontSize: 11, fontWeight: 700, color: (racing || finished) ? g.color : "rgba(255,255,255,0.1)", fontFamily: "JetBrains Mono,monospace" }}>P{positionMap[g.rank] + 1}</span>}
+                {finished ? <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 7, fontSize: 10, fontWeight: 800, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", background: g.rank < 3 ? g.color + "20" : "var(--th-surface-subtle)", border: "1.5px solid " + (g.rank < 3 ? g.color + "50" : "var(--th-border-subtle)"), color: g.rank < 3 ? g.color : "var(--th-text-dim)", boxShadow: g.rank === 0 ? "0 0 10px " + g.color + "40" : "none" }}>{g.rank + 1}</span> : <span style={{ fontSize: 11, fontWeight: 700, color: (racing || finished) ? g.color : "rgba(255,255,255,0.1)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>P{positionMap[g.rank] + 1}</span>}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                  <span style={{ fontSize: 12, fontWeight: isWinner ? 700 : 500, color: isWinner ? "white" : "rgba(255,255,255,0.5)" }}>{g.n}</span>
-                  <span style={{ fontSize: 10, color: g.color, fontFamily: "JetBrains Mono,monospace", opacity: (racing || finished) ? 1 : 0.12 }}>{g.displayCount}</span>
+                  <span style={{ fontSize: 12, fontWeight: isWinner ? 700 : 500, color: isWinner ? "var(--th-text)" : "var(--th-text-secondary)" }}>{g.n}</span>
+                  <span style={{ fontSize: 10, color: g.color, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", opacity: (racing || finished) ? 1 : 0.12 }}>{g.displayCount}</span>
                 </div>
-                <div style={{ height: 12, background: "rgba(255,255,255,0.02)", borderRadius: 6, overflow: "hidden", position: "relative" }}>
+                <div style={{ height: 12, background: "var(--th-surface-dim)", borderRadius: 6, overflow: "hidden", position: "relative" }}>
                   <div style={{
                     height: "100%", borderRadius: 6, position: "relative",
                     background: isWinner ? "linear-gradient(90deg," + g.color + "," + accent + ",#fff)" : "linear-gradient(90deg," + g.color + "15," + g.color + (finished ? "bb" : "55") + ")",
@@ -431,8 +433,8 @@ function BubblesMode({ data, accent, speed, colors: COLORS }) {
               }}>
                 {showLabel && <>
                   {finished && <div style={{ position: "absolute", top: -5, right: -5, width: 18, height: 18, borderRadius: "50%", background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800, color: "#000" }}>{rank + 1}</div>}
-                  <div style={{ fontSize: currentSize > 65 ? 12 : currentSize > 45 ? 9 : 7, fontWeight: 700, color: "white", lineHeight: 1.1, textAlign: "center", opacity: Math.min(1, (currentSize - 28) / 15) }}>{g.n}</div>
-                  <div style={{ fontSize: currentSize > 55 ? 10 : 7, color: color, fontFamily: "JetBrains Mono,monospace", marginTop: 1, opacity: Math.min(1, (currentSize - 32) / 15) }}>{Math.round(g.v * t)}</div>
+                  <div style={{ fontSize: currentSize > 65 ? 12 : currentSize > 45 ? 9 : 7, fontWeight: 700, color: "var(--th-text)", lineHeight: 1.1, textAlign: "center", opacity: Math.min(1, (currentSize - 28) / 15) }}>{g.n}</div>
+                  <div style={{ fontSize: currentSize > 55 ? 10 : 7, color: color, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", marginTop: 1, opacity: Math.min(1, (currentSize - 32) / 15) }}>{Math.round(g.v * t)}</div>
                 </>}
               </div>
             </div>
@@ -528,7 +530,7 @@ function OrbitMode({ data, accent, speed, colors: COLORS }) {
       <div style={{ position: "relative", width: "100%", maxWidth: 320, margin: "0 auto", aspectRatio: "1" }}>
         <svg viewBox={"0 0 " + SVG_SIZE + " " + SVG_SIZE} style={{ width: "100%", height: "100%" }}>
           {/* Base circle — thin line */}
-          <circle cx={SVG_SIZE / 2} cy={SVG_SIZE / 2} r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+          <circle cx={SVG_SIZE / 2} cy={SVG_SIZE / 2} r={R} fill="none" stroke="var(--th-border-dim)" strokeWidth="1" />
 
           {/* Colored arcs + white separator ticks at end of each arc */}
           {arcs.map((arc, i) => {
@@ -574,8 +576,8 @@ function OrbitMode({ data, accent, speed, colors: COLORS }) {
                 {/* Label at middle of arc, outside the circle */}
                 {isStopped && (
                   <g style={{ opacity: 0.9 }}>
-                    <text x={labelPos.x} y={labelPos.y - 2} textAnchor="middle" fill="white" fontSize="3.5" fontWeight="700">{g.n}</text>
-                    <text x={labelPos.x} y={labelPos.y + 3} textAnchor="middle" fill={arc.color} fontSize="3" fontFamily="JetBrains Mono,monospace">{Math.round(arc.pct * 100)}%</text>
+                    <text x={labelPos.x} y={labelPos.y - 2} textAnchor="middle" fill="var(--th-text)" fontSize="3.5" fontWeight="700">{g.n}</text>
+                    <text x={labelPos.x} y={labelPos.y + 3} textAnchor="middle" fill={arc.color} fontSize="3" fontFamily="var(--th-font-mono, JetBrains Mono,monospace)">{Math.round(arc.pct * 100)}%</text>
                   </g>
                 )}
               </g>
@@ -583,10 +585,10 @@ function OrbitMode({ data, accent, speed, colors: COLORS }) {
           })}
 
           {/* Center text */}
-          <text x={SVG_SIZE / 2} y={SVG_SIZE / 2 - 2} textAnchor="middle" fill="white" fontSize="8" fontWeight="800">
+          <text x={SVG_SIZE / 2} y={SVG_SIZE / 2 - 2} textAnchor="middle" fill="var(--th-text)" fontSize="8" fontWeight="800">
             {finished ? total : Math.round(total * Math.min(1, elapsed / speed))}
           </text>
-          <text x={SVG_SIZE / 2} y={SVG_SIZE / 2 + 6} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="3" fontFamily="JetBrains Mono,monospace" letterSpacing="0.1em">
+          <text x={SVG_SIZE / 2} y={SVG_SIZE / 2 + 6} textAnchor="middle" fill="var(--th-text-muted)" fontSize="3" fontFamily="var(--th-font-mono, JetBrains Mono,monospace)" letterSpacing="0.1em">
             TOTAL VUES
           </text>
         </svg>
@@ -632,8 +634,8 @@ function PodiumMode({ data, accent, speed, colors: COLORS }) {
                 transition: "all 0.6s ease " + delay + "s",
               }}>
                 <div style={{ fontSize: isFirst ? 28 : 20, marginBottom: 4 }}>{medals[i === 1 ? 0 : i === 0 ? 1 : 2]}</div>
-                <div style={{ fontSize: isFirst ? 14 : 12, fontWeight: 700, color: "white", textAlign: "center", marginBottom: 2 }}>{g.n}</div>
-                <div style={{ fontSize: 10, color: color, fontFamily: "JetBrains Mono,monospace", marginBottom: 8 }}>{g.v}</div>
+                <div style={{ fontSize: isFirst ? 14 : 12, fontWeight: 700, color: "var(--th-text)", textAlign: "center", marginBottom: 2 }}>{g.n}</div>
+                <div style={{ fontSize: 10, color: color, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", marginBottom: 8 }}>{g.v}</div>
                 <div style={{
                   width: "100%", height: heights[i], borderRadius: "8px 8px 0 0",
                   background: "linear-gradient(180deg," + color + "35 0%," + color + "12 100%)",
@@ -650,12 +652,12 @@ function PodiumMode({ data, accent, speed, colors: COLORS }) {
         return (
           <div key={g.n} style={{
             display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginBottom: 4,
-            background: "rgba(255,255,255,0.02)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.04)",
+            background: "var(--th-surface-dim)", borderRadius: "var(--th-radius-xs)", border: "1px solid var(--th-border-dim)",
             opacity: revealed ? 1 : 0, transition: "opacity 0.4s ease " + (1 + i * 0.1) + "s",
           }}>
-            <div style={{ width: 20, textAlign: "center", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.25)" }}>{i + 4}</div>
-            <span style={{ flex: 1, fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{g.n}</span>
-            <span style={{ fontSize: 10, color: color, fontFamily: "JetBrains Mono,monospace" }}>{g.v}</span>
+            <div style={{ width: 20, textAlign: "center", fontSize: 12, fontWeight: 700, color: "var(--th-text-dim)" }}>{i + 4}</div>
+            <span style={{ flex: 1, fontSize: 12, color: "var(--th-text-secondary)" }}>{g.n}</span>
+            <span style={{ fontSize: 10, color: color, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{g.v}</span>
           </div>
         )
       })}

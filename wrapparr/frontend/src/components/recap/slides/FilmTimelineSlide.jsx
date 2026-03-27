@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useComparison } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 const DEFAULT_PROFILES = [
   { min: 1900, max: 1949, name: "Cinephile classique", desc: "Tes films datent de l'age d'or du cinema", emoji: "🎩" },
@@ -16,6 +17,7 @@ function getProfile(avgYear, profiles) {
 }
 
 export default function FilmTimelineSlide({ accent, data, year, config = {}, mediaType = "films" }) {
+  const L = useLabels()
   const isSeries = mediaType === "series"
   const animSpeed = config.animationSpeed || 8000
   const profiles = config.profiles || DEFAULT_PROFILES
@@ -98,8 +100,8 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
   return (
     <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
-        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
           Ton profil <span style={{ color: accent }}>{isSeries ? "seriephile" : "cinephile"}</span>
         </h2>
       </div>
@@ -115,11 +117,11 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
             <div style={{ fontSize: 26 }}>{profile.emoji}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: accent }}>{profile.name}</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", lineHeight: 1.3 }}>{profile.desc}</div>
+              <div style={{ fontSize: 10, color: "var(--th-text-tertiary)", lineHeight: 1.3 }}>{profile.desc}</div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{avgYear}</div>
-              <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
+              <div style={{ fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", lineHeight: 1 }}>{avgYear}</div>
+              <div style={{ fontSize: 7, color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
             </div>
           </div>
         </div>
@@ -128,18 +130,18 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
       {/* Previous year profile card (grey) */}
       {comp.active && prevProfile && phase >= 2 && (
         <div style={{
-          padding: "8px 12px", borderRadius: 10, marginBottom: 10, marginTop: -6,
-          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+          padding: "8px 12px", borderRadius: "var(--th-radius-sm)", marginBottom: 10, marginTop: -6,
+          background: "var(--th-surface-dim)", border: "1px solid var(--th-border-subtle)",
           animation: "slide-up 0.4s ease 0.2s both",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ fontSize: 18, opacity: 0.5 }}>{prevProfile.emoji}</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>{prevProfile.name} <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)" }}>({year - 1})</span></div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--th-text-tertiary)" }}>{prevProfile.name} <span style={{ fontSize: 8, color: "var(--th-text-faint)" }}>({year - 1})</span></div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{prevAvgYear}</div>
-              <div style={{ fontSize: 7, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
+              <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "rgba(255,255,255,0.35)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", lineHeight: 1 }}>{prevAvgYear}</div>
+              <div style={{ fontSize: 7, color: "var(--th-text-faint)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
             </div>
           </div>
         </div>
@@ -155,7 +157,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
           {/* Y axis labels */}
           <div style={{ width: 22, position: "relative", height: TIMELINE_H, flexShrink: 0 }}>
             {[0.25, 0.5, 0.75, 1].map((pct) => (
-              <div key={pct} style={{ position: "absolute", right: 4, bottom: (pct * TIMELINE_H - 5) + "px", fontSize: 7, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace" }}>{Math.round(maxBucketAll * pct)}</div>
+              <div key={pct} style={{ position: "absolute", right: 4, bottom: (pct * TIMELINE_H - 5) + "px", fontSize: 7, color: "var(--th-text-faint)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{Math.round(maxBucketAll * pct)}</div>
             ))}
           </div>
 
@@ -163,20 +165,20 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
           <div style={{ flex: 1, position: "relative", height: TIMELINE_H }}>
             {/* Horizontal grid lines */}
             {[0.25, 0.5, 0.75, 1].map((pct) => (
-              <div key={pct} style={{ position: "absolute", left: 0, right: 0, bottom: (pct * TIMELINE_H) + "px", height: 1, background: "rgba(255,255,255,0.04)" }} />
+              <div key={pct} style={{ position: "absolute", left: 0, right: 0, bottom: (pct * TIMELINE_H) + "px", height: 1, background: "var(--th-surface-subtle)" }} />
             ))}
             {/* Average year vertical line + label */}
             {phase >= 2 && avgYear >= minYearCfg && avgYear <= maxYearCfg && (
               <div style={{ position: "absolute", left: ((avgYear - minYearCfg) / range * 100) + "%", top: 0, bottom: 0, zIndex: 3, pointerEvents: "none" }}>
                 <div style={{ position: "absolute", left: -1, top: 0, bottom: 0, width: 2, background: accent + "50", animation: "pulse-line 2s ease-in-out infinite" }} />
-                <div style={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontWeight: 700, color: accent, fontFamily: "JetBrains Mono,monospace", whiteSpace: "nowrap", textShadow: "0 0 8px rgba(0,0,0,0.8)" }}>{avgYear}</div>
+                <div style={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", fontSize: 8, fontWeight: 700, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", whiteSpace: "nowrap", textShadow: "0 0 8px rgba(0,0,0,0.8)" }}>{avgYear}</div>
               </div>
             )}
             {/* Previous avg year vertical line */}
             {comp.active && prevAvgYear > 0 && phase >= 2 && prevAvgYear >= minYearCfg && prevAvgYear <= maxYearCfg && (
               <div style={{ position: "absolute", left: ((prevAvgYear - minYearCfg) / range * 100) + "%", top: 0, bottom: 0, zIndex: 2, pointerEvents: "none" }}>
                 <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1, background: "rgba(255,255,255,0.15)", borderLeft: "1px dashed rgba(255,255,255,0.25)" }} />
-                <div style={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", fontSize: 7, fontWeight: 600, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", whiteSpace: "nowrap" }}>{prevAvgYear}</div>
+                <div style={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", fontSize: 7, fontWeight: 600, color: "var(--th-text-muted)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", whiteSpace: "nowrap" }}>{prevAvgYear}</div>
               </div>
             )}
             {/* Bars */}
@@ -217,7 +219,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
             {/* X axis = track line + ticks + labels — unified */}
             <div style={{ position: "relative", marginTop: 2 }}>
               {/* The line itself */}
-              <div style={{ height: 2, background: "rgba(255,255,255,0.08)", borderRadius: 1, position: "relative" }}>
+              <div style={{ height: 2, background: "var(--th-surface)", borderRadius: 1, position: "relative" }}>
                 <div style={{
                   position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 1,
                   width: cursorPos + "%",
@@ -246,7 +248,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
                 const left = ((decade - minYearCfg) / range) * 100
                 return <div key={decade} style={{ position: "absolute", left: left + "%", top: 0, display: "flex", flexDirection: "column", alignItems: "center", transform: "translateX(-50%)" }}>
                   <div style={{ width: 1, height: 5, background: "rgba(255,255,255,0.15)" }} />
-                  <div style={{ fontSize: 6, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", marginTop: 1 }}>{decade}</div>
+                  <div style={{ fontSize: 6, color: "var(--th-text-faint)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", marginTop: 1 }}>{decade}</div>
                 </div>
               })}
             </div>
@@ -262,7 +264,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
             <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
               <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
             </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "var(--th-text-muted)" }}>
               <span style={{ width: 10, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />{year - 1}
             </span>
           </div>
@@ -274,17 +276,17 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
       {done && oldestFilm && newestFilm && oldestFilm !== newestFilm && (
         <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.5s both" }}>
           {[{ film: oldestFilm, label: "Le plus ancien", icon: "🎞️" }, { film: newestFilm, label: "Le plus recent", icon: "🆕" }].map(({ film, label, icon }) => (
-            <div key={label} style={{ flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(14px)" }}>
+            <div key={label} style={{ flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: "var(--th-radius-sm)", background: "var(--th-surface)", border: "1px solid var(--th-border)", backdropFilter: "var(--th-glass-blur)" }}>
               {film.thumb ? (
                 <img src={film.thumb} alt="" style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }} onError={(e) => { e.target.style.display = "none" }} />
               ) : (
                 <div style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{icon}</div>
               )}
               <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
-                <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{film.t}</div>
+                <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
+                <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{film.t}</div>
                 <div style={{ display: "flex", gap: 5, marginTop: 3 }}>
-                  <span style={{ fontSize: "clamp(10px, 1.3vw, 12px)", fontWeight: 700, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{film.y || film.year}</span>
+                  <span style={{ fontSize: "clamp(10px, 1.3vw, 12px)", fontWeight: 700, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{film.y || film.year}</span>
                   {film.r > 0 && <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.35)" }}>★ {film.r}</span>}
                 </div>
               </div>

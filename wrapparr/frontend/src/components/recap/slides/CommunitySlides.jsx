@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { useActive, AN, Tag, Lbl, DayChart, TimeChart, AreaG } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
 
 const USER_COLORS = ["#E5A00D", "#60a5fa", "#f472b6", "#4ade80", "#a78bfa", "#fb923c", "#38bdf8", "#f87171", "#34d399", "#fbbf24"]
@@ -23,7 +24,7 @@ if (typeof document !== "undefined" && !document.getElementById("community-keyfr
 
 function PosterImg({ src, size = 50 }) {
   const [err, setErr] = useState(false)
-  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 6, flexShrink: 0, background: "rgba(255,255,255,0.06)" }} />
+  if (!src || err) return <div style={{ width: size, height: size * 1.45, borderRadius: 6, flexShrink: 0, background: "var(--th-border-dim)" }} />
   return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: 6, objectFit: "cover", flexShrink: 0, boxShadow: "0 3px 12px rgba(0,0,0,0.5)" }} />
 }
 
@@ -31,6 +32,7 @@ function PosterImg({ src, size = 50 }) {
    1. COMMUNITY ACTIVITY — Activite mensuelle superposee
    ═══════════════════════════════════════════════════════ */
 export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType = "films" }) {
+  const L = useLabels()
   const active = useActive()
   const isSeries = mediaType === "series"
   const label = isSeries ? "series" : "films"
@@ -98,29 +100,29 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
       <Lbl c={accent} size={9}>👥 Communaute · Habitudes</Lbl>
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05, marginTop: 4 }}>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05, marginTop: 4 }}>
         Quand la communaute <span style={{ color: accent }}>{isSeries ? "binge" : "regarde"}</span>
       </h2>
 
       {/* Badges totaux */}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         {totalAll > 0 && (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: accent + "10", border: "1px solid " + accent + "25" }}>
-            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalAll} /> : 0}</span>
-            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{label} vus</span>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: "var(--th-radius-pill)", background: accent + "10", border: "1px solid " + accent + "25" }}>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? <AN t={totalAll} /> : 0}</span>
+            <span style={{ fontSize: 9, color: "var(--th-text-tertiary)" }}>{label} {L.viewed}</span>
           </div>
         )}
         {totalHours > 0 && (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
-            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>au total</span>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: "var(--th-radius-pill)", background: "var(--th-surface-dim)", border: "1px solid var(--th-border-dim)" }}>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "var(--th-text)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
+            <span style={{ fontSize: 9, color: "var(--th-text-tertiary)" }}>au total</span>
           </div>
         )}
       </div>
     </div>
 
     {/* Activite mensuelle superposee */}
-    <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
+    <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
       <Lbl c={accent} size={8}>Activite mensuelle par utilisateur</Lbl>
       <ResponsiveContainer width="100%" height={170}>
         <AreaChart data={multiMonthlyData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
@@ -154,13 +156,13 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
         {/* Total legend */}
         <div onClick={() => toggleLine("_total")} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", opacity: hidden._total ? 0.3 : 1, transition: "opacity .2s" }}>
           <svg width="10" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="10" y2="1.5" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="3 2" /></svg>
-          <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Total</span>
+          <span style={{ fontSize: 9, color: "var(--th-text-secondary)", fontWeight: 600 }}>Total</span>
         </div>
         {/* Per-user legends */}
         {allUsers.map((u, i) => (
           <div key={u.name} onClick={() => toggleLine(u.name)} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", opacity: hidden[u.name] ? 0.3 : 1, transition: "opacity .2s" }}>
             <div style={{ width: 8, height: 3, borderRadius: 2, background: USER_COLORS[i % USER_COLORS.length] }} />
-            <span style={{ fontSize: 9, color: (u.isMe || u.name === me) ? "white" : "rgba(255,255,255,0.4)", fontWeight: (u.isMe || u.name === me) ? 700 : 400 }}>{u.name}</span>
+            <span style={{ fontSize: 9, color: (u.isMe || u.name === me) ? "var(--th-text)" : "var(--th-text-tertiary)", fontWeight: (u.isMe || u.name === me) ? 700 : 400 }}>{u.name}</span>
           </div>
         ))}
       </div>
@@ -176,21 +178,21 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
     {(bestMonthEntry || bestDayEntry) && (
       <div className="s4" style={{ display: "flex", gap: 8 }}>
         {bestMonthEntry && (
-          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: accent + "0a", border: "1px solid " + accent + "25" }}>
-            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
+          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: "var(--th-radius-sm)", background: accent + "0a", border: "1px solid " + accent + "25" }}>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
             <div style={{ fontSize: "clamp(18px, 4.5vw, 24px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonthEntry.m}</div>
-            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "white", marginTop: 4 }}>{bestMonthEntry.v} vues</div>
-            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.25)" }}>{totalViews > 0 ? Math.round(bestMonthEntry.v / totalViews * 100) : 0}% du total</div>
+            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "var(--th-text)", marginTop: 4 }}>{bestMonthEntry.v} {L.viewsUnit}</div>
+            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "var(--th-text-dim)" }}>{totalViews > 0 ? Math.round(bestMonthEntry.v / totalViews * 100) : 0}% du total</div>
           </div>
         )}
         {bestDayEntry && (
-          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
-            <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", lineHeight: 1.1 }}>
+          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: "var(--th-radius-sm)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
+            <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.1 }}>
               {bestDayEntry.day_name} {bestDayEntry.day} {bestDayEntry.month}
             </div>
-            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: accent, marginTop: 4 }}>{bestDayEntry.views} vues</div>
-            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.25)" }}>{bestDayEntry.hours}h de visionnage</div>
+            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: accent, marginTop: 4 }}>{bestDayEntry.views} {L.viewsUnit}</div>
+            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "var(--th-text-dim)" }}>{bestDayEntry.hours}h de visionnage</div>
           </div>
         )}
       </div>
@@ -205,6 +207,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
 const PODIUM_H = [75, 95, 115]
 
 export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "films" }) {
+  const L = useLabels()
   const isSeries = mediaType === "series"
   const label = isSeries ? "Series" : "Films"
 
@@ -270,8 +273,8 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 16, position: "relative", zIndex: 5 }}>
         <div style={{ fontSize: 34, marginBottom: 6, filter: "drop-shadow(0 0 20px " + accent + ")", animation: "float 3s ease-in-out infinite" }}>{isSeries ? "📺" : "🎬"}</div>
-        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 4 }}>WRAPPARR · COMMUNAUTE</div>
-        <h2 style={{ fontSize: "clamp(18px, 5vw, 28px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 4 }}>{L.brand} · COMMUNAUTE</div>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 28px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
           {label} les plus <span style={{ color: accent }}>populaires</span>
         </h2>
       </div>
@@ -294,15 +297,15 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
                   </div>}
                   <div style={{
                     width: "100%", borderRadius: "6px 6px 0 0", height: PODIUM_H[rIdx],
-                    background: show ? "linear-gradient(180deg," + accent + "38 0%," + accent + "18 100%)" : "rgba(255,255,255,0.04)",
+                    background: show ? "linear-gradient(180deg," + accent + "38 0%," + accent + "18 100%)" : "var(--th-surface-subtle)",
                     border: "1px solid " + (show ? accent + "55" : "rgba(255,255,255,0.05)"), borderBottom: "none",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "8px 5px",
                     animation: show ? "platform-rise .7s cubic-bezier(0.34,1.3,0.64,1) both" : "none",
                   }}>
                     {show && <>
-                      <div style={{ color: "white", fontWeight: 700, fontSize: isOne ? 11 : 9, textAlign: "center", lineHeight: 1.2, marginBottom: 3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
-                      <div style={{ color: accent, fontWeight: 800, fontFamily: "JetBrains Mono,monospace", fontSize: isOne ? 13 : 10 }}>{item.userCount} user{item.userCount > 1 ? "s" : ""}</div>
-                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 8 }}>{item.viewCount} vue{item.viewCount > 1 ? "s" : ""}</div>
+                      <div style={{ color: "var(--th-text)", fontWeight: 700, fontSize: isOne ? 11 : 9, textAlign: "center", lineHeight: 1.2, marginBottom: 3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.t}</div>
+                      <div style={{ color: accent, fontWeight: 800, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontSize: isOne ? 13 : 10 }}>{item.userCount} user{item.userCount > 1 ? "s" : ""}</div>
+                      <div style={{ color: "var(--th-text-tertiary)", fontSize: 8 }}>{item.viewCount} vue{item.viewCount > 1 ? "s" : ""}</div>
                       {item.r > 0 && <div style={{ color: "#fbbf24", fontSize: 8, marginTop: 1 }}>★ {item.r}</div>}
                     </>}
                   </div>
@@ -320,17 +323,17 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
           {rest.map((item, i) => (
             <div key={item.t + i} style={{
               display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", borderRadius: 9,
-              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+              background: "var(--th-surface-dim)", border: "1px solid var(--th-border-dim)",
               animation: "slide-up .35s ease " + (i * 0.06) + "s both",
             }}>
-              <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", width: 16, textAlign: "center", flexShrink: 0 }}>{i + 4}</span>
+              <span style={{ fontSize: 9, color: "var(--th-text-faint)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", width: 16, textAlign: "center", flexShrink: 0 }}>{i + 4}</span>
               <PosterImg src={item.thumb} size={24} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.t}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.t}</div>
               </div>
               <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
                 <span style={{ fontSize: 9, color: accent, fontWeight: 700 }}>{item.userCount} user{item.userCount > 1 ? "s" : ""}</span>
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{item.viewCount} vues</span>
+                <span style={{ fontSize: 9, color: "var(--th-text-dim)" }}>{item.viewCount} {L.viewsUnit}</span>
               </div>
             </div>
           ))}
@@ -344,6 +347,7 @@ export function CommunityTopSlide({ accent, allUsers, year, me, mediaType = "fil
    2b. MOST VIEWED — Top 10 films/series par nombre de vues
    ═══════════════════════════════════════════════════════ */
 export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType = "films" }) {
+  const L = useLabels()
   const active = useActive()
   const isSeries = mediaType === "series"
   const label = isSeries ? "series" : "films"
@@ -374,8 +378,8 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-        {isSeries ? "Series" : "Films"} les plus <span style={{ color: accent }}>vus</span>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
+        {isSeries ? "Series" : "Films"} les plus <span style={{ color: accent }}>{L.viewed}</span>
       </h2>
       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>Top 10 par {isSeries ? "episodes vus" : "nombre de vues"} · {allUsers.length} utilisateurs</div>
     </div>
@@ -384,13 +388,13 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
       {topItems.map((item, i) => (
         <div key={item.t + i} style={{
           display: "flex", gap: 10, padding: "8px 10px", borderRadius: 12,
-          background: i === 0 ? accent + "0c" : "rgba(255,255,255,0.03)",
-          border: `1px solid ${i === 0 ? accent + "30" : "rgba(255,255,255,0.06)"}`,
+          background: i === 0 ? accent + "0c" : "var(--th-surface-dim)",
+          border: `1px solid ${i === 0 ? accent + "30" : "var(--th-border-dim)"}`,
           animation: "slide-up .4s ease " + (0.08 + i * 0.05) + "s both",
         }}>
           {/* Rank */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: 20, flexShrink: 0 }}>
-            <span style={{ fontSize: i < 3 ? 14 : 11, fontWeight: 800, color: i === 0 ? accent : "rgba(255,255,255,0.25)" }}>
+            <span style={{ fontSize: i < 3 ? 14 : 11, fontWeight: 800, color: i === 0 ? accent : "var(--th-text-dim)" }}>
               {i < 3 ? ["🥇", "🥈", "🥉"][i] : "#" + (i + 1)}
             </span>
           </div>
@@ -400,24 +404,24 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
 
           {/* Info */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{item.t}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{item.t}</div>
             <div style={{ display: "flex", gap: 6, marginTop: 2, alignItems: "center" }}>
-              {item.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono,monospace" }}>{item.y}</span>}
+              {item.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{item.y}</span>}
               {item.r > 0 && <span style={{ fontSize: 9, color: "#fbbf24", fontWeight: 600 }}>★ {item.r}</span>}
-              <span style={{ fontSize: 10, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{item.totalViews} {isSeries ? "ep." : "vue"}{!isSeries && item.totalViews > 1 ? "s" : ""}</span>
+              <span style={{ fontSize: 10, fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{item.totalViews} {isSeries ? L.episodes : "vue"}{!isSeries && item.totalViews > 1 ? "s" : ""}</span>
             </div>
 
             {/* Per-user view badges */}
             <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
               {item.perUser.map((pu) => (
                 <span key={pu.name} style={{
-                  fontSize: 8, padding: "2px 6px", borderRadius: 8,
+                  fontSize: 8, padding: "2px 6px", borderRadius: "var(--th-radius-xs)",
                   background: pu.isMe ? accent + "20" : "rgba(255,255,255,0.05)",
-                  border: pu.isMe ? "1px solid " + accent + "30" : "1px solid rgba(255,255,255,0.06)",
-                  color: pu.isMe ? accent : "rgba(255,255,255,0.5)",
+                  border: pu.isMe ? "1px solid " + accent + "30" : "1px solid var(--th-border-dim)",
+                  color: pu.isMe ? accent : "var(--th-text-secondary)",
                   fontWeight: pu.isMe ? 700 : 400,
                 }}>
-                  {pu.name} · {pu.views}{isSeries ? " ep." : ""}
+                  {pu.name} · {pu.views}{isSeries ? " " + L.episodes : ""}
                 </span>
               ))}
             </div>
@@ -433,6 +437,7 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
    Memes dimensions que CommunityGenresSlide
    ═══════════════════════════════════════════════════════ */
 export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType = "films" }) {
+  const L = useLabels()
   const active = useActive()
   const isSeries = mediaType === "series"
   const label = isSeries ? "series" : "films"
@@ -462,7 +467,7 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
         {data.map((u, i) => (
           <div key={u.n} style={{
             animation: "slide-up .4s ease " + (delayBase + i * 0.05) + "s both",
-            padding: "4px 8px", borderRadius: 8,
+            padding: "4px 8px", borderRadius: "var(--th-radius-xs)",
             background: u.isMe ? accent + "10" : "transparent",
             border: u.isMe ? "1px solid " + accent + "25" : "1px solid transparent",
           }}>
@@ -474,10 +479,10 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
               }}>
                 {u.n}{u.isMe && <span style={{ fontSize: 9, color: accent, marginLeft: 4, fontWeight: 700 }}>· moi</span>}
               </span>
-              <span style={{ fontSize: 9, color: u.isMe ? accent + "80" : "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>#{i + 1}</span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: u.isMe ? accent : (i === 0 ? accent : "rgba(255,255,255,0.4)"), fontFamily: "JetBrains Mono,monospace", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
+              <span style={{ fontSize: 9, color: u.isMe ? accent + "80" : "var(--th-text-muted)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>#{i + 1}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: u.isMe ? accent : (i === 0 ? accent : "var(--th-text-tertiary)"), fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", width: 40, textAlign: "right" }}>{u.v.toLocaleString("fr-FR")}{unitSuffix}</span>
             </div>
-            <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ height: 5, background: "var(--th-surface-subtle)", borderRadius: 3, overflow: "hidden" }}>
               <div style={{
                 height: "100%", borderRadius: 3,
                 background: accent, opacity: u.isMe ? 1 : (opacities[i] || 0.15),
@@ -494,7 +499,7 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 8 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
         Qui regarde le plus de <span style={{ color: accent }}>{label}</span> ?
       </h2>
       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{allUsers.length} utilisateurs</div>
@@ -504,12 +509,12 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
       <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
-        <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>{myRankViews > 0 ? `#${myRankViews}` : "—"}</span>
+        <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", position: "relative" }}>{myRankViews > 0 ? `#${myRankViews}` : "—"}</span>
         <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en {viewLabel}</span>
       </div>
       <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
-        <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "JetBrains Mono,monospace", position: "relative" }}>{myRankHours > 0 ? `#${myRankHours}` : "—"}</span>
+        <span style={{ fontSize: 12, fontWeight: 900, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", position: "relative" }}>{myRankHours > 0 ? `#${myRankHours}` : "—"}</span>
         <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>en heures</span>
       </div>
     </div>
@@ -536,6 +541,7 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
    4. COMMUNITY GENRES — Genres preferes de la communaute
    ═══════════════════════════════════════════════════════ */
 export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "films" }) {
+  const L = useLabels()
   const active = useActive()
   const isSeries = mediaType === "series"
   const label = isSeries ? "series" : "films"
@@ -572,7 +578,7 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
         Genres preferes <span style={{ color: accent }}>{label}</span>
       </h2>
       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{allUsers.length} utilisateurs</div>
@@ -584,10 +590,10 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
         <div key={g.n} style={{ animation: "slide-up .4s ease " + (0.1 + i * 0.05) + "s both" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
             <span style={{ fontSize: 12, fontWeight: i === 0 ? 800 : 500, color: i === 0 ? accent : "rgba(255,255,255,0.7)", flex: 1 }}>{g.n}</span>
-            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>{g.users.size} user{g.users.size > 1 ? "s" : ""}</span>
-            <span style={{ fontSize: 10, fontWeight: 700, color: i === 0 ? accent : "rgba(255,255,255,0.4)", fontFamily: "JetBrains Mono,monospace", width: 30, textAlign: "right" }}>{g.v}</span>
+            <span style={{ fontSize: 9, color: "var(--th-text-muted)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{g.users.size} user{g.users.size > 1 ? "s" : ""}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: i === 0 ? accent : "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", width: 30, textAlign: "right" }}>{g.v}</span>
           </div>
-          <div style={{ height: 5, background: "rgba(255,255,255,0.04)", borderRadius: 3, overflow: "hidden" }}>
+          <div style={{ height: 5, background: "var(--th-surface-subtle)", borderRadius: 3, overflow: "hidden" }}>
             <div style={{
               height: "100%", borderRadius: 3,
               background: accent, opacity: opacities[i] || 0.15,
@@ -601,17 +607,17 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
 
     {/* Genre favori par utilisateur */}
     {userTopGenre.length > 0 && (
-      <div className="s2" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <div className="s2" style={{ marginTop: 12, padding: "10px 12px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
         <Lbl c={accent} size={8}>Genre prefere par utilisateur</Lbl>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 6 }}>
           {userTopGenre.map((u) => {
             return <div key={u.name} style={{
-              display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 8,
-              background: u.isMe ? accent + "12" : "rgba(255,255,255,0.03)",
-              border: u.isMe ? "1px solid " + accent + "30" : "1px solid rgba(255,255,255,0.06)",
+              display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: "var(--th-radius-xs)",
+              background: u.isMe ? accent + "12" : "var(--th-surface-dim)",
+              border: u.isMe ? "1px solid " + accent + "30" : "1px solid var(--th-border-dim)",
             }}>
               <span style={{ fontSize: 10, fontWeight: u.isMe ? 700 : 400, color: u.isMe ? accent : "rgba(255,255,255,0.6)" }}>{u.name}</span>
-              <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace" }}>{u.genre}</span>
+              <span style={{ fontSize: 9, color: "var(--th-text-muted)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{u.genre}</span>
             </div>
           })}
         </div>
@@ -625,8 +631,8 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
    ═══════════════════════════════════════════════════════ */
 function MultiUserTooltip({ active, payload, label, users = [] }) {
   if (!active || !payload?.length) return null
-  return <div style={{ background: "#0d0d1a", border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: "6px 10px", fontSize: 10, fontFamily: "JetBrains Mono,monospace" }}>
-    <div style={{ color: "rgba(255,255,255,.4)", marginBottom: 3 }}>{label}</div>
+  return <div style={{ background: "#0d0d1a", border: "1px solid rgba(255,255,255,.1)", borderRadius: "var(--th-radius-xs)", padding: "6px 10px", fontSize: 10, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>
+    <div style={{ color: "var(--th-text-tertiary)", marginBottom: 3 }}>{label}</div>
     {payload.map((p) => (
       <div key={p.dataKey} style={{ color: p.color, display: "flex", justifyContent: "space-between", gap: 12 }}>
         <span>{p.dataKey}</span><span style={{ fontWeight: 700 }}>{p.value}</span>
@@ -642,6 +648,7 @@ function MultiUserTooltip({ active, payload, label, users = [] }) {
    5. YEAR COMPARISON — Comparaison annee vs annee
    ═══════════════════════════════════════════════════════ */
 export function CommunityCompareSlide({ accent, compareData, year, mediaType = "films" }) {
+  const L = useLabels()
   const active = useActive()
   const isSeries = mediaType === "series"
   const label = isSeries ? "series" : "films"
@@ -671,7 +678,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 10 }}>
       <Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
+      <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
         {year} vs <span style={{ color: accent }}>{year - 1}</span>
       </h2>
       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>Comparaison {label}</div>
@@ -679,21 +686,21 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
 
     {/* Totaux avec diff badges */}
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{isSeries ? "ep." : label}</span>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {prevItems}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? curItems : 0}</span>
+        <span style={{ fontSize: 9, color: "var(--th-text-tertiary)" }}>{isSeries ? L.episodes : label}</span>
+        <span style={{ fontSize: 9, color: "var(--th-text-dim)" }}>vs {prevItems}</span>
         {diffItems !== 0 && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: diffItems > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: 8, background: diffItems > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: diffItems > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: "var(--th-radius-xs)", background: diffItems > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
             {diffItems > 0 ? "+" : ""}{diffItems}%
           </span>
         )}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {Math.round(prevHours)}h</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "var(--th-text)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? Math.round(curHours) : 0}h</span>
+        <span style={{ fontSize: 9, color: "var(--th-text-dim)" }}>vs {Math.round(prevHours)}h</span>
         {diffHours !== 0 && (
-          <span style={{ fontSize: 9, fontWeight: 700, color: diffHours > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: 8, background: diffHours > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: diffHours > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: "var(--th-radius-xs)", background: diffHours > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
             {diffHours > 0 ? "+" : ""}{diffHours}%
           </span>
         )}
@@ -711,7 +718,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
 
     {/* Activite mensuelle comparee — line chart */}
     {monthly.length > 0 && (
-      <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
+      <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
         <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
         <ResponsiveContainer width="100%" height={90}>
           <AreaChart data={monthly} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
@@ -737,7 +744,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
 
     {/* Genres — badges cote a cote : annee en cours a gauche, precedente a droite */}
     {(curGenres.length > 0 || prevGenres.length > 0) && (
-      <div className="s2" style={{ padding: "10px 10px 8px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
+      <div className="s2" style={{ padding: "10px 10px 8px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
         <Lbl c={accent} size={8}>Genres</Lbl>
         <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
           {/* Current year */}
@@ -745,8 +752,8 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
             <div style={{ fontSize: 8, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>{year}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {curGenres.map((g, i) => (
-                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 8, background: i === 0 ? accent + "18" : "rgba(255,255,255,0.04)", border: "1px solid " + (i === 0 ? accent + "30" : "rgba(255,255,255,0.08)"), fontSize: 10, color: i === 0 ? accent : "rgba(255,255,255,0.6)", fontWeight: i === 0 ? 700 : 500 }}>
-                  {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 9, color: accent }}>{g.current}</span>
+                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: "var(--th-radius-xs)", background: i === 0 ? accent + "18" : "var(--th-surface-subtle)", border: "1px solid " + (i === 0 ? accent + "30" : "var(--th-border-subtle)"), fontSize: 10, color: i === 0 ? accent : "rgba(255,255,255,0.6)", fontWeight: i === 0 ? 700 : 500 }}>
+                  {g.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: 9, color: accent }}>{g.current}</span>
                 </span>
               ))}
             </div>
@@ -756,8 +763,8 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
             <div style={{ fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>{year - 1}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {prevGenres.map((g, i) => (
-                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "rgba(255,255,255,0.45)", fontWeight: i === 0 ? 600 : 400 }}>
-                  {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{g.previous}</span>
+                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: "var(--th-radius-xs)", background: "var(--th-surface-dim)", border: "1px solid var(--th-border-dim)", fontSize: 10, color: "rgba(255,255,255,0.45)", fontWeight: i === 0 ? 600 : 400 }}>
+                  {g.n} <span style={{ fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", fontWeight: 700, fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{g.previous}</span>
                 </span>
               ))}
             </div>
@@ -776,7 +783,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
       const curByUsers = topData.current?.by_users || []
       const prevByUsers = topData.previous?.by_users || []
       const rankBadge = (pos, isCurrent) => (
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: 6, fontSize: 9, fontWeight: 800, fontFamily: "JetBrains Mono,monospace", flexShrink: 0, background: pos === 0 ? (isCurrent ? accent + "20" : "rgba(255,255,255,0.08)") : "rgba(255,255,255,0.04)", color: pos === 0 ? (isCurrent ? accent : "rgba(255,255,255,0.5)") : "rgba(255,255,255,0.3)", border: "1px solid " + (pos === 0 ? (isCurrent ? accent + "40" : "rgba(255,255,255,0.12)") : "rgba(255,255,255,0.06)") }}>
+        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: 6, fontSize: 9, fontWeight: 800, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", flexShrink: 0, background: pos === 0 ? (isCurrent ? accent + "20" : "var(--th-surface)") : "var(--th-surface-subtle)", color: pos === 0 ? (isCurrent ? accent : "var(--th-text-secondary)") : "var(--th-text-muted)", border: "1px solid " + (pos === 0 ? (isCurrent ? accent + "40" : "var(--th-border)") : "var(--th-border-dim)") }}>
           {pos + 1}
         </span>
       )
@@ -788,8 +795,8 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
               {rankBadge(i, isCurrent)}
               <PosterImg src={it.thumb} size={28} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t}</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{it.total_views} {isSeries ? "ep." : "vue" + (it.total_views > 1 ? "s" : "")}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "var(--th-text)" : "var(--th-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t}</div>
+                <div style={{ fontSize: 8, color: "var(--th-text-muted)" }}>{it.total_views} {isSeries ? L.episodes : "vue" + (it.total_views > 1 ? "s" : "")}</div>
               </div>
             </div>
           ))}
@@ -803,8 +810,8 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
               {rankBadge(i, isCurrent)}
               <PosterImg src={it.thumb} size={28} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t}</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)" }}>{it.user_count} utilisateur{it.user_count > 1 ? "s" : ""}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? "var(--th-text)" : "var(--th-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{it.t}</div>
+                <div style={{ fontSize: 8, color: "var(--th-text-muted)" }}>{it.user_count} utilisateur{it.user_count > 1 ? "s" : ""}</div>
               </div>
             </div>
           ))}
@@ -812,8 +819,8 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
       )
       return <>
         {(curByViews.length > 0 || prevByViews.length > 0) && (
-          <div className="s3" style={{ padding: "10px 10px 8px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
-            <Lbl c={accent} size={8}>Top {label} les plus vus</Lbl>
+          <div className="s3" style={{ padding: "10px 10px 8px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
+            <Lbl c={accent} size={8}>Top {label} les plus {L.viewed}</Lbl>
             <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
               {renderTop(curByViews, String(year), true)}
               {renderTop(prevByViews, String(year - 1), false)}
@@ -821,7 +828,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
           </div>
         )}
         {(curByUsers.length > 0 || prevByUsers.length > 0) && (
-          <div className="s4" style={{ padding: "10px 10px 8px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
+          <div className="s4" style={{ padding: "10px 10px 8px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
             <Lbl c={accent} size={8}>Top {label} vus par le plus d'utilisateurs</Lbl>
             <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
               {renderTopUsers(curByUsers, String(year), true)}
@@ -834,4 +841,4 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
   </div>
 }
 
-const statPill = { display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid" }
+const statPill = { display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "var(--th-surface-subtle)", border: "1px solid" }

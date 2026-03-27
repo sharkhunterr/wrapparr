@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useComparison, CompBadge } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 function formatBudget(n) {
   if (!n) return "0"
@@ -30,7 +31,7 @@ function AnimatedCounter({ target, accent, duration = 2000 }) {
     const t = setTimeout(() => { raf.current = requestAnimationFrame(tick) }, 400)
     return () => { clearTimeout(t); cancelAnimationFrame(raf.current) }
   }, [target, duration])
-  return <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{formatBudget(val)}</span>
+  return <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{formatBudget(val)}</span>
 }
 
 // Falling money effect — coins spinning + bills floating
@@ -92,15 +93,15 @@ function MoneyRain({ active, accent }) {
   )
 }
 
-function BracketBar({ label, count, maxCount, accent, delay, animated, prevCount }) {
+function BracketBar({ label, count, maxCount, accent, delay, animated, prevCount, L }) {
   const allMax = Math.max(maxCount, prevCount || 0)
   const pct = (count / Math.max(1, allMax)) * 100
   const prevPct = prevCount != null ? (prevCount / Math.max(1, allMax)) * 100 : 0
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, animation: animated ? `slide-up 0.4s ease ${delay}s both` : "none" }}>
-      <div style={{ width: 55, fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "right", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{label}</div>
+      <div style={{ width: 55, fontSize: 9, color: "var(--th-text-tertiary)", textAlign: "right", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", flexShrink: 0 }}>{label}</div>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-        <div style={{ height: 18, background: "rgba(255,255,255,0.03)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
+        <div style={{ height: 18, background: "var(--th-bar-bg)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
           <div style={{
             height: "100%", borderRadius: 4,
             background: `linear-gradient(90deg, ${accent}50, ${accent})`,
@@ -108,19 +109,19 @@ function BracketBar({ label, count, maxCount, accent, delay, animated, prevCount
             transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay}s`,
             boxShadow: `0 0 12px ${accent}25`,
           }} />
-          <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 9, fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
+          <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 9, fontWeight: 700, color: "var(--th-text)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>
             {count}
           </div>
         </div>
         {prevCount != null && (
-          <div style={{ height: 16, background: "rgba(255,255,255,0.02)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
+          <div style={{ height: 16, background: "var(--th-surface-dim)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
             {prevCount > 0 && <div style={{
               height: "100%", borderRadius: 3,
-              background: "rgba(255,255,255,0.12)",
+              background: "var(--th-bar-prev)",
               width: animated ? prevPct + "%" : "0%",
               transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay + 0.15}s`,
             }} />}
-            <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 600, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace" }}>
+            <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 600, color: "var(--th-text-dim)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>
               {prevCount}
             </div>
           </div>
@@ -168,7 +169,7 @@ function BudgetLineChart({ allBudgets, average, accent, animated }) {
         <line x1={padX} x2={W - padX} y1={avgY} y2={avgY}
           stroke="rgba(255,255,255,0.3)" strokeWidth={1} strokeDasharray="4 3"
           style={{ opacity: animated ? 1 : 0, transition: "opacity 1s ease 1s" }} />
-        <text x={W - padX - 2} y={avgY - 5} textAnchor="end" fill="rgba(255,255,255,0.4)" fontSize={8} fontFamily="JetBrains Mono,monospace"
+        <text x={W - padX - 2} y={avgY - 5} textAnchor="end" fill="rgba(255,255,255,0.4)" fontSize={8} fontFamily="var(--th-font-mono, JetBrains Mono,monospace)"
           style={{ opacity: animated ? 1 : 0, transition: "opacity 1s ease 1s" }}>
           moy. {formatBudget(average)}
         </text>
@@ -176,7 +177,7 @@ function BudgetLineChart({ allBudgets, average, accent, animated }) {
         {/* Labels for first, last, and max — no dots */}
         {allBudgets.map((b, i) => (
           (i === 0 || i === n - 1 || b.budget === maxB) ? (
-            <text key={i} x={toX(i)} y={H + 12} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} fill="rgba(255,255,255,0.3)" fontSize={7} fontFamily="JetBrains Mono,monospace"
+            <text key={i} x={toX(i)} y={H + 12} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} fill="rgba(255,255,255,0.3)" fontSize={7} fontFamily="var(--th-font-mono, JetBrains Mono,monospace)"
               style={{ opacity: animated ? 1 : 0, transition: `opacity 0.4s ease ${0.5 + i * 0.05}s` }}>
               {b.t.length > 12 ? b.t.slice(0, 10) + ".." : b.t}
             </text>
@@ -184,8 +185,8 @@ function BudgetLineChart({ allBudgets, average, accent, animated }) {
         ))}
 
         {/* Y axis labels */}
-        <text x={padX} y={padY - 4} fill="rgba(255,255,255,0.2)" fontSize={7} fontFamily="JetBrains Mono,monospace">{formatBudget(maxB)}</text>
-        <text x={padX} y={H - padY + 10} fill="rgba(255,255,255,0.2)" fontSize={7} fontFamily="JetBrains Mono,monospace">0</text>
+        <text x={padX} y={padY - 4} fill="var(--th-text-faint)" fontSize={7} fontFamily="var(--th-font-mono, JetBrains Mono,monospace)">{formatBudget(maxB)}</text>
+        <text x={padX} y={H - padY + 10} fill="var(--th-text-faint)" fontSize={7} fontFamily="var(--th-font-mono, JetBrains Mono,monospace)">0</text>
       </svg>
     </div>
   )
@@ -194,8 +195,8 @@ function BudgetLineChart({ allBudgets, average, accent, animated }) {
 function FilmBudgetCard({ film, accent, rank, delay, animated }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 8,
-      background: rank === 0 ? `${accent}0a` : "rgba(255,255,255,0.015)",
+      display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: "var(--th-radius-xs)",
+      background: rank === 0 ? `${accent}0a` : "var(--th-surface-faint)",
       border: `1px solid ${rank === 0 ? accent + "25" : "rgba(255,255,255,0.04)"}`,
       animation: animated ? `slide-up 0.4s ease ${delay}s both` : "none",
     }}>
@@ -205,14 +206,15 @@ function FilmBudgetCard({ film, accent, rank, delay, animated }) {
         <div style={{ width: 28, height: 40, borderRadius: 4, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🎬</div>
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: rank === 0 ? accent : "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{film.t}</div>
-        <div style={{ fontSize: 14, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{formatBudget(film.budget)}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: rank === 0 ? accent : "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{film.t}</div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{formatBudget(film.budget)}</div>
       </div>
     </div>
   )
 }
 
 export default function BudgetSlide({ accent, data, year, config = {} }) {
+  const L = useLabels()
   const budgets = data?.extra?.budgets
   const displayMode = config.displayMode || "bars"
   const [phase, setPhase] = useState(0)
@@ -242,25 +244,25 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
 
       <div style={{ position: "relative", zIndex: 1 }}>
         <div className="s0" style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
-          <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-            Le budget de <span style={{ color: accent }}>tes films</span>
+          <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
+          <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
+            {L.budgetTitle} <span style={{ color: accent }}>{L.yourFilms}</span>
           </h2>
         </div>
 
         {/* Average budget counter */}
         <div style={{
-          textAlign: "center", padding: "16px 20px", borderRadius: 14, marginBottom: 14,
+          textAlign: "center", padding: "16px 20px", borderRadius: "var(--th-radius)", marginBottom: 14,
           background: `linear-gradient(135deg, ${accent}08, ${accent}04)`,
           border: `1px solid ${accent}20`, boxShadow: `0 0 40px ${accent}08`,
         }}>
-          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".15em", marginBottom: 6 }}>Budget moyen des films vus</div>
+          <div style={{ fontSize: 9, color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".15em", marginBottom: 6 }}>{L.avgBudget}</div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             {phase >= 1 ? <AnimatedCounter target={budgets.average} accent={accent} /> : <span style={{ fontSize: 32, color: "rgba(255,255,255,0.1)" }}>...</span>}
             <CompBadge current={budgets.average} previous={prevBudgets?.average} format={formatBudget} />
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, fontSize: 9, color: "rgba(255,255,255,0.25)", marginTop: 4 }}>
-            <span>sur {budgets.count} films · total cumule {formatBudget(budgets.total)}</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, fontSize: 9, color: "var(--th-text-dim)", marginTop: 4 }}>
+            <span>{L.on} {budgets.count} {L.films} · {L.totalCumulated} {formatBudget(budgets.total)}</span>
             <CompBadge current={budgets.total} previous={prevBudgets?.total} format={formatBudget} />
           </div>
         </div>
@@ -268,8 +270,8 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
         {/* Distribution — bars or linechart */}
         {phase >= 2 && (
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 6, fontWeight: 600 }}>
-              {displayMode === "linechart" ? "Budget par film" : "Repartition par budget"}
+            <div style={{ fontSize: 10, color: "var(--th-text-muted)", marginBottom: 6, fontWeight: 600 }}>
+              {displayMode === "linechart" ? L.budgetPerFilm : L.distributionTitle}
             </div>
             {displayMode === "linechart" && budgets.all_budgets?.length >= 2 ? (
               <BudgetLineChart allBudgets={budgets.all_budgets} average={budgets.average} accent={accent} animated={phase >= 2} />
@@ -278,15 +280,15 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
                 {budgets.distribution.map((b, i) => {
                   const prevDist = prevBudgets?.distribution || []
                   const prevB = prevDist.find((p) => p.label === b.label)
-                  return <BracketBar key={b.label} label={b.label} count={b.count} maxCount={maxBracket} accent={accent} delay={i * 0.12} animated={phase >= 2} prevCount={comp.active ? (prevB?.count ?? 0) : undefined} />
+                  return <BracketBar key={b.label} label={b.label} count={b.count} maxCount={maxBracket} accent={accent} delay={i * 0.12} animated={phase >= 2} prevCount={comp.active ? (prevB?.count ?? 0) : undefined} L={L} />
                 })}
                 {comp.active && prevBudgets && (
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 4 }}>
                     <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
                       <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
                     </span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
-                      <span style={{ width: 10, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />{year - 1}
+                    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "var(--th-text-muted)" }}>
+                      <span style={{ width: 10, height: 3, borderRadius: 2, background: "var(--th-bar-prev)" }} />{year - 1}
                     </span>
                   </div>
                 )}
@@ -300,7 +302,7 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
             {budgets.top_expensive?.length > 0 && (
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 9, color: accent, fontWeight: 600, marginBottom: 4 }}>Les plus chers</div>
+                <div style={{ fontSize: 9, color: accent, fontWeight: 600, marginBottom: 4 }}>{L.mostExpensive}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {budgets.top_expensive.map((f, i) => (
                     <FilmBudgetCard key={f.t} film={f} accent={accent} rank={i} delay={i * 0.1} animated={phase >= 3} />
@@ -310,7 +312,7 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
             )}
             {budgets.top_cheap?.length > 0 && (
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, marginBottom: 4 }}>Les moins chers</div>
+                <div style={{ fontSize: 9, color: "var(--th-text-muted)", fontWeight: 600, marginBottom: 4 }}>{L.leastExpensive}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {budgets.top_cheap.map((f, i) => (
                     <FilmBudgetCard key={f.t} film={f} accent={accent} rank={-1} delay={i * 0.1 + 0.3} animated={phase >= 3} />
@@ -324,21 +326,21 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
         {/* Best ROI — multiplier format */}
         {phase >= 4 && budgets.best_roi?.length > 0 && (
           <div style={{ animation: "slide-up 0.4s ease both" }}>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, marginBottom: 4 }}>Meilleur retour sur investissement</div>
+            <div style={{ fontSize: 9, color: "var(--th-text-muted)", fontWeight: 600, marginBottom: 4 }}>{L.bestROI}</div>
             <div style={{ display: "flex", gap: 6 }}>
               {budgets.best_roi.map((f, i) => {
                 const mult = formatMultiplier(f.budget, f.revenue)
                 return (
                   <div key={f.t} style={{
-                    flex: 1, padding: "8px 8px", borderRadius: 8, textAlign: "center",
-                    background: i === 0 ? `${accent}0a` : "rgba(255,255,255,0.015)",
+                    flex: 1, padding: "8px 8px", borderRadius: "var(--th-radius-xs)", textAlign: "center",
+                    background: i === 0 ? `${accent}0a` : "var(--th-surface-faint)",
                     border: `1px solid ${i === 0 ? accent + "20" : "rgba(255,255,255,0.04)"}`,
                   }}>
-                    <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: f.revenue > f.budget ? "#4ade80" : "#f87171", fontFamily: "JetBrains Mono,monospace" }}>
+                    <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: f.revenue > f.budget ? "#4ade80" : "#f87171", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>
                       {mult || "?"}
                     </div>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.t}</div>
-                    <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace" }}>
+                    <div style={{ fontSize: 9, color: "var(--th-text-tertiary)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.t}</div>
+                    <div style={{ fontSize: 8, color: "var(--th-text-faint)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>
                       {formatBudget(f.budget)} → {formatBudget(f.revenue)}
                     </div>
                   </div>

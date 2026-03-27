@@ -26,6 +26,8 @@ import FinaleSlide from "./slides/FinaleSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/CommunitySlides"
 import { ComparisonProvider } from "./SharedUI"
 import { useResponsive } from "./responsive"
+import { THEMES, getTheme, themeToCSS } from "./themes"
+import { ThemeProvider } from "./ThemeContext"
 
 // ── AMBIENT EFFECTS (from prototype) ──
 function Orbs({ accent }) {
@@ -64,6 +66,403 @@ function Spotlights({ accent, intensity = 1, fixed = false }) {
       })}
     </div>
   )
+}
+
+function NoirRain() {
+  const cv = useRef(null)
+  useEffect(() => {
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
+    const drops = Array.from({ length: 120 }, () => ({
+      x: Math.random() * c.width, y: Math.random() * c.height,
+      len: 15 + Math.random() * 25, speed: 8 + Math.random() * 12,
+      opacity: 0.03 + Math.random() * 0.06,
+    }))
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height)
+      for (const d of drops) {
+        d.y += d.speed; d.x -= d.speed * 0.15
+        if (d.y > c.height) { d.y = -d.len; d.x = Math.random() * c.width * 1.2 }
+        ctx.save()
+        ctx.globalAlpha = d.opacity
+        ctx.strokeStyle = "#ffffff"
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(d.x, d.y)
+        ctx.lineTo(d.x - d.len * 0.15, d.y - d.len)
+        ctx.stroke()
+        ctx.restore()
+      }
+      requestAnimationFrame(draw)
+    }
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }} />
+}
+
+function Bioluminescence() {
+  const cv = useRef(null)
+  useEffect(() => {
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
+    const orbs = Array.from({ length: 20 }, () => ({
+      x: Math.random() * c.width, y: Math.random() * c.height,
+      vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.3,
+      size: 3 + Math.random() * 8, phase: Math.random() * Math.PI * 2,
+      speed: 0.01 + Math.random() * 0.02,
+      color: Math.random() > 0.6 ? "#00ffcc" : Math.random() > 0.5 ? "#0088ff" : "#00ccff",
+    }))
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height)
+      for (const o of orbs) {
+        o.phase += o.speed
+        o.x += o.vx + Math.sin(o.phase) * 0.3
+        o.y += o.vy + Math.cos(o.phase * 0.7) * 0.2
+        if (o.x < -30) o.x = c.width + 30
+        if (o.x > c.width + 30) o.x = -30
+        if (o.y < -30) o.y = c.height + 30
+        if (o.y > c.height + 30) o.y = -30
+        const pulse = 0.3 + Math.sin(o.phase * 2) * 0.25
+        const sz = o.size * (0.8 + Math.sin(o.phase) * 0.2)
+        // Outer glow
+        ctx.save()
+        ctx.globalAlpha = pulse * 0.08
+        const grad = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, sz * 4)
+        grad.addColorStop(0, o.color)
+        grad.addColorStop(1, "transparent")
+        ctx.fillStyle = grad
+        ctx.beginPath(); ctx.arc(o.x, o.y, sz * 4, 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+        // Core
+        ctx.save()
+        ctx.globalAlpha = pulse * 0.4
+        ctx.fillStyle = o.color
+        ctx.shadowBlur = 15; ctx.shadowColor = o.color
+        ctx.beginPath(); ctx.arc(o.x, o.y, sz, 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+      }
+      requestAnimationFrame(draw)
+    }
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1 }} />
+}
+
+function AbyssBubbles() {
+  const items = useRef(Array.from({ length: 18 }, () => ({
+    x: Math.random() * 100, size: 2 + Math.random() * 5,
+    dur: 8 + Math.random() * 14, delay: Math.random() * 10,
+  }))).current
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1, overflow: "hidden" }}>
+    <style>{`@keyframes th-abubble{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:0.15}50%{opacity:0.1}100%{transform:translateY(-110vh) scale(0.5);opacity:0}}`}</style>
+    {items.map((b, i) => (
+      <div key={i} style={{
+        position: "absolute", left: b.x + "%", bottom: -10,
+        width: b.size, height: b.size, borderRadius: "50%",
+        border: "1px solid rgba(0,180,255,0.15)",
+        animation: `th-abubble ${b.dur}s ease-in ${b.delay}s infinite`,
+        opacity: 0,
+      }} />
+    ))}
+  </div>
+}
+
+function Spores() {
+  const items = useRef(Array.from({ length: 25 }, () => ({
+    x: Math.random() * 100, size: 2 + Math.random() * 5,
+    dur: 8 + Math.random() * 12, delay: Math.random() * 8,
+  }))).current
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2, overflow: "hidden" }}>
+    {items.map((s, i) => (
+      <div key={i} className="th-spore" style={{
+        left: s.x + "%", bottom: -20, width: s.size, height: s.size,
+        animationDuration: s.dur + "s", animationDelay: s.delay + "s",
+      }} />
+    ))}
+  </div>
+}
+
+
+function Waves() {
+  return <div className="th-waves">
+    <div className="th-wave">
+      <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+        <path d="M0,30 C200,60 400,10 600,35 C800,60 1000,15 1200,40 L1200,80 L0,80 Z" fill="rgba(210,170,100,0.08)" />
+      </svg>
+    </div>
+    <div className="th-wave">
+      <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+        <path d="M0,40 C150,15 350,55 550,30 C750,5 950,50 1200,25 L1200,80 L0,80 Z" fill="rgba(210,170,100,0.06)" />
+      </svg>
+    </div>
+  </div>
+}
+
+function Compass() {
+  return <div className="th-compass">
+    <svg viewBox="0 0 50 50" fill="none">
+      <circle cx="25" cy="25" r="23" stroke="rgba(210,170,100,0.3)" strokeWidth="1" />
+      <circle cx="25" cy="25" r="18" stroke="rgba(210,170,100,0.15)" strokeWidth="0.5" />
+      <path d="M25 2 L27 25 L25 48 L23 25 Z" fill="rgba(210,170,100,0.2)" />
+      <path d="M2 25 L25 23 L48 25 L25 27 Z" fill="rgba(210,170,100,0.15)" />
+      <text x="25" y="9" textAnchor="middle" fill="rgba(210,170,100,0.4)" fontSize="5" fontFamily="serif">N</text>
+    </svg>
+  </div>
+}
+
+function StarStreaks() {
+  const streaks = useRef(Array.from({ length: 14 }, () => ({
+    x: 5 + Math.random() * 90,
+    len: 50 + Math.random() * 90,
+    dur: 1.2 + Math.random() * 2.5,
+    delay: Math.random() * 10,
+  }))).current
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1, overflow: "hidden" }}>
+    <style>{`@keyframes th-shoot{0%{transform:translateY(-10%);opacity:0}8%{opacity:1}80%{opacity:0.5}100%{transform:translateY(115vh);opacity:0}}`}</style>
+    {streaks.map((s, i) => (
+      <div key={i} style={{
+        position: "absolute", left: s.x + "%", top: 0,
+        width: 1.5, height: s.len, borderRadius: 1,
+        background: "linear-gradient(to bottom, transparent 0%, rgba(200,230,255,0.5) 70%, rgba(255,255,255,0.8) 100%)",
+        boxShadow: "0 0 6px rgba(200,230,255,0.4)",
+        animation: `th-shoot ${s.dur}s linear ${s.delay}s infinite`,
+        opacity: 0,
+      }} />
+    ))}
+  </div>
+}
+
+function DimensionCrack() {
+  // Generate organic branching crack path
+  const crack = useRef(() => {
+    const segs = []
+    let x = 50, y = 0
+    const mainLen = 18 + Math.floor(Math.random() * 8)
+    for (let i = 0; i < mainLen; i++) {
+      const nx = x + (Math.random() - 0.5) * 12
+      const ny = y + 3.5 + Math.random() * 3
+      segs.push({ x1: x, y1: y, x2: nx, y2: ny, w: 2.5 - (i / mainLen) * 1.5, main: true })
+      // Branch
+      if (Math.random() > 0.55 && i > 2) {
+        const bdir = Math.random() > 0.5 ? 1 : -1
+        let bx = nx, by = ny
+        const blen = 2 + Math.floor(Math.random() * 4)
+        for (let j = 0; j < blen; j++) {
+          const bnx = bx + bdir * (2 + Math.random() * 6)
+          const bny = by + 1.5 + Math.random() * 3
+          segs.push({ x1: bx, y1: by, x2: bnx, y2: bny, w: 1.2 - (j / blen) * 0.8, main: false })
+          bx = bnx; by = bny
+        }
+      }
+      x = nx; y = ny
+    }
+    return segs
+  }).current()
+
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2, animation: "th-crack-anim 15s ease-in-out infinite", opacity: 0 }}>
+    <style>{`
+      @keyframes th-crack-anim{0%,82%,100%{opacity:0}84%{opacity:0.9}86%{opacity:0.3}87%{opacity:0.85}89%{opacity:0.5}91%{opacity:0}}
+    `}</style>
+    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ filter: "blur(0.3px)" }}>
+      {crack.map((s, i) => (
+        <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
+          stroke={s.main ? "rgba(255,40,20,0.7)" : "rgba(255,80,40,0.5)"}
+          strokeWidth={s.w * 0.3} strokeLinecap="round"
+          style={{ filter: `drop-shadow(0 0 ${s.main ? 4 : 2}px rgba(255,50,20,0.6))` }}
+        />
+      ))}
+      {/* Glow layer */}
+      {crack.filter(s => s.main).map((s, i) => (
+        <line key={"g" + i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
+          stroke="rgba(255,100,30,0.15)" strokeWidth={s.w * 1.5} strokeLinecap="round"
+          style={{ filter: "blur(6px)" }}
+        />
+      ))}
+    </svg>
+  </div>
+}
+
+function Sabers({ intensity = 1 }) {
+  const cv = useRef(null)
+  const sparks = useRef([])
+  // Combat state machine: idle → approach → clash → retreat → idle
+  const combat = useRef({
+    phase: "idle", // idle, approach, clash, retreat
+    phaseEnd: 2,
+    sab: [
+      { ox: 0.15, oy: 0, angle: Math.PI * 0.45, targetAngle: Math.PI * 0.45, speed: 0.02 },
+      { ox: 0.85, oy: 0, angle: Math.PI * 0.55, targetAngle: Math.PI * 0.55, speed: 0.02 },
+    ],
+    clashCount: 0,
+  })
+  useEffect(() => {
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
+    let time = 0
+    const colors = [["#4488ff", "#aaccff"], ["#ff2020", "#ffaaaa"]]
+    const opBase = 0.04 + intensity * 0.04
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height)
+      time += 1 / 60
+      const st = combat.current
+      const sb = st.sab
+      // Phase transitions
+      if (time > st.phaseEnd) {
+        if (st.phase === "idle") {
+          // After idling, start approaching
+          st.phase = "approach"
+          st.phaseEnd = time + 0.8 + Math.random() * 0.6
+          // Both aim toward center for a clash
+          const clashAngle = Math.PI * 0.3 + Math.random() * Math.PI * 0.4
+          sb[0].targetAngle = clashAngle - 0.05
+          sb[1].targetAngle = Math.PI - clashAngle + 0.05
+          sb[0].speed = 0.06 + Math.random() * 0.04
+          sb[1].speed = 0.06 + Math.random() * 0.04
+        } else if (st.phase === "approach") {
+          st.phase = "clash"
+          st.phaseEnd = time + 0.15 + Math.random() * 0.1
+          st.clashCount++
+        } else if (st.phase === "clash") {
+          // Sometimes chain 2-3 quick clashes, sometimes retreat
+          if (st.clashCount < 3 && Math.random() > 0.45) {
+            st.phase = "approach"
+            st.phaseEnd = time + 0.3 + Math.random() * 0.4
+            const a = Math.PI * 0.25 + Math.random() * Math.PI * 0.5
+            sb[0].targetAngle = a
+            sb[1].targetAngle = Math.PI - a
+            sb[0].speed = 0.08
+            sb[1].speed = 0.08
+          } else {
+            st.phase = "retreat"
+            st.phaseEnd = time + 0.6 + Math.random() * 0.8
+            st.clashCount = 0
+            // Swing wide apart
+            sb[0].targetAngle = Math.PI * 0.1 + Math.random() * Math.PI * 0.25
+            sb[1].targetAngle = Math.PI * 0.65 + Math.random() * Math.PI * 0.25
+            sb[0].speed = 0.04
+            sb[1].speed = 0.04
+          }
+        } else if (st.phase === "retreat") {
+          st.phase = "idle"
+          st.phaseEnd = time + 1.5 + Math.random() * 2.5
+          // Slow random swinging
+          sb[0].targetAngle = Math.PI * 0.2 + Math.random() * Math.PI * 0.3
+          sb[1].targetAngle = Math.PI * 0.5 + Math.random() * Math.PI * 0.3
+          sb[0].speed = 0.015
+          sb[1].speed = 0.015
+        }
+      }
+      // During idle, periodically pick new random angles
+      if (st.phase === "idle" && Math.random() < 0.008) {
+        const which = Math.random() > 0.5 ? 0 : 1
+        sb[which].targetAngle = Math.PI * 0.15 + Math.random() * Math.PI * 0.7
+      }
+      // Interpolate angles
+      for (const s of sb) {
+        s.angle += (s.targetAngle - s.angle) * s.speed
+      }
+      const len = Math.max(c.width, c.height) * 0.7
+      const tips = sb.map((s) => {
+        const px = s.ox * c.width, py = s.oy * c.height
+        return { ox: px, oy: py, tx: px + Math.cos(s.angle) * len, ty: py + Math.sin(s.angle) * len }
+      })
+      // Draw sabers
+      for (let s = 0; s < 2; s++) {
+        const { ox, oy, tx, ty } = tips[s]
+        // Wide glow
+        ctx.save()
+        ctx.globalAlpha = opBase
+        ctx.strokeStyle = colors[s][0]
+        ctx.lineWidth = 28
+        ctx.lineCap = "round"
+        ctx.shadowBlur = 60
+        ctx.shadowColor = colors[s][0]
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(tx, ty); ctx.stroke()
+        ctx.restore()
+        // Core
+        ctx.save()
+        ctx.globalAlpha = opBase * 2
+        ctx.strokeStyle = colors[s][1]
+        ctx.lineWidth = 4
+        ctx.lineCap = "round"
+        ctx.shadowBlur = 18
+        ctx.shadowColor = colors[s][0]
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(tx, ty); ctx.stroke()
+        ctx.restore()
+      }
+      // Check intersection → sparks
+      const dx = tips[0].tx - tips[1].tx, dy = tips[0].ty - tips[1].ty
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      if (dist < 80) {
+        const mx = (tips[0].tx + tips[1].tx) / 2, my = (tips[0].ty + tips[1].ty) / 2
+        const sparkCount = Math.max(1, Math.round(8 * (1 - dist / 80)))
+        for (let i = 0; i < sparkCount; i++) {
+          const a = Math.random() * Math.PI * 2
+          const spd = 3 + Math.random() * 7
+          sparks.current.push({
+            x: mx + (Math.random() - 0.5) * 10, y: my + (Math.random() - 0.5) * 10,
+            vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+            life: 1, color: Math.random() > 0.5 ? colors[0][1] : colors[1][1],
+            size: 1 + Math.random() * 2,
+          })
+        }
+      }
+      // Draw sparks
+      sparks.current = sparks.current.filter(p => p.life > 0.01)
+      for (const p of sparks.current) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.vx *= 0.98; p.life -= 0.025; p.size *= 0.985
+        ctx.save()
+        ctx.globalAlpha = Math.max(0, p.life * 0.8)
+        ctx.fillStyle = p.color
+        ctx.shadowBlur = 8; ctx.shadowColor = p.color
+        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0.2, p.size), 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+      }
+      requestAnimationFrame(draw)
+    }
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [intensity])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }} />
+}
+
+function MatrixRain() {
+  const cols = useRef(Array.from({ length: 35 }, (_, i) => ({
+    left: (i / 35) * 100 + Math.random() * 2,
+    dur: 4 + Math.random() * 8,
+    delay: Math.random() * 6,
+    chars: Array.from({ length: 12 + Math.floor(Math.random() * 18) }, () =>
+      String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96))
+    ).join(""),
+    size: 10 + Math.random() * 6,
+  }))).current
+  return <div className="th-matrix-rain">
+    {cols.map((c, i) => (
+      <div key={i} className="th-matrix-col" style={{
+        left: c.left + "%", fontSize: c.size,
+        animationDuration: c.dur + "s", animationDelay: c.delay + "s",
+      }}>{c.chars}</div>
+    ))}
+  </div>
+}
+
+function XmasLights() {
+  const colors = ["#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff2020", "#ffdd00", "#20ff40", "#2080ff",
+    "#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff2020", "#ffdd00", "#20ff40", "#2080ff",
+    "#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff2020", "#ffdd00", "#20ff40", "#2080ff"]
+  return <div className="th-xmas-lights">
+    {colors.map((c, i) => (
+      <div key={i} className="th-xmas-bulb" style={{
+        backgroundColor: c, color: c,
+        animationDelay: (i * 0.15) + "s",
+      }} />
+    ))}
+  </div>
 }
 
 function Grain() {
@@ -156,6 +555,7 @@ export default function RecapPlayer() {
   const [dir, setDir] = useState(1)
   const [comparisonActive, setComparisonActive] = useState(false)
   const [recapConfig, setRecapConfig] = useState({})
+  const [visualTheme, setVisualTheme] = useState(THEMES["glass-dark"])
   const touchY = useRef(null)
 
   // Load recap data — try active first, then specific year, then latest
@@ -181,6 +581,12 @@ export default function RecapPlayer() {
         const recapCfg = parsedCfg.recap_config || {}
         if (recapCfg.comparison_default_on) setComparisonActive(true)
         setRecapConfig(recapCfg)
+
+        // Visual theme + effect overrides
+        const vThemeId = recapCfg.visual_theme || "glass-dark"
+        const baseTheme = getTheme(vThemeId)
+        const effOverrides = recapCfg.visual_theme_effects || {}
+        setVisualTheme({ ...baseTheme, effects: { ...baseTheme.effects, ...effOverrides } })
 
         let recapResult = null
 
@@ -342,25 +748,65 @@ export default function RecapPlayer() {
   const hasComparison = !!recapData?.comparison
   const comparisonCtx = { enabled: hasComparison, active: comparisonActive && hasComparison, data: recapData?.comparison, year }
 
+  // Theme effects
+  const eff = visualTheme.effects || {}
+
   return (
+    <ThemeProvider value={visualTheme}>
     <div
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY }}
       onTouchEnd={(e) => { if (touchY.current === null) return; const d = touchY.current - e.changedTouches[0].clientY; if (Math.abs(d) > 40) goTo(slide + (d > 0 ? 1 : -1)); touchY.current = null }}
-      className="recap-root"
-      style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", background: bg, transition: "background .75s ease", fontFamily: "Nunito,sans-serif", userSelect: "none" }}
+      className={"recap-root" + (eff.holoScan ? " th-holo-scan" : "") + (eff.noirDesaturate ? " th-noir-on" : "")}
+      style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", background: bg, transition: "background .75s ease", fontFamily: `var(--th-font-body, Nunito,sans-serif)`, userSelect: "none", ...Object.fromEntries(Object.entries(visualTheme.css || {}).map(([k, v]) => [k, v])) }}
     >
       <style>{RECAP_CSS}</style>
+      {visualTheme.cssExtra && <style>{visualTheme.cssExtra}</style>}
 
-      {/* ── AMBIENT EFFECTS (like prototype) ── */}
-      <Stars />
-      <Orbs accent={accent} />
-      {needSpotlights && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
+      {/* ── AMBIENT EFFECTS (theme-driven) ── */}
+      {eff.stars !== false && <Stars />}
+      {eff.orbs !== false && <Orbs accent={accent} />}
+      {needSpotlights && eff.sabers && <Sabers intensity={spotlightIntensity} />}
+      {needSpotlights && !eff.sabers && eff.spotlights !== false && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
       {/* Music player */}
       {recapConfig.recap_music && <MusicPlayer musicConfig={recapConfig.recap_music} currentSlideId={curr.id} />}
 
-      {isFinale && (slideConfigs?.settings?.finale?.confetti !== false) && <ConfettiEffect />}
-      {isFinale && (slideConfigs?.settings?.finale?.fireworks !== false) && <FireworksEffect active={true} />}
-      <Grain />
+      {isFinale && (slideConfigs?.settings?.finale?.confetti !== false) && eff.confetti !== false && <ConfettiEffect />}
+      {isFinale && (slideConfigs?.settings?.finale?.fireworks !== false) && eff.fireworks !== false && <FireworksEffect active={true} />}
+      {eff.grain !== false && <Grain />}
+
+      {/* Theme overlays */}
+      {eff.scanlines && <div className="th-scanlines" />}
+      {eff.grid && <div className="th-grid" />}
+      {eff.vhs && <div className="th-vhs" />}
+      {eff.filmGrain && <><div className="th-film-grain" /><div className="th-vignette" /></>}
+      {eff.matrixRain && <MatrixRain />}
+      {eff.xmasLights && <XmasLights />}
+      {eff.hyperspace && <div className="th-hyperspace" />}
+      {/* Pirate */}
+      {eff.waves && <Waves />}
+      {eff.compass && <Compass />}
+      {/* Upside Down */}
+      {eff.spores && <Spores />}
+      {eff.dimensionCrack && <DimensionCrack />}
+      {/* Galaxie lointaine */}
+      {/* holoScan applied via className on recap-root */}
+      {eff.starStreaks && <StarStreaks />}
+      {/* sabers rendered above in place of spotlights when needSpotlights */}
+      {/* Matrix */}
+      {eff.digitalGlitch && <div className="th-digital-glitch" />}
+      {eff.greenPulse && <div className="th-green-pulse" />}
+      {eff.screenOff && <div className="th-screen-off" />}
+      {/* Arcade */}
+      {eff.arcadeBorder && <div className="th-arcade-border" />}
+      {/* Silent film */}
+      {eff.filmStrip && <><div className="th-film-strip left">{Array.from({length:80},(_,i)=><div key={i} className="th-film-hole"/>)}</div><div className="th-film-strip right">{Array.from({length:80},(_,i)=><div key={i} className="th-film-hole"/>)}</div></>}
+      {eff.silentSlate && fade && <div className="th-slate" style={{opacity:1}}><div className="th-slate-inner"><div style={{fontSize:10,letterSpacing:"0.2em",marginBottom:4,color:"rgba(255,255,255,0.4)"}}>WRAPPARR PICTURES PRESENTE</div><div style={{fontSize:18,fontWeight:700}}>Acte suivant...</div></div></div>}
+      {/* Sin City */}
+      {eff.noirRain && <NoirRain />}
+      {/* Abyss */}
+      {eff.caustics && <div className="th-caustics" />}
+      {eff.biolum && <Bioluminescence />}
+      {eff.bubbles && <AbyssBubbles />}
 
       {/* Dot nav */}
       <div style={{ position: "fixed", right: R.dotRight, top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: 3.5, zIndex: 200 }}>
@@ -410,6 +856,7 @@ export default function RecapPlayer() {
       {/* Bottom chevron — go next */}
       {slide < slides.length - 1 && <NavChevron direction="down" onClick={() => goTo(slide + 1)} />}
     </div>
+    </ThemeProvider>
   )
 }
 

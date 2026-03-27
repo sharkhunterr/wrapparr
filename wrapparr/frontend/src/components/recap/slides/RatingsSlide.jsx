@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useComparison } from "../SharedUI"
+import { useLabels } from "../ThemeContext"
 
 const DEFAULT_BRACKETS = [
   { min: 0, max: 4, label: "Navet", emoji: "🥬" },
@@ -26,6 +27,7 @@ function Gauge({ value, max = 10, accent, animated, size = 240, prevValue, prevY
   const cy = size / 2 + 10
   const r = size / 2 - 18
   const halfCircumference = Math.PI * r
+
   const fillPct = Math.min(value / max, 1)
   const dashOffset = animated ? halfCircumference * (1 - fillPct) : halfCircumference
 
@@ -78,7 +80,7 @@ function Gauge({ value, max = 10, accent, animated, size = 240, prevValue, prevY
         style={{ filter: `drop-shadow(0 0 8px ${accent}60)`, transition: "stroke-dashoffset 1.8s cubic-bezier(0.25,0.46,0.45,0.94)" }}
       />
       {/* Center value */}
-      <text x={cx} y={cy - 18} textAnchor="middle" dominantBaseline="middle" fill="white" fontSize={38} fontWeight={800} fontFamily="Nunito,sans-serif"
+      <text x={cx} y={cy - 18} textAnchor="middle" dominantBaseline="middle" fill="var(--th-text)" fontSize={38} fontWeight={800} fontFamily="var(--th-font-body, Nunito,sans-serif)"
         style={{ opacity: animated ? 1 : 0, transition: "opacity 0.4s ease 0.3s" }}
       >
         {displayVal.toFixed(1)}
@@ -108,6 +110,7 @@ function Gauge({ value, max = 10, accent, animated, size = 240, prevValue, prevY
 }
 
 export default function RatingsSlide({ accent, data, year, config = {}, mediaType = "films" }) {
+  const L = useLabels()
   const animSpeed = config.animationSpeed || 10000
   const rawBrackets = config.brackets || DEFAULT_BRACKETS
   // Generate bracket colors: gradient from muted to accent
@@ -161,9 +164,9 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
   return (
     <div style={{ maxWidth: "clamp(320px, 85vw, 560px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
-        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-          Tes notes <span style={{ color: accent }}>{mediaType === "series" ? "series" : "cinema"}</span>
+        <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
+        <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
+          {L.ratingsTitle} <span style={{ color: accent }}>{mediaType === "series" ? "series" : "cinema"}</span>
         </h2>
       </div>
 
@@ -179,7 +182,7 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
         }}>
           <span style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "6px 14px", borderRadius: 20,
+            padding: "6px 14px", borderRadius: "var(--th-radius-pill)",
             background: accent + "12", border: "1px solid " + accent + "30",
             fontSize: 12, fontWeight: 700, color: accent,
           }}>
@@ -200,11 +203,11 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
                 animation: "slide-up 0.4s ease " + delay + "s both",
               }}>
                 <div style={{ width: 24, textAlign: "center", fontSize: 14 }}>{b.emoji}</div>
-                <div style={{ width: 60, fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                <div style={{ width: 60, fontSize: 10, color: "var(--th-text-secondary)", fontWeight: 600, whiteSpace: "nowrap" }}>
                   {b.min}-{b.max}
                 </div>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-                  <div style={{ height: 18, background: "rgba(255,255,255,0.03)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
+                  <div style={{ height: 18, background: "var(--th-bar-bg)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
                     <div style={{
                       height: "100%", borderRadius: 4,
                       background: `linear-gradient(90deg, ${b.color}90, ${b.color})`,
@@ -215,8 +218,8 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
                     {done && b.count > 0 && (
                       <div style={{
                         position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                        fontSize: 9, fontWeight: 700, color: "white",
-                        fontFamily: "JetBrains Mono,monospace",
+                        fontSize: 9, fontWeight: 700, color: "var(--th-text)",
+                        fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)",
                         textShadow: "0 1px 3px rgba(0,0,0,0.5)",
                       }}>
                         {b.count}
@@ -224,14 +227,14 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
                     )}
                   </div>
                   {comp.active && b.prevCount != null && (
-                    <div style={{ height: 16, background: "rgba(255,255,255,0.02)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                    <div style={{ height: 16, background: "var(--th-surface-dim)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
                       {b.prevCount > 0 && <div style={{
                         height: "100%", borderRadius: 3,
-                        background: "rgba(255,255,255,0.12)",
+                        background: "var(--th-bar-prev)",
                         width: done ? ((b.prevCount / maxCount) * 100) + "%" : "0%",
                         transition: "width 0.8s cubic-bezier(0.25,0.46,0.45,0.94) " + (delay + 0.15) + "s",
                       }} />}
-                      <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 600, color: "rgba(255,255,255,0.25)", fontFamily: "JetBrains Mono,monospace" }}>
+                      <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 8, fontWeight: 600, color: "var(--th-text-dim)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>
                         {b.prevCount}
                       </div>
                     </div>
@@ -245,8 +248,8 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
               <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
                 <span style={{ width: 10, height: 3, borderRadius: 2, background: accent }} />{year}
               </span>
-              <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
-                <span style={{ width: 10, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />{year - 1}
+              <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "var(--th-text-muted)" }}>
+                <span style={{ width: 10, height: 3, borderRadius: 2, background: "var(--th-bar-prev)" }} />{year - 1}
               </span>
             </div>
           )}
@@ -261,24 +264,24 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
         const worstFilm = filmLookup[worst.t] || {}
         return (
           <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.3s both" }}>
-            {[{ r: best, film: bestFilm, label: "Meilleure note", isBest: true }, { r: worst, film: worstFilm, label: "Pire note", isBest: false }].map(({ r, film, label, isBest }) => (
+            {[{ r: best, film: bestFilm, label: L.bestNote, isBest: true }, { r: worst, film: worstFilm, label: L.worstNote, isBest: false }].map(({ r, film, label, isBest }) => (
               <div key={label} style={{
-                flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10,
-                background: isBest ? accent + "0c" : "rgba(255,255,255,0.08)",
+                flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: "var(--th-radius-sm)",
+                background: isBest ? accent + "0c" : "var(--th-surface)",
                 border: "1px solid " + (isBest ? accent + "30" : "rgba(255,255,255,0.12)"),
-                backdropFilter: "blur(14px)",
+                backdropFilter: "var(--th-glass-blur)",
               }}>
                 {film.thumb ? (
                   <img src={film.thumb} alt="" style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }} onError={(e) => { e.target.style.display = "none" }} />
                 ) : (
-                  <div style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🎬</div>
+                  <div style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, background: "var(--th-surface-subtle)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🎬</div>
                 )}
                 <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
-                  <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: isBest ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{r.t}</div>
+                  <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
+                  <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: isBest ? "var(--th-text)" : "var(--th-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{r.t}</div>
                   <div style={{ display: "flex", gap: 5, marginTop: 3 }}>
-                    <span style={{ fontSize: "clamp(12px, 1.8vw, 16px)", fontWeight: 800, color: isBest ? accent : "rgba(255,255,255,0.4)", fontFamily: "JetBrains Mono,monospace" }}>{r.r}/10</span>
-                    {film.y && <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.3)" }}>{film.y}</span>}
+                    <span style={{ fontSize: "clamp(12px, 1.8vw, 16px)", fontWeight: 800, color: isBest ? accent : "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{r.r}/10</span>
+                    {film.y && <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "var(--th-text-muted)" }}>{film.y}</span>}
                   </div>
                 </div>
               </div>
@@ -289,8 +292,8 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
 
       {/* Summary */}
       {done && (
-        <div style={{ marginTop: 10, fontSize: 10, color: "rgba(255,255,255,0.3)", textAlign: "center" }}>
-          {ratings.length} films notes — moyenne <span style={{ color: accent, fontWeight: 700 }}>{avg.toFixed(1)}</span>/10
+        <div style={{ marginTop: 10, fontSize: 10, color: "var(--th-text-muted)", textAlign: "center" }}>
+          {ratings.length} {L.films} {L.rated} — {L.average} <span style={{ color: accent, fontWeight: 700 }}>{avg.toFixed(1)}</span>/10
         </div>
       )}
     </div>
