@@ -411,6 +411,7 @@ function ComparisonButton({ active, onToggle, accent, year, visible }) {
   if (!visible) return null
   const btn = <button
     onClick={onToggle}
+    id="recap-compare-btn"
     title={active ? "Masquer la comparaison" : "Comparer avec " + (year - 1)}
     style={{
       background: active ? accent + "15" : "rgba(255,255,255,0.06)",
@@ -422,7 +423,7 @@ function ComparisonButton({ active, onToggle, accent, year, visible }) {
     }}
   >
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>
-    vs {year - 1}
+    Comparaison {year - 1}
   </button>
   if (el) return createPortal(btn, el)
   return null
@@ -546,7 +547,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   // 0 — Intro
   slides.push({
     id: "intro", accent: primary, bg: baseBg, fullscreen: false,
-    component: <IntroSlide accent={primary} userName={userName} year={year} onStart={null} />,
+    component: <IntroSlide accent={primary} userName={userName} year={year} onStart={null} hasComparison={!!data.comparison} />,
   })
 
   // Per-service: Category → Podium → Stats → Deep

@@ -36,5 +36,6 @@ export const RECAP_CSS = `
 .s4{animation:slide-up .5s ease .40s both}.s5{animation:slide-up .5s ease .50s both}
 .glass{background:rgba(255,255,255,0.037);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
 @keyframes pulse-line{0%,100%{opacity:0.4}50%{opacity:1}}
+@keyframes pulse-hint{0%,100%{box-shadow:0 0 0 0 rgba(229,160,13,0);transform:scale(1)}50%{box-shadow:0 0 16px 4px rgba(229,160,13,0.15);transform:scale(1.02)}}
 @keyframes glow-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 `
