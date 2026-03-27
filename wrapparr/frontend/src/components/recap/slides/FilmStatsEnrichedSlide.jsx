@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useActive, AN, Tag, Lbl, Pill, AreaG, useComparison, CompBadge } from "../SharedUI"
+import { useActive, AN, Tag, Lbl, Pill, AreaG, useComparison, CompBadge, CompLegend } from "../SharedUI"
 
 const DEFAULT_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
@@ -154,6 +154,8 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   const prevMedia = prevSvc?.[mediaKey] || {}
   const prevItems = prevMedia.previous
   const prevHours = prevMedia.hours?.previous
+  const prevMonthly = prevMedia.monthly || null
+  const prevGenres = (prevMedia.genres || []).filter((g) => (g.previous || 0) > 0).sort((a, b) => (b.previous || 0) - (a.previous || 0)).slice(0, 4)
 
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%", position: "relative" }}>
     <PosterWall films={allFilms} />
@@ -192,8 +194,22 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
 
       {/* Genre donut + quick stats — stacks on mobile */}
       <div className="s1" style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "stretch", flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center" }}>
-          <GenreDonut genres={genres} accent={accent} />
+        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <GenreDonut genres={genres} accent={accent} />
+          </div>
+          {/* Previous year genres comparison */}
+          {comp.active && prevGenres.length > 0 && (<>
+            <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "8px 0 6px" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              <span style={{ fontSize: "clamp(7px, 0.9vw, 9px)", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{year - 1}</span>
+              {prevGenres.map((g, i) => (
+                <span key={g.n} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 7, fontSize: "clamp(8px, 1vw, 10px)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", fontWeight: i === 0 ? 600 : 400 }}>
+                  {g.n} <span style={{ fontFamily: "JetBrains Mono,monospace", fontWeight: 700, fontSize: "clamp(7px, 0.9vw, 9px)", color: "rgba(255,255,255,0.3)" }}>{g.previous}</span>
+                </span>
+              ))}
+            </div>
+          </>)}
         </div>
         <div style={{ flex: "1 1 100%", display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
@@ -224,7 +240,8 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         return (
           <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
             <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
-            <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit=" vues" id={"stats-enriched-" + label} />
+            <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit=" vues" id={"stats-enriched-" + label} prevData={prevMonthly} prevDataKey="previous" />
+            <CompLegend accent={accent} year={year} />
           </div>
         )
       })()}
