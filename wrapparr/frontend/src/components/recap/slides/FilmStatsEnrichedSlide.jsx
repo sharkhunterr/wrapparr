@@ -279,8 +279,8 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       {/* Stamp animation */}
       {stamped && (config.showStamp !== false) && (
         <div style={{
-          position: "absolute", top: "45%", right: -8,
-          transform: "rotate(-22deg)",
+          position: "absolute", top: "12%", right: -8,
+          transform: "rotate(22deg)",
           zIndex: 10, pointerEvents: "none",
           animation: "stamp-hit 0.4s cubic-bezier(0.17, 0.67, 0.21, 1.2) both",
         }}>
@@ -302,14 +302,14 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       )}
       <style>{`
         @keyframes stamp-hit {
-          0% { transform: rotate(-22deg) scale(3); opacity: 0; }
-          60% { transform: rotate(-22deg) scale(0.95); opacity: 0.8; }
-          80% { transform: rotate(-22deg) scale(1.02); opacity: 0.7; }
-          100% { transform: rotate(-22deg) scale(1); opacity: 0.7; }
+          0% { transform: rotate(22deg) scale(3); opacity: 0; }
+          60% { transform: rotate(22deg) scale(0.95); opacity: 0.8; }
+          80% { transform: rotate(22deg) scale(1.02); opacity: 0.7; }
+          100% { transform: rotate(22deg) scale(1); opacity: 0.7; }
         }
         @keyframes stamp-pulse {
-          0%, 100% { transform: rotate(-22deg) scale(1); opacity: 0.7; }
-          50% { transform: rotate(-22deg) scale(1.06); opacity: 0.9; }
+          0%, 100% { transform: rotate(22deg) scale(1); opacity: 0.7; }
+          50% { transform: rotate(22deg) scale(1.06); opacity: 0.9; }
         }
       `}</style>
     </div>
