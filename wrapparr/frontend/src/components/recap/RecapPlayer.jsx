@@ -68,6 +68,161 @@ function Spotlights({ accent, intensity = 1, fixed = false }) {
   )
 }
 
+const MUTHUR_LINES = [
+  "INTERFACE MUTHUR 6000 v2.4.1",
+  "WEYLAND-YUTANI CORP // ACCES AUTORISE",
+  "CHARGEMENT DONNEES SUJET...",
+  "ANALYSE EN COURS ███████░░ 78%",
+  "PROTOCOLE DE SURVEILLANCE ACTIF",
+  "PRIORITE: SPECIMEN // EQUIPAGE DISPENSABLE",
+  "SIGNAL RECU // COORDONNEES LV-426",
+  "QUARANTAINE RECOMMANDEE",
+  "RAPPORT SPECIAL ORDER 937",
+  "COLLECTE DONNEES TERMINEE",
+  "TRANSMISSION VERS STATION RELAIS...",
+  "ALERTE: FORME DE VIE DETECTEE",
+  "NIVEAU DE MENACE: INCONNU",
+  "RECOMMANDATION: CONTINUER OBSERVATION",
+]
+
+function TypingTitles() {
+  // Observes h1/h2/h3 in recap-root and types them character by character
+  const processed = useRef(new WeakSet())
+  const observer = useRef(null)
+
+  useEffect(() => {
+    const animateEl = (el) => {
+      if (processed.current.has(el)) return
+      processed.current.add(el)
+
+      // Collect all text nodes recursively, preserving structure
+      const walk = (node) => {
+        const parts = []
+        for (const child of node.childNodes) {
+          if (child.nodeType === 3) { // text node
+            parts.push({ type: "text", node: child, full: child.textContent })
+            child.textContent = ""
+          } else if (child.nodeType === 1) { // element
+            const sub = walk(child)
+            parts.push({ type: "el", node: child, children: sub })
+          }
+        }
+        return parts
+      }
+      const parts = walk(el)
+
+      // Flatten to chars with refs
+      const chars = []
+      const flatten = (items) => {
+        for (const p of items) {
+          if (p.type === "text") {
+            for (let i = 0; i < p.full.length; i++) {
+              chars.push({ textNode: p.node, char: p.full[i], idx: i })
+            }
+          } else {
+            flatten(p.children)
+          }
+        }
+      }
+      flatten(parts)
+
+      // Add cursor
+      const cursor = document.createElement("span")
+      cursor.className = "th-typing-cursor"
+      el.appendChild(cursor)
+
+      // Type chars one by one
+      let i = 0
+      const type = () => {
+        if (i >= chars.length) {
+          // Done — remove cursor after a moment
+          setTimeout(() => cursor.remove(), 1500)
+          return
+        }
+        const c = chars[i]
+        c.textNode.textContent += c.char
+        i++
+        setTimeout(type, 25 + Math.random() * 35)
+      }
+      setTimeout(type, 200)
+    }
+
+    // Observe for new headings appearing (slide changes)
+    const root = document.querySelector(".recap-root")
+    if (!root) return
+
+    const scan = () => {
+      root.querySelectorAll("h1, h2, h3").forEach(animateEl)
+    }
+
+    observer.current = new MutationObserver(() => {
+      // Reset processed set on DOM changes (new slide)
+      scan()
+    })
+    observer.current.observe(root, { childList: true, subtree: true })
+    scan()
+
+    return () => observer.current?.disconnect()
+  }, [])
+
+  return null
+}
+
+function TerminalOverlay() {
+  const [lines, setLines] = useState([])
+  const [currentText, setCurrentText] = useState("")
+  const lineIdx = useRef(0)
+  const charIdx = useRef(0)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    const tick = () => {
+      const fullLine = MUTHUR_LINES[lineIdx.current % MUTHUR_LINES.length]
+      if (charIdx.current <= fullLine.length) {
+        setCurrentText(fullLine.slice(0, charIdx.current))
+        charIdx.current++
+        timerRef.current = setTimeout(tick, 30 + Math.random() * 50)
+      } else {
+        // Line complete — pause then move to next
+        timerRef.current = setTimeout(() => {
+          setLines(prev => {
+            const next = [...prev, fullLine]
+            return next.length > 6 ? next.slice(-6) : next
+          })
+          setCurrentText("")
+          charIdx.current = 0
+          lineIdx.current++
+          timerRef.current = setTimeout(tick, 800 + Math.random() * 1500)
+        }, 1200)
+      }
+    }
+    timerRef.current = setTimeout(tick, 500)
+    return () => clearTimeout(timerRef.current)
+  }, [])
+
+  return (
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, pointerEvents: "none",
+      padding: "6px 12px", fontFamily: "'VT323',monospace", fontSize: 13,
+      background: "linear-gradient(180deg, rgba(0,4,0,0.85) 0%, rgba(0,4,0,0.5) 70%, transparent 100%)",
+    }}>
+      <div style={{ color: "rgba(0,255,65,0.12)", fontSize: 10, letterSpacing: "0.2em", marginBottom: 3 }}>
+        MUTHUR 6000 // TERMINAL ACTIF
+      </div>
+      {lines.map((l, i) => (
+        <div key={i} style={{ color: "rgba(0,255,65,0.15)", fontSize: 11, lineHeight: 1.4 }}>
+          {">"} {l}
+        </div>
+      ))}
+      {currentText && (
+        <div style={{ color: "rgba(0,255,65,0.3)", fontSize: 11, lineHeight: 1.4 }}>
+          {">"} {currentText}<span style={{ animation: "th-blink-cursor 0.8s step-end infinite", borderRight: "1px solid rgba(0,255,65,0.5)" }}>&nbsp;</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function NoirRain() {
   const cv = useRef(null)
   useEffect(() => {
@@ -796,6 +951,8 @@ export default function RecapPlayer() {
       {eff.digitalGlitch && <div className="th-digital-glitch" />}
       {eff.greenPulse && <div className="th-green-pulse" />}
       {eff.screenOff && <div className="th-screen-off" />}
+      {/* Weyland-Yutani */}
+      {eff.terminalOverlay && <><TerminalOverlay /><TypingTitles /></>}
       {/* Arcade */}
       {eff.arcadeBorder && <div className="th-arcade-border" />}
       {/* Silent film */}

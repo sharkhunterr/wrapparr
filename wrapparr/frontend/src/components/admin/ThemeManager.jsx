@@ -14,6 +14,7 @@ const EFFECT_LABELS = {
   holoScan: "Scan hologramme", starStreaks: "Etoiles filantes", glitchText: "Glitch texte",
   arcadeBorder: "Bordure arcade", digitalGlitch: "Glitch digital", greenPulse: "Pulse vert",
   screenOff: "Ecran CRT", sabers: "Sabres laser",
+  terminalOverlay: "Terminal MUTHUR",
   filmStrip: "Bandes pellicule", silentSlate: "Ardoise transition",
   noirRain: "Pluie noir", noirDesaturate: "Desaturation",
   caustics: "Caustiques", biolum: "Bioluminescence", bubbles: "Bulles",

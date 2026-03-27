@@ -349,6 +349,7 @@ export const THEMES = {
       grid: false,
       vhs: true,
       filmGrain: false,
+      terminalOverlay: true,
     },
 
     cssExtra: `
@@ -359,10 +360,11 @@ export const THEMES = {
 .th-vhs::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:rgba(0,255,65,0.08);animation:th-crt-line 6s linear infinite;box-shadow:0 0 15px 3px rgba(0,255,65,0.06)}
 @keyframes th-crt-line{0%{top:-2%}100%{top:102%}}
 .recap-root{text-shadow:0 0 6px rgba(0,255,65,0.5)!important}
-.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 10px rgba(0,255,65,0.7),0 0 25px rgba(0,255,65,0.3)!important;animation:th-terminal-glow 3s ease-in-out infinite!important}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 10px rgba(0,255,65,0.7),0 0 25px rgba(0,255,65,0.3)!important}
+.th-typing-cursor{display:inline-block;width:2px;height:1em;background:rgba(0,255,65,0.7);margin-left:3px;vertical-align:text-bottom;animation:th-blink-cursor 0.6s step-end infinite}
+@keyframes th-blink-cursor{0%,100%{opacity:1}50%{opacity:0}}
 @keyframes th-terminal-glow{0%,100%{text-shadow:0 0 10px rgba(0,255,65,0.7),0 0 25px rgba(0,255,65,0.3)}50%{text-shadow:0 0 14px rgba(0,255,65,0.9),0 0 35px rgba(0,255,65,0.4)}}
 .glass{box-shadow:0 0 12px rgba(0,255,65,0.05),inset 0 1px 0 rgba(0,255,65,0.08)!important}
-.recap-root::before{content:'WEYLAND-YUTANI CORP · INTERFACE MUTHUR 6000';position:fixed;top:8px;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:10px;color:rgba(0,255,65,0.15);letter-spacing:0.3em;z-index:200;pointer-events:none}
 `,
 
     labels: {
