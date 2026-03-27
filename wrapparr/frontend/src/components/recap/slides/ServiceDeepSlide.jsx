@@ -32,14 +32,14 @@ export default function ServiceDeepSlide({ accent, label, icon, data, me, year }
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         {totalItems > 0 && (
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: accent + "10", border: "1px solid " + accent + "25" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{totalItems}</span>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{totalItems}</span>
             <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>vus</span>
             <CompBadge current={totalItems} previous={prevItems} />
           </div>
         )}
         {totalHours > 0 && (
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalHours}h</span>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{totalHours}h</span>
             <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>passees</span>
             <CompBadge current={totalHours} previous={prevHours} suffix="h" />
           </div>
@@ -57,7 +57,7 @@ export default function ServiceDeepSlide({ accent, label, icon, data, me, year }
         {bestMonth && (
           <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: accent + "08", border: "1px solid " + accent + "20" }}>
             <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonth.month}</div>
+            <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonth.month}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: "white" }}>{bestMonth.views} vues</span>
               <CompBadge current={bestMonth.views} previous={prevSvc?.peak?.previous?.best_month?.views} />

@@ -103,11 +103,11 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
         {/* Badges */}
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: accent + "25", border: "1px solid " + accent + "40", backdropFilter: "blur(8px)" }}>
-            <span style={{ fontSize: 16, fontWeight: 800 }}><AnimNum target={totalFilms} color={accent} delay={300} /></span>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800 }}><AnimNum target={totalFilms} color={accent} delay={300} /></span>
             <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>films</span>
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
-            <span style={{ fontSize: 16, fontWeight: 800 }}><AnimNum target={Math.round(totalHours)} suffix="h" color="white" delay={300} /></span>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800 }}><AnimNum target={Math.round(totalHours)} suffix="h" color="white" delay={300} /></span>
             <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>passees</span>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
             )}
             <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: accent + "15", border: "1px solid " + accent + "25", backdropFilter: "blur(8px)", textAlign: "center" }}>
               <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em" }}>Equivalent</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{equiv.value}</div>
+              <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{equiv.value}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{equiv.unit} {equiv.icon}</div>
             </div>
           </div>

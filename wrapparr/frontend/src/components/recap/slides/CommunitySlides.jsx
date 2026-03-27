@@ -106,13 +106,13 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         {totalAll > 0 && (
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: accent + "10", border: "1px solid " + accent + "25" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalAll} /> : 0}</span>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalAll} /> : 0}</span>
             <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{label} vus</span>
           </div>
         )}
         {totalHours > 0 && (
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
+            <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
             <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>au total</span>
           </div>
         )}
@@ -178,7 +178,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
         {bestMonthEntry && (
           <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: accent + "08", border: "1px solid " + accent + "20" }}>
             <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonthEntry.m}</div>
+            <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonthEntry.m}</div>
             <div style={{ fontSize: 11, fontWeight: 700, color: "white", marginTop: 4 }}>{bestMonthEntry.v} vues</div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{totalViews > 0 ? Math.round(bestMonthEntry.v / totalViews * 100) : 0}% du total</div>
           </div>
@@ -680,7 +680,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
     {/* Totaux avec diff badges */}
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{isSeries ? "ep." : label}</span>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {prevItems}</span>
         {diffItems !== 0 && (
@@ -690,7 +690,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
         )}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: 16, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {Math.round(prevHours)}h</span>
         {diffHours !== 0 && (
           <span style={{ fontSize: 9, fontWeight: 700, color: diffHours > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: 8, background: diffHours > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>

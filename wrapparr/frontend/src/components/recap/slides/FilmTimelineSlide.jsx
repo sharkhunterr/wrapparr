@@ -118,7 +118,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", lineHeight: 1.3 }}>{profile.desc}</div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{avgYear}</div>
+              <div style={{ fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{avgYear}</div>
               <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
               <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>{prevProfile.name} <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)" }}>({year - 1})</span></div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{prevAvgYear}</div>
+              <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{prevAvgYear}</div>
               <div style={{ fontSize: 7, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
             </div>
           </div>

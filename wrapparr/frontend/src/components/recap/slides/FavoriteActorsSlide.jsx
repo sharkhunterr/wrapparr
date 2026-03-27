@@ -64,7 +64,7 @@ function PersonCard({ person, index, accent, revealed, rank }) {
             border: `1px solid ${rank === 0 ? accent + "25" : "rgba(255,255,255,0.04)"}`,
           }}>
             <div style={{
-              fontSize: 16, fontWeight: 800, lineHeight: 1,
+              fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, lineHeight: 1,
               color: rank === 0 ? accent : "white",
               fontFamily: "JetBrains Mono,monospace",
             }}>{person.count}</div>

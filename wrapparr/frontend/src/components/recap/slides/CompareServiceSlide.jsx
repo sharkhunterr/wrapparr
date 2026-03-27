@@ -106,13 +106,13 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
     {/* Totaux */}
     <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? curItems : 0}</span>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{isSeriesSlide ? "ep." : label}</span>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {prevItems}</span>
         {diffItems !== 0 && <DiffBadge value={diffItems} />}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
+        <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? Math.round(curHours) : 0}h</span>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>vs {Math.round(prevHours)}h</span>
         {diffHours !== 0 && <DiffBadge value={diffHours} />}
       </div>

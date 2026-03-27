@@ -141,7 +141,7 @@ export default function BilanFilmsSlide({ accent, data, year, config = {} }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <span style={{ fontSize: 28 }}>{equiv.icon}</span>
               <div>
-                <span style={{ fontSize: 28, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{equiv.value}</span>
+                <span style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{equiv.value}</span>
                 <span style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginLeft: 4 }}>{equiv.unit}</span>
               </div>
             </div>

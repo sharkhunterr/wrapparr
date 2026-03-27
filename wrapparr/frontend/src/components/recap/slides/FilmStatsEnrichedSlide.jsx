@@ -166,26 +166,26 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         </h2>
 
         {/* Stats row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 1vw, 8px)", marginTop: 6, flexWrap: "wrap", overflow: "hidden" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-            <span style={{ fontSize: 28, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
+            <span style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={totalItems} s="" /> : "0"}</span>
             <span style={{ fontSize: 10, fontWeight: 600, color: accent + "90" }}>{unitLabel}</span>
             <CompBadge current={totalItems} previous={prevItems} />
           </div>
           <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-            <span style={{ fontSize: 28, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
+            <span style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace", lineHeight: 1 }}>{active ? <AN t={Math.round(totalHours)} s="h" /> : "0h"}</span>
             <CompBadge current={totalHours} previous={prevHours} suffix="h" />
           </div>
           <div style={{ height: 20, width: 1, background: "rgba(255,255,255,0.08)" }} />
           {/* Category badge with shine */}
-          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden" }}>
+          <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "clamp(3px, 0.5vw, 5px) clamp(7px, 1.2vw, 12px)", borderRadius: 16, background: accent + "18", border: "1px solid " + accent + "35", boxShadow: `0 0 12px ${accent}20`, overflow: "hidden", maxWidth: "100%" }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}30 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
-            <span style={{ fontSize: 14, position: "relative" }}>{category.emoji}</span>
-            <span style={{ fontSize: 9, fontWeight: 700, color: accent, position: "relative" }}>{category.name}</span>
+            <span style={{ fontSize: "clamp(11px, 2vw, 14px)", position: "relative" }}>{category.emoji}</span>
+            <span style={{ fontSize: "clamp(8px, 1vw, 10px)", fontWeight: 700, color: accent, position: "relative", whiteSpace: "nowrap" }}>{category.name}</span>
           </div>
-          <div style={{ padding: "4px 8px", borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
-            <span style={{ fontSize: 9, fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
+          <div style={{ padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 10px)", borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+            <span style={{ fontSize: "clamp(8px, 1vw, 10px)", fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
           </div>
         </div>
       </div>

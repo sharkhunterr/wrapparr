@@ -8,11 +8,11 @@ export default function IntroSlide({ accent, userName, year, onStart, hasCompari
     if (onStart) onStart()
   }
 
-  return <div style={{ textAlign: "center", maxWidth: 380, width: "100%" }}>
-    <div style={{ position: "relative", width: 130, height: 130, margin: "0 auto 26px" }}>
+  return <div style={{ textAlign: "center", maxWidth: "clamp(300px, 80vw, 400px)", width: "100%" }}>
+    <div style={{ position: "relative", width: "clamp(80px, 22vw, 130px)", height: "clamp(80px, 22vw, 130px)", margin: "0 auto clamp(16px, 4vw, 26px)" }}>
       {[0, 1, 2, 3].map((i) => <div key={i} style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1.5px solid " + accent, animation: "pulse-ring 3s ease-out " + (i * 0.8) + "s infinite" }} />)}
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", filter: "drop-shadow(0 0 40px " + accent + "90)" }}>
-        <img src="/icon.svg" alt="Wrapparr" style={{ width: 70, height: 70 }} />
+        <img src="/icon.svg" alt="Wrapparr" style={{ width: "55%", height: "55%" }} />
       </div>
     </div>
     <div className="s0" style={{ fontSize: 9, color: accent, letterSpacing: ".35em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase" }}>WRAPPARR · RECAP ANNUEL</div>

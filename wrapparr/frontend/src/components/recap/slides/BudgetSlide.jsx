@@ -30,7 +30,7 @@ function AnimatedCounter({ target, accent, duration = 2000 }) {
     const t = setTimeout(() => { raf.current = requestAnimationFrame(tick) }, 400)
     return () => { clearTimeout(t); cancelAnimationFrame(raf.current) }
   }, [target, duration])
-  return <span style={{ fontSize: 32, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{formatBudget(val)}</span>
+  return <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{formatBudget(val)}</span>
 }
 
 // Falling money effect — coins spinning + bills floating
@@ -334,7 +334,7 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
                     background: i === 0 ? `${accent}0a` : "rgba(255,255,255,0.015)",
                     border: `1px solid ${i === 0 ? accent + "20" : "rgba(255,255,255,0.04)"}`,
                   }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: f.revenue > f.budget ? "#4ade80" : "#f87171", fontFamily: "JetBrains Mono,monospace" }}>
+                    <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: f.revenue > f.budget ? "#4ade80" : "#f87171", fontFamily: "JetBrains Mono,monospace" }}>
                       {mult || "?"}
                     </div>
                     <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.t}</div>

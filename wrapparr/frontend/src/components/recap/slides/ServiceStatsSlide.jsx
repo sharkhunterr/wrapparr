@@ -22,7 +22,7 @@ export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
     <div className="s0" style={{ marginBottom: 12 }}><Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginTop: 4 }}>
         <div><BigNum value={data.total_items || 0} accent={accent} active={active} /><CompBadge current={data.total_items} previous={prevItems} /><Lbl>total</Lbl></div>
-        {(data.total_hours || 0) > 0 && <div style={{ marginBottom: 3 }}><div style={{ fontSize: 22, fontWeight: 700, color: accent + "bb" }}>{active ? <AN t={Math.round(data.total_hours)} s="h" /> : "0h"}<CompBadge current={data.total_hours} previous={prevHours} suffix="h" /></div><Lbl>heures</Lbl></div>}
+        {(data.total_hours || 0) > 0 && <div style={{ marginBottom: 3 }}><div style={{ fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 700, color: accent + "bb" }}>{active ? <AN t={Math.round(data.total_hours)} s="h" /> : "0h"}<CompBadge current={data.total_hours} previous={prevHours} suffix="h" /></div><Lbl>heures</Lbl></div>}
       </div>
       {data.vs_last_year ? <div style={{ display: "flex", gap: 6, marginTop: 7, flexWrap: "wrap" }}><VsB value={data.vs_last_year} /></div> : null}
     </div>

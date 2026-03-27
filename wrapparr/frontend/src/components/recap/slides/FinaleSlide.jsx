@@ -276,20 +276,20 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
         )}
 
         {/* Two columns: Films | Series */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
 
           {/* FILMS column */}
           {totalFilms > 0 && (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ flex: "1 1 200px", minWidth: 0, display: "flex", flexDirection: "column", gap: 6 }}>
 
               {/* Stats */}
               <div style={{ display: "flex", gap: 4 }}>
                 <div style={{ flex: 1, padding: "6px 8px", borderRadius: 8, background: accent + "12", border: "1px solid " + accent + "25", backdropFilter: "blur(8px)", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalFilms} /> : 0}</div>
+                  <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalFilms} /> : 0}</div>
                   <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>films</div>
                 </div>
                 <div style={{ flex: 1, padding: "6px 8px", borderRadius: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(filmsHours)} s="h" /> : "0h"}</div>
+                  <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(filmsHours)} s="h" /> : "0h"}</div>
                   <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>heures</div>
                 </div>
               </div>
@@ -334,16 +334,16 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
 
           {/* SERIES column */}
           {totalSeries > 0 && (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ flex: "1 1 200px", minWidth: 0, display: "flex", flexDirection: "column", gap: 6 }}>
 
               {/* Stats */}
               <div style={{ display: "flex", gap: 4 }}>
                 <div style={{ flex: 1, padding: "6px 8px", borderRadius: 8, background: seriesAccent + "12", border: "1px solid " + seriesAccent + "25", backdropFilter: "blur(8px)", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: seriesAccent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalSeries} /> : 0}</div>
+                  <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: seriesAccent, fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={totalSeries} /> : 0}</div>
                   <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>episodes</div>
                 </div>
                 <div style={{ flex: 1, padding: "6px 8px", borderRadius: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(seriesHours)} s="h" /> : "0h"}</div>
+                  <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{active ? <AN t={Math.round(seriesHours)} s="h" /> : "0h"}</div>
                   <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>heures</div>
                 </div>
               </div>
