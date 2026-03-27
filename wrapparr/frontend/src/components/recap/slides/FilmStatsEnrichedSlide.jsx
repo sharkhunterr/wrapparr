@@ -45,8 +45,8 @@ function GenreDonut({ genres, accent, maxShow = 4 }) {
   const opacities = [1, 0.72, 0.5, 0.35, 0.2]
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 14px)", width: "100%" }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={stroke} />
         {items.map((g, i) => {
           const pct = g.v / total
@@ -58,12 +58,12 @@ function GenreDonut({ genres, accent, maxShow = 4 }) {
             transform={`rotate(-90 ${cx} ${cy})`} opacity={opacities[i] || 0.15} />
         })}
       </svg>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, columnGap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, flex: 1, minWidth: 0 }}>
         {items.map((g, i) => (
-          <div key={g.n} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 7, height: 7, borderRadius: 2, background: accent, opacity: opacities[i] || 0.15, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, color: i === 0 ? "white" : "rgba(255,255,255,0.5)", fontWeight: i === 0 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.n}</span>
-            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{g.v}</span>
+          <div key={g.n} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: accent, opacity: opacities[i] || 0.15, flexShrink: 0 }} />
+            <span style={{ fontSize: "clamp(10px, 1.4vw, 13px)", color: i === 0 ? "white" : "rgba(255,255,255,0.5)", fontWeight: i === 0 ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>{g.n}</span>
+            <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.3)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{g.v}</span>
           </div>
         ))}
       </div>
@@ -191,11 +191,11 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
       </div>
 
       {/* Genre donut + quick stats — stacks on mobile */}
-      <div className="s1" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "stretch", flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 120px", maxWidth: "clamp(100%, 40%, 40%)", padding: "8px 10px", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="s1" style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "stretch", flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center" }}>
           <GenreDonut genres={genres} accent={accent} />
         </div>
-        <div style={{ flex: "1 1 180px", display: "flex", flexDirection: "column", gap: 3, justifyContent: "space-between", minWidth: 0 }}>
+        <div style={{ flex: "1 1 100%", display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label={perMonthLabel} accent={accent} />}
             {ratings.length > 0 && <MiniStat iconKey="star" value={avgRating + "/10"} label="note moyenne" accent={accent} />}
@@ -222,16 +222,16 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         const monthly = data.extra?.films?.monthly || data.monthly || []
         if (monthly.length < 3) return null
         return (
-          <div style={{ padding: "8px 10px", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+          <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
             <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
-            <AreaG data={monthly} dataKey="v" accent={accent} height={60} unit=" vues" id={"stats-enriched-" + label} />
+            <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit=" vues" id={"stats-enriched-" + label} />
           </div>
         )
       })()}
 
       {/* Top films — compact 2-column grid */}
       {top.length > 0 && (
-        <div className="s2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5 }}>
+        <div className="s2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           {top.slice(0, 4).map((item, i) => (
             <div key={item.t || i} style={{
               padding: "7px", display: "flex", gap: 7, borderRadius: 10,
