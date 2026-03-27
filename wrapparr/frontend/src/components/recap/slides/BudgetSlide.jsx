@@ -100,9 +100,9 @@ function BracketBar({ label, count, maxCount, accent, delay, animated, prevCount
     <div style={{ display: "flex", alignItems: "center", gap: 8, animation: animated ? `slide-up 0.4s ease ${delay}s both` : "none" }}>
       <div style={{ width: 55, fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "right", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{label}</div>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
-        <div style={{ height: 20, background: "rgba(255,255,255,0.03)", borderRadius: 5, overflow: "hidden", position: "relative" }}>
+        <div style={{ height: 18, background: "rgba(255,255,255,0.03)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
           <div style={{
-            height: "100%", borderRadius: 5,
+            height: "100%", borderRadius: 4,
             background: `linear-gradient(90deg, ${accent}50, ${accent})`,
             width: animated ? pct + "%" : "0%",
             transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay}s`,
@@ -113,9 +113,9 @@ function BracketBar({ label, count, maxCount, accent, delay, animated, prevCount
           </div>
         </div>
         {prevCount != null && (
-          <div style={{ height: 14, background: "rgba(255,255,255,0.02)", borderRadius: 4, overflow: "hidden", position: "relative" }}>
+          <div style={{ height: 16, background: "rgba(255,255,255,0.02)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
             {prevCount > 0 && <div style={{
-              height: "100%", borderRadius: 4,
+              height: "100%", borderRadius: 3,
               background: "rgba(255,255,255,0.12)",
               width: animated ? prevPct + "%" : "0%",
               transition: `width 1s cubic-bezier(0.25,0.46,0.45,0.94) ${delay + 0.15}s`,
