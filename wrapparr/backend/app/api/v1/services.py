@@ -39,7 +39,10 @@ def _get_collector(svc: ServiceConnector):
 
 @router.get("", response_model=list[ServiceResponse])
 async def list_services(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(ServiceConnector).where(ServiceConnector.user_id == user.id))
+    query = select(ServiceConnector)
+    if user.role != "admin":
+        query = query.where(ServiceConnector.user_id == user.id)
+    result = await db.execute(query)
     services = []
     for s in result.scalars().all():
         resp = ServiceResponse.model_validate(s)
