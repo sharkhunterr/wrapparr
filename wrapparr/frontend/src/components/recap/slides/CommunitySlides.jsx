@@ -94,7 +94,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
   const [hidden, setHidden] = useState({})
   const toggleLine = useCallback((key) => setHidden((h) => ({ ...h, [key]: !h[key] })), [])
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
       <Lbl c={accent} size={9}>👥 Communaute · Habitudes</Lbl>
@@ -371,7 +371,7 @@ export function CommunityMostViewedSlide({ accent, allUsers, year, me, mediaType
   }
   const topItems = [...itemMap.values()].sort((a, b) => b.totalViews - a.totalViews).slice(0, 10)
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
@@ -491,7 +491,7 @@ export function CommunityRankingsSlide({ accent, allUsers, year, me, mediaType =
     )
   }
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 8 }}>
       <Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
@@ -569,7 +569,7 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
 
   const opacities = [1, 0.8, 0.65, 0.5, 0.4, 0.32, 0.25, 0.2]
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
@@ -668,7 +668,7 @@ export function CommunityCompareSlide({ accent, compareData, year, mediaType = "
   // Colors
   const prevColor = accent + "60"
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 10 }}>
       <Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>

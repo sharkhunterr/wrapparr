@@ -18,7 +18,7 @@ export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
   const prevItems = prevData?.total_items?.previous
   const prevHours = prevData?.total_hours?.previous
 
-  return <div style={{ maxWidth: 430, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}><Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label}</Lbl>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginTop: 4 }}>
         <div><BigNum value={data.total_items || 0} accent={accent} active={active} /><CompBadge current={data.total_items} previous={prevItems} /><Lbl>total</Lbl></div>

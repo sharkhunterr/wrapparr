@@ -24,7 +24,7 @@ export default function ServiceDeepSlide({ accent, label, icon, data, me, year }
   const prevDayOfWeek = prevFilms.day_of_week || null
   const prevTimeOfDay = prevFilms.time_of_day || null
 
-  return <div style={{ maxWidth: 430, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}><Tag accent={accent} year={year} /><Lbl c={accent} size={9}>{icon} {label} · Habitudes</Lbl>
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05, marginTop: 4 }}>Quand tu <span style={{ color: accent }}>consommes</span></h2>
 

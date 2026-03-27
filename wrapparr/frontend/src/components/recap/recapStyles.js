@@ -35,6 +35,76 @@ export const RECAP_CSS = `
 .s2{animation:slide-up .5s ease .20s both}.s3{animation:slide-up .5s ease .30s both}
 .s4{animation:slide-up .5s ease .40s both}.s5{animation:slide-up .5s ease .50s both}
 .glass{background:rgba(255,255,255,0.037);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
+
+/* ── Responsive slide wrapper ── */
+.slide-wrap{max-width:clamp(320px, 85vw, 540px);width:100%}
+@media(max-width:480px){.slide-wrap{max-width:100%}}
+@media(min-width:1440px){.slide-wrap{max-width:580px}}
+
+/* ── Responsive font scaling for all recap content ── */
+.recap-root{font-size:clamp(13px, 1.6vw, 16px)}
+.recap-root .fs-xs{font-size:clamp(7px, 0.9vw, 10px)!important}
+.recap-root .fs-sm{font-size:clamp(8px, 1vw, 11px)!important}
+.recap-root .fs-md{font-size:clamp(9px, 1.1vw, 12px)!important}
+.recap-root .fs-base{font-size:clamp(10px, 1.3vw, 13px)!important}
+
+/* ── Responsive CSS custom properties ── */
+:root{
+  --slide-max-w:430px;
+  --slide-pad:20px 28px 40px 18px;
+  --fs-xs:8px;--fs-sm:9px;--fs-md:10px;--fs-base:11px;--fs-lg:13px;--fs-xl:16px;--fs-2xl:22px;
+  --chart-h:90px;
+  --pill-pad:5px 10px;
+  --pill-fs:9px;
+  --pill-radius:20px;
+  --topbar-top:8px;--topbar-right:30px;--topbar-fs:10px;--topbar-pad:5px 9px;--topbar-icon:13px;
+  --dot-right:11px;
+  --counter-top:10px;--counter-left:14px;--counter-fs:11px;
+  --chevron-bottom:14px;--chevron-top:42px;
+}
+/* Phone (<=480px) */
+@media(max-width:480px){
+  :root{
+    --slide-max-w:100%;
+    --slide-pad:14px 14px 50px 14px;
+    --fs-xs:7px;--fs-sm:8px;--fs-md:9px;--fs-base:10px;--fs-lg:12px;--fs-xl:14px;--fs-2xl:18px;
+    --chart-h:75px;
+    --pill-pad:4px 8px;--pill-fs:8px;
+    --topbar-top:6px;--topbar-right:12px;--topbar-fs:9px;--topbar-pad:4px 6px;--topbar-icon:11px;
+    --dot-right:6px;
+    --counter-top:8px;--counter-left:8px;--counter-fs:9px;
+    --chevron-bottom:10px;--chevron-top:34px;
+  }
+}
+/* Tablet (481-768px) */
+@media(min-width:481px) and (max-width:768px){
+  :root{
+    --slide-max-w:460px;
+    --slide-pad:18px 22px 44px 16px;
+    --chart-h:85px;
+  }
+}
+/* Desktop (>1024px) */
+@media(min-width:1024px){
+  :root{
+    --slide-max-w:520px;
+    --slide-pad:24px 32px 44px 22px;
+    --fs-xs:9px;--fs-sm:10px;--fs-md:11px;--fs-base:12px;--fs-lg:14px;--fs-xl:18px;--fs-2xl:26px;
+    --chart-h:110px;
+    --pill-pad:6px 12px;--pill-fs:10px;
+    --topbar-fs:11px;--topbar-pad:5px 10px;--topbar-icon:14px;
+    --counter-fs:12px;
+  }
+}
+/* Large desktop (>1440px) */
+@media(min-width:1440px){
+  :root{
+    --slide-max-w:580px;
+    --fs-xs:10px;--fs-sm:11px;--fs-md:12px;--fs-base:13px;--fs-lg:15px;--fs-xl:20px;--fs-2xl:28px;
+    --chart-h:130px;
+    --pill-pad:7px 14px;--pill-fs:11px;
+  }
+}
 @keyframes pulse-line{0%,100%{opacity:0.4}50%{opacity:1}}
 @keyframes pulse-hint{0%,100%{box-shadow:0 0 0 0 rgba(229,160,13,0);transform:scale(1)}50%{box-shadow:0 0 16px 4px rgba(229,160,13,0.15);transform:scale(1.02)}}
 @keyframes glow-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}

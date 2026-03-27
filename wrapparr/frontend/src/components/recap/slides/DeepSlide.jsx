@@ -4,7 +4,7 @@ export default function DeepSlide({ accent, data, serviceName, userName }) {
   const medals = ["🥇", "🥈", "🥉"]
 
   return (
-    <div style={{ maxWidth: 430, width: "100%" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>{serviceName} · HABITUDES</div>
       </div>

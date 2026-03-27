@@ -14,9 +14,9 @@ export function CompBadge({ current, previous, suffix = "", style = {}, format }
   if (!active || previous == null || previous === 0) return null
   const diff = current != null && previous > 0 ? Math.round(((current - previous) / previous) * 100) : null
   const fmtVal = format ? format(previous) : (typeof previous === "number" ? (Number.isInteger(previous) ? previous : previous.toFixed(1)) : previous)
-  return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 9, color: "rgba(255,255,255,0.3)", marginLeft: 4, ...style }}>
+  return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", marginLeft: 4, ...style }}>
     <span style={{ fontFamily: "JetBrains Mono,monospace" }}>{fmtVal}{format ? "" : suffix}</span>
-    {diff != null && diff !== 0 && <span style={{ fontSize: 8, fontWeight: 700, color: diff > 0 ? "#4ade80" : "#f87171", padding: "0px 4px", borderRadius: 6, background: diff > 0 ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)" }}>{diff > 0 ? "+" : ""}{diff}%</span>}
+    {diff != null && diff !== 0 && <span style={{ fontSize: "clamp(7px, 0.9vw, 9px)", fontWeight: 700, color: diff > 0 ? "#4ade80" : "#f87171", padding: "0px 4px", borderRadius: 6, background: diff > 0 ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)" }}>{diff > 0 ? "+" : ""}{diff}%</span>}
   </span>
 }
 
@@ -25,7 +25,7 @@ export function CompLegend({ accent, year }) {
   const { active } = useComparison()
   if (!active) return null
   return <div style={{ display: "flex", gap: 10, marginTop: 4, justifyContent: "flex-end" }}>
-    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: accent }}>
+    <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: "clamp(7px, 0.9vw, 9px)", color: accent }}>
       <span style={{ width: 10, height: 2.5, borderRadius: 2, background: accent }} />{year}
     </span>
     <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 8, color: "rgba(255,255,255,0.3)" }}>
@@ -66,17 +66,17 @@ export function AN({ t, s = "" }) {
 
 // ── Labels ──
 export const Lbl = ({ c = "rgba(255,255,255,0.32)", size = 10, children, upper = true }) =>
-  <div style={{ color: c, fontSize: size, textTransform: upper ? "uppercase" : "none", letterSpacing: "0.12em" }}>{children}</div>
+  <div style={{ color: c, fontSize: `clamp(${Math.max(7, size - 2)}px, ${size / 8}vw, ${size + 2}px)`, textTransform: upper ? "uppercase" : "none", letterSpacing: "0.12em" }}>{children}</div>
 
 export const Tag = ({ accent, year = 2024 }) =>
-  <div style={{ color: accent, fontSize: 9, letterSpacing: "0.3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 7, opacity: 0.8 }}>WRAPPARR · {year}</div>
+  <div style={{ color: accent, fontSize: "clamp(8px, 1vw, 10px)", letterSpacing: "0.3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 7, opacity: 0.8 }}>WRAPPARR · {year}</div>
 
 export const Pill = ({ children, accent }) =>
-  <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 18, background: accent + "1e", border: "1px solid " + accent + "38", color: accent, fontSize: 10 }}>{children}</span>
+  <span style={{ display: "inline-block", padding: "clamp(2px, 0.4vw, 4px) clamp(7px, 1.2vw, 12px)", borderRadius: 18, background: accent + "1e", border: "1px solid " + accent + "38", color: accent, fontSize: "clamp(9px, 1.1vw, 11px)" }}>{children}</span>
 
 export const VsB = ({ value, label = "vs annee prec." }) => {
   const p = value > 0
-  return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 11px", borderRadius: 18, background: p ? "#22c55e16" : "#ef444416", border: "1px solid " + (p ? "#22c55e" : "#ef4444") + "40", color: p ? "#4ade80" : "#f87171", fontSize: 11, fontWeight: 600, animation: "badge-p .5s ease .6s both" }}>{p ? "↑" : "↓"} {p ? "+" : ""}{value}% {label}</span>
+  return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "clamp(3px, 0.5vw, 5px) clamp(8px, 1.2vw, 12px)", borderRadius: 18, background: p ? "#22c55e16" : "#ef444416", border: "1px solid " + (p ? "#22c55e" : "#ef4444") + "40", color: p ? "#4ade80" : "#f87171", fontSize: "clamp(9px, 1.2vw, 12px)", fontWeight: 600, animation: "badge-p .5s ease .6s both" }}>{p ? "↑" : "↓"} {p ? "+" : ""}{value}% {label}</span>
 }
 
 export function BigNum({ value, suffix = "", accent, active, delay = 0.05 }) {

@@ -236,7 +236,7 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
   const maxBracket = Math.max(1, ...budgets.distribution.map((d) => d.count))
 
   return (
-    <div style={{ maxWidth: 460, width: "100%", position: "relative" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 560px)", width: "100%", position: "relative" }}>
       {/* Money rain effect when done */}
       {/* MoneyRain removed */}
 

@@ -50,7 +50,7 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
   if (!data.length) return null
 
   return (
-    <div style={{ maxWidth: 430, width: "100%" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(20px, 6vw, 32px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>

@@ -93,7 +93,7 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
 
   const prevColor = accent + "60"
 
-  return <div style={{ maxWidth: 440, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     {/* Header */}
     <div className="s0" style={{ marginBottom: 10 }}>
       <Tag accent={accent} year={year} />

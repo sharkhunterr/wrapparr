@@ -220,7 +220,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
       <PosterWall posters={posters} />
 
       {/* Scrollable content */}
-      <div ref={contentRef} style={{ position: "relative", zIndex: 5, width: "100%", maxWidth: 500, padding: "20px 16px 40px", overflowY: "auto", maxHeight: "100vh" }}>
+      <div ref={contentRef} style={{ position: "relative", zIndex: 5, width: "100%", maxWidth: "clamp(340px, 85vw, 520px)", padding: "clamp(12px, 2vw, 20px) clamp(10px, 2vw, 16px) 40px", overflowY: "auto", maxHeight: "100vh" }}>
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 12 }}>

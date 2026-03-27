@@ -89,7 +89,7 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
   const category = categories.find((c) => totalHours >= c.min && totalHours < c.max) || categories[categories.length - 1]
 
   return (
-    <div style={{ maxWidth: 460, width: "100%", position: "relative" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 560px)", width: "100%", position: "relative" }}>
       <PosterWall films={allFilms} />
 
       <div style={{ position: "relative", zIndex: 1 }}>

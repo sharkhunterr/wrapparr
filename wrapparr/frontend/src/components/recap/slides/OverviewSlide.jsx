@@ -6,7 +6,7 @@ export default function OverviewSlide({ accent, globalStats, year }) {
     { v: Math.round(globalStats.total_hours || 0), s: "h", l: "heures totales" },
     { v: globalStats.total_items || 0, s: "", l: "contenus" },
   ]
-  return <div style={{ maxWidth: 430, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 18 }}><Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(24px, 7vw, 38px)", fontWeight: 800, color: "white", lineHeight: 1 }}>Ton annee<br /><span style={{ color: accent }}>en chiffres</span></h2>
     </div>

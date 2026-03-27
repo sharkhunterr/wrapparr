@@ -3,7 +3,7 @@ import { Tag } from "../SharedUI"
 export default function RankingSlide({ accent, users = [], me = "", year }) {
   const medals = ["🥇", "🥈", "🥉"]; const max = users[0]?.v || 1
   const myRank = users.findIndex((u) => u.n === me) + 1
-  return <div style={{ maxWidth: 430, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 16 }}><Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(22px, 6vw, 36px)", fontWeight: 800, color: "white", lineHeight: 1.0 }}>Tu es<br /><span style={{ background: "linear-gradient(135deg," + accent + ",#fb923c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>#{myRank || "?"} sur {users.length}</span></h2>
       <div style={{ fontSize: 12, color: "rgba(255,255,255,.3)", marginTop: 4 }}>utilisateurs Wrapparr</div>

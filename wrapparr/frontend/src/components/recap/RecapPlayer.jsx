@@ -25,6 +25,7 @@ import RankingSlide from "./slides/RankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/CommunitySlides"
 import { ComparisonProvider } from "./SharedUI"
+import { useResponsive } from "./responsive"
 
 // ── AMBIENT EFFECTS (from prototype) ──
 function Orbs({ accent }) {
@@ -261,6 +262,8 @@ export default function RecapPlayer() {
     }
   }
 
+  const R = useResponsive()
+
   // Build slide list from data + config
   const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId)
 
@@ -343,6 +346,7 @@ export default function RecapPlayer() {
     <div
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY }}
       onTouchEnd={(e) => { if (touchY.current === null) return; const d = touchY.current - e.changedTouches[0].clientY; if (Math.abs(d) > 40) goTo(slide + (d > 0 ? 1 : -1)); touchY.current = null }}
+      className="recap-root"
       style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", background: bg, transition: "background .75s ease", fontFamily: "Nunito,sans-serif", userSelect: "none" }}
     >
       <style>{RECAP_CSS}</style>
@@ -359,7 +363,7 @@ export default function RecapPlayer() {
       <Grain />
 
       {/* Dot nav */}
-      <div style={{ position: "fixed", right: 11, top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: 3.5, zIndex: 200 }}>
+      <div style={{ position: "fixed", right: R.dotRight, top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: 3.5, zIndex: 200 }}>
         {slides.map((s, i) => (
           <div key={i} onClick={() => goTo(i)} style={{
             width: i === slide ? 4 : s.cat ? 3.5 : 2.5,
@@ -373,7 +377,7 @@ export default function RecapPlayer() {
       </div>
 
       {/* Counter */}
-      <div style={{ position: "fixed", top: 10, left: 14, zIndex: 100, fontSize: 11, color: "rgba(255,255,255,.22)", fontFamily: "JetBrains Mono,monospace", letterSpacing: ".15em", textTransform: "uppercase" }}>
+      <div style={{ position: "fixed", top: R.counterTop, left: R.counterLeft, zIndex: 100, fontSize: R.counterFs, color: "rgba(255,255,255,.22)", fontFamily: "JetBrains Mono,monospace", letterSpacing: ".15em", textTransform: "uppercase" }}>
         {slide + 1} / {slides.length}
         {isCat && <span style={{ color: accent, marginLeft: 8 }}>SECTION</span>}
         {isPod && <span style={{ color: accent, marginLeft: 8 }}>PODIUM</span>}
@@ -389,7 +393,7 @@ export default function RecapPlayer() {
           position: "relative", zIndex: 10, width: "100%", height: "100vh",
           display: (isCat || isPod || isFinale) ? "block" : "flex",
           alignItems: "center", justifyContent: "center",
-          padding: (isCat || isPod || isFinale) ? "0" : "20px 28px 40px 18px",
+          padding: (isCat || isPod || isFinale) ? "0" : R.pad,
           opacity: fade ? 0 : 1, transform: fade ? `translateY(${dir * 16}px)` : "translateY(0)",
           transition: "opacity .23s ease, transform .23s ease",
           overflowY: (isCat || isPod || isFinale) ? "hidden" : "auto",
@@ -547,15 +551,15 @@ function MusicPlayer({ musicConfig, currentSlideId }) {
         background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
         border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
         borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
-        fontSize: 10, padding: "5px 7px", cursor: "pointer",
+        fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(5px, 0.8vw, 7px)", cursor: "pointer",
         display: "flex", alignItems: "center",
         transition: "all .2s ease",
       }}
     >
       {playing ? (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
       ) : (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
       )}
     </button>
   </div>
@@ -582,13 +586,13 @@ function FullscreenButton() {
   }
   const btn = <button onClick={toggle} title={isFs ? "Quitter le plein ecran" : "Plein ecran"} style={{
     background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 10, padding: "5px 7px",
+    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(5px, 0.8vw, 7px)",
     cursor: "pointer", display: "flex", alignItems: "center", transition: "all .2s ease",
   }}>
     {isFs ? (
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" /></svg>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" /></svg>
     ) : (
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>
     )}
   </button>
   if (el) return createPortal(btn, el)
@@ -610,7 +614,7 @@ function ComparisonButton({ active, onToggle, accent, year, visible }) {
       background: active ? accent + "15" : "rgba(255,255,255,0.06)",
       border: `1px solid ${active ? accent + "40" : "rgba(255,255,255,0.1)"}`,
       borderRadius: 6, color: active ? accent : "rgba(255,255,255,0.4)",
-      fontSize: 10, padding: "5px 9px", cursor: "pointer",
+      fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 9px)", cursor: "pointer",
       display: "flex", alignItems: "center", gap: 4,
       transition: "all .2s ease",
     }}

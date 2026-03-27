@@ -155,7 +155,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   const prevItems = prevMedia.previous
   const prevHours = prevMedia.hours?.previous
 
-  return <div style={{ maxWidth: 440, width: "100%", position: "relative" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%", position: "relative" }}>
     <PosterWall films={allFilms} />
 
     <div style={{ position: "relative", zIndex: 1 }}>

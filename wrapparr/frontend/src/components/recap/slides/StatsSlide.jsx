@@ -9,7 +9,7 @@ function AN({ t, s = "" }) {
 
 export default function StatsSlide({ accent, data, serviceName }) {
   return (
-    <div style={{ maxWidth: 430, width: "100%" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>{serviceName}</div>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginTop: 4 }}>

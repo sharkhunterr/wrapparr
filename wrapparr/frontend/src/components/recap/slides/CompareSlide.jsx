@@ -3,7 +3,7 @@ import { Tag } from "../SharedUI"
 
 export default function CompareSlide({ accent, comparison, year }) {
   const monthly = comparison?.monthly || []
-  return <div style={{ maxWidth: 430, width: "100%" }}>
+  return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 16 }}><Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(20px, 6vw, 34px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>{year} vs <span style={{ color: accent }}>{year - 1}</span></h2>
     </div>

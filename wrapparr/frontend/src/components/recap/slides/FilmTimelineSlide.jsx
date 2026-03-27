@@ -96,7 +96,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
   const TIMELINE_H = 80 // max bar height in px
 
   return (
-    <div style={{ maxWidth: 430, width: "100%" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>

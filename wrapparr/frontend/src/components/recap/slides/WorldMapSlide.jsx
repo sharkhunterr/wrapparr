@@ -93,7 +93,7 @@ export default function WorldMapSlide({ accent, data, year, config = {} }) {
   for (let i = 0; i < revealedCount; i++) revealedSet.add(revealOrder[i]?.code)
 
   return (
-    <div style={{ maxWidth: 700, width: "100%" }}>
+    <div style={{ maxWidth: "clamp(320px, 92vw, 700px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>

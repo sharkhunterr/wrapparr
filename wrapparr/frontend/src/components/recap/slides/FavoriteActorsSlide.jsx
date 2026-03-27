@@ -105,7 +105,7 @@ export default function FavoriteActorsSlide({ accent, data, year, config = {} })
   const done = phase >= 2
 
   return (
-    <div style={{ maxWidth: 460, width: "100%" }}>
+    <div style={{ maxWidth: "clamp(320px, 85vw, 560px)", width: "100%" }}>
       <div className="s0" style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
