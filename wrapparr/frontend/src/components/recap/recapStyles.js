@@ -39,4 +39,6 @@ export const RECAP_CSS = `
 @keyframes pulse-hint{0%,100%{box-shadow:0 0 0 0 rgba(229,160,13,0);transform:scale(1)}50%{box-shadow:0 0 16px 4px rgba(229,160,13,0.15);transform:scale(1.02)}}
 @keyframes glow-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes soundbar{0%{height:3px}100%{height:12px}}
+@keyframes bounce-down{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+@keyframes bounce-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 `

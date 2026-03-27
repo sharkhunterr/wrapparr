@@ -373,7 +373,7 @@ export default function RecapPlayer() {
       </div>
 
       {/* Counter */}
-      <div style={{ position: "fixed", top: 14, left: 14, zIndex: 100, fontSize: 9, color: "rgba(255,255,255,.18)", fontFamily: "JetBrains Mono,monospace", letterSpacing: ".2em", textTransform: "uppercase" }}>
+      <div style={{ position: "fixed", top: 10, left: 14, zIndex: 100, fontSize: 11, color: "rgba(255,255,255,.22)", fontFamily: "JetBrains Mono,monospace", letterSpacing: ".15em", textTransform: "uppercase" }}>
         {slide + 1} / {slides.length}
         {isCat && <span style={{ color: accent, marginLeft: 8 }}>SECTION</span>}
         {isPod && <span style={{ color: accent, marginLeft: 8 }}>PODIUM</span>}
@@ -383,17 +383,13 @@ export default function RecapPlayer() {
       <ComparisonButton active={comparisonActive} onToggle={() => setComparisonActive((v) => !v)} accent={accent} year={year} visible={hasComparison} />
       <FullscreenButton />
 
-      {/* Arrows */}
-      {slide > 0 && <button onClick={() => goTo(slide - 1)} style={arrowBtn({ top: "calc(50% - 44px)" })}>↑</button>}
-      {slide < slides.length - 1 && <button onClick={() => goTo(slide + 1)} style={arrowBtn({ top: "calc(50% + 4px)" })}>↓</button>}
-
       {/* Slide content */}
       <ComparisonProvider value={comparisonCtx}>
         <div style={{
           position: "relative", zIndex: 10, width: "100%", height: "100vh",
           display: (isCat || isPod || isFinale) ? "block" : "flex",
           alignItems: "center", justifyContent: "center",
-          padding: (isCat || isPod || isFinale) ? "0" : "20px 44px 20px 18px",
+          padding: (isCat || isPod || isFinale) ? "0" : "20px 28px 40px 18px",
           opacity: fade ? 0 : 1, transform: fade ? `translateY(${dir * 16}px)` : "translateY(0)",
           transition: "opacity .23s ease, transform .23s ease",
           overflowY: (isCat || isPod || isFinale) ? "hidden" : "auto",
@@ -404,12 +400,35 @@ export default function RecapPlayer() {
         </div>
       </ComparisonProvider>
 
-      {/* Swipe hint */}
-      {!isCat && !isPod && !isFinale && slide > 0 && slide < slides.length - 1 && (
-        <div style={{ position: "fixed", bottom: 12, left: "50%", transform: "translateX(-50%)", color: "rgba(255,255,255,.12)", fontSize: 9, fontFamily: "JetBrains Mono,monospace", letterSpacing: ".15em", animation: "float 3s ease-in-out infinite", pointerEvents: "none", zIndex: 5 }}>
-          swipe
-        </div>
-      )}
+      {/* Top chevron — go back */}
+      {slide > 0 && <NavChevron direction="up" onClick={() => goTo(slide - 1)} />}
+
+      {/* Bottom chevron — go next */}
+      {slide < slides.length - 1 && <NavChevron direction="down" onClick={() => goTo(slide + 1)} />}
+    </div>
+  )
+}
+
+function NavChevron({ direction, onClick }) {
+  const isDown = direction === "down"
+  const chevron = (opacity) => (
+    <svg width="18" height="10" viewBox="0 0 18 10" style={{ opacity }}>
+      <path d={isDown ? "M2 2l7 6 7-6" : "M2 8l7-6 7 6"} stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+  return (
+    <div onClick={onClick} style={{
+      position: "fixed", [isDown ? "bottom" : "top"]: isDown ? 14 : 42, left: 0, right: 0,
+      cursor: "pointer", zIndex: 100, display: "flex", flexDirection: "column", alignItems: "center",
+      animation: (isDown ? "bounce-down" : "bounce-up") + " 2s ease-in-out infinite",
+      pointerEvents: "none",
+    }}>
+      <div style={{ pointerEvents: "auto" }}>
+        {!isDown && chevron(0.2)}
+        {isDown && chevron(0.12)}
+        {isDown && <div style={{ marginTop: -3 }}>{chevron(0.22)}</div>}
+        {!isDown && <div style={{ marginTop: -3 }}>{chevron(0.12)}</div>}
+      </div>
     </div>
   )
 }
@@ -528,15 +547,15 @@ function MusicPlayer({ musicConfig, currentSlideId }) {
         background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
         border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
         borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
-        fontSize: 9, padding: "4px 6px", cursor: "pointer",
+        fontSize: 10, padding: "5px 7px", cursor: "pointer",
         display: "flex", alignItems: "center",
         transition: "all .2s ease",
       }}
     >
       {playing ? (
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 010 7.07" /></svg>
       ) : (
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" /></svg>
       )}
     </button>
   </div>
@@ -563,13 +582,13 @@ function FullscreenButton() {
   }
   const btn = <button onClick={toggle} title={isFs ? "Quitter le plein ecran" : "Plein ecran"} style={{
     background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 6px",
+    borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 10, padding: "5px 7px",
     cursor: "pointer", display: "flex", alignItems: "center", transition: "all .2s ease",
   }}>
     {isFs ? (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" /></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" /></svg>
     ) : (
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>
     )}
   </button>
   if (el) return createPortal(btn, el)
@@ -591,7 +610,7 @@ function ComparisonButton({ active, onToggle, accent, year, visible }) {
       background: active ? accent + "15" : "rgba(255,255,255,0.06)",
       border: `1px solid ${active ? accent + "40" : "rgba(255,255,255,0.1)"}`,
       borderRadius: 6, color: active ? accent : "rgba(255,255,255,0.4)",
-      fontSize: 9, padding: "4px 8px", cursor: "pointer",
+      fontSize: 10, padding: "5px 9px", cursor: "pointer",
       display: "flex", alignItems: "center", gap: 4,
       transition: "all .2s ease",
     }}

@@ -74,7 +74,7 @@ function UserHome() {
   return (
     <>
       <RecapPlayer />
-      <div style={{ position: "fixed", top: 12, right: 44, zIndex: 9999, display: "flex", gap: 6, alignItems: "center" }}>
+      <div style={{ position: "fixed", top: 8, right: 30, zIndex: 9999, display: "flex", gap: 5, alignItems: "center" }}>
         <span id="recap-topbar-extra" style={{ display: "contents" }} />
         {availableRecaps.length > 0 && (
           <select
@@ -82,7 +82,7 @@ function UserHome() {
             onChange={handleYearChange}
             style={{
               background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 6, color: "rgba(255,255,255,0.5)", fontSize: 9, padding: "4px 6px",
+              borderRadius: 6, color: "rgba(255,255,255,0.5)", fontSize: 10, padding: "5px 8px",
               cursor: "pointer", fontFamily: "Nunito,sans-serif", outline: "none",
               appearance: "none", WebkitAppearance: "none",
               backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
@@ -98,12 +98,12 @@ function UserHome() {
           </select>
         )}
         {user.role === "admin" && (
-          <button onClick={() => navigate("/admin")} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 8px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-            <Settings size={11} /> Admin
+          <button onClick={() => navigate("/admin")} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 10, padding: "5px 9px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <Settings size={13} /> Admin
           </button>
         )}
-        <button onClick={async () => { await logout(); navigate("/login") }} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 9, padding: "4px 8px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-          <LogOut size={11} />
+        <button onClick={async () => { await logout(); navigate("/login") }} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, color: "rgba(255,255,255,0.4)", fontSize: 10, padding: "5px 9px", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+          <LogOut size={13} />
         </button>
       </div>
     </>
