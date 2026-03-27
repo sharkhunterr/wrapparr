@@ -21,7 +21,7 @@ function getBracket(rating, brackets) {
 }
 
 // Semi-circular gauge SVG using strokeDasharray for smooth animation
-function Gauge({ value, max = 10, accent, animated, size = 200, prevValue }) {
+function Gauge({ value, max = 10, accent, animated, size = 240, prevValue, prevYear }) {
   const cx = size / 2
   const cy = size / 2 + 10
   const r = size / 2 - 18
@@ -95,16 +95,19 @@ function Gauge({ value, max = 10, accent, animated, size = 200, prevValue }) {
         const y2 = cy - (r + 16) * Math.sin(prevAngle)
         const lx = cx + (r - 28) * Math.cos(prevAngle)
         const ly = cy - (r - 28) * Math.sin(prevAngle)
+        const labelX = cx + (r + 28) * Math.cos(prevAngle)
+        const labelY = cy - (r + 28) * Math.sin(prevAngle)
         return <g style={{ animation: "slide-up 0.4s ease 1.5s both" }}>
           <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.4)" strokeWidth={2} strokeDasharray="3 2" />
-          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.35)" fontSize={9} fontWeight={700} fontFamily="JetBrains Mono,monospace">{prevValue.toFixed(1)}</text>
+          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.35)" fontSize={11} fontWeight={700} fontFamily="JetBrains Mono,monospace">{prevValue.toFixed(1)}</text>
+          <text x={labelX} y={labelY} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.2)" fontSize={8} fontFamily="JetBrains Mono,monospace">{prevYear}</text>
         </g>
       })()}
     </svg>
   )
 }
 
-export default function RatingsSlide({ accent, data, year, config = {} }) {
+export default function RatingsSlide({ accent, data, year, config = {}, mediaType = "films" }) {
   const animSpeed = config.animationSpeed || 10000
   const rawBrackets = config.brackets || DEFAULT_BRACKETS
   // Generate bracket colors: gradient from muted to accent
@@ -160,25 +163,13 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
       <div className="s0" style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-          Tes notes <span style={{ color: accent }}>cinema</span>
+          Tes notes <span style={{ color: accent }}>{mediaType === "series" ? "series" : "cinema"}</span>
         </h2>
       </div>
 
       {/* Gauge */}
-      <Gauge value={avg} accent={accent} animated={gaugeAnimated} prevValue={comp.active ? prevAvg : 0} />
+      <Gauge value={avg} accent={accent} animated={gaugeAnimated} prevValue={comp.active ? prevAvg : 0} prevYear={year - 1} />
 
-      {/* Gauge legend when comparison active */}
-      {comp.active && prevAvg > 0 && gaugeAnimated && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: -2, marginBottom: 4, animation: "slide-up 0.4s ease 1.6s both" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 8, color: accent }}>
-            <span style={{ width: 10, height: 2.5, borderRadius: 2, background: accent }} />{year}
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 8, color: "rgba(255,255,255,0.35)" }}>
-            <svg width="10" height="3" style={{ flexShrink: 0 }}><line x1="0" y1="1.5" x2="10" y2="1.5" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeDasharray="2 1.5" /></svg>
-            {year - 1}
-          </span>
-        </div>
-      )}
 
       {/* Profile badge */}
       {gaugeAnimated && (
@@ -233,7 +224,7 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
                     )}
                   </div>
                   {comp.active && b.prevCount != null && (
-                    <div style={{ height: 12, background: "rgba(255,255,255,0.02)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                    <div style={{ height: 16, background: "rgba(255,255,255,0.02)", borderRadius: 3, overflow: "hidden", position: "relative" }}>
                       {b.prevCount > 0 && <div style={{
                         height: "100%", borderRadius: 3,
                         background: "rgba(255,255,255,0.12)",
@@ -272,21 +263,22 @@ export default function RatingsSlide({ accent, data, year, config = {} }) {
           <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.3s both" }}>
             {[{ r: best, film: bestFilm, label: "Meilleure note", isBest: true }, { r: worst, film: worstFilm, label: "Pire note", isBest: false }].map(({ r, film, label, isBest }) => (
               <div key={label} style={{
-                flex: 1, display: "flex", gap: 8, padding: "8px 10px", borderRadius: 10,
-                background: isBest ? accent + "0a" : "rgba(255,255,255,0.03)",
-                border: "1px solid " + (isBest ? accent + "25" : "rgba(255,255,255,0.08)"),
+                flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10,
+                background: isBest ? accent + "0c" : "rgba(255,255,255,0.08)",
+                border: "1px solid " + (isBest ? accent + "30" : "rgba(255,255,255,0.12)"),
+                backdropFilter: "blur(14px)",
               }}>
                 {film.thumb ? (
-                  <img src={film.thumb} alt="" style={{ width: 30, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+                  <img src={film.thumb} alt="" style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }} onError={(e) => { e.target.style.display = "none" }} />
                 ) : (
-                  <div style={{ width: 30, height: 44, borderRadius: 4, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🎬</div>
+                  <div style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🎬</div>
                 )}
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: isBest ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.t}</div>
-                  <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: isBest ? accent : "rgba(255,255,255,0.4)", fontFamily: "JetBrains Mono,monospace" }}>{r.r}/10</span>
-                    {film.y && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{film.y}</span>}
+                <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
+                  <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: isBest ? "white" : "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{r.t}</div>
+                  <div style={{ display: "flex", gap: 5, marginTop: 3 }}>
+                    <span style={{ fontSize: "clamp(12px, 1.8vw, 16px)", fontWeight: 800, color: isBest ? accent : "rgba(255,255,255,0.4)", fontFamily: "JetBrains Mono,monospace" }}>{r.r}/10</span>
+                    {film.y && <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.3)" }}>{film.y}</span>}
                   </div>
                 </div>
               </div>

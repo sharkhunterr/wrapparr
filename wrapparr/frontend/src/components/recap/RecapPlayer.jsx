@@ -942,7 +942,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesRatings.length >= 2) {
           slides.push({
             id: svc + "-series-ratings", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <RatingsSlide accent={seriesAccent} data={{ extra: { ratings: seriesRatings, films: { top: seriesExtraData.top || [] } }, top: seriesTop }} year={year} config={getSlideConfig(sc, svc + "-series-ratings")} />,
+            component: <RatingsSlide accent={seriesAccent} data={{ extra: { ratings: seriesRatings, films: { top: seriesExtraData.top || [] } }, top: seriesTop }} year={year} config={getSlideConfig(sc, svc + "-series-ratings")} mediaType="series" />,
           })
         }
 
