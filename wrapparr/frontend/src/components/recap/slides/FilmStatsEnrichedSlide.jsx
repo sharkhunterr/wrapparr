@@ -105,7 +105,7 @@ const ICONS = {
 function MiniStat({ iconKey, value, label, accent }) {
   const iconFn = ICONS[iconKey] || ICONS.chart
   return (
-    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(5px, 1vw, 8px)", padding: "clamp(6px, 1vw, 9px) clamp(7px, 1.2vw, 10px)", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", minWidth: 0, overflow: "hidden" }}>
+    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(5px, 1vw, 8px)", padding: "clamp(6px, 1vw, 9px) clamp(7px, 1.2vw, 10px)", borderRadius: 10, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)", minWidth: 0, overflow: "hidden" }}>
       <div style={{ flexShrink: 0 }}>{iconFn(accent)}</div>
       <div style={{ minWidth: 0, overflow: "hidden" }}>
         <div style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 800, color: "white", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
@@ -188,7 +188,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
             <span style={{ fontSize: "clamp(16px, 3.5vw, 22px)", position: "relative" }}>{category.emoji}</span>
             <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: accent, position: "relative" }}>{category.name}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: 20, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 0.8vw, 8px)", padding: "clamp(6px, 1vw, 10px) clamp(10px, 2vw, 16px)", borderRadius: 20, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)" }}>
             <span style={{ fontSize: "clamp(16px, 3.5vw, 22px)" }}>⏱️</span>
             <span style={{ fontSize: "clamp(11px, 1.6vw, 14px)", fontWeight: 700, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{equiv}</span>
           </div>
@@ -197,7 +197,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
 
       {/* Genre donut + quick stats — stacks on mobile */}
       <div className="s1" style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "stretch", flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+        <div style={{ flex: "1 1 100%", padding: "clamp(6px, 1.2vw, 10px)", borderRadius: 14, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <GenreDonut genres={genres} accent={accent} />
           </div>
@@ -241,7 +241,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         const monthly = data.extra?.films?.monthly || data.monthly || []
         if (monthly.length < 3) return null
         return (
-          <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+          <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: 14, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(14px)" }}>
             <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
             <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit=" vues" id={"stats-enriched-" + label} prevData={prevMonthly} prevDataKey="previous" />
             <CompLegend accent={accent} year={year} />
@@ -255,9 +255,9 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
           {top.slice(0, 4).map((item, i) => (
             <div key={item.t || i} style={{
               padding: "7px", display: "flex", gap: 7, borderRadius: 10,
-              background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
+              background: "rgba(255,255,255,0.12)", backdropFilter: "blur(14px)",
               animation: "slide-up .4s ease " + (0.15 + i * 0.08) + "s both",
-              border: i === 0 ? `1px solid ${accent}35` : "1px solid rgba(255,255,255,0.15)",
+              border: i === 0 ? `1px solid ${accent}35` : "1px solid rgba(255,255,255,0.18)",
               boxShadow: i === 0 ? `0 0 14px ${accent}12` : undefined,
               position: "relative", overflow: "hidden",
             }}>
