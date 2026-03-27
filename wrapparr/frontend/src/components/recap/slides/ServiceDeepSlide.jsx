@@ -55,24 +55,24 @@ export default function ServiceDeepSlide({ accent, label, icon, data, me, year }
     {(bestDay || bestMonth) && (
       <div className="s4" style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         {bestMonth && (
-          <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: accent + "08", border: "1px solid " + accent + "20" }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
-            <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonth.month}</div>
+          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: accent + "0a", border: "1px solid " + accent + "25" }}>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
+            <div style={{ fontSize: "clamp(18px, 4.5vw, 24px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonth.month}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "white" }}>{bestMonth.views} vues</span>
+              <span style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "white" }}>{bestMonth.views} vues</span>
               <CompBadge current={bestMonth.views} previous={prevSvc?.peak?.previous?.best_month?.views} />
             </div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{bestMonth.hours}h · {totalViews > 0 ? Math.round(bestMonth.views / totalViews * 100) : 0}% du total</div>
+            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.25)" }}>{bestMonth.hours}h · {totalViews > 0 ? Math.round(bestMonth.views / totalViews * 100) : 0}% du total</div>
           </div>
         )}
         {bestDay && (
-          <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "white", lineHeight: 1.1 }}>
+          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
+            <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", lineHeight: 1.1 }}>
               {bestDay.day_name} {bestDay.day} {bestDay.month}
             </div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: accent, marginTop: 4 }}>{bestDay.views} vues</div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{bestDay.hours}h de visionnage</div>
+            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: accent, marginTop: 4 }}>{bestDay.views} vues</div>
+            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.25)" }}>{bestDay.hours}h de visionnage</div>
           </div>
         )}
       </div>
