@@ -11,7 +11,9 @@ export default function IntroSlide({ accent, userName, year, onStart, hasCompari
   return <div style={{ textAlign: "center", maxWidth: 380, width: "100%" }}>
     <div style={{ position: "relative", width: 130, height: 130, margin: "0 auto 26px" }}>
       {[0, 1, 2, 3].map((i) => <div key={i} style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "1.5px solid " + accent, animation: "pulse-ring 3s ease-out " + (i * 0.8) + "s infinite" }} />)}
-      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 54, filter: "drop-shadow(0 0 40px " + accent + "90)" }}>🎬</div>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", filter: "drop-shadow(0 0 40px " + accent + "90)" }}>
+        <img src="/icon.svg" alt="Wrapparr" style={{ width: 70, height: 70 }} />
+      </div>
     </div>
     <div className="s0" style={{ fontSize: 9, color: accent, letterSpacing: ".35em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase" }}>WRAPPARR · RECAP ANNUEL</div>
     <h1 className="s1" style={{ fontSize: "clamp(32px, 10vw, 72px)", fontWeight: 800, color: "white", lineHeight: 0.88, margin: "10px 0 6px", textShadow: "0 0 120px " + accent + "55" }}>

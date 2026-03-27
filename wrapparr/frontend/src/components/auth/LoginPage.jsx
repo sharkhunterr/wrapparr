@@ -83,12 +83,9 @@ export default function LoginPage() {
         background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
         backdropFilter: "blur(18px)",
       }}>
-        <h1 style={{
-          fontFamily: "Nunito, sans-serif", fontSize: 18, fontWeight: 700,
-          color: accent, marginBottom: 6, textAlign: "center",
-        }}>
-          Wrapparr
-        </h1>
+        <div style={{ textAlign: "center", marginBottom: 6 }}>
+          <img src="/logo-text.svg" alt="Wrapparr" style={{ height: 32 }} />
+        </div>
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center", marginBottom: 28 }}>
           {mode === "login" ? "Connectez-vous pour voir votre recap" : "Créez votre compte"}
         </p>

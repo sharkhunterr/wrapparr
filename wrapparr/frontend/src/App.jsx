@@ -203,7 +203,7 @@ function AdminLayout() {
         }}>
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
-        <span style={{ color: "#E5A00D", fontFamily: "Nunito,sans-serif", fontWeight: 800, fontSize: 16, flex: 1 }}>Wrapparr</span>
+        <img src="/logo-text.svg" alt="Wrapparr" style={{ height: 22, flex: 1 }} />
         <div style={{ display: "flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.35)", fontSize: 12 }}>
           {activeItem && <activeItem.icon size={14} />}
           {activeItem?.short}
@@ -246,7 +246,7 @@ function AdminLayout() {
         {/* Desktop sidebar */}
         <nav className="admin-sidebar">
           <div style={{ color: "#E5A00D", fontFamily: "Nunito,sans-serif", fontWeight: 800, fontSize: 18, padding: "8px 16px", marginBottom: 24 }}>
-            Wrapparr <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", fontWeight: 400, fontFamily: "JetBrains Mono,monospace" }}>admin</span>
+            <img src="/logo-text.svg" alt="Wrapparr" style={{ height: 18 }} /> <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", fontWeight: 400, fontFamily: "JetBrains Mono,monospace" }}>admin</span>
           </div>
 
           {NAV_ITEMS.map((sec) => (

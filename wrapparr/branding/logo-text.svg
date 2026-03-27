@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80">
+  <defs>
+    <linearGradient id="gtx" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5A00D"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <linearGradient id="gtxV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#E5A00D"/>
+    </linearGradient>
+    <clipPath id="ct3">
+      <polygon points="38,18 55,62 63,62 46,18"/>
+    </clipPath>
+    <clipPath id="ct4">
+      <polygon points="50,62 68,14 76,14 58,62"/>
+    </clipPath>
+  </defs>
+
+  <!-- W with clap stripes on last 2 bars -->
+  <g>
+    <!-- W base -->
+    <polyline points="8,14 26,64 40,28 54,64 72,14" fill="none" stroke="url(#gtxV)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Clap stripes bar 3 -->
+    <g clip-path="url(#ct3)">
+      <rect x="34" y="14" width="3" height="55" fill="url(#gtx)" transform="rotate(16, 44, 40)"/>
+      <rect x="39" y="14" width="4.5" height="55" fill="#05050e" transform="rotate(16, 49, 40)"/>
+      <rect x="46" y="14" width="3" height="55" fill="url(#gtx)" transform="rotate(16, 56, 40)"/>
+      <rect x="51" y="14" width="4.5" height="55" fill="#05050e" transform="rotate(16, 61, 40)"/>
+      <rect x="58" y="14" width="3" height="55" fill="url(#gtx)" transform="rotate(16, 68, 40)"/>
+    </g>
+
+    <!-- Clap stripes bar 4 -->
+    <g clip-path="url(#ct4)">
+      <rect x="46" y="8" width="3" height="60" fill="url(#gtx)" transform="rotate(-20, 56, 38)"/>
+      <rect x="51" y="8" width="4.5" height="60" fill="#05050e" transform="rotate(-20, 61, 38)"/>
+      <rect x="58" y="8" width="3" height="60" fill="url(#gtx)" transform="rotate(-20, 68, 38)"/>
+      <rect x="63" y="8" width="4.5" height="60" fill="#05050e" transform="rotate(-20, 73, 38)"/>
+      <rect x="70" y="8" width="3" height="60" fill="url(#gtx)" transform="rotate(-20, 80, 38)"/>
+    </g>
+  </g>
+
+  <!-- "rapparr" text -->
+  <text x="74" y="60" font-family="Nunito, Arial, sans-serif" font-weight="800" font-size="52" letter-spacing="-2">
+    <tspan fill="white">rap</tspan><tspan fill="url(#gtx)">parr</tspan>
+  </text>
+</svg>
