@@ -105,11 +105,11 @@ const ICONS = {
 function MiniStat({ iconKey, value, label, accent }) {
   const iconFn = ICONS[iconKey] || ICONS.chart
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6, padding: "5px 8px", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
+    <div style={{ flex: "1 1 auto", display: "flex", alignItems: "center", gap: "clamp(3px, 0.8vw, 6px)", padding: "clamp(3px, 0.6vw, 5px) clamp(5px, 1vw, 8px)", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", minWidth: 0, overflow: "hidden" }}>
       <div style={{ flexShrink: 0 }}>{iconFn(accent)}</div>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 800, color: "white", lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
-        <div style={{ fontSize: 8, color: accent, lineHeight: 1.1, opacity: 0.8 }}>{label}</div>
+      <div style={{ minWidth: 0, overflow: "hidden" }}>
+        <div style={{ fontSize: "clamp(10px, 1.4vw, 13px)", fontWeight: 800, color: "white", lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
+        <div style={{ fontSize: "clamp(7px, 0.9vw, 9px)", color: accent, lineHeight: 1.1, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</div>
       </div>
     </div>
   )
@@ -190,27 +190,27 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         </div>
       </div>
 
-      {/* Genre donut + quick stats side by side */}
-      <div className="s1" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "stretch" }}>
-        <div style={{ flex: "0 0 40%", padding: "8px 10px", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {/* Genre donut + quick stats — stacks on mobile */}
+      <div className="s1" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "stretch", flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 120px", maxWidth: "clamp(100%, 40%, 40%)", padding: "8px 10px", borderRadius: 14, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <GenreDonut genres={genres} accent={accent} />
         </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3, justifyContent: "space-between" }}>
-          <div style={{ flex: 1, display: "flex", gap: 3 }}>
+        <div style={{ flex: "1 1 180px", display: "flex", flexDirection: "column", gap: 3, justifyContent: "space-between", minWidth: 0 }}>
+          <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label={perMonthLabel} accent={accent} />}
             {ratings.length > 0 && <MiniStat iconKey="star" value={avgRating + "/10"} label="note moyenne" accent={accent} />}
             {avgYear && <MiniStat iconKey="film" value={avgYear} label="annee moyenne" accent={accent} />}
           </div>
-          <div style={{ flex: 1, display: "flex", gap: 3 }}>
+          <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             {topActor && <MiniStat iconKey="user" value={topActor.name} label={topActor.count + " " + itemLabel} accent={accent} />}
             {topDirector && <MiniStat iconKey="clapperboard" value={topDirector.name} label={topDirector.count + " " + itemLabel} accent={accent} />}
           </div>
-          <div style={{ flex: 1, display: "flex", gap: 3 }}>
+          <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             {bestMonth && <MiniStat iconKey="calendar" value={bestMonth.month} label={bestMonth.views + " vues"} accent={accent} />}
             {bestDay && <MiniStat iconKey="calendar" value={bestDay.day + " " + bestDay.month.slice(0, 3)} label={bestDay.views + " vues · " + bestDay.hours + "h"} accent={accent} />}
           </div>
           {countries.length > 0 && (
-            <div style={{ flex: 1, display: "flex", gap: 3 }}>
+            <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
               <MiniStat iconKey="film" value={countries[0].name} label={countries[0].count + " " + itemLabel + " · pays principal"} accent={accent} />
             </div>
           )}
