@@ -122,7 +122,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
     {/* Activite mensuelle superposee */}
     <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 8 }}>
       <Lbl c={accent} size={8}>Activite mensuelle par utilisateur</Lbl>
-      <ResponsiveContainer width="100%" height={140}>
+      <ResponsiveContainer width="100%" height={170}>
         <AreaChart data={multiMonthlyData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
           <defs>
             {allUsers.map((u, i) => (
@@ -167,30 +167,30 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
     </div>
 
     {/* Jour prefere (DayChart) */}
-    {dayData.length > 0 && <div className="glass s2" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Jour prefere</Lbl><DayChart data={dayData} accent={accent} height={70} /></div>}
+    {dayData.length > 0 && <div className="glass s2" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Jour prefere</Lbl><DayChart data={dayData} accent={accent} height={100} /></div>}
 
     {/* Heure de consommation (TimeChart) */}
-    {timeData.length > 0 && <div className="glass s3" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Heure de consommation</Lbl><TimeChart data={timeData} accent={accent} height={70} /></div>}
+    {timeData.length > 0 && <div className="glass s3" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Heure de consommation</Lbl><TimeChart data={timeData} accent={accent} height={100} /></div>}
 
     {/* Peak stats: mois en or + journee record */}
     {(bestMonthEntry || bestDayEntry) && (
       <div className="s4" style={{ display: "flex", gap: 8 }}>
         {bestMonthEntry && (
-          <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: accent + "08", border: "1px solid " + accent + "20" }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
-            <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonthEntry.m}</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "white", marginTop: 4 }}>{bestMonthEntry.v} vues</div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{totalViews > 0 ? Math.round(bestMonthEntry.v / totalViews * 100) : 0}% du total</div>
+          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: accent + "0a", border: "1px solid " + accent + "25" }}>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Mois en or</div>
+            <div style={{ fontSize: "clamp(18px, 4.5vw, 24px)", fontWeight: 800, color: accent, lineHeight: 1 }}>{bestMonthEntry.m}</div>
+            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "white", marginTop: 4 }}>{bestMonthEntry.v} vues</div>
+            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.25)" }}>{totalViews > 0 ? Math.round(bestMonthEntry.v / totalViews * 100) : 0}% du total</div>
           </div>
         )}
         {bestDayEntry && (
-          <div style={{ flex: 1, padding: "10px 12px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "white", lineHeight: 1.1 }}>
+          <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
+            <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "white", lineHeight: 1.1 }}>
               {bestDayEntry.day_name} {bestDayEntry.day} {bestDayEntry.month}
             </div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: accent, marginTop: 4 }}>{bestDayEntry.views} vues</div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{bestDayEntry.hours}h de visionnage</div>
+            <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: accent, marginTop: 4 }}>{bestDayEntry.views} vues</div>
+            <div style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.25)" }}>{bestDayEntry.hours}h de visionnage</div>
           </div>
         )}
       </div>
