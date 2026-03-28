@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/your-username/wrapparr/-/compare/v0.1.3...v0.1.4) (2026-03-28)
+
+
+### Features
+
+* SQLite par defaut, Redis optionnel, cles auto-generees ([a011303](https://github.com/your-username/wrapparr/-/commit/a0113039af2e5770308756d165178fdecbcf6566))
+
 ### [0.1.3](https://github.com/your-username/wrapparr/-/compare/v0.1.2...v0.1.3) (2026-03-28)
 
 
