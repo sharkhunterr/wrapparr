@@ -181,6 +181,38 @@ BUILTIN_THEMES = [
             "card_style": "glass", "transition": "slide-up",
         },
     },
+    {   # VHS — tons chauds retro
+        "name": "Videoclub", "slug": "videoclub",
+        "config": {
+            "palette": {"primary": "#ff8844", "background": "#0a0808",
+                        "accents": {"films": "#ff8844", "series": "#dd66aa", "romm": "#66cc44", "audio": "#ffcc22", "komga": "#cc88ff", "booklore": "#44bbdd", "compare": "#ff6644", "ranking": "#ffaa22"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Comic — couleurs pop saturees
+        "name": "Pop Art", "slug": "pop-art",
+        "config": {
+            "palette": {"primary": "#ff3366", "background": "#1a1a2e",
+                        "accents": {"films": "#ff3366", "series": "#33ccff", "romm": "#33ff66", "audio": "#ffcc00", "komga": "#cc66ff", "booklore": "#ff6633", "compare": "#66ffcc", "ranking": "#ff0066"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Chalkboard — couleurs craie pastels
+        "name": "Craie", "slug": "craie",
+        "config": {
+            "palette": {"primary": "#e8e8c8", "background": "#1a2a1a",
+                        "accents": {"films": "#e8e8c8", "series": "#ffbb88", "romm": "#88ddaa", "audio": "#ffdd88", "komga": "#bbaadd", "booklore": "#88ccdd", "compare": "#ddcc88", "ranking": "#ff9988"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Noel — or chaud et rouge
+        "name": "Feerie", "slug": "feerie",
+        "config": {
+            "palette": {"primary": "#ffcc44", "background": "#0a0a18",
+                        "accents": {"films": "#ffcc44", "series": "#ff4444", "romm": "#44dd88", "audio": "#ff8844", "komga": "#cc88ff", "booklore": "#44bbff", "compare": "#ffaa44", "ranking": "#ff3333"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
 ]
 
 DEFAULT_CONFIG = {

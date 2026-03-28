@@ -18,6 +18,10 @@ const EFFECT_LABELS = {
   filmStrip: "Bandes pellicule", silentSlate: "Ardoise transition",
   noirRain: "Pluie noir", noirDesaturate: "Desaturation", noirBlinds: "Store venitien",
   stBars: "Barres LED rouges",
+  vhsHud: "HUD VHS", vhsTracking: "Tracking VHS", vhsChromatic: "Aberration chromatique",
+  halftone: "Halftone BD", comicBorders: "Bordures BD",
+  chalkDust: "Poussiere de craie", chalkTexture: "Texture ardoise",
+  snow: "Neige", frost: "Givre",
   caustics: "Caustiques", biolum: "Bioluminescence", bubbles: "Bulles",
 }
 

@@ -739,6 +739,145 @@ function NoirBlinds() {
   </div>
 }
 
+// ── VHS HUD overlay: PLAY, REC, timestamp ──
+function VhsHud() {
+  const [time, setTime] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTime(t => t + 1), 1000)
+    return () => clearInterval(id)
+  }, [])
+  const h = String(Math.floor(time / 3600)).padStart(2, "0")
+  const m = String(Math.floor((time % 3600) / 60)).padStart(2, "0")
+  const s = String(time % 60).padStart(2, "0")
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 201, fontFamily: "'Share Tech Mono',monospace" }}>
+    <div style={{ position: "absolute", top: 14, left: 16, fontSize: 11, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em" }}>▶ PLAY</div>
+    <div style={{ position: "absolute", top: 14, right: 16, display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "rgba(255,255,255,0.2)" }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ff0000", animation: "th-blink-cursor 1.5s step-end infinite" }} />REC
+    </div>
+    <div style={{ position: "absolute", bottom: 14, right: 16, fontSize: 12, color: "rgba(255,255,255,0.15)", letterSpacing: "0.15em", fontFamily: "'Share Tech Mono',monospace" }}>{h}:{m}:{s}</div>
+    <div style={{ position: "absolute", bottom: 14, left: 16, fontSize: 9, color: "rgba(255,255,255,0.1)", letterSpacing: "0.1em" }}>SP · HI-FI</div>
+  </div>
+}
+
+// ── VHS tracking lines ──
+function VhsTracking() {
+  const [lines, setLines] = useState([])
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (Math.random() > 0.7) {
+        setLines(Array.from({ length: 1 + Math.floor(Math.random() * 3) }, () => ({
+          y: Math.random() * 100, h: 2 + Math.random() * 6, offset: (Math.random() - 0.5) * 8,
+        })))
+        setTimeout(() => setLines([]), 80 + Math.random() * 120)
+      }
+    }, 500 + Math.random() * 1500)
+    return () => clearInterval(id)
+  }, [])
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 47, overflow: "hidden" }}>
+    {lines.map((l, i) => (
+      <div key={i} style={{
+        position: "absolute", left: 0, right: 0, top: l.y + "%", height: l.h,
+        background: "rgba(255,255,255,0.04)", transform: `translateX(${l.offset}px)`,
+        boxShadow: "0 0 10px rgba(255,255,255,0.03)",
+      }} />
+    ))}
+  </div>
+}
+
+// ── Snow effect ──
+function Snow() {
+  const cv = useRef(null)
+  const flakes = useRef([])
+  useEffect(() => {
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
+    // Init flakes
+    for (let i = 0; i < 80; i++) {
+      flakes.current.push({
+        x: Math.random() * c.width, y: Math.random() * c.height,
+        r: 1 + Math.random() * 3, vx: (Math.random() - 0.5) * 0.5,
+        vy: 0.5 + Math.random() * 1.5, wobble: Math.random() * Math.PI * 2,
+      })
+    }
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height)
+      for (const f of flakes.current) {
+        f.wobble += 0.01
+        f.x += f.vx + Math.sin(f.wobble) * 0.3
+        f.y += f.vy
+        if (f.y > c.height) { f.y = -5; f.x = Math.random() * c.width }
+        if (f.x < 0) f.x = c.width
+        if (f.x > c.width) f.x = 0
+        ctx.save()
+        ctx.globalAlpha = 0.4 + f.r * 0.1
+        ctx.fillStyle = "#ffffff"
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+      }
+      // Snow accumulation at bottom
+      ctx.save()
+      ctx.globalAlpha = 0.06
+      ctx.fillStyle = "#d0e0f0"
+      ctx.beginPath()
+      ctx.moveTo(0, c.height)
+      for (let x = 0; x <= c.width; x += 20) {
+        ctx.lineTo(x, c.height - 5 - Math.sin(x * 0.02) * 3 - Math.random() * 2)
+      }
+      ctx.lineTo(c.width, c.height); ctx.closePath(); ctx.fill()
+      ctx.restore()
+      requestAnimationFrame(draw)
+    }
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }} />
+}
+
+// ── Chalk dust falling from titles ──
+function ChalkDust() {
+  const cv = useRef(null)
+  const particles = useRef([])
+  useEffect(() => {
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
+    const spawn = () => {
+      // Spawn dust near center (where titles are)
+      const cx = c.width * (0.2 + Math.random() * 0.6)
+      const cy = c.height * (0.35 + Math.random() * 0.3)
+      for (let i = 0; i < 2; i++) {
+        particles.current.push({
+          x: cx + (Math.random() - 0.5) * 200, y: cy,
+          vx: (Math.random() - 0.5) * 0.5, vy: 0.3 + Math.random() * 0.8,
+          size: 0.5 + Math.random() * 2, life: 1,
+          color: Math.random() > 0.5 ? "rgba(255,255,240," : "rgba(200,200,180,",
+        })
+      }
+    }
+    let frame = 0
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height)
+      frame++
+      if (frame % 8 === 0) spawn()
+      particles.current = particles.current.filter(p => p.life > 0)
+      for (const p of particles.current) {
+        p.x += p.vx; p.y += p.vy; p.life -= 0.005
+        p.vx += (Math.random() - 0.5) * 0.05
+        ctx.save()
+        ctx.globalAlpha = p.life * 0.25
+        ctx.fillStyle = p.color + (p.life * 0.3) + ")"
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill()
+        ctx.restore()
+      }
+      requestAnimationFrame(draw)
+    }
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1 }} />
+}
+
 function Grain() {
   return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 50, opacity: 0.045, mixBlendMode: "overlay", backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
 }
@@ -1032,7 +1171,7 @@ export default function RecapPlayer() {
     <div
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY }}
       onTouchEnd={(e) => { if (touchY.current === null) return; const d = touchY.current - e.changedTouches[0].clientY; if (Math.abs(d) > 40) goTo(slide + (d > 0 ? 1 : -1)); touchY.current = null }}
-      className={"recap-root" + (eff.holoScan ? " th-holo-scan" : "") + (eff.noirDesaturate ? " th-noir-on" : "") + (eff.stBars ? " th-st-on" : "")}
+      className={"recap-root" + (eff.holoScan ? " th-holo-scan" : "") + (eff.noirDesaturate ? " th-noir-on" : "") + (eff.stBars ? " th-st-on" : "") + (eff.vhsChromatic ? " th-vhs-on" : "")}
       style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", background: bg, transition: "background .75s ease", fontFamily: `var(--th-font-body, Nunito,sans-serif)`, userSelect: "none", ...Object.fromEntries(Object.entries(visualTheme.css || {}).map(([k, v]) => [k, v])) }}
     >
       <style>{RECAP_CSS}</style>
@@ -1087,6 +1226,17 @@ export default function RecapPlayer() {
       {eff.caustics && <div className="th-caustics" />}
       {eff.biolum && <Bioluminescence />}
       {eff.bubbles && <AbyssBubbles />}
+      {/* VHS */}
+      {eff.vhsHud && <VhsHud />}
+      {eff.vhsTracking && <VhsTracking />}
+      {/* Comic */}
+      {eff.halftone && <div className="th-halftone" />}
+      {/* Chalkboard */}
+      {eff.chalkDust && <ChalkDust />}
+      {eff.chalkTexture && <div className="th-chalk-texture" />}
+      {/* Christmas */}
+      {eff.snow && <Snow />}
+      {eff.frost && <div className="th-frost" />}
 
       {/* Dot nav */}
       <div style={{ position: "fixed", right: R.dotRight, top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: 3.5, zIndex: 200 }}>
