@@ -19,7 +19,12 @@
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
     "release:major": "standard-version --release-as major",
-    "release:patch": "standard-version --release-as patch"
+    "release:patch": "standard-version --release-as patch",
+    "release:full": "standard-version && git push --follow-tags origin",
+    "release:full:minor": "standard-version --release-as minor && git push --follow-tags origin",
+    "release:full:major": "standard-version --release-as major && git push --follow-tags origin",
+    "release:full:patch": "standard-version --release-as patch && git push --follow-tags origin",
+    "release:first": "standard-version --first-release && git push --follow-tags origin"
   },
   "repository": {
     "type": "git",
