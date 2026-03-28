@@ -870,136 +870,244 @@ function Snow() {
   return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }} />
 }
 
-// ── Chalkboard: canvas with writing, erasing, rewriting ──
+// ── Chalkboard: canvas with text, drawings, eraser ──
 const CHALK_TEXTS = [
   "E = mc²", "2x + 3y = 12", "H₂O", "π ≈ 3.14159", "a² + b² = c²",
   "∑(n=1→∞) 1/n²", "BRAVO !!", "★★★★★", "100/100", "dx/dt = v",
-  "f(x) = 2x³ - 5x + 1", "∞", "ABCDEF", "☺ ☺ ☺", "1+1 = 2",
-  "∫ sin(x) dx", "Δx → 0", "y = mx + b", "V = 4/3 πr³", "F = ma",
+  "f(x) = 2x³ - 5x + 1", "∞", "ABCDEFGHIJK", "1 + 1 = 2",
+  "∫ sin(x) dx = -cos(x)", "y = mx + b", "V = 4/3 πr³", "F = ma",
   "cos²θ + sin²θ = 1", "12 × 8 = 96", "√144 = 12", "log₂(8) = 3",
-  "3! = 6", "SUPER!", "EXCELLENT", "A+", "→ ∀x ∈ ℝ",
-  "lim x→0", "P(A∩B)", "Σ = ?", "NOTE: 18/20", ":) :D",
-  "x² - 4 = 0", "BIEN", "★ TOP ★", "42", "MERCI",
-  "C₆H₁₂O₆", "NaCl", "Au", "Fe₂O₃", "pH = 7",
+  "SUPER!", "EXCELLENT", "A+", "lim x→0", "NOTE: 18/20",
+  "x² - 4 = 0  →  x = ±2", "★ TOP ★", "42", "MERCI",
+  "C₆H₁₂O₆", "NaCl", "Fe₂O₃", "pH = 7",
+  "La Terre est ronde", "Verbe: etre, avoir, aller",
+  "1789: Revolution francaise", "Victor Hugo: Les Miserables",
+  "Conjugaison: je suis, tu es, il est",
+  "Le chat mange la souris", "Il etait une fois...",
+  "ATTENTION: Controle demain !!!", "Ne pas oublier !!!",
+  "Les 3 mousquetaires etaient 4", "Ici c'est la classe de CM2",
+  "Jeudi = piscine", "Vendredi = sortie scolaire",
+  "Tableau d'honneur", "10h15: recreation",
+  "GEOGRAPHIE: les continents", "HISTOIRE: Louis XIV",
 ]
 const CHALK_COLORS = ["#e8e8d0", "#d0d0c0", "#ffccaa", "#aaddcc", "#ddbbee", "#ffddaa", "#ccddff", "#ffd0d0"]
 const CHALK_FONTS = ["'Caveat',cursive", "'Indie Flower',cursive", "serif", "monospace"]
 
+// Simple drawing functions for child-like shapes
+function drawChalkShape(ctx, x, y, size, color, type) {
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.lineCap = "round"
+  ctx.setLineDash([])
+  if (type === "star") {
+    ctx.beginPath()
+    for (let i = 0; i < 5; i++) {
+      const a = (i * 4 * Math.PI / 5) - Math.PI / 2
+      const r = i === 0 ? 0 : size
+      ctx[i === 0 ? "moveTo" : "lineTo"](x + Math.cos(a) * size, y + Math.sin(a) * size)
+      const a2 = a + 2 * Math.PI / 5
+      ctx.lineTo(x + Math.cos(a2) * size * 0.4, y + Math.sin(a2) * size * 0.4)
+    }
+    ctx.closePath(); ctx.stroke()
+  } else if (type === "house") {
+    // Simple house
+    ctx.beginPath()
+    ctx.rect(x - size * 0.6, y - size * 0.3, size * 1.2, size * 0.8) // body
+    ctx.moveTo(x - size * 0.7, y - size * 0.3) // roof
+    ctx.lineTo(x, y - size)
+    ctx.lineTo(x + size * 0.7, y - size * 0.3)
+    ctx.rect(x - size * 0.15, y, size * 0.3, size * 0.5) // door
+    ctx.stroke()
+  } else if (type === "sun") {
+    ctx.beginPath()
+    ctx.arc(x, y, size * 0.4, 0, Math.PI * 2); ctx.stroke()
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2
+      ctx.beginPath()
+      ctx.moveTo(x + Math.cos(a) * size * 0.5, y + Math.sin(a) * size * 0.5)
+      ctx.lineTo(x + Math.cos(a) * size, y + Math.sin(a) * size)
+      ctx.stroke()
+    }
+  } else if (type === "tree") {
+    ctx.beginPath()
+    ctx.moveTo(x, y + size); ctx.lineTo(x, y + size * 0.3) // trunk
+    ctx.moveTo(x - size * 0.6, y + size * 0.5); ctx.lineTo(x, y - size * 0.5); ctx.lineTo(x + size * 0.6, y + size * 0.5)
+    ctx.stroke()
+  } else if (type === "smiley") {
+    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.stroke()
+    ctx.beginPath(); ctx.arc(x - size * 0.3, y - size * 0.2, size * 0.1, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(x + size * 0.3, y - size * 0.2, size * 0.1, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y + size * 0.1, size * 0.4, 0.1, Math.PI - 0.1); ctx.stroke()
+  } else if (type === "arrow") {
+    ctx.beginPath()
+    ctx.moveTo(x - size, y); ctx.lineTo(x + size, y)
+    ctx.moveTo(x + size * 0.5, y - size * 0.4); ctx.lineTo(x + size, y); ctx.lineTo(x + size * 0.5, y + size * 0.4)
+    ctx.stroke()
+  } else if (type === "graph") {
+    // Axes + curve
+    ctx.beginPath()
+    ctx.moveTo(x - size, y + size); ctx.lineTo(x - size, y - size) // Y
+    ctx.moveTo(x - size, y + size); ctx.lineTo(x + size, y + size) // X
+    ctx.moveTo(x - size, y + size * 0.5)
+    for (let i = 0; i <= 10; i++) {
+      const px = x - size + (i / 10) * size * 2
+      const py = y + size * 0.5 - Math.sin(i * 0.8) * size * 0.8
+      ctx.lineTo(px, py)
+    }
+    ctx.stroke()
+  } else if (type === "circle") {
+    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(x, y - size); ctx.lineTo(x, y + size)
+    ctx.moveTo(x - size, y); ctx.lineTo(x + size, y); ctx.stroke()
+  }
+}
+const SHAPE_TYPES = ["star", "house", "sun", "tree", "smiley", "arrow", "graph", "circle"]
+
 function ChalkboardBg() {
   const cv = useRef(null)
-  const writings = useRef([]) // { text, x, y, size, rot, color, font, opacity, charsDone, totalChars, state }
+  const items = useRef([])
+  const eraser = useRef({ active: false, x: -200, y: 0, targetY: 0 })
+
   useEffect(() => {
     const c = cv.current, ctx = c.getContext("2d")
     const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
     rz(); window.addEventListener("resize", rz)
 
-    let frame = 0, nextWrite = 30, nextErase = 300
+    let frame = 0, nextItem = 10, nextErase = 400
 
-    const addWriting = () => {
-      const text = CHALK_TEXTS[Math.floor(Math.random() * CHALK_TEXTS.length)]
-      writings.current.push({
-        text, x: 0.03 + Math.random() * 0.85, y: 0.05 + Math.random() * 0.85,
-        size: 12 + Math.random() * 18, rot: (Math.random() - 0.5) * 12,
-        color: CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)],
-        font: CHALK_FONTS[Math.floor(Math.random() * CHALK_FONTS.length)],
-        opacity: 0.12 + Math.random() * 0.12,
-        charsDone: 0, totalChars: text.length,
-        state: "writing", // writing, visible, erasing, dead
-        visibleUntil: 0, eraseProgress: 0,
-      })
+    const addItem = (preload) => {
+      const isShape = Math.random() > 0.6
+      const x = 0.03 + Math.random() * 0.88, y = 0.05 + Math.random() * 0.88
+      if (isShape) {
+        items.current.push({
+          kind: "shape", shape: SHAPE_TYPES[Math.floor(Math.random() * SHAPE_TYPES.length)],
+          x, y, size: 12 + Math.random() * 22, rot: (Math.random() - 0.5) * 15,
+          color: CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)],
+          opacity: 0.13 + Math.random() * 0.12,
+          progress: preload ? 1 : 0, state: preload ? "visible" : "drawing",
+          visibleUntil: 0, eraseProgress: 0,
+        })
+      } else {
+        const text = CHALK_TEXTS[Math.floor(Math.random() * CHALK_TEXTS.length)]
+        items.current.push({
+          kind: "text", text, x, y,
+          size: 11 + Math.random() * 16, rot: (Math.random() - 0.5) * 10,
+          color: CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)],
+          font: CHALK_FONTS[Math.floor(Math.random() * CHALK_FONTS.length)],
+          opacity: 0.14 + Math.random() * 0.14,
+          charsDone: preload ? text.length : 0, totalChars: text.length,
+          state: preload ? "visible" : "writing",
+          visibleUntil: 0, eraseProgress: 0,
+        })
+      }
     }
+
+    // Pre-fill the board
+    for (let i = 0; i < 25; i++) addItem(true)
+    // Set staggered visibleUntil
+    items.current.forEach((it, i) => { it.visibleUntil = 300 + i * 40 + Math.random() * 400 })
 
     const draw = () => {
       ctx.clearRect(0, 0, c.width, c.height)
       frame++
 
-      // Spawn new writings
-      if (frame > nextWrite) {
-        addWriting()
-        nextWrite = frame + 20 + Math.random() * 60
+      // Spawn new items
+      if (frame > nextItem) {
+        addItem(false)
+        nextItem = frame + 15 + Math.random() * 40
       }
 
-      // Erase random zone periodically
-      if (frame > nextErase && writings.current.length > 8) {
-        const zoneX = Math.random(), zoneY = Math.random()
-        for (const w of writings.current) {
-          if (w.state === "visible" && Math.abs(w.x - zoneX) < 0.2 && Math.abs(w.y - zoneY) < 0.2) {
-            w.state = "erasing"
+      // Eraser sweep — clears a horizontal band
+      if (frame > nextErase && items.current.length > 15) {
+        eraser.current = { active: true, x: -200, y: 0.15 + Math.random() * 0.6, h: 0.12 + Math.random() * 0.1 }
+        nextErase = frame + 350 + Math.random() * 250
+      }
+
+      const er = eraser.current
+      if (er.active) {
+        er.x += c.width * 0.025
+        if (er.x > c.width + 200) {
+          er.active = false
+        } else {
+          // Mark items in eraser path as erasing
+          for (const it of items.current) {
+            if (it.state === "visible" || it.state === "writing") {
+              const iy = it.y
+              if (iy > er.y - er.h / 2 && iy < er.y + er.h / 2) {
+                const ix = it.x * c.width
+                if (ix < er.x + 60) it.state = "erasing"
+              }
+            }
           }
-        }
-        nextErase = frame + 200 + Math.random() * 300
-      }
-
-      writings.current = writings.current.filter(w => w.state !== "dead")
-
-      for (const w of writings.current) {
-        const px = w.x * c.width, py = w.y * c.height
-
-        if (w.state === "writing") {
-          w.charsDone += 0.3
-          if (w.charsDone >= w.totalChars) {
-            w.charsDone = w.totalChars
-            w.state = "visible"
-            w.visibleUntil = frame + 300 + Math.random() * 600
-          }
-        } else if (w.state === "visible") {
-          if (frame > w.visibleUntil) w.state = "erasing"
-        } else if (w.state === "erasing") {
-          w.eraseProgress += 0.02
-          if (w.eraseProgress >= 1) { w.state = "dead"; continue }
-        }
-
-        const displayText = w.text.slice(0, Math.floor(w.charsDone))
-        const alpha = w.state === "erasing" ? w.opacity * (1 - w.eraseProgress) : w.opacity
-
-        ctx.save()
-        ctx.translate(px, py)
-        ctx.rotate(w.rot * Math.PI / 180)
-        ctx.globalAlpha = alpha
-        ctx.font = `${w.size}px ${w.font}`
-        ctx.fillStyle = w.color
-
-        // Chalk texture: draw twice with slight offset for roughness
-        ctx.fillText(displayText, 0, 0)
-        ctx.globalAlpha = alpha * 0.3
-        ctx.fillText(displayText, 0.5, -0.5)
-
-        // Cursor while writing
-        if (w.state === "writing" && Math.floor(frame / 15) % 2 === 0) {
-          const metrics = ctx.measureText(displayText)
-          ctx.globalAlpha = alpha * 0.6
-          ctx.fillRect(metrics.width + 2, -w.size * 0.7, 2, w.size * 0.8)
-        }
-
-        ctx.restore()
-      }
-
-      // Eraser smudge effect — draw smudge where erasing
-      for (const w of writings.current) {
-        if (w.state === "erasing") {
-          const px = w.x * c.width, py = w.y * c.height
+          // Draw eraser
           ctx.save()
-          ctx.globalAlpha = 0.03 * (1 - w.eraseProgress)
-          ctx.fillStyle = w.color
-          const sw = 40 + Math.random() * 30, sh = 8
-          ctx.fillRect(px - sw / 2 + (Math.random() - 0.5) * 20, py - 5 + Math.random() * 10, sw, sh)
+          const ey = er.y * c.height, eh = er.h * c.height
+          ctx.globalAlpha = 0.12
+          ctx.fillStyle = "#3a4a3a"
+          ctx.fillRect(er.x - 30, ey - eh / 2, 60, eh)
+          // Smear behind
+          for (let i = 0; i < 6; i++) {
+            ctx.globalAlpha = 0.02
+            ctx.fillStyle = CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)]
+            ctx.fillRect(er.x - 80 - Math.random() * 40, ey - eh / 2 + Math.random() * eh, 50 + Math.random() * 30, 2)
+          }
           ctx.restore()
         }
       }
 
+      items.current = items.current.filter(it => it.state !== "dead")
+
+      for (const it of items.current) {
+        const px = it.x * c.width, py = it.y * c.height
+
+        // State transitions
+        if (it.state === "writing") {
+          it.charsDone += 0.4
+          if (it.charsDone >= it.totalChars) {
+            it.charsDone = it.totalChars; it.state = "visible"
+            it.visibleUntil = frame + 400 + Math.random() * 800
+          }
+        } else if (it.state === "drawing") {
+          it.progress += 0.02
+          if (it.progress >= 1) {
+            it.progress = 1; it.state = "visible"
+            it.visibleUntil = frame + 400 + Math.random() * 800
+          }
+        } else if (it.state === "visible" && frame > it.visibleUntil) {
+          it.state = "erasing"
+        } else if (it.state === "erasing") {
+          it.eraseProgress += 0.015
+          if (it.eraseProgress >= 1) { it.state = "dead"; continue }
+        }
+
+        const alpha = it.state === "erasing" ? it.opacity * (1 - it.eraseProgress) : it.opacity
+
+        if (it.kind === "text") {
+          const displayText = it.text.slice(0, Math.floor(it.charsDone))
+          ctx.save()
+          ctx.translate(px, py); ctx.rotate(it.rot * Math.PI / 180)
+          ctx.globalAlpha = alpha; ctx.font = `${it.size}px ${it.font}`
+          ctx.fillStyle = it.color; ctx.fillText(displayText, 0, 0)
+          ctx.globalAlpha = alpha * 0.25; ctx.fillText(displayText, 0.6, -0.6) // chalk texture
+          if (it.state === "writing" && Math.floor(frame / 12) % 2 === 0) {
+            const m = ctx.measureText(displayText)
+            ctx.globalAlpha = alpha * 0.5
+            ctx.fillRect(m.width + 2, -it.size * 0.7, 2, it.size * 0.8)
+          }
+          ctx.restore()
+        } else {
+          ctx.save()
+          ctx.translate(px, py); ctx.rotate(it.rot * Math.PI / 180)
+          ctx.globalAlpha = alpha * (it.state === "drawing" ? it.progress : 1)
+          ctx.fillStyle = it.color
+          drawChalkShape(ctx, 0, 0, it.size, it.color, it.shape)
+          ctx.restore()
+        }
+      }
       requestAnimationFrame(draw)
     }
-    // Start with some pre-existing writings
-    for (let i = 0; i < 12; i++) {
-      const text = CHALK_TEXTS[Math.floor(Math.random() * CHALK_TEXTS.length)]
-      writings.current.push({
-        text, x: 0.03 + Math.random() * 0.85, y: 0.05 + Math.random() * 0.85,
-        size: 12 + Math.random() * 18, rot: (Math.random() - 0.5) * 12,
-        color: CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)],
-        font: CHALK_FONTS[Math.floor(Math.random() * CHALK_FONTS.length)],
-        opacity: 0.1 + Math.random() * 0.1,
-        charsDone: text.length, totalChars: text.length,
-        state: "visible", visibleUntil: 200 + Math.random() * 500, eraseProgress: 0,
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }} />
       })
     }
     const raf = requestAnimationFrame(draw)
