@@ -1538,7 +1538,7 @@ export default function RecapPlayer() {
       {needSpotlights && eff.sabers && <Sabers intensity={spotlightIntensity} />}
       {needSpotlights && !eff.sabers && eff.spotlights !== false && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
       {/* Music player */}
-      {recapConfig.recap_music && <MusicPlayer musicConfig={recapConfig.recap_music} currentSlideId={curr.id} onPlayingChange={setMusicPlaying} />}
+      {recapConfig.recap_music && <MusicPlayer musicConfig={recapConfig.recap_music} currentSlideId={curr.id} onPlayingChange={setMusicPlaying} accent={accent} />}
 
       {isFinale && (slideConfigs?.settings?.finale?.confetti !== false) && eff.confetti !== false && <ConfettiEffect />}
       {isFinale && (slideConfigs?.settings?.finale?.fireworks !== false) && eff.fireworks !== false && <FireworksEffect active={true} />}
@@ -1709,7 +1709,7 @@ function extractYouTubeId(url) {
   return m ? m[1] : null
 }
 
-function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange }) {
+function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange, accent }) {
   const mode = musicConfig?.mode || "single"
   const tracks = musicConfig?.tracks || {}
   const [playing, setPlaying] = useState(false)
@@ -1805,7 +1805,7 @@ function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange }) {
         {[0, 0.2, 0.4, 0.1].map((d, i) => (
           <div key={i} style={{
             width: 2, borderRadius: 1,
-            background: "rgba(255,255,255,0.4)",
+            background: accent || "rgba(255,255,255,0.4)",
             animation: `soundbar ${0.4 + i * 0.15}s ease-in-out ${d}s infinite alternate`,
           }} />
         ))}
@@ -1815,9 +1815,9 @@ function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange }) {
       onClick={togglePlay}
       title={playing ? "Couper la musique" : "Activer la musique"}
       style={{
-        background: playing ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)",
-        border: "1px solid " + (playing ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)"),
-        borderRadius: 6, color: playing ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
+        background: playing ? (accent + "15") : "rgba(255,255,255,0.06)",
+        border: "1px solid " + (playing ? (accent + "40") : "rgba(255,255,255,0.1)"),
+        borderRadius: 6, color: playing ? accent : "rgba(255,255,255,0.4)",
         fontSize: "clamp(9px, 1.2vw, 11px)", padding: "clamp(3px, 0.5vw, 5px) clamp(6px, 1vw, 9px)", cursor: "pointer",
         display: "flex", alignItems: "center",
         transition: "all .2s ease",
