@@ -609,7 +609,6 @@ function MatrixRain() {
 function XmasLights() {
   const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   const bulbColors = ["#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff8800", "#ff20aa", "#20ddff", "#aaff20"]
-  // 3 rows: A-I, J-R, S-Z
   const rows = [
     ALPHA.slice(0, 9).split(""),
     ALPHA.slice(9, 18).split(""),
@@ -621,20 +620,36 @@ function XmasLights() {
       droopY: 6 + Math.sin((row * 9 + i) * 0.6) * 5 + Math.random() * 3,
     }))
   )).current
-  const [lit, setLit] = useState({})
+
+  // Smooth intensity per bulb (0-1), not just on/off
+  const [intensities, setIntensities] = useState(() => Array(26).fill(0.05))
+  const targets = useRef(Array(26).fill(0.05))
 
   useEffect(() => {
-    const flicker = () => {
-      const next = {}
-      const count = 4 + Math.floor(Math.random() * 5)
-      for (let i = 0; i < count; i++) {
-        next[Math.floor(Math.random() * 26)] = true
+    // Pick new random targets periodically
+    const pickTargets = () => {
+      const next = [...targets.current]
+      // Dim most bulbs, light a few
+      for (let i = 0; i < 26; i++) {
+        next[i] = Math.max(0.03, next[i] * 0.85) // fade toward dim
       }
-      setLit(next)
+      const count = 3 + Math.floor(Math.random() * 5)
+      for (let j = 0; j < count; j++) {
+        const idx = Math.floor(Math.random() * 26)
+        next[idx] = 0.5 + Math.random() * 0.5 // bright
+      }
+      targets.current = next
     }
-    flicker()
-    const id = setInterval(flicker, 250 + Math.random() * 350)
-    return () => clearInterval(id)
+    const targetId = setInterval(pickTargets, 400 + Math.random() * 600)
+    pickTargets()
+
+    // Smooth interpolation at 30fps
+    const lerp = () => {
+      setIntensities(prev => prev.map((v, i) => v + (targets.current[i] - v) * 0.12))
+    }
+    const lerpId = setInterval(lerp, 33)
+
+    return () => { clearInterval(targetId); clearInterval(lerpId) }
   }, [])
 
   return (
@@ -643,47 +658,46 @@ function XmasLights() {
         const globalOffset = row === 0 ? 0 : row === 1 ? 9 : 18
         const rowWidth = bulbs.length
         return (
-          <div key={row} style={{ position: "relative", height: 65, marginBottom: -8 }}>
+          <div key={row} style={{ position: "relative", height: 58, marginBottom: -6 }}>
             {/* Wire */}
-            <svg width="100%" height="28" viewBox={`0 0 1000 28`} preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
+            <svg width="100%" height="24" viewBox="0 0 1000 24" preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
               <path d={bulbs.map((b, i) => {
                 const pad = 60
                 const x = pad + (i / Math.max(1, rowWidth - 1)) * (1000 - pad * 2)
                 const nx = pad + (Math.min(i + 1, rowWidth - 1) / Math.max(1, rowWidth - 1)) * (1000 - pad * 2)
                 const midX = (x + nx) / 2
-                return i === 0 ? `M${x},6 Q${midX},${b.droopY + 6} ${nx},6` : `Q${midX},${b.droopY + 6} ${nx},6`
-              }).join(" ")} fill="none" stroke="rgba(100,100,80,0.35)" strokeWidth="1.2" />
+                return i === 0 ? `M${x},5 Q${midX},${b.droopY + 5} ${nx},5` : `Q${midX},${b.droopY + 5} ${nx},5`
+              }).join(" ")} fill="none" stroke="rgba(100,100,80,0.3)" strokeWidth="1" />
             </svg>
-            {/* Bulbs + letters */}
             {bulbs.map((b, i) => {
               const pad = 6
               const x = pad + ((i + 0.5) / rowWidth) * (100 - pad * 2)
               const gi = globalOffset + i
-              const isLit = lit[gi]
+              const intensity = intensities[gi] || 0.05
+              const bright = intensity > 0.2
               return (
                 <div key={gi} style={{
                   position: "absolute", left: x + "%", top: b.droopY, transform: "translateX(-50%)",
                   display: "flex", flexDirection: "column", alignItems: "center",
                 }}>
-                  <div style={{ width: 1, height: 5, background: "rgba(100,100,80,0.3)" }} />
-                  {/* Bulb */}
+                  <div style={{ width: 1, height: 4, background: "rgba(100,100,80,0.25)" }} />
+                  {/* Bulb — small, soft glow */}
                   <div style={{
-                    width: 9, height: 12, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
-                    background: isLit ? b.color : "rgba(60,55,40,0.25)",
-                    boxShadow: isLit ? `0 0 10px ${b.color}, 0 0 25px ${b.color}50, 0 4px 20px ${b.color}30` : "none",
-                    transition: "all 0.08s ease",
+                    width: 6, height: 8, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
+                    background: bright ? b.color : "rgba(60,55,40,0.2)",
+                    opacity: 0.3 + intensity * 0.7,
+                    boxShadow: bright ? `0 0 ${4 + intensity * 8}px ${b.color}${Math.round(intensity * 60).toString(16).padStart(2,"0")}` : "none",
+                    transition: "opacity 0.15s ease",
                   }} />
-                  {/* Letter with top-lit gradient */}
+                  {/* Letter */}
                   <div style={{
-                    fontSize: 16, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 800,
+                    fontSize: 15, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 800,
                     marginTop: 1, lineHeight: 1,
-                    background: isLit
-                      ? `linear-gradient(to bottom, ${b.color} 0%, ${b.color}40 60%, ${b.color}10 100%)`
-                      : "linear-gradient(to bottom, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
-                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    filter: isLit ? `drop-shadow(0 0 8px ${b.color}60)` : "none",
-                    transition: "all 0.08s ease",
+                    background: `linear-gradient(to bottom, ${b.color} 0%, ${b.color}30 70%, transparent 100%)`,
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+                    opacity: 0.04 + intensity * 0.9,
+                    filter: bright ? `drop-shadow(0 -2px ${3 + intensity * 5}px ${b.color}40)` : "none",
+                    transition: "opacity 0.15s ease, filter 0.15s ease",
                   }}>{b.letter}</div>
                 </div>
               )
