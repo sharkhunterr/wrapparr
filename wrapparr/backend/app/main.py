@@ -157,11 +157,11 @@ BUILTIN_THEMES = [
             "card_style": "glass", "transition": "slide-up",
         },
     },
-    {   # Sin City — noir avec rouge sang
+    {   # Sin City — noir, rouge, jaune, vert
         "name": "Basin City", "slug": "basin-city",
         "config": {
             "palette": {"primary": "#ff0033", "background": "#000000",
-                        "accents": {"films": "#ff0033", "series": "#ff0033", "romm": "#ff0033", "audio": "#ff0033", "komga": "#ff0033", "booklore": "#ff0033", "compare": "#ff0033", "ranking": "#ff0033"}},
+                        "accents": {"films": "#ff0033", "series": "#cccc00", "romm": "#33cc44", "audio": "#ff0033", "komga": "#cccc00", "booklore": "#33cc44", "compare": "#cccc00", "ranking": "#ff0033"}},
             "card_style": "glass", "transition": "slide-up",
         },
     },
