@@ -93,6 +93,94 @@ BUILTIN_THEMES = [
             "fonts": {"heading": "Syne", "body": "Outfit", "mono": "DM Mono"},
         },
     },
+    {   # Neon Retro — violet/magenta synthwave
+        "name": "Synthwave", "slug": "synthwave",
+        "config": {
+            "palette": {"primary": "#ff00dc", "background": "#0a0020",
+                        "accents": {"films": "#ff00dc", "series": "#00ffff", "romm": "#b4ff39", "audio": "#ff6600", "komga": "#aa55ff", "booklore": "#00ff99", "compare": "#ff55aa", "ranking": "#ffee00"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Cinema Classic — sepia chaud
+        "name": "Pellicule", "slug": "pellicule",
+        "config": {
+            "palette": {"primary": "#d4a040", "background": "#1a0f05",
+                        "accents": {"films": "#d4a040", "series": "#c07040", "romm": "#8a9060", "audio": "#b08050", "komga": "#907060", "booklore": "#a09070", "compare": "#c0a060", "ranking": "#b07050"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Weyland-Yutani — vert phosphore monochrome
+        "name": "Phosphore", "slug": "phosphore",
+        "config": {
+            "palette": {"primary": "#33ff66", "background": "#000800",
+                        "accents": {"films": "#33ff66", "series": "#22dd55", "romm": "#44ff77", "audio": "#55ff88", "komga": "#22cc44", "booklore": "#33ee55", "compare": "#44ff66", "ranking": "#55ff44"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Pirate — or et ambre
+        "name": "Tresor", "slug": "tresor",
+        "config": {
+            "palette": {"primary": "#d4a030", "background": "#1a0e04",
+                        "accents": {"films": "#d4a030", "series": "#c07830", "romm": "#aa8830", "audio": "#b09030", "komga": "#907840", "booklore": "#a08838", "compare": "#c4a848", "ranking": "#b87830"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Arcade — jaune/couleurs saturees retro
+        "name": "Arcade", "slug": "arcade",
+        "config": {
+            "palette": {"primary": "#ffff00", "background": "#000020",
+                        "accents": {"films": "#ffff00", "series": "#ff0066", "romm": "#00ff00", "audio": "#ff8800", "komga": "#00ccff", "booklore": "#ff00ff", "compare": "#00ff88", "ranking": "#ff4444"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Matrix — vert digital
+        "name": "Digital", "slug": "digital",
+        "config": {
+            "palette": {"primary": "#00dd00", "background": "#000500",
+                        "accents": {"films": "#00dd00", "series": "#00bb00", "romm": "#00ff44", "audio": "#44dd00", "komga": "#00cc22", "booklore": "#22ee00", "compare": "#00ff00", "ranking": "#44ff22"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Upside Down — rouge sombre
+        "name": "Hawkins", "slug": "hawkins",
+        "config": {
+            "palette": {"primary": "#ff3030", "background": "#0a0000",
+                        "accents": {"films": "#ff3030", "series": "#ff8800", "romm": "#ffcc00", "audio": "#ff5050", "komga": "#cc2020", "booklore": "#ff6644", "compare": "#ff4466", "ranking": "#ffaa22"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Star Wars — bleu spatial
+        "name": "Republique", "slug": "republique",
+        "config": {
+            "palette": {"primary": "#4488ff", "background": "#000510",
+                        "accents": {"films": "#4488ff", "series": "#ff4444", "romm": "#44ddaa", "audio": "#ffcc44", "komga": "#aa88ff", "booklore": "#44ddff", "compare": "#88bbff", "ranking": "#ff8844"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Sin City — noir avec rouge sang
+        "name": "Basin City", "slug": "basin-city",
+        "config": {
+            "palette": {"primary": "#ff0033", "background": "#000000",
+                        "accents": {"films": "#ff0033", "series": "#ff0033", "romm": "#ff0033", "audio": "#ff0033", "komga": "#ff0033", "booklore": "#ff0033", "compare": "#ff0033", "ranking": "#ff0033"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Cinema Muet — sepia desature
+        "name": "Muet", "slug": "muet",
+        "config": {
+            "palette": {"primary": "#c8b898", "background": "#0a0a0a",
+                        "accents": {"films": "#c8b898", "series": "#b0a080", "romm": "#a09878", "audio": "#b8a888", "komga": "#a89880", "booklore": "#b0a078", "compare": "#c0b090", "ranking": "#b8a078"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
+    {   # Abysse — bleu profond bioluminescent
+        "name": "Abyssal", "slug": "abyssal",
+        "config": {
+            "palette": {"primary": "#00aaff", "background": "#000818",
+                        "accents": {"films": "#00aaff", "series": "#00ffcc", "romm": "#4488ff", "audio": "#00ddaa", "komga": "#6688ff", "booklore": "#00ccff", "compare": "#44bbff", "ranking": "#00ff88"}},
+            "card_style": "glass", "transition": "slide-up",
+        },
+    },
 ]
 
 DEFAULT_CONFIG = {

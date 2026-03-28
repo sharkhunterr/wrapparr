@@ -5,6 +5,7 @@ export const THEMES = {
   "glass-dark": {
     id: "glass-dark",
     name: "Glass Dark",
+    defaultPalette: null,
     description: "Effet verre depoli sur fond sombre",
     preview: "linear-gradient(135deg, #0a0a1a, #15152a)",
 
@@ -106,6 +107,7 @@ export const THEMES = {
 
   "neon-retro": {
     id: "neon-retro",
+    defaultPalette: "synthwave",
     name: "Neon Retro",
     description: "Synthwave, grille perspective, neons scintillants",
     preview: "linear-gradient(180deg, #0a0020 0%, #1a0040 50%, #2d0060 100%)",
@@ -207,6 +209,7 @@ export const THEMES = {
 
   "cinema-classic": {
     id: "cinema-classic",
+    defaultPalette: "pellicule",
     name: "Cinema Classic",
     description: "Pellicule, grain, ambiance salle obscure",
     preview: "linear-gradient(135deg, #1a0f05, #2a1a0a)",
@@ -302,6 +305,7 @@ export const THEMES = {
   },
   "weyland-yutani": {
     id: "weyland-yutani",
+    defaultPalette: "phosphore",
     name: "Weyland-Yutani",
     description: "Terminal MUTHUR, phosphore vert, interface Nostromo",
     preview: "linear-gradient(180deg, #000800 0%, #001a00 50%, #000a00 100%)",
@@ -407,6 +411,7 @@ export const THEMES = {
 
   "pirate": {
     id: "pirate",
+    defaultPalette: "tresor",
     name: "Pirate",
     description: "Parchemin, carte au tresor, butin et aventure",
     preview: "linear-gradient(135deg, #2a1a08 0%, #3d2810 50%, #1a0e04 100%)",
@@ -524,6 +529,7 @@ export const THEMES = {
 
   "arcade-8bit": {
     id: "arcade-8bit",
+    defaultPalette: "arcade",
     name: "Arcade 8-bit",
     description: "Borne d'arcade, pixels, couleurs saturees",
     preview: "linear-gradient(180deg, #000000 0%, #1a0030 50%, #000020 100%)",
@@ -629,6 +635,7 @@ export const THEMES = {
 
   "matrix": {
     id: "matrix",
+    defaultPalette: "digital",
     name: "Matrix",
     description: "Pluie de code, pilule rouge, eveil numerique",
     preview: "linear-gradient(180deg, #000000 0%, #001500 60%, #000a00 100%)",
@@ -737,6 +744,7 @@ export const THEMES = {
 
   "stranger-things": {
     id: "stranger-things",
+    defaultPalette: "hawkins",
     name: "Upside Down",
     description: "Lumieres de Noel, Monde a l'envers, annees 80",
     preview: "linear-gradient(180deg, #0a0000 0%, #1a0505 50%, #0d0000 100%)",
@@ -843,6 +851,7 @@ export const THEMES = {
 
   "starwars": {
     id: "starwars",
+    defaultPalette: "republique",
     name: "Galaxie lointaine",
     description: "Hyperespace, hologrammes, Force et Rebellion",
     preview: "linear-gradient(180deg, #000005 0%, #000820 50%, #000005 100%)",
@@ -949,6 +958,7 @@ export const THEMES = {
 
   "silent-film": {
     id: "silent-film",
+    defaultPalette: "muet",
     name: "Cinema Muet",
     description: "Chaplin, pellicule, ardoises, noir et blanc",
     preview: "linear-gradient(135deg, #0a0a0a 0%, #222222 50%, #111111 100%)",
@@ -1055,6 +1065,7 @@ export const THEMES = {
 
   "sin-city": {
     id: "sin-city",
+    defaultPalette: "basin-city",
     name: "Sin City",
     description: "Noir total, contraste dur, touche de couleur",
     preview: "linear-gradient(135deg, #000000 0%, #1a1a1a 40%, #000000 100%)",
@@ -1111,8 +1122,10 @@ export const THEMES = {
 .th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.1;mix-blend-mode:overlay;animation:th-noir-grain 0.12s steps(1) infinite}
 @keyframes th-noir-grain{0%{opacity:0.07}50%{opacity:0.12}100%{opacity:0.08}}
 .th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 25%,rgba(0,0,0,0.7) 100%)}
-.recap-root.th-noir-on{filter:saturate(0.15) contrast(1.25)!important}
+.recap-root.th-noir-on{filter:contrast(1.3)!important}
+.recap-root.th-noir-on img,.recap-root.th-noir-on svg:not([data-keep-color]),.recap-root.th-noir-on canvas{filter:saturate(0)!important}
 .recap-root h2,.recap-root h1,.recap-root h3{text-transform:uppercase!important;letter-spacing:0.08em!important;text-shadow:2px 2px 0 rgba(0,0,0,0.9),4px 4px 0 rgba(0,0,0,0.4)!important}
+.recap-root h2 span[style],.recap-root h1 span[style]{filter:saturate(3) brightness(1.3)!important}
 .glass{border-left:3px solid rgba(255,255,255,0.15)!important;border-right:none!important;border-top:none!important;border-bottom:none!important;border-radius:0!important}
 `,
 
@@ -1156,6 +1169,7 @@ export const THEMES = {
 
   "abyss": {
     id: "abyss",
+    defaultPalette: "abyssal",
     name: "Abysse",
     description: "Fond marin, bioluminescence, profondeurs",
     preview: "linear-gradient(180deg, #000510 0%, #001030 50%, #000818 100%)",

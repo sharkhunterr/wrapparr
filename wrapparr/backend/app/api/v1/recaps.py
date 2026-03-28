@@ -39,7 +39,7 @@ async def get_slide_config_public(_user: User = Depends(get_current_user), db: A
     result3 = await db.execute(select(GlobalConfig).where(GlobalConfig.key == "active_theme"))
     theme_cfg = result3.scalar_one_or_none()
     # Public recap settings
-    public_keys = ["comparison_default_on", "recap_music", "visual_theme", "visual_theme_effects"]
+    public_keys = ["comparison_default_on", "recap_music", "visual_theme", "visual_theme_effects", "allow_user_themes"]
     public_config = {}
     for pk in public_keys:
         r = await db.execute(select(GlobalConfig).where(GlobalConfig.key == pk))

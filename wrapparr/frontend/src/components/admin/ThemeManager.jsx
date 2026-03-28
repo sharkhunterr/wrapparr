@@ -55,9 +55,21 @@ export default function ThemeManager() {
   const selectVisualTheme = async (id) => {
     setSaving(true)
     setGlobalConfig({ ...globalConfig, visual_theme: id })
-    // Reset effect overrides when switching theme
     setEffectOverrides({})
-    await api("/admin/config", { method: "PATCH", body: { visual_theme: id, visual_theme_effects: {} } })
+    const vt = VISUAL_THEMES.find((t) => t.id === id)
+    const updates = { visual_theme: id, visual_theme_effects: {} }
+    // Auto-select matching palette if the theme has one
+    if (vt?.defaultPalette) {
+      const matchingPalette = themes.find((t) => t.slug === vt.defaultPalette || t.name?.toLowerCase() === vt.defaultPalette)
+      if (matchingPalette) {
+        await api("/themes/users/me/theme", { method: "PUT", body: { theme_pack_id: matchingPalette.id } })
+        await api("/admin/config", { method: "PATCH", body: { ...updates, active_theme: matchingPalette.id } })
+        setActiveId(matchingPalette.id)
+        setSaving(false)
+        return
+      }
+    }
+    await api("/admin/config", { method: "PATCH", body: updates })
     setSaving(false)
   }
 
@@ -126,6 +138,7 @@ export default function ThemeManager() {
                 <div style={{ width: "100%", height: 36, borderRadius: 6, marginBottom: 10, background: t.preview }} />
                 <div style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#E5A00D" : "white", fontFamily: "Nunito,sans-serif" }}>{t.name}</div>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 2, fontFamily: "Nunito,sans-serif" }}>{t.description}</div>
+                {t.defaultPalette && <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", marginTop: 4, fontFamily: "JetBrains Mono,monospace" }}>palette: {t.defaultPalette}</div>}
               </button>
             )
           })}
