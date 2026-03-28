@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/your-username/wrapparr/-/compare/v0.1.2...v0.1.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* test backend CI — rootdir explicite pour pytest ([dccf953](https://github.com/your-username/wrapparr/-/commit/dccf953e2593a79d3dc99a8ed384cbf4c614c6a8))
+
 ### [0.1.2](https://github.com/your-username/wrapparr/-/compare/v0.1.1...v0.1.2) (2026-03-28)
 
 ### 0.1.1 (2026-03-28)
