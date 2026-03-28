@@ -872,23 +872,55 @@ function Snow() {
 
 // ── Chalkboard: canvas with text, drawings, eraser ──
 const CHALK_TEXTS = [
+  // Equations & formules
   "E = mc²", "2x + 3y = 12", "H₂O", "π ≈ 3.14159", "a² + b² = c²",
-  "∑(n=1→∞) 1/n²", "BRAVO !!", "★★★★★", "100/100", "dx/dt = v",
-  "f(x) = 2x³ - 5x + 1", "∞", "ABCDEFGHIJK", "1 + 1 = 2",
+  "∑(n=1→∞) 1/n²", "f(x) = 2x³ - 5x + 1", "∞", "1 + 1 = 2",
   "∫ sin(x) dx = -cos(x)", "y = mx + b", "V = 4/3 πr³", "F = ma",
   "cos²θ + sin²θ = 1", "12 × 8 = 96", "√144 = 12", "log₂(8) = 3",
-  "SUPER!", "EXCELLENT", "A+", "lim x→0", "NOTE: 18/20",
-  "x² - 4 = 0  →  x = ±2", "★ TOP ★", "42", "MERCI",
+  "x² - 4 = 0  →  x = ±2", "42", "dx/dt = v", "lim x→0",
   "C₆H₁₂O₆", "NaCl", "Fe₂O₃", "pH = 7",
-  "La Terre est ronde", "Verbe: etre, avoir, aller",
-  "1789: Revolution francaise", "Victor Hugo: Les Miserables",
+  // Notes & apreciations
+  "BRAVO !!", "★★★★★", "100/100", "SUPER!", "EXCELLENT", "A+",
+  "NOTE: 18/20", "★ TOP ★", "MERCI", "Tableau d'honneur",
+  "Tres bien, continue comme ca!", "Peut mieux faire...",
+  "Bon travail mais attention aux fautes",
+  // Phrases longues
+  "La Terre tourne autour du Soleil\nen 365 jours et 6 heures",
+  "Les dinosaures ont disparu\nil y a 65 millions d'annees",
+  "Victor Hugo a ecrit\nLes Miserables en 1862",
+  "Le theoreme de Pythagore:\nDans un triangle rectangle,\nle carre de l'hypotenuse\nest egal a la somme\ndes carres des deux\nautres cotes.",
+  "ATTENTION:\nControle de maths\nvendredi prochain !!!",
+  "Il etait une fois,\ndans un pays lointain,\nun roi tres sage...",
+  "Les 3 mousquetaires\netaient en fait 4:\nAthos, Porthos,\nAramis et d'Artagnan",
+  "La photosynthese:\n6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂\n(lumiere necessaire)",
+  // Listes
+  "Courses:\n- cahier\n- stylos\n- gomme\n- regle\n- compas",
+  "Les planetes:\n1. Mercure\n2. Venus\n3. Terre\n4. Mars\n5. Jupiter\n6. Saturne",
+  "A retenir:\n• la gravite\n• la vitesse\n• l'acceleration\n• la force",
+  "Menu cantine:\n- Entree: salade\n- Plat: poulet frites\n- Dessert: pomme",
+  "Emploi du temps:\nLundi: maths, francais\nMardi: histoire, SVT\nJeudi: sport, anglais",
+  // Conjugaison & grammaire
+  "Conjugaison du verbe ETRE:\nje suis\ntu es\nil/elle est\nnous sommes\nvous etes\nils/elles sont",
+  "Verbe: etre, avoir, aller",
   "Conjugaison: je suis, tu es, il est",
-  "Le chat mange la souris", "Il etait une fois...",
-  "ATTENTION: Controle demain !!!", "Ne pas oublier !!!",
-  "Les 3 mousquetaires etaient 4", "Ici c'est la classe de CM2",
-  "Jeudi = piscine", "Vendredi = sortie scolaire",
-  "Tableau d'honneur", "10h15: recreation",
-  "GEOGRAPHIE: les continents", "HISTOIRE: Louis XIV",
+  "Les temps:\n- present\n- imparfait\n- futur\n- passe compose",
+  // Histoire & geo
+  "1789: Revolution francaise",
+  "GEOGRAPHIE:\nles 5 continents:\nEurope, Asie, Afrique,\nAmerique, Oceanie",
+  "HISTOIRE:\nLouis XIV, le Roi Soleil\na regne 72 ans\n(1643 - 1715)",
+  "La Revolution industrielle\na commence en Angleterre\nau XVIIIe siecle",
+  // Maths
+  "Table de 7:\n7×1=7  7×2=14\n7×3=21  7×4=28\n7×5=35  7×6=42\n7×7=49  7×8=56",
+  "Perimetre du cercle:\nP = 2 × π × r\nAire du cercle:\nA = π × r²",
+  "Les fractions:\n1/2 + 1/4 = 3/4\n2/3 × 3/5 = 6/15 = 2/5",
+  // Divers ecole
+  "Le chat mange la souris",
+  "Ici c'est la classe de CM2",
+  "Jeudi = piscine !!!", "Vendredi = sortie scolaire",
+  "10h15: RECREATION !!!", "Ne pas oublier !!!",
+  "ABCDEFGHIJKLM\nNOPQRSTUVWXYZ",
+  "DEVOIRS:\n1) ex 3 p.47\n2) apprendre lecon\n3) lire chap. 5",
+  "Regle de trois:\nsi 3 → 12\nalors 5 → ??\n5 × 12 / 3 = 20",
 ]
 const CHALK_COLORS = ["#e8e8d0", "#d0d0c0", "#ffccaa", "#aaddcc", "#ddbbee", "#ffddaa", "#ccddff", "#ffd0d0"]
 const CHALK_FONTS = ["'Caveat',cursive", "'Indie Flower',cursive", "serif", "monospace"]
@@ -1082,15 +1114,23 @@ function ChalkboardBg() {
 
         if (it.kind === "text") {
           const displayText = it.text.slice(0, Math.floor(it.charsDone))
+          const lines = displayText.split("\n")
+          const lh = it.size * 1.3
           ctx.save()
           ctx.translate(px, py); ctx.rotate(it.rot * Math.PI / 180)
-          ctx.globalAlpha = alpha; ctx.font = `${it.size}px ${it.font}`
-          ctx.fillStyle = it.color; ctx.fillText(displayText, 0, 0)
-          ctx.globalAlpha = alpha * 0.25; ctx.fillText(displayText, 0.6, -0.6) // chalk texture
+          ctx.font = `${it.size}px ${it.font}`
+          ctx.fillStyle = it.color
+          for (let li = 0; li < lines.length; li++) {
+            ctx.globalAlpha = alpha
+            ctx.fillText(lines[li], 0, li * lh)
+            ctx.globalAlpha = alpha * 0.2
+            ctx.fillText(lines[li], 0.5, li * lh - 0.5) // chalk texture
+          }
           if (it.state === "writing" && Math.floor(frame / 12) % 2 === 0) {
-            const m = ctx.measureText(displayText)
+            const lastLine = lines[lines.length - 1]
+            const m = ctx.measureText(lastLine)
             ctx.globalAlpha = alpha * 0.5
-            ctx.fillRect(m.width + 2, -it.size * 0.7, 2, it.size * 0.8)
+            ctx.fillRect(m.width + 2, (lines.length - 1) * lh - it.size * 0.7, 2, it.size * 0.8)
           }
           ctx.restore()
         } else {
