@@ -1,0 +1,34 @@
+{
+  "name": "wrapparr",
+  "version": "0.1.0",
+  "description": "Spotify Wrapped-style media recap for homelab servers",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd src/backend && source .venv/bin/activate && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:frontend": "cd src/frontend && npm run dev",
+    "build": "cd src/frontend && npm run build",
+    "build:docker": "docker build -f docker/Dockerfile -t wrapparr:latest .",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:up:dev": "docker compose -f docker/docker-compose.dev.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
+    "lint:backend": "cd src/backend && ruff check .",
+    "lint:frontend": "cd src/frontend && npx eslint src/",
+    "test:backend": "cd src/backend && pytest",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/wrapparr.git"
+  },
+  "author": "Wrapparr",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "standard-version": "^9.5.0"
+  }
+}

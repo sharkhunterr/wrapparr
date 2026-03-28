@@ -1,0 +1,78 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    container_name: wrapparr-api-dev
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://wrapparr:secret@postgres:5432/wrapparr}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-dev-encryption-key}
+      - TMDB_API_KEY=${TMDB_API_KEY:-}
+    volumes:
+      - ../src/backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - wrapparr-network
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    container_name: wrapparr-front-dev
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8173}:8173"
+    volumes:
+      - ../src/frontend/src:/app/src
+    networks:
+      - wrapparr-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: wrapparr-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wrapparr
+      POSTGRES_USER: wrapparr
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wrapparr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wrapparr-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: wrapparr-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wrapparr-network
+
+volumes:
+  postgres-data-dev:
+
+networks:
+  wrapparr-network:
+    driver: bridge

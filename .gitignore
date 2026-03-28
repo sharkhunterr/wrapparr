@@ -5,13 +5,13 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
-dist/
 
 # Node
 node_modules/
 dist/
 build/
 *.log
+package-lock.json
 
 # Environment
 .env
@@ -30,8 +30,19 @@ Thumbs.db
 
 # Docker volumes
 postgres_data/
+postgres-data/
 
 # Coverage
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Build artifacts
+*.tgz
+
+# Prototype (unused)
+wrapparr-front/
+wrapparr-front.zip
+
+# Music cache
+src/backend/music_cache/
