@@ -870,55 +870,142 @@ function Snow() {
   return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }} />
 }
 
-// ── Chalkboard background writings ──
-const CHALK_ITEMS = [
-  { type: "text", content: "E = mc²", x: 0.08, y: 0.15, size: 18, rot: -3 },
-  { type: "text", content: "2x + 3 = 7", x: 0.75, y: 0.12, size: 14, rot: 2 },
-  { type: "text", content: "H₂O", x: 0.85, y: 0.7, size: 20, rot: -5 },
-  { type: "text", content: "π ≈ 3.14", x: 0.12, y: 0.78, size: 15, rot: 4 },
-  { type: "text", content: "a² + b² = c²", x: 0.65, y: 0.85, size: 13, rot: -2 },
-  { type: "text", content: "∑ f(x)", x: 0.9, y: 0.4, size: 16, rot: 6 },
-  { type: "text", content: "BRAVO!", x: 0.2, y: 0.88, size: 22, rot: -8 },
-  { type: "text", content: "★ ★ ★", x: 0.5, y: 0.08, size: 16, rot: 0 },
-  { type: "text", content: "100/100", x: 0.82, y: 0.25, size: 14, rot: 3 },
-  { type: "text", content: "dx/dt", x: 0.05, y: 0.45, size: 15, rot: -4 },
-  { type: "text", content: "ABC", x: 0.35, y: 0.92, size: 20, rot: 5 },
-  { type: "text", content: "∞", x: 0.92, y: 0.55, size: 24, rot: 0 },
-  { type: "text", content: "f(x) = ax + b", x: 0.15, y: 0.62, size: 12, rot: -1 },
-  { type: "text", content: "☺", x: 0.7, y: 0.35, size: 28, rot: 10 },
-  { type: "text", content: "1+1=2", x: 0.4, y: 0.18, size: 16, rot: -6 },
+// ── Chalkboard: canvas with writing, erasing, rewriting ──
+const CHALK_TEXTS = [
+  "E = mc²", "2x + 3y = 12", "H₂O", "π ≈ 3.14159", "a² + b² = c²",
+  "∑(n=1→∞) 1/n²", "BRAVO !!", "★★★★★", "100/100", "dx/dt = v",
+  "f(x) = 2x³ - 5x + 1", "∞", "ABCDEF", "☺ ☺ ☺", "1+1 = 2",
+  "∫ sin(x) dx", "Δx → 0", "y = mx + b", "V = 4/3 πr³", "F = ma",
+  "cos²θ + sin²θ = 1", "12 × 8 = 96", "√144 = 12", "log₂(8) = 3",
+  "3! = 6", "SUPER!", "EXCELLENT", "A+", "→ ∀x ∈ ℝ",
+  "lim x→0", "P(A∩B)", "Σ = ?", "NOTE: 18/20", ":) :D",
+  "x² - 4 = 0", "BIEN", "★ TOP ★", "42", "MERCI",
+  "C₆H₁₂O₆", "NaCl", "Au", "Fe₂O₃", "pH = 7",
 ]
+const CHALK_COLORS = ["#e8e8d0", "#d0d0c0", "#ffccaa", "#aaddcc", "#ddbbee", "#ffddaa", "#ccddff", "#ffd0d0"]
+const CHALK_FONTS = ["'Caveat',cursive", "'Indie Flower',cursive", "serif", "monospace"]
 
 function ChalkboardBg() {
-  const [visible, setVisible] = useState([])
-  const cycle = useRef(0)
-
+  const cv = useRef(null)
+  const writings = useRef([]) // { text, x, y, size, rot, color, font, opacity, charsDone, totalChars, state }
   useEffect(() => {
-    const showNext = () => {
-      const start = (cycle.current * 5) % CHALK_ITEMS.length
-      const batch = []
-      for (let i = 0; i < 5; i++) batch.push((start + i) % CHALK_ITEMS.length)
-      setVisible(batch)
-      cycle.current++
-    }
-    showNext()
-    const id = setInterval(showNext, 6000)
-    return () => clearInterval(id)
-  }, [])
+    const c = cv.current, ctx = c.getContext("2d")
+    const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
+    rz(); window.addEventListener("resize", rz)
 
-  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
-    {CHALK_ITEMS.map((item, i) => {
-      const isVisible = visible.includes(i)
-      return <div key={i} style={{
-        position: "absolute", left: (item.x * 100) + "%", top: (item.y * 100) + "%",
-        transform: `rotate(${item.rot}deg)`,
-        fontFamily: "'Caveat',cursive", fontSize: item.size, color: "rgba(220,220,200,0.06)",
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 2s ease",
-        whiteSpace: "nowrap",
-      }}>{item.content}</div>
-    })}
-  </div>
+    let frame = 0, nextWrite = 30, nextErase = 300
+
+    const addWriting = () => {
+      const text = CHALK_TEXTS[Math.floor(Math.random() * CHALK_TEXTS.length)]
+      writings.current.push({
+        text, x: 0.03 + Math.random() * 0.85, y: 0.05 + Math.random() * 0.85,
+        size: 12 + Math.random() * 18, rot: (Math.random() - 0.5) * 12,
+        color: CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)],
+        font: CHALK_FONTS[Math.floor(Math.random() * CHALK_FONTS.length)],
+        opacity: 0.12 + Math.random() * 0.12,
+        charsDone: 0, totalChars: text.length,
+        state: "writing", // writing, visible, erasing, dead
+        visibleUntil: 0, eraseProgress: 0,
+      })
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, c.width, c.height)
+      frame++
+
+      // Spawn new writings
+      if (frame > nextWrite) {
+        addWriting()
+        nextWrite = frame + 20 + Math.random() * 60
+      }
+
+      // Erase random zone periodically
+      if (frame > nextErase && writings.current.length > 8) {
+        const zoneX = Math.random(), zoneY = Math.random()
+        for (const w of writings.current) {
+          if (w.state === "visible" && Math.abs(w.x - zoneX) < 0.2 && Math.abs(w.y - zoneY) < 0.2) {
+            w.state = "erasing"
+          }
+        }
+        nextErase = frame + 200 + Math.random() * 300
+      }
+
+      writings.current = writings.current.filter(w => w.state !== "dead")
+
+      for (const w of writings.current) {
+        const px = w.x * c.width, py = w.y * c.height
+
+        if (w.state === "writing") {
+          w.charsDone += 0.3
+          if (w.charsDone >= w.totalChars) {
+            w.charsDone = w.totalChars
+            w.state = "visible"
+            w.visibleUntil = frame + 300 + Math.random() * 600
+          }
+        } else if (w.state === "visible") {
+          if (frame > w.visibleUntil) w.state = "erasing"
+        } else if (w.state === "erasing") {
+          w.eraseProgress += 0.02
+          if (w.eraseProgress >= 1) { w.state = "dead"; continue }
+        }
+
+        const displayText = w.text.slice(0, Math.floor(w.charsDone))
+        const alpha = w.state === "erasing" ? w.opacity * (1 - w.eraseProgress) : w.opacity
+
+        ctx.save()
+        ctx.translate(px, py)
+        ctx.rotate(w.rot * Math.PI / 180)
+        ctx.globalAlpha = alpha
+        ctx.font = `${w.size}px ${w.font}`
+        ctx.fillStyle = w.color
+
+        // Chalk texture: draw twice with slight offset for roughness
+        ctx.fillText(displayText, 0, 0)
+        ctx.globalAlpha = alpha * 0.3
+        ctx.fillText(displayText, 0.5, -0.5)
+
+        // Cursor while writing
+        if (w.state === "writing" && Math.floor(frame / 15) % 2 === 0) {
+          const metrics = ctx.measureText(displayText)
+          ctx.globalAlpha = alpha * 0.6
+          ctx.fillRect(metrics.width + 2, -w.size * 0.7, 2, w.size * 0.8)
+        }
+
+        ctx.restore()
+      }
+
+      // Eraser smudge effect — draw smudge where erasing
+      for (const w of writings.current) {
+        if (w.state === "erasing") {
+          const px = w.x * c.width, py = w.y * c.height
+          ctx.save()
+          ctx.globalAlpha = 0.03 * (1 - w.eraseProgress)
+          ctx.fillStyle = w.color
+          const sw = 40 + Math.random() * 30, sh = 8
+          ctx.fillRect(px - sw / 2 + (Math.random() - 0.5) * 20, py - 5 + Math.random() * 10, sw, sh)
+          ctx.restore()
+        }
+      }
+
+      requestAnimationFrame(draw)
+    }
+    // Start with some pre-existing writings
+    for (let i = 0; i < 12; i++) {
+      const text = CHALK_TEXTS[Math.floor(Math.random() * CHALK_TEXTS.length)]
+      writings.current.push({
+        text, x: 0.03 + Math.random() * 0.85, y: 0.05 + Math.random() * 0.85,
+        size: 12 + Math.random() * 18, rot: (Math.random() - 0.5) * 12,
+        color: CHALK_COLORS[Math.floor(Math.random() * CHALK_COLORS.length)],
+        font: CHALK_FONTS[Math.floor(Math.random() * CHALK_FONTS.length)],
+        opacity: 0.1 + Math.random() * 0.1,
+        charsDone: text.length, totalChars: text.length,
+        state: "visible", visibleUntil: 200 + Math.random() * 500, eraseProgress: 0,
+      })
+    }
+    const raf = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
+  }, [])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }} />
 }
 
 // ── Chalkboard eraser on transitions only ──
