@@ -1763,6 +1763,7 @@ function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange, accent }) {
   useEffect(() => {
     if (!hasAnyTrack || !audioPath) return
     setPlaying(true)
+    if (onPlayingChange) onPlayingChange(true)
     const startOnInteraction = () => {
       if (audioRef.current && audioRef.current.paused && playing) {
         audioRef.current.volume = 0.3
