@@ -1315,6 +1315,8 @@ export default function RecapPlayer() {
   const [fade, setFade] = useState(false)
   const [dir, setDir] = useState(1)
   const [comparisonActive, setComparisonActive] = useState(false)
+  const [musicPlaying, setMusicPlaying] = useState(false)
+  const musicToggleRef = useRef(null)
   const [recapConfig, setRecapConfig] = useState({})
   const [visualTheme, setVisualTheme] = useState(THEMES["glass-dark"])
   const touchY = useRef(null)
@@ -1530,7 +1532,7 @@ export default function RecapPlayer() {
       {needSpotlights && eff.sabers && <Sabers intensity={spotlightIntensity} />}
       {needSpotlights && !eff.sabers && eff.spotlights !== false && <Spotlights accent={accent} intensity={spotlightIntensity} fixed={isCommunityTop} />}
       {/* Music player */}
-      {recapConfig.recap_music && <MusicPlayer musicConfig={recapConfig.recap_music} currentSlideId={curr.id} />}
+      {recapConfig.recap_music && <MusicPlayer musicConfig={recapConfig.recap_music} currentSlideId={curr.id} onPlayingChange={setMusicPlaying} />}
 
       {isFinale && (slideConfigs?.settings?.finale?.confetti !== false) && eff.confetti !== false && <ConfettiEffect />}
       {isFinale && (slideConfigs?.settings?.finale?.fireworks !== false) && eff.fireworks !== false && <FireworksEffect active={true} />}
@@ -1638,6 +1640,22 @@ export default function RecapPlayer() {
                 onToggleComparison={() => setComparisonActive(v => !v)}
                 hasMusic={!!recapConfig.recap_music}
                 allowUserThemes={recapConfig.allow_user_themes !== false}
+                currentThemeId={visualTheme.id}
+                onSelectTheme={(id) => {
+                  const t = getAllThemes().find(th => th.id === id)
+                  if (t) {
+                    setVisualTheme({ ...t, effects: { ...t.effects, ...(recapConfig.visual_theme_effects || {}) } })
+                    if (t.defaultPalette) {
+                      const pal = dbPalettes.find(p => p.slug === t.defaultPalette)
+                      if (pal) setTheme(pal.config || null)
+                    }
+                  }
+                }}
+                musicPlaying={musicPlaying}
+                onToggleMusic={() => {
+                  const btn = document.querySelector('[title*="musique"]')
+                  if (btn) btn.click()
+                }}
               />
             : curr.component}
         </div>
@@ -1683,7 +1701,7 @@ function extractYouTubeId(url) {
   return m ? m[1] : null
 }
 
-function MusicPlayer({ musicConfig, currentSlideId }) {
+function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange }) {
   const mode = musicConfig?.mode || "single"
   const tracks = musicConfig?.tracks || {}
   const [playing, setPlaying] = useState(false)
@@ -1767,6 +1785,7 @@ function MusicPlayer({ musicConfig, currentSlideId }) {
   const togglePlay = () => {
     const next = !playing
     setPlaying(next)
+    if (onPlayingChange) onPlayingChange(next)
     if (next) doPlay()
     else doPause()
   }
@@ -2518,7 +2537,10 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   for (const s of enabledSlides) {
     if (s.id === "onboarding" && s._onboardingProps) {
       const p = s._onboardingProps
-      s.component = <OnboardingSlide {...p} slideCount={enabledSlides.length} services={svcList} />
+      const hasFilms = enabledSlides.some(sl => sl.id.includes("-pod") && !sl.id.includes("series"))
+      const hasSeries = enabledSlides.some(sl => sl.id.includes("-series-pod"))
+      const hasCommunity = enabledSlides.some(sl => sl.id.startsWith("community-"))
+      s.component = <OnboardingSlide {...p} slideCount={enabledSlides.length} hasFilms={hasFilms} hasSeries={hasSeries} hasCommunity={hasCommunity} />
       delete s._onboardingProps
     }
   }
