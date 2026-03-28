@@ -607,16 +607,80 @@ function MatrixRain() {
 }
 
 function XmasLights() {
-  const colors = ["#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff2020", "#ffdd00", "#20ff40", "#2080ff",
-    "#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff2020", "#ffdd00", "#20ff40", "#2080ff",
-    "#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff2020", "#ffdd00", "#20ff40", "#2080ff"]
-  return <div className="th-xmas-lights">
-    {colors.map((c, i) => (
-      <div key={i} className="th-xmas-bulb" style={{
-        backgroundColor: c, color: c,
-        animationDelay: (i * 0.15) + "s",
-      }} />
-    ))}
+  const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  const bulbColors = ["#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff8800", "#ff20aa", "#20ddff", "#aaff20"]
+  const bulbs = useRef(ALPHA.split("").map((letter, i) => ({
+    letter, color: bulbColors[i % bulbColors.length],
+    droopY: 8 + Math.sin(i * 0.5) * 6 + Math.random() * 4,
+  }))).current
+  const [lit, setLit] = useState({})
+
+  // Random flickering
+  useEffect(() => {
+    const flicker = () => {
+      const next = {}
+      // Light 3-6 random bulbs
+      const count = 3 + Math.floor(Math.random() * 4)
+      for (let i = 0; i < count; i++) {
+        next[Math.floor(Math.random() * 26)] = true
+      }
+      setLit(next)
+    }
+    flicker()
+    const id = setInterval(flicker, 300 + Math.random() * 400)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, pointerEvents: "none", height: 70 }}>
+      {/* Wire */}
+      <svg width="100%" height="40" viewBox="0 0 1000 40" preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
+        <path d={bulbs.map((b, i) => {
+          const x = (i / 25) * 1000
+          const nx = ((i + 1) / 25) * 1000
+          const midX = (x + nx) / 2
+          return i === 0 ? `M${x},8 Q${midX},${b.droopY + 8} ${nx},8` : `Q${midX},${b.droopY + 8} ${nx},8`
+        }).join(" ")} fill="none" stroke="rgba(100,100,80,0.4)" strokeWidth="1.5" />
+      </svg>
+      {/* Bulbs + letters */}
+      {bulbs.map((b, i) => {
+        const x = ((i + 0.5) / 26) * 100
+        const isLit = lit[i]
+        return (
+          <div key={i} style={{
+            position: "absolute", left: x + "%", top: b.droopY, transform: "translateX(-50%)",
+            display: "flex", flexDirection: "column", alignItems: "center",
+          }}>
+            {/* Wire to bulb */}
+            <div style={{ width: 1, height: 4, background: "rgba(100,100,80,0.3)" }} />
+            {/* Bulb */}
+            <div style={{
+              width: 8, height: 10, borderRadius: "50% 50% 50% 50% / 40% 40% 60% 60%",
+              background: isLit ? b.color : "rgba(80,80,60,0.3)",
+              boxShadow: isLit ? `0 0 8px ${b.color}, 0 0 20px ${b.color}60, 0 2px 15px ${b.color}40` : "none",
+              transition: "all 0.1s ease",
+            }} />
+            {/* Letter */}
+            <div style={{
+              fontSize: 9, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 700, marginTop: 2,
+              color: isLit ? b.color : "rgba(255,255,255,0.06)",
+              textShadow: isLit ? `0 0 6px ${b.color}80` : "none",
+              transition: "all 0.1s ease",
+            }}>{b.letter}</div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function NoirBlinds() {
+  return <div style={{
+    position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2, opacity: 0.06,
+    background: "repeating-linear-gradient(170deg, transparent 0px, transparent 18px, rgba(255,255,255,0.15) 18px, rgba(255,255,255,0.15) 20px)",
+    animation: "th-blinds-sway 8s ease-in-out infinite",
+  }}>
+    <style>{`@keyframes th-blinds-sway{0%,100%{transform:translateY(0) skewY(0deg)}50%{transform:translateY(3px) skewY(0.3deg)}}`}</style>
   </div>
 }
 
@@ -962,6 +1026,7 @@ export default function RecapPlayer() {
       {eff.silentSlate && fade && <div className="th-slate" style={{opacity:1}}><div className="th-slate-inner"><div style={{fontSize:10,letterSpacing:"0.2em",marginBottom:4,color:"rgba(255,255,255,0.4)"}}>WRAPPARR PICTURES PRESENTE</div><div style={{fontSize:18,fontWeight:700}}>Acte suivant...</div></div></div>}
       {/* Sin City */}
       {eff.noirRain && <NoirRain />}
+      {eff.noirBlinds && <NoirBlinds />}
       {/* Abyss */}
       {eff.caustics && <div className="th-caustics" />}
       {eff.biolum && <Bioluminescence />}

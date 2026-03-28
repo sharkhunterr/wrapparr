@@ -1115,6 +1115,7 @@ export const THEMES = {
       filmGrain: true,
       noirRain: true,
       noirDesaturate: true,
+      noirBlinds: true,
     },
 
     cssExtra: `

@@ -16,7 +16,7 @@ const EFFECT_LABELS = {
   screenOff: "Ecran CRT", sabers: "Sabres laser",
   terminalOverlay: "Terminal MUTHUR",
   filmStrip: "Bandes pellicule", silentSlate: "Ardoise transition",
-  noirRain: "Pluie noir", noirDesaturate: "Desaturation",
+  noirRain: "Pluie noir", noirDesaturate: "Desaturation", noirBlinds: "Store venitien",
   caustics: "Caustiques", biolum: "Bioluminescence", bubbles: "Bulles",
 }
 
