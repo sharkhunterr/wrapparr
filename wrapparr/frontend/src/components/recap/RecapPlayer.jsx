@@ -394,14 +394,14 @@ function StarStreaks() {
 function StrangerBars() {
   const barCount = 4
   return <>
-    {/* Above title — same position as CategorySlide top bar (22%) */}
-    <div style={{ position: "fixed", left: 0, right: 0, top: "22%", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column-reverse", gap: 3, alignItems: "center" }}>
+    {/* Above title — closer to center */}
+    <div style={{ position: "fixed", left: 0, right: 0, top: "32%", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column-reverse", gap: 3, alignItems: "center" }}>
       {Array.from({ length: barCount }, (_, i) => (
         <div key={i} className="th-st-bar" style={{ animationDelay: (i * 0.5) + "s", opacity: 0.25 + (1 - i / barCount) * 0.35 }} />
       ))}
     </div>
-    {/* Below title — same position as CategorySlide bottom bar (78%) */}
-    <div style={{ position: "fixed", left: 0, right: 0, bottom: "22%", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+    {/* Below title — closer to center */}
+    <div style={{ position: "fixed", left: 0, right: 0, bottom: "32%", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
       {Array.from({ length: barCount }, (_, i) => (
         <div key={i} className="th-st-bar" style={{ animationDelay: (i * 0.5) + "s", opacity: 0.25 + (1 - i / barCount) * 0.35 }} />
       ))}
@@ -683,7 +683,7 @@ function XmasLights() {
         const offset = row === 0 ? 0 : row === 1 ? 9 : 18
         const count = bulbs.length
         return (
-          <div key={row} style={{ position: "relative", height: 70, marginBottom: -10 }}>
+          <div key={row} style={{ position: "relative", height: 52, marginBottom: -8 }}>
             <svg width="100%" height="22" viewBox="0 0 1000 22" preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
               <path d={bulbs.map((b, i) => {
                 const pad = 50
@@ -704,14 +704,14 @@ function XmasLights() {
                 }}>
                   <div style={{ width: 1, height: 5, background: "rgba(100,100,80,0.2)" }} />
                   <div style={{
-                    width: 8, height: 11, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
+                    width: 6, height: 8, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
                     background: bright ? b.color : "rgba(60,55,40,0.12)",
                     opacity: 0.15 + intensity * 0.85,
                     boxShadow: bright ? `0 0 ${intensity * 12}px ${b.color}${Math.round(intensity * 40).toString(16).padStart(2, "0")}` : "none",
                     transition: "opacity 0.12s ease",
                   }} />
                   <div style={{
-                    fontSize: 22, fontFamily: "'Indie Flower',cursive", fontWeight: 400,
+                    fontSize: 17, fontFamily: "'Indie Flower',cursive", fontWeight: 400,
                     marginTop: 2, lineHeight: 1,
                     background: `linear-gradient(to bottom, ${b.color} 0%, ${b.color}20 85%, transparent 100%)`,
                     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
@@ -1032,7 +1032,7 @@ export default function RecapPlayer() {
     <div
       onTouchStart={(e) => { touchY.current = e.touches[0].clientY }}
       onTouchEnd={(e) => { if (touchY.current === null) return; const d = touchY.current - e.changedTouches[0].clientY; if (Math.abs(d) > 40) goTo(slide + (d > 0 ? 1 : -1)); touchY.current = null }}
-      className={"recap-root" + (eff.holoScan ? " th-holo-scan" : "") + (eff.noirDesaturate ? " th-noir-on" : "")}
+      className={"recap-root" + (eff.holoScan ? " th-holo-scan" : "") + (eff.noirDesaturate ? " th-noir-on" : "") + (eff.stBars ? " th-st-on" : "")}
       style={{ width: "100%", height: "100vh", overflow: "hidden", position: "relative", background: bg, transition: "background .75s ease", fontFamily: `var(--th-font-body, Nunito,sans-serif)`, userSelect: "none", ...Object.fromEntries(Object.entries(visualTheme.css || {}).map(([k, v]) => [k, v])) }}
     >
       <style>{RECAP_CSS}</style>

@@ -806,8 +806,7 @@ export const THEMES = {
 .recap-root h2,.recap-root h1{text-transform:uppercase!important;letter-spacing:0.06em!important;color:#dd1111!important;text-shadow:0 0 10px rgba(255,20,20,0.8),0 0 30px rgba(255,20,20,0.4),0 0 60px rgba(200,0,0,0.2),0 0 100px rgba(150,0,0,0.1)!important;animation:th-st-flicker 5s ease-in-out infinite!important}
 .recap-root h2 span,.recap-root h1 span{color:inherit!important}
 @keyframes th-st-flicker{0%,100%{text-shadow:0 0 10px rgba(255,20,20,0.8),0 0 30px rgba(255,20,20,0.4),0 0 60px rgba(200,0,0,0.2)}88%{text-shadow:0 0 10px rgba(255,20,20,0.8),0 0 30px rgba(255,20,20,0.4),0 0 60px rgba(200,0,0,0.2)}89%{text-shadow:0 0 4px rgba(255,20,20,0.3),0 0 10px rgba(255,20,20,0.1)}90%{text-shadow:0 0 12px rgba(255,20,20,0.9),0 0 35px rgba(255,20,20,0.5),0 0 70px rgba(200,0,0,0.25)}93%{text-shadow:0 0 6px rgba(255,20,20,0.4),0 0 15px rgba(255,20,20,0.15)}94%{text-shadow:0 0 10px rgba(255,20,20,0.8),0 0 30px rgba(255,20,20,0.4),0 0 60px rgba(200,0,0,0.2)}}
-.th-st-bars{position:fixed;left:0;right:0;z-index:3;pointer-events:none;display:flex;flex-direction:column;gap:3px;align-items:center}
-.th-st-bars.top{top:0}.th-st-bars.bottom{bottom:0}
+.recap-root.th-st-on .cat-bar{opacity:0!important}
 .th-st-bar{height:1.5px;background:linear-gradient(90deg,transparent 0%,rgba(200,0,0,0.5) 30%,rgba(255,20,20,0.8) 50%,rgba(200,0,0,0.5) 70%,transparent 100%);animation:th-st-bar-grow 3s ease-out both;box-shadow:0 0 6px rgba(255,0,0,0.3)}
 @keyframes th-st-bar-grow{0%{width:0;opacity:0}30%{opacity:1}100%{width:80%;opacity:0.6}}
 .th-spore{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,200,150,0.6) 0%,rgba(255,150,100,0.1) 60%,transparent 100%);animation:th-spore-rise linear infinite;pointer-events:none}
