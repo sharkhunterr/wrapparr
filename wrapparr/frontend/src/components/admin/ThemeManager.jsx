@@ -17,6 +17,7 @@ const EFFECT_LABELS = {
   terminalOverlay: "Terminal MUTHUR",
   filmStrip: "Bandes pellicule", silentSlate: "Ardoise transition",
   noirRain: "Pluie noir", noirDesaturate: "Desaturation", noirBlinds: "Store venitien",
+  stBars: "Barres LED rouges",
   caustics: "Caustiques", biolum: "Bioluminescence", bubbles: "Bulles",
 }
 
