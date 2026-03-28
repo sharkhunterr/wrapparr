@@ -22,6 +22,7 @@ export default function OnboardingSlide({
   comparisonActive, onToggleComparison, allowUserThemes,
   currentThemeId, onSelectTheme, musicPlaying, onToggleMusic,
   hasFilms, hasSeries, hasCommunity,
+  availableYears, onChangeYear,
 }) {
   const L = useLabels()
   const estimatedMin = Math.max(1, Math.round(slideCount * 0.12))
@@ -132,6 +133,28 @@ export default function OnboardingSlide({
                 outline: "none", cursor: "pointer",
               }}>
                 {allThemes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Year select */}
+          {availableYears && availableYears.length > 1 && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8, padding: "8px 12px",
+              borderRadius: "var(--th-radius-xs)",
+              border: "1px solid var(--th-border-dim)", background: "var(--th-surface-dim)",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--th-text-muted)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: "var(--th-text)", fontWeight: 600 }}>Annee</div>
+              </div>
+              <select value={year} onChange={(e) => onChangeYear && onChangeYear(parseInt(e.target.value))} style={{
+                padding: "4px 8px", borderRadius: 4, fontSize: 10,
+                background: "var(--th-surface)", border: "1px solid var(--th-border)",
+                color: "var(--th-text)", fontFamily: "var(--th-font-mono)",
+                outline: "none", cursor: "pointer",
+              }}>
+                {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
               </select>
             </div>
           )}

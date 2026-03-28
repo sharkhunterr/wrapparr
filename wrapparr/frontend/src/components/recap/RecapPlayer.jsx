@@ -1317,6 +1317,7 @@ export default function RecapPlayer() {
   const [comparisonActive, setComparisonActive] = useState(false)
   const [musicPlaying, setMusicPlaying] = useState(false)
   const musicToggleRef = useRef(null)
+  const [availableYears, setAvailableYears] = useState([])
   const [recapConfig, setRecapConfig] = useState({})
   const [visualTheme, setVisualTheme] = useState(THEMES["glass-dark"])
   const touchY = useRef(null)
@@ -1351,6 +1352,11 @@ export default function RecapPlayer() {
         const baseTheme = getTheme(vThemeId)
         const effOverrides = recapCfg.visual_theme_effects || {}
         setVisualTheme({ ...baseTheme, effects: { ...baseTheme.effects, ...effOverrides } })
+
+        // Load available years
+        const allRecapsList = await api("/recaps").catch(() => [])
+        const years = allRecapsList.filter(r => r.status === "completed").map(r => r.year).sort((a, b) => b - a)
+        setAvailableYears(years)
 
         let recapResult = null
 
@@ -1656,6 +1662,8 @@ export default function RecapPlayer() {
                   const btn = document.querySelector('[title*="musique"]')
                   if (btn) btn.click()
                 }}
+                availableYears={availableYears}
+                onChangeYear={(y) => { window.location.href = "/recap/" + y }}
               />
             : curr.component}
         </div>
