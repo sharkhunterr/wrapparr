@@ -1108,12 +1108,6 @@ function ChalkboardBg() {
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
   }, [])
   return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }} />
-      })
-    }
-    const raf = requestAnimationFrame(draw)
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
-  }, [])
-  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }} />
 }
 
 // ── Chalkboard eraser on transitions only ──
