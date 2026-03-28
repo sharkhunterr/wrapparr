@@ -799,7 +799,7 @@ export const THEMES = {
     },
 
     cssExtra: `
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Courier+Prime:wght@400;700&family=Indie+Flower&display=swap');
 .th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.06;mix-blend-mode:overlay;animation:th-grain-flick 0.1s infinite}
 @keyframes th-grain-flick{0%{opacity:0.05}50%{opacity:0.08}100%{opacity:0.06}}
 .th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 45%,rgba(10,0,0,0.6) 100%)}

@@ -394,14 +394,14 @@ function StarStreaks() {
 function StrangerBars() {
   const barCount = 4
   return <>
-    {/* Above title */}
-    <div style={{ position: "fixed", left: 0, right: 0, top: "calc(50% - 60px)", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+    {/* Above title — same position as CategorySlide top bar (22%) */}
+    <div style={{ position: "fixed", left: 0, right: 0, top: "22%", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column-reverse", gap: 3, alignItems: "center" }}>
       {Array.from({ length: barCount }, (_, i) => (
         <div key={i} className="th-st-bar" style={{ animationDelay: (i * 0.5) + "s", opacity: 0.25 + (1 - i / barCount) * 0.35 }} />
       ))}
     </div>
-    {/* Below title */}
-    <div style={{ position: "fixed", left: 0, right: 0, top: "calc(50% + 50px)", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+    {/* Below title — same position as CategorySlide bottom bar (78%) */}
+    <div style={{ position: "fixed", left: 0, right: 0, bottom: "22%", zIndex: 3, pointerEvents: "none", display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
       {Array.from({ length: barCount }, (_, i) => (
         <div key={i} className="th-st-bar" style={{ animationDelay: (i * 0.5) + "s", opacity: 0.25 + (1 - i / barCount) * 0.35 }} />
       ))}
@@ -711,7 +711,7 @@ function XmasLights() {
                     transition: "opacity 0.12s ease",
                   }} />
                   <div style={{
-                    fontSize: 20, fontFamily: "'Libre Baskerville',Georgia,serif", fontWeight: 700,
+                    fontSize: 22, fontFamily: "'Indie Flower',cursive", fontWeight: 400,
                     marginTop: 2, lineHeight: 1,
                     background: `linear-gradient(to bottom, ${b.color} 0%, ${b.color}20 85%, transparent 100%)`,
                     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
