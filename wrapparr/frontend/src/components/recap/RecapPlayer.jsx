@@ -423,25 +423,25 @@ function DimensionCrack() {
       @keyframes th-crack-anim{0%,82%,100%{opacity:0}84%{opacity:0.9}86%{opacity:0.3}87%{opacity:0.85}89%{opacity:0.5}91%{opacity:0}}
     `}</style>
     <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ filter: "blur(0.3px)" }}>
-      {/* Wide glow layer */}
+      {/* Wide glow layer — deep red */}
       {crack.filter(s => s.main).map((s, i) => (
         <line key={"g2" + i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
-          stroke="rgba(255,60,20,0.08)" strokeWidth={s.w * 3} strokeLinecap="round"
+          stroke="rgba(200,0,0,0.1)" strokeWidth={s.w * 3} strokeLinecap="round"
           style={{ filter: "blur(8px)" }}
         />
       ))}
-      {/* Medium glow */}
+      {/* Medium glow — red */}
       {crack.map((s, i) => (
         <line key={"g" + i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
-          stroke={s.main ? "rgba(255,80,20,0.2)" : "rgba(255,100,40,0.12)"}
+          stroke={s.main ? "rgba(220,20,20,0.25)" : "rgba(200,40,30,0.15)"}
           strokeWidth={s.w * 1.5} strokeLinecap="round"
           style={{ filter: "blur(3px)" }}
         />
       ))}
-      {/* Core bright line */}
+      {/* Core bright line — hot red/white */}
       {crack.map((s, i) => (
         <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2}
-          stroke={s.main ? "rgba(255,220,180,0.8)" : "rgba(255,120,60,0.5)"}
+          stroke={s.main ? "rgba(255,180,160,0.85)" : "rgba(255,80,60,0.5)"}
           strokeWidth={s.w * 0.4} strokeLinecap="round"
         />
       ))}
@@ -614,102 +614,90 @@ function MatrixRain() {
   </div>
 }
 
+const XMAS_WORDS = ["RUN", "HELP", "HERE", "HIDE", "WILL", "MIKE", "TRAP", "DARK", "GATE", "LOST", "DEMO", "FIND"]
+
 function XmasLights() {
   const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   const bulbColors = ["#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff8800", "#ff20aa", "#20ddff", "#aaff20"]
-  const rows = [
-    ALPHA.slice(0, 9).split(""),
-    ALPHA.slice(9, 18).split(""),
-    ALPHA.slice(18).split(""),
-  ]
-  const rowData = useRef(rows.map((letters, row) =>
-    letters.map((letter, i) => ({
-      letter, color: bulbColors[(row * 9 + i) % bulbColors.length],
-      droopY: 6 + Math.sin((row * 9 + i) * 0.6) * 5 + Math.random() * 3,
-    }))
-  )).current
+  const bulbData = useRef(ALPHA.split("").map((letter, i) => ({
+    letter, color: bulbColors[i % bulbColors.length],
+    droopY: 6 + Math.sin(i * 0.6) * 5 + Math.random() * 3,
+  }))).current
 
-  // Smooth intensity per bulb (0-1), not just on/off
-  const [intensities, setIntensities] = useState(() => Array(26).fill(0.05))
-  const targets = useRef(Array(26).fill(0.05))
+  const [litLetter, setLitLetter] = useState(-1) // index in alphabet currently lit
 
   useEffect(() => {
-    // Pick new random targets periodically
-    const pickTargets = () => {
-      const next = [...targets.current]
-      // Dim most bulbs, light a few
-      for (let i = 0; i < 26; i++) {
-        next[i] = Math.max(0.03, next[i] * 0.85) // fade toward dim
+    let wordIdx = 0, charIdx = 0, timer
+    const nextChar = () => {
+      const word = XMAS_WORDS[wordIdx % XMAS_WORDS.length]
+      if (charIdx < word.length) {
+        const letterIndex = word.charCodeAt(charIdx) - 65
+        setLitLetter(letterIndex)
+        charIdx++
+        timer = setTimeout(nextChar, 350 + Math.random() * 200)
+      } else {
+        // Pause between words
+        setLitLetter(-1)
+        charIdx = 0
+        wordIdx++
+        timer = setTimeout(nextChar, 1200 + Math.random() * 800)
       }
-      const count = 3 + Math.floor(Math.random() * 5)
-      for (let j = 0; j < count; j++) {
-        const idx = Math.floor(Math.random() * 26)
-        next[idx] = 0.5 + Math.random() * 0.5 // bright
-      }
-      targets.current = next
     }
-    const targetId = setInterval(pickTargets, 400 + Math.random() * 600)
-    pickTargets()
-
-    // Smooth interpolation at 30fps
-    const lerp = () => {
-      setIntensities(prev => prev.map((v, i) => v + (targets.current[i] - v) * 0.12))
-    }
-    const lerpId = setInterval(lerp, 33)
-
-    return () => { clearInterval(targetId); clearInterval(lerpId) }
+    timer = setTimeout(nextChar, 500)
+    return () => clearTimeout(timer)
   }, [])
 
+  // Smooth intensity with lerp
+  const [intensities, setIntensities] = useState(() => Array(26).fill(0.02))
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIntensities(prev => prev.map((v, i) => {
+        const target = i === litLetter ? 1 : 0.02
+        return v + (target - v) * 0.18
+      }))
+    }, 33)
+    return () => clearInterval(id)
+  }, [litLetter])
+
   return (
-    <div style={{ position: "fixed", top: 30, left: 0, right: 0, zIndex: 200, pointerEvents: "none" }}>
-      {rowData.map((bulbs, row) => {
-        const globalOffset = row === 0 ? 0 : row === 1 ? 9 : 18
-        const rowWidth = bulbs.length
+    <div style={{ position: "fixed", top: 35, left: 0, right: 0, zIndex: 200, pointerEvents: "none" }}>
+      {/* Single wire */}
+      <svg width="100%" height="22" viewBox="0 0 1000 22" preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
+        <path d={bulbData.map((b, i) => {
+          const pad = 30
+          const x = pad + (i / 25) * (1000 - pad * 2)
+          const nx = pad + (Math.min(i + 1, 25) / 25) * (1000 - pad * 2)
+          const midX = (x + nx) / 2
+          return i === 0 ? `M${x},4 Q${midX},${b.droopY + 4} ${nx},4` : `Q${midX},${b.droopY + 4} ${nx},4`
+        }).join(" ")} fill="none" stroke="rgba(100,100,80,0.3)" strokeWidth="1" />
+      </svg>
+      {bulbData.map((b, i) => {
+        const pad = 3
+        const x = pad + ((i + 0.5) / 26) * (100 - pad * 2)
+        const intensity = intensities[i] || 0.02
+        const bright = intensity > 0.15
         return (
-          <div key={row} style={{ position: "relative", height: 58, marginBottom: -6 }}>
-            {/* Wire */}
-            <svg width="100%" height="24" viewBox="0 0 1000 24" preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
-              <path d={bulbs.map((b, i) => {
-                const pad = 60
-                const x = pad + (i / Math.max(1, rowWidth - 1)) * (1000 - pad * 2)
-                const nx = pad + (Math.min(i + 1, rowWidth - 1) / Math.max(1, rowWidth - 1)) * (1000 - pad * 2)
-                const midX = (x + nx) / 2
-                return i === 0 ? `M${x},5 Q${midX},${b.droopY + 5} ${nx},5` : `Q${midX},${b.droopY + 5} ${nx},5`
-              }).join(" ")} fill="none" stroke="rgba(100,100,80,0.3)" strokeWidth="1" />
-            </svg>
-            {bulbs.map((b, i) => {
-              const pad = 6
-              const x = pad + ((i + 0.5) / rowWidth) * (100 - pad * 2)
-              const gi = globalOffset + i
-              const intensity = intensities[gi] || 0.05
-              const bright = intensity > 0.2
-              return (
-                <div key={gi} style={{
-                  position: "absolute", left: x + "%", top: b.droopY, transform: "translateX(-50%)",
-                  display: "flex", flexDirection: "column", alignItems: "center",
-                }}>
-                  <div style={{ width: 1, height: 4, background: "rgba(100,100,80,0.25)" }} />
-                  {/* Bulb — small, soft glow */}
-                  <div style={{
-                    width: 6, height: 8, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
-                    background: bright ? b.color : "rgba(60,55,40,0.2)",
-                    opacity: 0.3 + intensity * 0.7,
-                    boxShadow: bright ? `0 0 ${4 + intensity * 8}px ${b.color}${Math.round(intensity * 60).toString(16).padStart(2,"0")}` : "none",
-                    transition: "opacity 0.15s ease",
-                  }} />
-                  {/* Letter */}
-                  <div style={{
-                    fontSize: 15, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 800,
-                    marginTop: 1, lineHeight: 1,
-                    background: `linear-gradient(to bottom, ${b.color} 0%, ${b.color}30 70%, transparent 100%)`,
-                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-                    opacity: 0.04 + intensity * 0.9,
-                    filter: bright ? `drop-shadow(0 -2px ${3 + intensity * 5}px ${b.color}40)` : "none",
-                    transition: "opacity 0.15s ease, filter 0.15s ease",
-                  }}>{b.letter}</div>
-                </div>
-              )
-            })}
+          <div key={i} style={{
+            position: "absolute", left: x + "%", top: b.droopY, transform: "translateX(-50%)",
+            display: "flex", flexDirection: "column", alignItems: "center",
+          }}>
+            <div style={{ width: 1, height: 4, background: "rgba(100,100,80,0.2)" }} />
+            <div style={{
+              width: 5, height: 7, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
+              background: bright ? b.color : "rgba(60,55,40,0.15)",
+              opacity: 0.2 + intensity * 0.8,
+              boxShadow: bright ? `0 0 ${intensity * 10}px ${b.color}${Math.round(intensity * 50).toString(16).padStart(2,"0")}` : "none",
+              transition: "opacity 0.1s ease",
+            }} />
+            <div style={{
+              fontSize: 14, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 800,
+              marginTop: 1, lineHeight: 1,
+              background: `linear-gradient(to bottom, ${b.color} 0%, ${b.color}25 80%, transparent 100%)`,
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              opacity: 0.03 + intensity * 0.95,
+              filter: bright ? `drop-shadow(0 -1px ${intensity * 6}px ${b.color}35)` : "none",
+              transition: "opacity 0.1s ease, filter 0.1s ease",
+            }}>{b.letter}</div>
           </div>
         )
       })}

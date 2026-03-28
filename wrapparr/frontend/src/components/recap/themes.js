@@ -772,7 +772,7 @@ export const THEMES = {
       "--th-radius-pill": "4px",
       "--th-bar-bg": "rgba(255,50,50,0.05)",
       "--th-bar-prev": "rgba(255,200,50,0.12)",
-      "--th-font-body": "'ITC Benguiat',Georgia,serif",
+      "--th-font-body": "'Libre Baskerville',Georgia,serif",
       "--th-font-mono": "'Courier Prime',Courier,monospace",
       "--th-glass-bg": "rgba(15,2,2,0.88)",
       "--th-glass-border": "rgba(255,50,50,0.18)",
@@ -798,17 +798,13 @@ export const THEMES = {
     },
 
     cssExtra: `
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Courier+Prime:wght@400;700&display=swap');
 .th-film-grain{position:fixed;inset:0;pointer-events:none;z-index:44;opacity:0.06;mix-blend-mode:overlay;animation:th-grain-flick 0.1s infinite}
 @keyframes th-grain-flick{0%{opacity:0.05}50%{opacity:0.08}100%{opacity:0.06}}
 .th-vignette{position:fixed;inset:0;pointer-events:none;z-index:43;background:radial-gradient(ellipse at center,transparent 45%,rgba(10,0,0,0.6) 100%)}
-.th-xmas-lights{position:fixed;top:0;left:0;right:0;height:4px;z-index:200;pointer-events:none;display:flex;gap:0}
-.th-xmas-bulb{flex:1;height:4px;border-radius:0 0 50% 50%;animation:th-bulb-glow 2s ease-in-out infinite alternate}
-@keyframes th-bulb-glow{0%{opacity:0.3;box-shadow:0 0 4px currentColor}100%{opacity:1;box-shadow:0 0 12px currentColor,0 2px 20px currentColor}}
-.recap-root h2,.recap-root h1{text-shadow:0 0 20px rgba(255,40,40,0.5),0 0 50px rgba(255,40,40,0.15)!important;letter-spacing:0.05em!important}
+.recap-root h2,.recap-root h1{text-transform:uppercase!important;letter-spacing:0.06em!important;text-shadow:0 0 15px rgba(255,20,20,0.6),0 0 40px rgba(255,20,20,0.2),0 0 80px rgba(200,0,0,0.1)!important}
 .th-spore{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,200,150,0.6) 0%,rgba(255,150,100,0.1) 60%,transparent 100%);animation:th-spore-rise linear infinite;pointer-events:none}
 @keyframes th-spore-rise{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:0.6}80%{opacity:0.3}100%{transform:translateY(-110vh) scale(0.3);opacity:0}}
-/* crack is rendered as SVG React component */
 `,
 
     labels: {

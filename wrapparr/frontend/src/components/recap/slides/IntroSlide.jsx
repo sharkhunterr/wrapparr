@@ -21,7 +21,7 @@ export default function IntroSlide({ accent, userName, year, onStart, hasCompari
     </div>
     <div className="s0" style={{ fontSize: 9, color: accent, letterSpacing: ".35em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase" }}>{L.brand} · RECAP ANNUEL</div>
     <h1 className="s1" style={{ fontSize: "clamp(32px, 10vw, 72px)", fontWeight: 800, color: "var(--th-text, white)", lineHeight: 0.88, margin: "10px 0 6px", textShadow: "0 0 120px " + accent + "55" }}>
-      WRAP<span style={{ background: "linear-gradient(135deg," + accent + ",#fb923c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>PARR</span>
+      WRAP<span style={{ color: accent }}>PARR</span>
     </h1>
     <p className="s2" style={{ fontSize: 16, color: "var(--th-text-secondary, rgba(255,255,255,.42))", margin: "14px 0 4px" }}>Bienvenue, <span style={{ color: "var(--th-text, white)", fontWeight: 600 }}>{userName}</span></p>
     <p className="s3" style={{ fontSize: 12, color: "var(--th-text-faint, rgba(255,255,255,.2))", marginBottom: 34, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>Ton annee {year}<span style={{ animation: "blink-c 1s step-end infinite" }}>|</span></p>
