@@ -690,6 +690,7 @@ export default function RecapPlayer() {
   const [recapData, setRecapData] = useState(null)
   const [myRecapUserId, setMyRecapUserId] = useState(null)
   const [theme, setTheme] = useState(null)
+  const [dbPalettes, setDbPalettes] = useState([])
   const [slideConfigs, setSlideConfigs] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -730,6 +731,7 @@ export default function RecapPlayer() {
           || themes.find((t) => t.id === me.theme_pack_id)
           || themes[0]
         setTheme(activeTheme?.config || null)
+        setDbPalettes(themes)
         setSlideConfigs(parsedCfg)
 
         // Apply admin defaults
@@ -988,7 +990,13 @@ export default function RecapPlayer() {
 
       {/* Top-right bar buttons — emits to the slot in App.jsx */}
       <ComparisonButton active={comparisonActive} onToggle={() => setComparisonActive((v) => !v)} accent={accent} year={year} visible={hasComparison} />
-      {recapConfig.allow_user_themes !== false && <ThemeSelector currentThemeId={visualTheme.id} onSelect={(t) => setVisualTheme({ ...t, effects: { ...t.effects, ...(recapConfig.visual_theme_effects || {}) } })} />}
+      {recapConfig.allow_user_themes !== false && <ThemeSelector currentThemeId={visualTheme.id} dbPalettes={dbPalettes} onSelect={(t) => {
+        setVisualTheme({ ...t, effects: { ...t.effects, ...(recapConfig.visual_theme_effects || {}) } })
+        if (t.defaultPalette) {
+          const pal = dbPalettes.find((p) => p.slug === t.defaultPalette)
+          if (pal) setTheme(pal.config || null)
+        }
+      }} />}
       <FullscreenButton />
 
       {/* Slide content */}
