@@ -2494,7 +2494,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   }
 
   // ── Apply saved order + enabled filter ──
-  const LOCKED = new Set(["intro", "onboarding", "finale"])
+  const LOCKED = new Set(["intro", "finale"])
 
   // Filter out disabled slides (but keep locked: intro, finale)
   const enabledSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
@@ -2528,15 +2528,19 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     const slideMap = new Map(enabledSlides.map((s) => [s.id, s]))
     const ordered = []
 
-    // Intro always first
+    // Intro always first, onboarding always second
     if (slideMap.has("intro")) {
       ordered.push(slideMap.get("intro"))
       slideMap.delete("intro")
     }
+    if (slideMap.has("onboarding")) {
+      ordered.push(slideMap.get("onboarding"))
+      slideMap.delete("onboarding")
+    }
 
     // Follow saved order for the rest
     for (const id of slideOrder) {
-      if (id === "intro" || id === "finale") continue
+      if (id === "intro" || id === "onboarding" || id === "finale") continue
       if (slideMap.has(id)) {
         ordered.push(slideMap.get(id))
         slideMap.delete(id)

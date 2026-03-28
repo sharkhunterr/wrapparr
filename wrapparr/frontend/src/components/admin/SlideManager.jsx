@@ -5,7 +5,7 @@ import { expandRegistry } from "../recap/slideRegistry"
 
 // Icon map for slide types
 const ICON_MAP = {
-  "intro": Sparkles, "overview": BarChart3, "compare": ArrowDownUp, "ranking": Layers, "finale": Sparkles,
+  "intro": Sparkles, "onboarding": MonitorPlay, "overview": BarChart3, "compare": ArrowDownUp, "ranking": Layers, "finale": Sparkles,
 }
 function getSlideIcon(id) {
   if (ICON_MAP[id]) return ICON_MAP[id]

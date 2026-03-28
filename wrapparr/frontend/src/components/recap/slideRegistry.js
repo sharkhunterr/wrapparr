@@ -11,6 +11,11 @@ export const SLIDE_REGISTRY = [
     desc: "Ecran d'accueil avec le titre WRAPPARR",
     params: [],
   },
+  {
+    id: "onboarding", label: "Presentation du recap", group: "global",
+    desc: "Nombre de slides, services, parametres rapides, navigation",
+    params: [],
+  },
   // Per-service slides — generated dynamically per service, but these define the templates
   {
     id: "cat-{service}", label: "Annonce {service}", group: "service", cat: true,
@@ -444,8 +449,8 @@ export const SLIDE_REGISTRY = [
 export function expandRegistry(dataServices = []) {
   const expanded = []
   const serviceTemplates = SLIDE_REGISTRY.filter((s) => s.group === "service")
-  const globalBefore = SLIDE_REGISTRY.filter((s) => s.group === "global" && s.id === "intro")
-  const globalAfter = SLIDE_REGISTRY.filter((s) => s.group === "global" && s.id !== "intro")
+  const globalBefore = SLIDE_REGISTRY.filter((s) => s.group === "global" && (s.id === "intro" || s.id === "onboarding"))
+  const globalAfter = SLIDE_REGISTRY.filter((s) => s.group === "global" && s.id !== "intro" && s.id !== "onboarding")
 
   // 1. Global slides first (intro, overview)
   for (const tmpl of globalBefore) {
