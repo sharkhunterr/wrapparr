@@ -609,64 +609,85 @@ function MatrixRain() {
 function XmasLights() {
   const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   const bulbColors = ["#ff2020", "#ffdd00", "#20ff40", "#2080ff", "#ff8800", "#ff20aa", "#20ddff", "#aaff20"]
-  const bulbs = useRef(ALPHA.split("").map((letter, i) => ({
-    letter, color: bulbColors[i % bulbColors.length],
-    droopY: 8 + Math.sin(i * 0.5) * 6 + Math.random() * 4,
-  }))).current
+  // 3 rows: A-I, J-R, S-Z
+  const rows = [
+    ALPHA.slice(0, 9).split(""),
+    ALPHA.slice(9, 18).split(""),
+    ALPHA.slice(18).split(""),
+  ]
+  const rowData = useRef(rows.map((letters, row) =>
+    letters.map((letter, i) => ({
+      letter, color: bulbColors[(row * 9 + i) % bulbColors.length],
+      droopY: 6 + Math.sin((row * 9 + i) * 0.6) * 5 + Math.random() * 3,
+    }))
+  )).current
   const [lit, setLit] = useState({})
 
-  // Random flickering
   useEffect(() => {
     const flicker = () => {
       const next = {}
-      // Light 3-6 random bulbs
-      const count = 3 + Math.floor(Math.random() * 4)
+      const count = 4 + Math.floor(Math.random() * 5)
       for (let i = 0; i < count; i++) {
         next[Math.floor(Math.random() * 26)] = true
       }
       setLit(next)
     }
     flicker()
-    const id = setInterval(flicker, 300 + Math.random() * 400)
+    const id = setInterval(flicker, 250 + Math.random() * 350)
     return () => clearInterval(id)
   }, [])
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, pointerEvents: "none", height: 70 }}>
-      {/* Wire */}
-      <svg width="100%" height="40" viewBox="0 0 1000 40" preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
-        <path d={bulbs.map((b, i) => {
-          const x = (i / 25) * 1000
-          const nx = ((i + 1) / 25) * 1000
-          const midX = (x + nx) / 2
-          return i === 0 ? `M${x},8 Q${midX},${b.droopY + 8} ${nx},8` : `Q${midX},${b.droopY + 8} ${nx},8`
-        }).join(" ")} fill="none" stroke="rgba(100,100,80,0.4)" strokeWidth="1.5" />
-      </svg>
-      {/* Bulbs + letters */}
-      {bulbs.map((b, i) => {
-        const x = ((i + 0.5) / 26) * 100
-        const isLit = lit[i]
+    <div style={{ position: "fixed", top: 30, left: 0, right: 0, zIndex: 200, pointerEvents: "none" }}>
+      {rowData.map((bulbs, row) => {
+        const globalOffset = row === 0 ? 0 : row === 1 ? 9 : 18
+        const rowWidth = bulbs.length
         return (
-          <div key={i} style={{
-            position: "absolute", left: x + "%", top: b.droopY, transform: "translateX(-50%)",
-            display: "flex", flexDirection: "column", alignItems: "center",
-          }}>
-            {/* Wire to bulb */}
-            <div style={{ width: 1, height: 4, background: "rgba(100,100,80,0.3)" }} />
-            {/* Bulb */}
-            <div style={{
-              width: 8, height: 10, borderRadius: "50% 50% 50% 50% / 40% 40% 60% 60%",
-              background: isLit ? b.color : "rgba(80,80,60,0.3)",
-              boxShadow: isLit ? `0 0 8px ${b.color}, 0 0 20px ${b.color}60, 0 2px 15px ${b.color}40` : "none",
-              transition: "all 0.1s ease",
-            }} />
-            {/* Letter */}
-            <div style={{
-              fontSize: 9, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 700, marginTop: 2,
-              color: isLit ? b.color : "rgba(255,255,255,0.06)",
-              textShadow: isLit ? `0 0 6px ${b.color}80` : "none",
-              transition: "all 0.1s ease",
-            }}>{b.letter}</div>
+          <div key={row} style={{ position: "relative", height: 65, marginBottom: -8 }}>
+            {/* Wire */}
+            <svg width="100%" height="28" viewBox={`0 0 1000 28`} preserveAspectRatio="none" style={{ position: "absolute", top: 0 }}>
+              <path d={bulbs.map((b, i) => {
+                const pad = 60
+                const x = pad + (i / Math.max(1, rowWidth - 1)) * (1000 - pad * 2)
+                const nx = pad + (Math.min(i + 1, rowWidth - 1) / Math.max(1, rowWidth - 1)) * (1000 - pad * 2)
+                const midX = (x + nx) / 2
+                return i === 0 ? `M${x},6 Q${midX},${b.droopY + 6} ${nx},6` : `Q${midX},${b.droopY + 6} ${nx},6`
+              }).join(" ")} fill="none" stroke="rgba(100,100,80,0.35)" strokeWidth="1.2" />
+            </svg>
+            {/* Bulbs + letters */}
+            {bulbs.map((b, i) => {
+              const pad = 6
+              const x = pad + ((i + 0.5) / rowWidth) * (100 - pad * 2)
+              const gi = globalOffset + i
+              const isLit = lit[gi]
+              return (
+                <div key={gi} style={{
+                  position: "absolute", left: x + "%", top: b.droopY, transform: "translateX(-50%)",
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                }}>
+                  <div style={{ width: 1, height: 5, background: "rgba(100,100,80,0.3)" }} />
+                  {/* Bulb */}
+                  <div style={{
+                    width: 9, height: 12, borderRadius: "50% 50% 50% 50% / 35% 35% 65% 65%",
+                    background: isLit ? b.color : "rgba(60,55,40,0.25)",
+                    boxShadow: isLit ? `0 0 10px ${b.color}, 0 0 25px ${b.color}50, 0 4px 20px ${b.color}30` : "none",
+                    transition: "all 0.08s ease",
+                  }} />
+                  {/* Letter with top-lit gradient */}
+                  <div style={{
+                    fontSize: 16, fontFamily: "'Special Elite','Courier Prime',monospace", fontWeight: 800,
+                    marginTop: 1, lineHeight: 1,
+                    background: isLit
+                      ? `linear-gradient(to bottom, ${b.color} 0%, ${b.color}40 60%, ${b.color}10 100%)`
+                      : "linear-gradient(to bottom, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    filter: isLit ? `drop-shadow(0 0 8px ${b.color}60)` : "none",
+                    transition: "all 0.08s ease",
+                  }}>{b.letter}</div>
+                </div>
+              )
+            })}
           </div>
         )
       })}
