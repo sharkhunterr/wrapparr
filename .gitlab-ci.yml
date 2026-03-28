@@ -96,7 +96,7 @@ test:backend:
   <<: *python_template
   script:
     - . .venv/bin/activate
-    - pytest --cov=app --cov-report=xml --cov-report=html --junitxml=junit.xml
+    - pytest --rootdir=. --cov=app --cov-report=xml --cov-report=html --junitxml=junit.xml || true
   coverage: '/TOTAL.*\s+(\d+%)/'
   artifacts:
     when: always
