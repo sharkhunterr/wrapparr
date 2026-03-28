@@ -1062,7 +1062,7 @@ export default function RecapPlayer() {
       {/* Upside Down */}
       {eff.spores && <Spores />}
       {eff.dimensionCrack && <DimensionCrack />}
-      {eff.stBars && <StrangerBars />}
+      {eff.stBars && isCat && <StrangerBars />}
       {/* Galaxie lointaine */}
       {/* holoScan applied via className on recap-root */}
       {eff.starStreaks && <StarStreaks />}
