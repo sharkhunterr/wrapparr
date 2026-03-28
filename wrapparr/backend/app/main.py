@@ -113,7 +113,7 @@ BUILTIN_THEMES = [
         "name": "Phosphore", "slug": "phosphore",
         "config": {
             "palette": {"primary": "#ccaa00", "background": "#000800",
-                        "accents": {"films": "#ccaa00", "series": "#33cc55", "romm": "#44aadd", "audio": "#cc3333", "komga": "#33cc55", "booklore": "#44aadd", "compare": "#ccaa00", "ranking": "#cc3333"}},
+                        "accents": {"films": "#ccaa00", "series": "#44aadd", "romm": "#33cc55", "audio": "#33cc55", "komga": "#44aadd", "booklore": "#33cc55", "compare": "#cc3333", "ranking": "#cc3333"}},
             "card_style": "glass", "transition": "slide-up",
         },
     },
