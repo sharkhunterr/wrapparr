@@ -109,11 +109,11 @@ BUILTIN_THEMES = [
             "card_style": "glass", "transition": "slide-up",
         },
     },
-    {   # Weyland-Yutani — vert phosphore monochrome
+    {   # Weyland-Yutani — interface Nostromo (jaune, vert, bleu, rouge)
         "name": "Phosphore", "slug": "phosphore",
         "config": {
-            "palette": {"primary": "#33ff66", "background": "#000800",
-                        "accents": {"films": "#33ff66", "series": "#22dd55", "romm": "#44ff77", "audio": "#55ff88", "komga": "#22cc44", "booklore": "#33ee55", "compare": "#44ff66", "ranking": "#55ff44"}},
+            "palette": {"primary": "#ccaa00", "background": "#000800",
+                        "accents": {"films": "#ccaa00", "series": "#33cc55", "romm": "#44aadd", "audio": "#cc3333", "komga": "#33cc55", "booklore": "#44aadd", "compare": "#ccaa00", "ranking": "#cc3333"}},
             "card_style": "glass", "transition": "slide-up",
         },
     },
