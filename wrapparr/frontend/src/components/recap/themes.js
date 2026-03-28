@@ -1510,9 +1510,7 @@ export const THEMES = {
     cssExtra: `
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
 .th-chalk-texture{position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-conic-gradient(rgba(255,255,255,0.008) 0% 25%,transparent 0% 50%) 0 0/3px 3px}
-.glass{border:1px dashed rgba(255,255,255,0.12)!important;background:rgba(25,40,25,0.88)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;box-shadow:inset 0 0 30px rgba(0,0,0,0.2)!important}
-.recap-root [style*="padding"]:not(h1):not(h2):not(h3):not(button){backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.recap-root .s0,.recap-root .s1,.recap-root .s2,.recap-root .s3,.recap-root .s4,.recap-root .s5{position:relative;z-index:2}
+.glass{border:1px dashed rgba(255,255,255,0.12)!important;background:rgba(25,40,25,0.9)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;box-shadow:inset 0 0 30px rgba(0,0,0,0.2)!important}
 .recap-root h1,.recap-root h2,.recap-root h3{font-style:italic!important;text-shadow:1px 1px 0 rgba(255,255,255,0.05)!important;filter:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence baseFrequency='0.04' numOctaves='4' type='fractalNoise'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2'/%3E%3C/filter%3E%3C/svg%3E#c")!important}
 .recap-root::before{content:'';position:fixed;top:6px;left:6px;right:6px;bottom:6px;border:3px solid rgba(180,150,100,0.12);border-radius:2px;pointer-events:none;z-index:200;box-shadow:inset 0 0 20px rgba(0,0,0,0.15)}
 `,
