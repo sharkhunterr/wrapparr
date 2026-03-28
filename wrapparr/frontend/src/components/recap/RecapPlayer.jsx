@@ -5,6 +5,7 @@ import { api } from "../../services/api"
 import useAuthStore from "../../stores/authStore"
 import { RECAP_CSS } from "./recapStyles"
 import IntroSlide from "./slides/IntroSlide"
+import OnboardingSlide from "./slides/OnboardingSlide"
 // OverviewSlide removed
 import CategorySlide from "./slides/CategorySlide"
 import PodiumSlide from "./slides/PodiumSlide"
@@ -1631,6 +1632,13 @@ export default function RecapPlayer() {
         }}>
           {curr._introProps
             ? <IntroSlide {...curr._introProps} onStart={() => goTo(1)} />
+            : curr.id === "onboarding" && curr.component
+            ? <OnboardingSlide {...curr.component.props}
+                comparisonActive={comparisonActive}
+                onToggleComparison={() => setComparisonActive(v => !v)}
+                hasMusic={!!recapConfig.recap_music}
+                allowUserThemes={recapConfig.allow_user_themes !== false}
+              />
             : curr.component}
         </div>
       </ComparisonProvider>
@@ -2028,6 +2036,12 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   slides.push({
     id: "intro", accent: primary, bg: baseBg, fullscreen: false,
     _introProps: { accent: primary, userName, year, hasComparison: !!data.comparison },
+  })
+
+  // 1 — Onboarding (slideCount injected later)
+  slides.push({
+    id: "onboarding", accent: primary, bg: baseBg,
+    _onboardingProps: { accent: primary, year, hasComparison: !!data.comparison },
   })
 
   // Per-service: Category → Podium → Stats → Deep
@@ -2480,7 +2494,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   }
 
   // ── Apply saved order + enabled filter ──
-  const LOCKED = new Set(["intro", "finale"])
+  const LOCKED = new Set(["intro", "onboarding", "finale"])
 
   // Filter out disabled slides (but keep locked: intro, finale)
   const enabledSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
@@ -2495,6 +2509,17 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       const p = s._finaleProps
       s.component = <FinaleSlide {...p} activeServices={detectedServices} onRestart={null} />
       delete s._finaleProps
+    }
+  }
+
+  // Inject OnboardingSlide with dynamic data
+  const SERVICE_CFG = { tautulli: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, plex: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, jellyfin: { icon: "📺", label: "Jellyfin", sub: "Films · Series" }, romm: { icon: "🎮", label: "Jeux Video", sub: "Switch · PC" }, audiobookshelf: { icon: "🎧", label: "Livres Audio", sub: "Podcasts" }, komga: { icon: "📚", label: "Manga", sub: "BD · Comics" }, booklore: { icon: "📖", label: "Livres", sub: "Romans · Essais" } }
+  const svcList = detectedServices.map((s) => ({ key: s, ...(SERVICE_CFG[s] || { icon: "📦", label: s, sub: "" }) }))
+  for (const s of enabledSlides) {
+    if (s.id === "onboarding" && s._onboardingProps) {
+      const p = s._onboardingProps
+      s.component = <OnboardingSlide {...p} slideCount={enabledSlides.length} services={svcList} />
+      delete s._onboardingProps
     }
   }
 
