@@ -750,8 +750,8 @@ function VhsHud() {
   const m = String(Math.floor((time % 3600) / 60)).padStart(2, "0")
   const s = String(time % 60).padStart(2, "0")
   return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 201, fontFamily: "'Share Tech Mono',monospace" }}>
-    <div style={{ position: "absolute", top: 12, left: 16, fontSize: 10, color: "rgba(255,255,255,0.15)", letterSpacing: "0.15em" }}>CH-03 · SP · HI-FI STEREO</div>
-    <div style={{ position: "absolute", top: 12, right: 80, fontSize: 12, color: "rgba(255,255,255,0.18)", letterSpacing: "0.15em" }}>{h}:{m}:{s}</div>
+    <div style={{ position: "absolute", top: 36, left: 16, fontSize: 10, color: "rgba(255,255,255,0.15)", letterSpacing: "0.15em" }}>CH-03 · SP · HI-FI STEREO</div>
+    <div style={{ position: "absolute", top: 36, right: 80, fontSize: 12, color: "rgba(255,255,255,0.18)", letterSpacing: "0.15em" }}>{h}:{m}:{s}</div>
     <div style={{ position: "absolute", bottom: 50, right: 16, display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "rgba(255,0,0,0.5)" }}>
       <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#ff0000", animation: "th-blink-cursor 1s step-end infinite" }} />REC
     </div>
@@ -801,13 +801,13 @@ function Snow() {
         vy: 0.3 + Math.random() * 1, wobble: Math.random() * Math.PI * 2,
       })
     }
-    // Magic sparkles
-    for (let i = 0; i < 20; i++) {
+    // Magic sparkles — golden dust floating
+    for (let i = 0; i < 25; i++) {
       sparkles.current.push({
         x: Math.random() * c.width, y: Math.random() * c.height,
-        phase: Math.random() * Math.PI * 2, speed: 0.02 + Math.random() * 0.03,
-        size: 1 + Math.random() * 2,
-        vx: (Math.random() - 0.5) * 0.3, vy: -(0.1 + Math.random() * 0.4),
+        phase: Math.random() * Math.PI * 2, speed: 0.015 + Math.random() * 0.02,
+        size: 2 + Math.random() * 3,
+        vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.15,
       })
     }
     const draw = () => {
@@ -829,9 +829,10 @@ function Snow() {
       // Magic sparkles — golden dust
       for (const s of sparkles.current) {
         s.phase += s.speed
-        s.x += s.vx + Math.sin(s.phase * 3) * 0.4
-        s.y += s.vy
-        if (s.y < -10) { s.y = c.height + 10; s.x = Math.random() * c.width }
+        s.x += s.vx + Math.sin(s.phase * 3) * 0.3
+        s.y += s.vy + Math.cos(s.phase * 2) * 0.2
+        if (s.y < -10 || s.y > c.height + 10) { s.y = Math.random() * c.height; s.x = Math.random() * c.width }
+        if (s.x < -10 || s.x > c.width + 10) { s.x = Math.random() * c.width }
         const pulse = 0.3 + Math.sin(s.phase * 5) * 0.3
         const sz = s.size * (0.6 + Math.sin(s.phase * 2) * 0.4)
         // Star shape
@@ -869,71 +870,97 @@ function Snow() {
   return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }} />
 }
 
-// ── Chalk dust + eraser effect on transitions ──
+// ── Chalkboard background writings ──
+const CHALK_ITEMS = [
+  { type: "text", content: "E = mc²", x: 0.08, y: 0.15, size: 18, rot: -3 },
+  { type: "text", content: "2x + 3 = 7", x: 0.75, y: 0.12, size: 14, rot: 2 },
+  { type: "text", content: "H₂O", x: 0.85, y: 0.7, size: 20, rot: -5 },
+  { type: "text", content: "π ≈ 3.14", x: 0.12, y: 0.78, size: 15, rot: 4 },
+  { type: "text", content: "a² + b² = c²", x: 0.65, y: 0.85, size: 13, rot: -2 },
+  { type: "text", content: "∑ f(x)", x: 0.9, y: 0.4, size: 16, rot: 6 },
+  { type: "text", content: "BRAVO!", x: 0.2, y: 0.88, size: 22, rot: -8 },
+  { type: "text", content: "★ ★ ★", x: 0.5, y: 0.08, size: 16, rot: 0 },
+  { type: "text", content: "100/100", x: 0.82, y: 0.25, size: 14, rot: 3 },
+  { type: "text", content: "dx/dt", x: 0.05, y: 0.45, size: 15, rot: -4 },
+  { type: "text", content: "ABC", x: 0.35, y: 0.92, size: 20, rot: 5 },
+  { type: "text", content: "∞", x: 0.92, y: 0.55, size: 24, rot: 0 },
+  { type: "text", content: "f(x) = ax + b", x: 0.15, y: 0.62, size: 12, rot: -1 },
+  { type: "text", content: "☺", x: 0.7, y: 0.35, size: 28, rot: 10 },
+  { type: "text", content: "1+1=2", x: 0.4, y: 0.18, size: 16, rot: -6 },
+]
+
+function ChalkboardBg() {
+  const [visible, setVisible] = useState([])
+  const cycle = useRef(0)
+
+  useEffect(() => {
+    const showNext = () => {
+      const start = (cycle.current * 5) % CHALK_ITEMS.length
+      const batch = []
+      for (let i = 0; i < 5; i++) batch.push((start + i) % CHALK_ITEMS.length)
+      setVisible(batch)
+      cycle.current++
+    }
+    showNext()
+    const id = setInterval(showNext, 6000)
+    return () => clearInterval(id)
+  }, [])
+
+  return <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+    {CHALK_ITEMS.map((item, i) => {
+      const isVisible = visible.includes(i)
+      return <div key={i} style={{
+        position: "absolute", left: (item.x * 100) + "%", top: (item.y * 100) + "%",
+        transform: `rotate(${item.rot}deg)`,
+        fontFamily: "'Caveat',cursive", fontSize: item.size, color: "rgba(220,220,200,0.06)",
+        opacity: isVisible ? 1 : 0,
+        transition: "opacity 2s ease",
+        whiteSpace: "nowrap",
+      }}>{item.content}</div>
+    })}
+  </div>
+}
+
+// ── Chalkboard eraser on transitions only ──
 function ChalkDust({ fade }) {
   const cv = useRef(null)
-  const particles = useRef([])
-  const eraserPos = useRef(0)
+  const eraserX = useRef(-200)
+  const prevFade = useRef(false)
   useEffect(() => {
     const c = cv.current, ctx = c.getContext("2d")
     const rz = () => { c.width = window.innerWidth; c.height = window.innerHeight }
     rz(); window.addEventListener("resize", rz)
     const chalkColors = ["#e8e8d0", "#d0d0c0", "#ffccaa", "#aaddcc", "#ddbbee", "#ffddaa"]
-    const spawn = () => {
-      const cx = c.width * (0.15 + Math.random() * 0.7)
-      const cy = c.height * (0.3 + Math.random() * 0.35)
-      for (let i = 0; i < 2; i++) {
-        particles.current.push({
-          x: cx + (Math.random() - 0.5) * 250, y: cy,
-          vx: (Math.random() - 0.5) * 0.4, vy: 0.2 + Math.random() * 0.6,
-          size: 0.5 + Math.random() * 2.5, life: 1,
-          color: chalkColors[Math.floor(Math.random() * chalkColors.length)],
-        })
-      }
-    }
-    let frame = 0
     const draw = () => {
       ctx.clearRect(0, 0, c.width, c.height)
-      frame++
-      if (frame % 6 === 0) spawn()
-      // Eraser during fade
+      if (fade && !prevFade.current) eraserX.current = -200
+      prevFade.current = fade
       if (fade) {
-        eraserPos.current += c.width * 0.06
+        eraserX.current += c.width * 0.08
+        const ew = 140, eh = c.height * 0.7
+        const ex = eraserX.current
+        const ey = c.height * 0.15
+        // Eraser body
         ctx.save()
-        ctx.globalAlpha = 0.15
-        const ew = 120, eh = 50
-        const ex = eraserPos.current % (c.width + 200) - 100
-        const ey = c.height * 0.4 + Math.sin(eraserPos.current * 0.01) * 30
-        // Eraser smear
-        ctx.fillStyle = "rgba(40,60,40,0.8)"
-        ctx.fillRect(ex - ew / 2, ey - eh / 2, ew, eh)
-        // Chalk smear traces
-        for (let i = 0; i < 8; i++) {
+        ctx.globalAlpha = 0.2
+        ctx.fillStyle = "rgba(50,70,50,0.9)"
+        ctx.fillRect(ex, ey, ew, eh)
+        // Smear traces behind eraser
+        for (let i = 0; i < 12; i++) {
           const col = chalkColors[Math.floor(Math.random() * chalkColors.length)]
-          ctx.globalAlpha = 0.04
+          ctx.globalAlpha = 0.03 + Math.random() * 0.03
           ctx.fillStyle = col
-          ctx.fillRect(ex - ew / 2 + Math.random() * ew, ey + eh / 2, Math.random() * 40, 2)
+          const ty = ey + Math.random() * eh
+          ctx.fillRect(ex - 20 - Math.random() * 60, ty, 30 + Math.random() * 50, 1.5 + Math.random() * 2)
         }
-        ctx.restore()
-      } else {
-        eraserPos.current = 0
-      }
-      particles.current = particles.current.filter(p => p.life > 0)
-      for (const p of particles.current) {
-        p.x += p.vx; p.y += p.vy; p.life -= 0.004
-        p.vx += (Math.random() - 0.5) * 0.04
-        ctx.save()
-        ctx.globalAlpha = p.life * 0.2
-        ctx.fillStyle = p.color
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill()
         ctx.restore()
       }
       requestAnimationFrame(draw)
     }
     const raf = requestAnimationFrame(draw)
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rz) }
-  }, [])
-  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1 }} />
+  }, [fade])
+  return <canvas ref={cv} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 48 }} />
 }
 
 function Grain() {
@@ -1325,6 +1352,7 @@ export default function RecapPlayer() {
       {/* Chalkboard */}
       {eff.chalkDust && <ChalkDust fade={fade} />}
       {eff.chalkTexture && <div className="th-chalk-texture" />}
+      {eff.chalkboardBg && <ChalkboardBg />}
       {/* Christmas */}
       {eff.snow && <Snow />}
       {eff.frost && <div className="th-frost" />}

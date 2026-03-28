@@ -20,7 +20,7 @@ const EFFECT_LABELS = {
   stBars: "Barres LED rouges",
   vhsHud: "HUD VHS", vhsTracking: "Tracking VHS", vhsChromatic: "Aberration chromatique",
   halftone: "Halftone BD", comicBorders: "Bordures BD",
-  chalkDust: "Poussiere de craie", chalkTexture: "Texture ardoise",
+  chalkDust: "Brosse/eponge", chalkTexture: "Texture ardoise", chalkboardBg: "Ecritures fond",
   snow: "Neige", frost: "Givre",
   caustics: "Caustiques", biolum: "Bioluminescence", bubbles: "Bulles",
 }

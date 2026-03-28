@@ -1504,7 +1504,7 @@ export const THEMES = {
       stars: false, orbs: false, grain: false, spotlights: false,
       confetti: false, fireworks: false, scanlines: false, grid: false,
       vhs: false, filmGrain: false,
-      chalkDust: true, chalkTexture: true,
+      chalkDust: true, chalkTexture: true, chalkboardBg: true,
     },
 
     cssExtra: `
