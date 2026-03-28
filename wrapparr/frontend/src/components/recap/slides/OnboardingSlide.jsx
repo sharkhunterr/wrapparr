@@ -3,8 +3,8 @@ import { getAllThemes } from "../themes"
 
 const allThemes = getAllThemes()
 
-function Toggle({ active, onToggle, accent }) {
-  return <div onClick={onToggle} style={{
+function Toggle({ active, accent }) {
+  return <div style={{
     width: 36, height: 20, borderRadius: 11, padding: 2, cursor: "pointer",
     background: active ? accent : "var(--th-surface)", border: "1px solid " + (active ? accent + "60" : "var(--th-border-dim)"),
     transition: "background 0.2s ease",
@@ -95,7 +95,7 @@ export default function OnboardingSlide({
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: comparisonActive ? accent : "var(--th-text)", fontWeight: 600 }}>Comparaison {year - 1}</div>
               </div>
-              <Toggle active={comparisonActive} onToggle={onToggleComparison} accent={accent} />
+              <Toggle active={comparisonActive} accent={accent} />
             </div>
           )}
 
@@ -111,7 +111,7 @@ export default function OnboardingSlide({
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: musicPlaying ? accent : "var(--th-text)", fontWeight: 600 }}>Musique</div>
               </div>
-              <Toggle active={musicPlaying} onToggle={onToggleMusic} accent={accent} />
+              <Toggle active={musicPlaying} accent={accent} />
             </div>
           )}
 
