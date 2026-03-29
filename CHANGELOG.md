@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.11](https://github.com/your-username/wrapparr/-/compare/v0.1.10...v0.1.11) (2026-03-29)
+
+
+### Features
+
+* MemoryStore remplace Redis quand non configure ([e4febf7](https://github.com/your-username/wrapparr/-/commit/e4febf7cc32cc9556681d169c545d563fcba1b72))
+
+
+### Bug Fixes
+
+* audit securite — corrections critiques et high ([dd812b6](https://github.com/your-username/wrapparr/-/commit/dd812b687d7f4394c562a195a9f2a9361840ba9e))
+* Redis optionnel — guard sur tous les appels Redis (auth SSO + cache poster) ([70310f0](https://github.com/your-username/wrapparr/-/commit/70310f0a4e785dac1c8f79d038cc13de3ef8a77e))
+* to_uuid() sur toutes les comparaisons UUID pour compatibilite SQLite ([c2e3326](https://github.com/your-username/wrapparr/-/commit/c2e332605d5e962c5272bad9be422e32cbca22c4))
+* UUID string→uuid conversion pour SQLite + option configurer plus tard ([b4b8c0d](https://github.com/your-username/wrapparr/-/commit/b4b8c0d320b04fcca35ff5effc40cda787977cc9))
+
 ### [0.1.10](https://github.com/your-username/wrapparr/-/compare/v0.1.9...v0.1.10) (2026-03-29)
 
 
