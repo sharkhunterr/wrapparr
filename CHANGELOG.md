@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.10](https://github.com/your-username/wrapparr/-/compare/v0.1.9...v0.1.10) (2026-03-29)
+
+
+### Bug Fixes
+
+* remplace passlib par bcrypt direct (bug passlib+bcrypt>=4.1) ([3a17e4d](https://github.com/your-username/wrapparr/-/commit/3a17e4d7e7072923da55b0b7ee657e04ddc299a0))
+
 ### [0.1.9](https://github.com/your-username/wrapparr/-/compare/v0.1.8...v0.1.9) (2026-03-29)
 
 
