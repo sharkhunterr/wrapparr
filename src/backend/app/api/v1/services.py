@@ -17,6 +17,7 @@ from app.core.security import get_current_user
 from app.models.service import ServiceConnector
 from app.models.user import User
 from app.schemas.service import ServiceCreate, ServiceResponse, ServiceUpdate, TestConnectionResponse
+from app.core.utils import to_uuid
 
 router = APIRouter(prefix="/services", tags=["services"])
 
@@ -84,7 +85,7 @@ async def update_service(
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(ServiceConnector).where(ServiceConnector.id == service_id, ServiceConnector.user_id == user.id)
+        select(ServiceConnector).where(ServiceConnector.id == to_uuid(service_id), ServiceConnector.user_id == user.id)
     )
     svc = result.scalar_one_or_none()
     if not svc:
@@ -111,7 +112,7 @@ async def delete_service(
     service_id: uuid.UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(ServiceConnector).where(ServiceConnector.id == service_id, ServiceConnector.user_id == user.id)
+        select(ServiceConnector).where(ServiceConnector.id == to_uuid(service_id), ServiceConnector.user_id == user.id)
     )
     svc = result.scalar_one_or_none()
     if not svc:
@@ -125,7 +126,7 @@ async def test_connection(
     service_id: uuid.UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(ServiceConnector).where(ServiceConnector.id == service_id, ServiceConnector.user_id == user.id)
+        select(ServiceConnector).where(ServiceConnector.id == to_uuid(service_id), ServiceConnector.user_id == user.id)
     )
     svc = result.scalar_one_or_none()
     if not svc:

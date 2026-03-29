@@ -9,6 +9,7 @@ from app.core.security import get_current_user
 from app.models.phrase import CustomPhrase
 from app.models.user import User
 from app.schemas.phrase import PhraseCreate, PhraseResponse, PhraseUpdate
+from app.core.utils import to_uuid
 
 router = APIRouter(prefix="/phrases", tags=["phrases"])
 
@@ -82,7 +83,7 @@ async def update_phrase(
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(CustomPhrase).where(CustomPhrase.id == phrase_id, CustomPhrase.user_id == user.id)
+        select(CustomPhrase).where(CustomPhrase.id == to_uuid(phrase_id), CustomPhrase.user_id == user.id)
     )
     phrase = result.scalar_one_or_none()
     if not phrase:
@@ -105,7 +106,7 @@ async def delete_phrase(
     phrase_id: uuid.UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(CustomPhrase).where(CustomPhrase.id == phrase_id, CustomPhrase.user_id == user.id)
+        select(CustomPhrase).where(CustomPhrase.id == to_uuid(phrase_id), CustomPhrase.user_id == user.id)
     )
     phrase = result.scalar_one_or_none()
     if not phrase:

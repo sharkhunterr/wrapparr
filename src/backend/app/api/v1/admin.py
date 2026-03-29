@@ -19,6 +19,7 @@ from app.models.service import ServiceConnector
 from app.models.share import GlobalConfig
 from app.models.user import User
 from app.schemas.auth import OIDCProviderCreate, OIDCProviderResponse, OIDCProviderUpdate, UserResponse
+from app.core.utils import to_uuid
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -76,7 +77,7 @@ async def update_user(
     user_id: uuid.UUID, updates: dict,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(User).where(User.id == user_id))
+    result = await db.execute(select(User).where(User.id == to_uuid(user_id)))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
@@ -182,7 +183,7 @@ async def save_mappings(data: dict, _admin=Depends(require_admin), db: AsyncSess
                 # Delete mapping if empty
                 result = await db.execute(
                     select(UserServiceMapping).where(
-                        UserServiceMapping.user_id == user_id,
+                        UserServiceMapping.user_id == to_uuid(user_id),
                         UserServiceMapping.service_type == service_type,
                     )
                 )
@@ -193,7 +194,7 @@ async def save_mappings(data: dict, _admin=Depends(require_admin), db: AsyncSess
 
             result = await db.execute(
                 select(UserServiceMapping).where(
-                    UserServiceMapping.user_id == user_id,
+                    UserServiceMapping.user_id == to_uuid(user_id),
                     UserServiceMapping.service_type == service_type,
                 )
             )
@@ -243,7 +244,7 @@ async def admin_update_recap(
     recap_id: uuid.UUID, updates: dict,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == recap_id))
+    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == to_uuid(recap_id)))
     recap = result.scalar_one_or_none()
     if not recap:
         raise HTTPException(status_code=404, detail="Recap introuvable")
@@ -266,7 +267,7 @@ async def admin_delete_recap(
     recap_id: uuid.UUID,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == recap_id))
+    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == to_uuid(recap_id)))
     recap = result.scalar_one_or_none()
     if not recap:
         raise HTTPException(status_code=404, detail="Recap introuvable")
@@ -429,7 +430,7 @@ async def update_oidc_provider(
     provider_id: uuid.UUID, data: OIDCProviderUpdate,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == provider_id))
+    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == to_uuid(provider_id)))
     provider = result.scalar_one_or_none()
     if not provider:
         raise HTTPException(status_code=404, detail="Provider introuvable")
@@ -457,7 +458,7 @@ async def delete_oidc_provider(
     provider_id: uuid.UUID,
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == provider_id))
+    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == to_uuid(provider_id)))
     provider = result.scalar_one_or_none()
     if not provider:
         raise HTTPException(status_code=404, detail="Provider introuvable")
@@ -471,7 +472,7 @@ async def test_oidc_provider(
     _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
     """Test OIDC discovery for a saved provider."""
-    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == provider_id))
+    result = await db.execute(select(OIDCProvider).where(OIDCProvider.id == to_uuid(provider_id)))
     provider = result.scalar_one_or_none()
     if not provider:
         raise HTTPException(status_code=404, detail="Provider introuvable")

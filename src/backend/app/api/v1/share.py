@@ -12,6 +12,7 @@ from app.models.recap import YearlyRecap
 from app.models.share import GlobalConfig, ShareLink
 from app.models.user import User
 from app.schemas.share import ShareCreate, ShareResponse, SharedRecapResponse
+from app.core.utils import to_uuid
 
 router = APIRouter(prefix="/share", tags=["share"])
 
@@ -29,7 +30,7 @@ async def create_share(
 ):
     # Verify recap exists and belongs to user
     result = await db.execute(
-        select(YearlyRecap).where(YearlyRecap.id == data.recap_id, YearlyRecap.user_id == user.id)
+        select(YearlyRecap).where(YearlyRecap.id == to_uuid(data.recap_id), YearlyRecap.user_id == user.id)
     )
     recap = result.scalar_one_or_none()
     if not recap:
@@ -73,7 +74,7 @@ async def get_shared_recap(token: str, db: AsyncSession = Depends(get_db)):
     if link.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=410, detail="Ce lien de partage a expiré")
 
-    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == link.recap_id))
+    result = await db.execute(select(YearlyRecap).where(YearlyRecap.id == to_uuid(link.recap_id)))
     recap = result.scalar_one_or_none()
     if not recap or not recap.data:
         raise HTTPException(status_code=404, detail="Recap introuvable")

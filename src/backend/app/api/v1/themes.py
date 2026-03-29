@@ -9,6 +9,7 @@ from app.core.security import get_current_user, require_admin
 from app.models.theme import ThemePack
 from app.models.user import User
 from app.schemas.theme import ThemePackCreate, ThemePackResponse, ThemePackUpdate, UserThemeUpdate
+from app.core.utils import to_uuid
 
 router = APIRouter(prefix="/themes", tags=["themes"])
 
@@ -53,7 +54,7 @@ async def create_theme(data: ThemePackCreate, _admin=Depends(require_admin), db:
 async def update_theme(
     theme_id: uuid.UUID, data: ThemePackUpdate, _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(ThemePack).where(ThemePack.id == theme_id))
+    result = await db.execute(select(ThemePack).where(ThemePack.id == to_uuid(theme_id)))
     theme = result.scalar_one_or_none()
     if not theme:
         raise HTTPException(status_code=404, detail="Thème introuvable")
@@ -69,7 +70,7 @@ async def update_theme(
 
 @router.delete("/admin/themes/{theme_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_theme(theme_id: uuid.UUID, _admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(ThemePack).where(ThemePack.id == theme_id))
+    result = await db.execute(select(ThemePack).where(ThemePack.id == to_uuid(theme_id)))
     theme = result.scalar_one_or_none()
     if not theme:
         raise HTTPException(status_code=404, detail="Thème introuvable")

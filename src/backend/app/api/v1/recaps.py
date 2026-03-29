@@ -18,6 +18,7 @@ from app.schemas.recap import (
 )
 from app.services.pipeline import RecapPipeline
 from app.services.recap_service import get_compare_data, get_recap, get_recaps, get_snapshot
+from app.core.utils import to_uuid
 
 router = APIRouter(prefix="/recaps", tags=["recaps"])
 

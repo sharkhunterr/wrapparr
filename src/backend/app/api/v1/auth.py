@@ -13,6 +13,7 @@ from app.core.security import create_access_token, create_refresh_token, get_cur
 from app.models.auth import OIDCProvider
 from app.models.user import User
 from app.schemas.auth import AuthResponse, LoginRequest, OIDCProviderPublic, RegisterRequest, TokenResponse, UserResponse
+from app.core.utils import to_uuid
 from app.services.auth_service import (
     authenticate_user,
     refresh_access_token,
@@ -187,7 +188,7 @@ def _get_base_url(request: Request) -> str:
 async def sso_authorize(provider_id: str, request: Request, db: AsyncSession = Depends(get_db)):
     """Redirect user to OIDC provider for authentication."""
     result = await db.execute(
-        select(OIDCProvider).where(OIDCProvider.id == provider_id, OIDCProvider.is_active.is_(True))
+        select(OIDCProvider).where(OIDCProvider.id == to_uuid(provider_id), OIDCProvider.is_active.is_(True))
     )
     provider = result.scalar_one_or_none()
     if not provider:
@@ -255,7 +256,7 @@ async def sso_callback(
 
     # Load provider
     result = await db.execute(
-        select(OIDCProvider).where(OIDCProvider.id == provider_id, OIDCProvider.is_active.is_(True))
+        select(OIDCProvider).where(OIDCProvider.id == to_uuid(provider_id), OIDCProvider.is_active.is_(True))
     )
     provider = result.scalar_one_or_none()
     if not provider:
