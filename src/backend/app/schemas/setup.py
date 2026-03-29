@@ -25,11 +25,13 @@ class SetupFetchUsersRequest(BaseModel):
 class ServiceUser(BaseModel):
     id: str
     name: str
+    email: str = ""
 
 
 class SetupUser(BaseModel):
     service_username: str
     display_name: str
+    email: str = ""
     role: str = "user"
 
 

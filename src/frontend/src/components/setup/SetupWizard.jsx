@@ -61,7 +61,7 @@ export default function SetupWizard({ onComplete }) {
     try {
       const users = await post("/fetch-users", { service_type: serviceType, base_url: baseUrl, api_key: apiKey })
       setServiceUsers(users)
-      setSelectedUsers(users.map(u => ({ service_username: u.name, display_name: u.name, role: "user" })))
+      setSelectedUsers(users.map(u => ({ service_username: u.name, display_name: u.name, email: u.email || "", role: "user" })))
     } catch (e) { setError(e.message) }
     setFetching(false)
   }
@@ -187,16 +187,23 @@ export default function SetupWizard({ onComplete }) {
                       }}>
                         <input type="checkbox" checked={isSelected} onChange={() => {
                           if (isSelected) setSelectedUsers(selectedUsers.filter(s => s.service_username !== u.name))
-                          else setSelectedUsers([...selectedUsers, { service_username: u.name, display_name: u.name, role: "user" }])
+                          else setSelectedUsers([...selectedUsers, { service_username: u.name, display_name: u.name, email: u.email || "", role: "user" }])
                         }} style={{ accentColor: "#E5A00D" }} />
-                        <input value={sel?.display_name || u.name} disabled={!isSelected}
-                          onChange={e => setSelectedUsers(selectedUsers.map(s => s.service_username === u.name ? { ...s, display_name: e.target.value } : s))}
-                          style={{ ...inp, flex: 1, opacity: isSelected ? 1 : 0.3, padding: "4px 8px" }} />
+                        <div style={{ flex: 1, minWidth: 100 }}>
+                          <input value={sel?.display_name || u.name} disabled={!isSelected}
+                            onChange={e => setSelectedUsers(selectedUsers.map(s => s.service_username === u.name ? { ...s, display_name: e.target.value } : s))}
+                            style={{ ...inp, opacity: isSelected ? 1 : 0.3, padding: "4px 8px", fontSize: 12 }} />
+                          {u.email && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", marginTop: 2, paddingLeft: 8 }}>{u.email}</div>}
+                        </div>
                         <button disabled={!isSelected} onClick={() => {
-                          setSelectedUsers(selectedUsers.map(s => s.service_username === u.name
+                          const newUsers = selectedUsers.map(s => s.service_username === u.name
                             ? { ...s, role: s.role === "admin" ? "user" : "admin" }
                             : s.role === "admin" && s.service_username !== u.name ? { ...s, role: "user" } : s
-                          ))
+                          )
+                          setSelectedUsers(newUsers)
+                          // Pre-fill admin email from Tautulli
+                          const newAdmin = newUsers.find(s => s.role === "admin")
+                          if (newAdmin?.email && !adminEmail) setAdminEmail(newAdmin.email)
                         }} style={{
                           padding: "3px 10px", borderRadius: 6, border: "none", cursor: isSelected ? "pointer" : "default",
                           fontSize: 10, fontWeight: 700, fontFamily: "Nunito,sans-serif",

@@ -138,7 +138,7 @@ async def get_service_users(_admin=Depends(require_admin), db: AsyncSession = De
                         for u in (data.get("data", []) if isinstance(data, dict) else []):
                             name = u.get("friendly_name", "?")
                             if name and name != "Local":
-                                users.append({"id": str(u.get("user_id", "")), "name": name})
+                                users.append({"id": str(u.get("user_id", "")), "name": name, "email": u.get("email", "")})
                 elif svc.service_type == "audiobookshelf":
                     resp = await client.get(f"{svc.base_url}/api/users", headers={"Authorization": f"Bearer {key}"})
                     if resp.status_code == 200:

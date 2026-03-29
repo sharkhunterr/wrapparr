@@ -47,7 +47,7 @@ async def _fetch_service_users(service_type: str, base_url: str, api_key: str) -
                 for u in (data.get("data", []) if isinstance(data, dict) else []):
                     name = u.get("friendly_name", "?")
                     if name and name != "Local":
-                        users.append({"id": str(u.get("user_id", "")), "name": name})
+                        users.append({"id": str(u.get("user_id", "")), "name": name, "email": u.get("email", "")})
         elif service_type == "jellyfin":
             resp = await client.get(f"{base_url}/Users", headers={"X-Emby-Token": api_key})
             if resp.status_code == 200:
@@ -128,8 +128,8 @@ async def _do_finish(data: SetupFinishRequest, db: AsyncSession):
                 role="admin",
             )
         else:
-            # Regular user — no password, auto email
-            email = f"{data.service_type}.{u.service_username.lower().replace(' ', '_')}@local.wrapparr"
+            # Regular user — use Tautulli email if available, otherwise auto-generate
+            email = u.email if u.email else f"{data.service_type}.{u.service_username.lower().replace(' ', '_')}@local.wrapparr"
             user = User(
                 email=email,
                 hashed_password=None,
