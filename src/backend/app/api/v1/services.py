@@ -47,7 +47,8 @@ async def list_services(user: User = Depends(get_current_user), db: AsyncSession
     services = []
     for s in result.scalars().all():
         resp = ServiceResponse.model_validate(s)
-        resp.api_key_clear = decrypt(s.api_key_enc)
+        key = decrypt(s.api_key_enc)
+        resp.api_key_clear = key[:4] + "•" * max(0, len(key) - 8) + key[-4:] if len(key) > 8 else "••••••••"
         services.append(resp)
     return services
 

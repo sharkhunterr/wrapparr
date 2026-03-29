@@ -57,7 +57,8 @@ class Settings(BaseSettings):
         ek = self.encryption_key or secrets.token_urlsafe(64)
         object.__setattr__(self, "secret_key", sk)
         object.__setattr__(self, "encryption_key", ek)
-        with open(keys_file, "w") as f:
+        fd = os.open(keys_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
             f.write(f"{sk}\n{ek}\n")
 
 

@@ -69,11 +69,24 @@ async def register(data: RegisterRequest, response: Response, db: AsyncSession =
     return AuthResponse(access_token=access, user=UserResponse.model_validate(user))
 
 
+import time as _time
+_login_attempts = {}
+_LOGIN_MAX, _LOGIN_WINDOW = 10, 300
+
 @router.post("/login", response_model=AuthResponse)
-async def login(data: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
+async def login(data: LoginRequest, request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+    now = _time.time()
+    count, start = _login_attempts.get(ip, (0, now))
+    if now - start > _LOGIN_WINDOW:
+        count, start = 0, now
+    if count >= _LOGIN_MAX:
+        raise HTTPException(status_code=429, detail="Trop de tentatives. Reessayez dans quelques minutes.")
     try:
         user, access, refresh = await authenticate_user(db, data.email, data.password)
+        _login_attempts.pop(ip, None)
     except ValueError as e:
+        _login_attempts[ip] = (count + 1, start)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     response.set_cookie(

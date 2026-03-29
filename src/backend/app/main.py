@@ -286,12 +286,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
+# CORS — allow_credentials needed for httponly refresh cookies
+# In production, set CORS_ORIGINS env var to restrict origins
+import os
+_cors_origins = os.environ.get("CORS_ORIGINS", "").split(",") if os.environ.get("CORS_ORIGINS") else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=True if _cors_origins != ["*"] else False,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "Authorization"],
 )
 
 # API routers
@@ -336,9 +340,9 @@ async def health():
 
 
 # ── Logs endpoint (admin only) ──
-from fastapi import Query
+from fastapi import Depends, Query
+from app.core.security import require_admin
 
 @app.get("/api/v1/admin/logs")
-async def get_logs(limit: int = Query(100, le=500), level: str = Query(None)):
-    # No auth check here for debugging — in prod, add require_admin
+async def get_logs(limit: int = Query(100, le=500), level: str = Query(None), _admin=Depends(require_admin)):
     return log_store.get_logs(limit=limit, level=level)
