@@ -98,15 +98,45 @@ async def fetch_users(data: SetupFetchUsersRequest, db: AsyncSession = Depends(g
 async def finish_setup(data: SetupFinishRequest, db: AsyncSession = Depends(get_db)):
     await _guard_setup(db)
 
-    # 1. Create admin user
-    admin = User(
-        email=data.admin_email,
-        hashed_password=hash_password(data.admin_password),
-        display_name=data.admin_display_name,
-        role="admin",
-    )
-    db.add(admin)
-    await db.flush()
+    admin = None
+
+    # 1. Create all users from the selected list
+    for u in data.users:
+        is_admin = u.role == "admin"
+
+        if is_admin:
+            # This is the admin — use provided email + password
+            user = User(
+                email=data.admin_email,
+                hashed_password=hash_password(data.admin_password),
+                display_name=u.display_name,
+                role="admin",
+            )
+        else:
+            # Regular user — no password, auto email
+            email = f"{data.service_type}.{u.service_username.lower().replace(' ', '_')}@local.wrapparr"
+            user = User(
+                email=email,
+                hashed_password=None,
+                display_name=u.display_name,
+                role="user",
+            )
+
+        db.add(user)
+        await db.flush()
+
+        if is_admin and admin is None:
+            admin = user
+
+        # Create mapping
+        db.add(UserServiceMapping(
+            user_id=user.id,
+            service_type=data.service_type,
+            service_username=u.service_username,
+        ))
+
+    if not admin:
+        raise HTTPException(status_code=400, detail="Au moins un utilisateur doit etre admin")
 
     # 2. Create service connector (owned by admin)
     svc = ServiceConnector(
@@ -118,36 +148,6 @@ async def finish_setup(data: SetupFinishRequest, db: AsyncSession = Depends(get_
         is_active=True,
     )
     db.add(svc)
-
-    # 3. Create users + mappings
-    for u in data.users:
-        # Check if this is the admin (same name)
-        if u.service_username.lower() == data.admin_display_name.lower():
-            # Map admin to this service user
-            db.add(UserServiceMapping(
-                user_id=admin.id,
-                service_type=data.service_type,
-                service_username=u.service_username,
-            ))
-            continue
-
-        # Create wrapparr user (no password — admin sets later or SSO)
-        email = f"{data.service_type}.{u.service_username.lower().replace(' ', '_')}@local.wrapparr"
-        user = User(
-            email=email,
-            hashed_password=None,
-            display_name=u.display_name,
-            role=u.role,
-        )
-        db.add(user)
-        await db.flush()
-
-        # Create mapping
-        db.add(UserServiceMapping(
-            user_id=user.id,
-            service_type=data.service_type,
-            service_username=u.service_username,
-        ))
 
     # 4. Store auth method in config
     from app.models.share import GlobalConfig
