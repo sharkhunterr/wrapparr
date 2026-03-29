@@ -15,7 +15,7 @@ async function post(path, body) {
   return res.json()
 }
 
-const STEPS = ["Service", "Utilisateurs", "Authentification", "Securite", "Termine"]
+const STEPS = ["Service", "Utilisateurs", "Compte admin", "Authentification", "Termine"]
 
 export default function SetupWizard({ onComplete }) {
   const [step, setStep] = useState(0)
@@ -92,6 +92,11 @@ export default function SetupWizard({ onComplete }) {
   const goNext = () => {
     if (step === 0 && !tested) return
     if (step === 1 && !hasAdmin) { setError("Definissez au moins un utilisateur comme admin"); return }
+    if (step === 2) {
+      if (!adminEmail) { setError("Email requis"); return }
+      if (!adminPassword || adminPassword.length < 4) { setError("Le mot de passe doit faire au moins 4 caracteres"); return }
+      if (adminPassword !== adminPassword2) { setError("Les mots de passe ne correspondent pas"); return }
+    }
     if (step === 0) fetchUsers()
     setStep(s => s + 1); setError("")
   }
@@ -123,8 +128,8 @@ export default function SetupWizard({ onComplete }) {
         <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 16 }}>
           {step === 0 && "Connectez votre serveur media"}
           {step === 1 && "Selectionnez les utilisateurs et definissez l'admin"}
-          {step === 2 && "Choisissez le mode d'authentification"}
-          {step === 3 && "Definissez le mot de passe et l'email de l'admin"}
+          {step === 2 && "Definissez les identifiants de l'admin"}
+          {step === 3 && "Comment les utilisateurs se connecteront-ils ?"}
           {step === 4 && "Configuration terminee !"}
         </div>
 
@@ -215,35 +220,8 @@ export default function SetupWizard({ onComplete }) {
           </div>
         )}
 
-        {/* ═══ Step 2: Auth Method ═══ */}
+        {/* ═══ Step 2: Admin credentials ═══ */}
         {step === 2 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[
-              { value: "password", label: "Mot de passe", desc: "Chaque utilisateur se connecte avec email + mot de passe", icon: "🔑" },
-              { value: "sso", label: "SSO (bientot)", desc: "Connexion via un fournisseur externe (OIDC)", icon: "🔗", disabled: true },
-              { value: "plex", label: "Plex Auth (bientot)", desc: "Connexion avec le compte Plex", icon: "🎬", disabled: true },
-            ].map(opt => (
-              <button key={opt.value} disabled={opt.disabled}
-                onClick={() => !opt.disabled && setAuthMethod(opt.value)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "12px 14px",
-                  borderRadius: 8, cursor: opt.disabled ? "not-allowed" : "pointer", textAlign: "left",
-                  background: authMethod === opt.value ? "rgba(229,160,13,0.08)" : "rgba(255,255,255,0.02)",
-                  border: "1px solid " + (authMethod === opt.value ? "rgba(229,160,13,0.3)" : "rgba(255,255,255,0.06)"),
-                  opacity: opt.disabled ? 0.4 : 1,
-                }}>
-                <span style={{ fontSize: 22 }}>{opt.icon}</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: authMethod === opt.value ? "#E5A00D" : "white" }}>{opt.label}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{opt.desc}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* ═══ Step 3: Admin security ═══ */}
-        {step === 3 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(229,160,13,0.06)", border: "1px solid rgba(229,160,13,0.15)" }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#E5A00D" }}>★ {admins[0]?.display_name || "Admin"}</div>
@@ -261,6 +239,35 @@ export default function SetupWizard({ onComplete }) {
               <label style={lbl}>Confirmer le mot de passe</label>
               <input value={adminPassword2} onChange={e => setAdminPassword2(e.target.value)} style={inp} type="password" />
             </div>
+          </div>
+        )}
+
+        {/* ═══ Step 3: Auth Method ═══ */}
+        {step === 3 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>
+              Comment les autres utilisateurs se connecteront-ils a Wrapparr ?
+            </div>
+            {[
+              { value: "password", label: "Mot de passe", desc: "L'admin definit un mot de passe pour chaque utilisateur", icon: "🔑" },
+              { value: "sso", label: "SSO / OIDC", desc: "Connexion via un fournisseur externe (configurable apres)", icon: "🔗" },
+              { value: "plex", label: "Plex Auth", desc: "Les utilisateurs se connectent avec leur compte Plex", icon: "🎬" },
+            ].map(opt => (
+              <button key={opt.value}
+                onClick={() => setAuthMethod(opt.value)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10, padding: "12px 14px",
+                  borderRadius: 8, cursor: "pointer", textAlign: "left",
+                  background: authMethod === opt.value ? "rgba(229,160,13,0.08)" : "rgba(255,255,255,0.02)",
+                  border: "1px solid " + (authMethod === opt.value ? "rgba(229,160,13,0.3)" : "rgba(255,255,255,0.06)"),
+                }}>
+                <span style={{ fontSize: 22 }}>{opt.icon}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: authMethod === opt.value ? "#E5A00D" : "white" }}>{opt.label}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{opt.desc}</div>
+                </div>
+              </button>
+            ))}
           </div>
         )}
 
