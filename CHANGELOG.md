@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.9](https://github.com/your-username/wrapparr/-/compare/v0.1.8...v0.1.9) (2026-03-29)
+
+
+### Bug Fixes
+
+* tronque mot de passe a 72 bytes (limite bcrypt) ([9abb7eb](https://github.com/your-username/wrapparr/-/commit/9abb7ebea69ac78d2507cea1108112577502115e))
+
 ### [0.1.8](https://github.com/your-username/wrapparr/-/compare/v0.1.7...v0.1.8) (2026-03-29)
 
 
