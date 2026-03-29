@@ -82,12 +82,25 @@ async def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
 
+    if "display_name" in updates and updates["display_name"]:
+        user.display_name = updates["display_name"]
+    if "email" in updates and updates["email"]:
+        user.email = updates["email"]
     if "role" in updates:
         user.role = updates["role"]
     if "is_active" in updates:
         user.is_active = updates["is_active"]
     if "password" in updates:
         user.hashed_password = hash_password(updates["password"])
+    if updates.get("reset_password"):
+        # Generate a temporary password and return it
+        import secrets
+        temp = secrets.token_urlsafe(12)
+        user.hashed_password = hash_password(temp)
+        await db.commit()
+        await db.refresh(user)
+        resp = UserResponse.model_validate(user)
+        return {"user": resp, "temp_password": temp}
 
     await db.commit()
     await db.refresh(user)
