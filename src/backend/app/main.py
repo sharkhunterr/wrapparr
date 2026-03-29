@@ -323,7 +323,14 @@ app.add_api_websocket_route("/ws/admin-logs", ws_admin_logs)
 # ── Health endpoint (no auth) ──
 @app.get("/api/v1/health")
 async def health():
-    return {"status": "ok", "version": getattr(settings, "app_name", "wrapparr")}
+    import os
+    from app.version import __version__
+    return {
+        "status": "ok",
+        "version": __version__,
+        "commit": os.environ.get("COMMIT_SHA", "dev"),
+        "build_date": os.environ.get("BUILD_DATE", ""),
+    }
 
 
 # ── Logs endpoint (admin only) ──
