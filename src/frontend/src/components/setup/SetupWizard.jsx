@@ -250,8 +250,9 @@ export default function SetupWizard({ onComplete }) {
             </div>
             {[
               { value: "password", label: "Mot de passe", desc: "L'admin definit un mot de passe pour chaque utilisateur", icon: "🔑" },
-              { value: "sso", label: "SSO / OIDC", desc: "Connexion via un fournisseur externe (configurable apres)", icon: "🔗" },
+              { value: "sso", label: "SSO / OIDC", desc: "Connexion via un fournisseur externe (configurable dans l'admin)", icon: "🔗" },
               { value: "plex", label: "Plex Auth", desc: "Les utilisateurs se connectent avec leur compte Plex", icon: "🎬" },
+              { value: "later", label: "Configurer plus tard", desc: "Passer cette etape et configurer l'authentification dans l'admin", icon: "⏭️" },
             ].map(opt => (
               <button key={opt.value}
                 onClick={() => setAuthMethod(opt.value)}
