@@ -62,6 +62,29 @@ export default function ConfigPanel() {
       </div>
 
       {saving && <div style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, marginTop: 8, fontFamily: "JetBrains Mono,monospace" }}>sauvegarde...</div>}
+
+      {/* Reset Wrapparr */}
+      <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid rgba(239,68,68,0.15)" }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#f87171", marginBottom: 6 }}>Zone dangereuse</div>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginBottom: 12 }}>
+          Reinitialiser Wrapparr supprime toutes les donnees : utilisateurs, services, recaps, themes, configuration.
+          Le wizard de configuration initiale sera relance.
+        </p>
+        <button onClick={async () => {
+          if (!confirm("Etes-vous sur de vouloir TOUT supprimer ? Cette action est irreversible.")) return
+          if (!confirm("DERNIERE CONFIRMATION : toutes les donnees seront perdues. Continuer ?")) return
+          try {
+            await api("/admin/reset", { method: "POST", body: { confirm: "RESET_WRAPPARR" } })
+            window.location.href = "/"
+          } catch (e) { alert(e.message) }
+        }} style={{
+          padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(239,68,68,0.3)",
+          background: "rgba(239,68,68,0.08)", color: "#f87171", fontSize: 12, fontWeight: 700,
+          cursor: "pointer",
+        }}>
+          Reinitialiser Wrapparr
+        </button>
+      </div>
     </div>
   )
 }

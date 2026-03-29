@@ -123,7 +123,7 @@ const NAV_ITEMS = [
   ]},
   { section: "Services", items: [
     { to: "/admin/services", icon: Link2, label: "Connecteurs", short: "Services" },
-    { to: "/admin/mapping", icon: Users2, label: "Mapping utilisateurs", short: "Mapping" },
+    // Mapping integre dans la page Utilisateurs
   ]},
   { section: "Recap", items: [
     { to: "/admin/recaps", icon: Clapperboard, label: "Gestion recaps", short: "Recaps" },

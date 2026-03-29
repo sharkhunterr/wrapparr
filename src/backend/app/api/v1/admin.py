@@ -50,6 +50,27 @@ async def list_users(_admin=Depends(require_admin), db: AsyncSession = Depends(g
     return [UserResponse.model_validate(u) for u in result.scalars().all()]
 
 
+@router.get("/users-full")
+async def list_users_full(_admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    """Users with their service mappings."""
+    users_result = await db.execute(select(User).order_by(User.created_at.desc()))
+    mappings_result = await db.execute(select(UserServiceMapping))
+
+    mappings_by_user = {}
+    for m in mappings_result.scalars().all():
+        uid = str(m.user_id)
+        if uid not in mappings_by_user:
+            mappings_by_user[uid] = []
+        mappings_by_user[uid].append({"service_type": m.service_type, "service_username": m.service_username, "id": str(m.id)})
+
+    out = []
+    for u in users_result.scalars().all():
+        user_data = UserResponse.model_validate(u).model_dump()
+        user_data["mappings"] = mappings_by_user.get(str(u.id), [])
+        out.append(user_data)
+    return out
+
+
 @router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     data: dict,
@@ -532,3 +553,23 @@ async def test_oidc_provider(
         "detail": f"Impossible de joindre le provider. Erreur: {last_error}",
         "tried": tried,
     }
+
+
+@router.post("/reset")
+async def reset_wrapparr(
+    body: dict,
+    _admin=Depends(require_admin), db: AsyncSession = Depends(get_db),
+):
+    """Reset all data and return to setup wizard."""
+    confirm = body.get("confirm", "")
+    if confirm != "RESET_WRAPPARR":
+        raise HTTPException(status_code=400, detail="Confirmation requise: envoyez {\"confirm\": \"RESET_WRAPPARR\"}")
+
+    from app.core.database import Base, engine
+
+    # Drop and recreate all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+    return {"status": "ok", "message": "Toutes les donnees ont ete supprimees. Redemarrez l'application."}
