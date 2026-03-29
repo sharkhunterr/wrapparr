@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.7](https://github.com/your-username/wrapparr/-/compare/v0.1.6...v0.1.7) (2026-03-29)
+
+
+### Bug Fixes
+
+* ignore src/backend/data/ (SQLite + cles) ([be8937d](https://github.com/your-username/wrapparr/-/commit/be8937d6ea8d5abd002a9b5381e60035fb415e80))
+* models portables SQLite+PostgreSQL — Uuid et JSON natifs SQLAlchemy ([257c2b2](https://github.com/your-username/wrapparr/-/commit/257c2b2a38c5408d13538fd58f9fdb297845cb8a))
+
 ### [0.1.6](https://github.com/your-username/wrapparr/-/compare/v0.1.5...v0.1.6) (2026-03-29)
 
 
