@@ -237,7 +237,9 @@ async def lifespan(app: FastAPI):
     if settings.redis_url:
         app.state.redis = aioredis.from_url(settings.redis_url, decode_responses=True)
     else:
-        app.state.redis = None
+        from app.core.memory_store import memory_store
+        app.state.redis = memory_store
+        logger.info("Redis non configure — utilisation du store memoire")
 
     from app.models.share import GlobalConfig
     from app.models.theme import ThemePack

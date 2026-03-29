@@ -110,8 +110,6 @@ async def sso_exchange(request: Request, response: Response):
         raise HTTPException(400, "Missing code")
 
     redis = request.app.state.redis
-    if not redis:
-        raise HTTPException(503, "Redis non configure — SSO indisponible")
     data = await redis.get(f"sso_code:{code}")
     if not data:
         raise HTTPException(401, "Code invalide ou expire")
@@ -220,8 +218,6 @@ async def sso_authorize(provider_id: str, request: Request, db: AsyncSession = D
 
     # Store state + nonce + origin in Redis for validation
     redis = request.app.state.redis
-    if not redis:
-        raise HTTPException(503, "Redis non configure — SSO indisponible")
     await redis.setex(f"oidc_state:{state}", 600, f"{provider_id}|{nonce}|{base_url}")
 
     uri, _ = client.create_authorization_url(
@@ -245,8 +241,6 @@ async def sso_callback(
     """Handle OIDC callback: exchange code for tokens, create/login user."""
     # Validate state
     redis = request.app.state.redis
-    if not redis:
-        raise HTTPException(503, "Redis non configure")
     stored = await redis.get(f"oidc_state:{state}")
     if not stored:
         raise HTTPException(status_code=400, detail="State OIDC invalide ou expiré")
@@ -363,8 +357,6 @@ async def sso_callback(
     import secrets
     sso_code = secrets.token_urlsafe(32)
     redis = request.app.state.redis
-    if not redis:
-        raise HTTPException(503, "Redis non configure — SSO indisponible")
     await redis.setex(f"sso_code:{sso_code}", 60, f"{access}||{refresh}")
 
     from fastapi.responses import RedirectResponse

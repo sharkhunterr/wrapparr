@@ -26,11 +26,10 @@ async def get_poster(
     cache_key = f"poster:{type}:{id}:{size}"
     redis = request.app.state.redis
 
-    # Check cache (skip if no Redis)
-    if redis:
-        cached = await redis.get(cache_key)
-        if cached:
-            return Response(content=cached.encode("latin-1"), media_type="image/jpeg")
+    # Check cache
+    cached = await redis.get(cache_key)
+    if cached:
+        return Response(content=cached.encode("latin-1"), media_type="image/jpeg")
 
     # Fetch from source
     if type == "tmdb":
@@ -47,8 +46,7 @@ async def get_poster(
 
         # Cache the image data
         image_data = resp.content
-        if redis:
-            await redis.setex(cache_key, CACHE_TTL, image_data.decode("latin-1"))
+        await redis.setex(cache_key, CACHE_TTL, image_data.decode("latin-1"))
 
         return Response(content=image_data, media_type=resp.headers.get("content-type", "image/jpeg"))
 
