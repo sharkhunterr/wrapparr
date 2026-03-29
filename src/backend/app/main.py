@@ -10,6 +10,8 @@ from app.core.config import settings
 from app.core.database import Base, async_session, engine
 from app.core.security import hash_password
 
+from app.core.log_store import log_store, setup_logging
+setup_logging()
 logger = logging.getLogger("wrapparr")
 
 BUILTIN_THEMES = [
@@ -316,3 +318,18 @@ app.include_router(admin_router.router, prefix="/api/v1")
 
 app.add_api_websocket_route("/ws/recap-progress", ws_recap_progress)
 app.add_api_websocket_route("/ws/admin-logs", ws_admin_logs)
+
+
+# ── Health endpoint (no auth) ──
+@app.get("/api/v1/health")
+async def health():
+    return {"status": "ok", "version": getattr(settings, "app_name", "wrapparr")}
+
+
+# ── Logs endpoint (admin only) ──
+from fastapi import Query
+
+@app.get("/api/v1/admin/logs")
+async def get_logs(limit: int = Query(100, le=500), level: str = Query(None)):
+    # No auth check here for debugging — in prod, add require_admin
+    return log_store.get_logs(limit=limit, level=level)

@@ -1,6 +1,10 @@
 """First-run setup wizard API."""
+import logging
+import traceback
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
+
+logger = logging.getLogger("wrapparr.setup")
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -97,7 +101,18 @@ async def fetch_users(data: SetupFetchUsersRequest, db: AsyncSession = Depends(g
 @router.post("/finish")
 async def finish_setup(data: SetupFinishRequest, db: AsyncSession = Depends(get_db)):
     await _guard_setup(db)
+    logger.info("Setup finish started: %s users, service=%s", len(data.users), data.service_type)
 
+    try:
+        return await _do_finish(data, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Setup finish failed: %s\n%s", str(e), traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Setup error: {str(e)}")
+
+
+async def _do_finish(data: SetupFinishRequest, db: AsyncSession):
     admin = None
 
     # 1. Create all users from the selected list

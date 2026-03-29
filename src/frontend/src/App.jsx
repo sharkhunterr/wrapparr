@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink, Outlet, useNavigate, u
 import { useEffect, useState } from "react"
 import {
   LayoutDashboard, Link2, Users2, Film, Palette, UserCog,
-  KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music,
+  KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music, ScrollText,
 } from "lucide-react"
 import LoginPage from "./components/auth/LoginPage"
 import SetupWizard from "./components/setup/SetupWizard"
@@ -21,6 +21,7 @@ import SlideManager from "./components/admin/SlideManager"
 import ConnectionConfig from "./components/admin/ConnectionConfig"
 import RecapManager from "./components/admin/RecapManager"
 import MusicManager from "./components/admin/MusicManager"
+import LogsPanel from "./components/admin/LogsPanel"
 
 /* ── Auth guard ── */
 function useRequireAuth({ requireAdmin = false } = {}) {
@@ -134,6 +135,7 @@ const NAV_ITEMS = [
     { to: "/admin/users", icon: UserCog, label: "Utilisateurs", short: "Users" },
     { to: "/admin/connections", icon: KeyRound, label: "Connexions & SSO", short: "SSO" },
     { to: "/admin/config", icon: Settings, label: "Configuration", short: "Config" },
+    { to: "/admin/logs", icon: ScrollText, label: "Logs", short: "Logs" },
   ]},
 ]
 
@@ -329,6 +331,7 @@ export default function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="connections" element={<ConnectionConfig />} />
           <Route path="config" element={<ConfigPanel />} />
+          <Route path="logs" element={<LogsPanel />} />
         </Route>
       </Routes>
     </BrowserRouter>
