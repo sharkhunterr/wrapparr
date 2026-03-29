@@ -5,6 +5,7 @@ import {
   KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music,
 } from "lucide-react"
 import LoginPage from "./components/auth/LoginPage"
+import SetupWizard from "./components/setup/SetupWizard"
 import RecapPlayer from "./components/recap/RecapPlayer"
 import ShareView from "./components/ShareView"
 import useAuthStore from "./stores/authStore"
@@ -298,6 +299,18 @@ function LoginRedirect() {
 }
 
 export default function App() {
+  const [setupNeeded, setSetupNeeded] = useState(null)
+
+  useEffect(() => {
+    fetch("/api/v1/setup/status")
+      .then(r => r.json())
+      .then(d => setSetupNeeded(d.needed))
+      .catch(() => setSetupNeeded(false))
+  }, [])
+
+  if (setupNeeded === null) return null
+  if (setupNeeded) return <SetupWizard onComplete={() => setSetupNeeded(false)} />
+
   return (
     <BrowserRouter>
       <Routes>

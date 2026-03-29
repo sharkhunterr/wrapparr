@@ -242,17 +242,19 @@ async def lifespan(app: FastAPI):
     from app.models.user import User
 
     async with async_session() as db:
-        # First admin
-        result = await db.execute(select(User).where(User.email == settings.first_admin_email))
-        if not result.scalar_one_or_none():
-            admin = User(
-                email=settings.first_admin_email,
-                hashed_password=hash_password(settings.first_admin_password),
-                display_name="Admin",
-                role="admin",
-            )
-            db.add(admin)
-            logger.info("Premier compte admin créé: %s", settings.first_admin_email)
+        # First admin — only if explicitly configured via env (skip if using setup wizard)
+        import os
+        if os.environ.get("FIRST_ADMIN_PASSWORD") and settings.first_admin_password != "changeme":
+            result = await db.execute(select(User).where(User.email == settings.first_admin_email))
+            if not result.scalar_one_or_none():
+                admin = User(
+                    email=settings.first_admin_email,
+                    hashed_password=hash_password(settings.first_admin_password),
+                    display_name="Admin",
+                    role="admin",
+                )
+                db.add(admin)
+                logger.info("Premier compte admin créé: %s", settings.first_admin_email)
 
         # Builtin themes — create or update config
         for t in BUILTIN_THEMES:
@@ -291,6 +293,7 @@ app.add_middleware(
 # API routers
 from app.api.v1 import admin as admin_router
 from app.api.v1 import auth as auth_router
+from app.api.v1 import setup as setup_router
 from app.api.v1 import media as media_router
 from app.api.v1 import phrases as phrases_router
 from app.api.v1 import recaps as recaps_router
@@ -300,6 +303,7 @@ from app.api.v1 import slides as slides_router
 from app.api.v1 import themes as themes_router
 from app.websocket.handlers import ws_admin_logs, ws_recap_progress
 
+app.include_router(setup_router.router, prefix="/api/v1")
 app.include_router(auth_router.router, prefix="/api/v1")
 app.include_router(services_router.router, prefix="/api/v1")
 app.include_router(recaps_router.router, prefix="/api/v1")
