@@ -1,8 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -12,8 +11,8 @@ class YearlyRecap(Base):
     __tablename__ = "yearly_recaps"
     __table_args__ = (UniqueConstraint("user_id", "year", name="uq_user_year"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False)
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(
         Enum("pending", "collecting", "processing", "fetching_posters", "completed", "failed", name="recap_status"),
@@ -40,9 +39,9 @@ class YearlyRecap(Base):
 class HistorySnapshot(Base):
     __tablename__ = "history_snapshots"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    recap_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("yearly_recaps.id"), unique=True)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    recap_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("yearly_recaps.id"), unique=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False)
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     recap_data: Mapped[dict] = mapped_column(JSON, nullable=False)
     slide_config: Mapped[dict] = mapped_column(JSON, nullable=False)
