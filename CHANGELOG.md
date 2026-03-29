@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/your-username/wrapparr/-/compare/v0.1.5...v0.1.6) (2026-03-29)
+
+
+### Features
+
+* wizard de configuration initiale (setup first-run) ([10f441e](https://github.com/your-username/wrapparr/-/commit/10f441e5f3be521233397b6b1370edcb025d71d2))
+
+
+### Bug Fixes
+
+* setup wizard — admin = utilisateur tautulli selectionne + mdp ([6b10ba9](https://github.com/your-username/wrapparr/-/commit/6b10ba9b77998626773e021dd44a65c1e3decd99))
+* setup wizard — ordre des etapes: users → admin → auth ([fba5414](https://github.com/your-username/wrapparr/-/commit/fba541453e608229e5c91f6968058e68341f0334))
+
 ### [0.1.5](https://github.com/your-username/wrapparr/-/compare/v0.1.4...v0.1.5) (2026-03-28)
 
 
