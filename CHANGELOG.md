@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.com/your-username/wrapparr/-/compare/v0.1.7...v0.1.8) (2026-03-29)
+
+
+### Features
+
+* systeme de logs + health endpoint + page admin logs ([f79251b](https://github.com/your-username/wrapparr/-/commit/f79251bf9862fefbd43c047d6ccf3e59f07cee1f))
+
 ### [0.1.7](https://github.com/your-username/wrapparr/-/compare/v0.1.6...v0.1.7) (2026-03-29)
 
 
