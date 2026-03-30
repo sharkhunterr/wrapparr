@@ -338,7 +338,8 @@ async def update_config(updates: dict, _admin=Depends(require_admin), db: AsyncS
 
 # ── Music download ──
 
-MUSIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "music_cache")
+from app.core.config import settings as _settings
+MUSIC_DIR = _settings.music_dir
 os.makedirs(MUSIC_DIR, exist_ok=True)
 
 

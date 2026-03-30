@@ -26,7 +26,16 @@ export default function UserManagement() {
     try {
       const svcUsers = await api("/admin/service-users")
       setServiceUsers(svcUsers)
-    } catch { }
+    } catch (e) {
+      console.warn("Impossible de charger les utilisateurs des services:", e.message)
+      // Fallback: get connected service types at least
+      try {
+        const svcs = await api("/admin/all-services")
+        const fallback = {}
+        for (const s of svcs) if (!fallback[s.service_type]) fallback[s.service_type] = []
+        setServiceUsers(fallback)
+      } catch { }
+    }
   }
   useEffect(() => { load() }, [])
 

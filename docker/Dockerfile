@@ -12,7 +12,8 @@ WORKDIR /app
 
 # System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor curl && \
+    nginx supervisor curl ffmpeg && \
+    pip install --no-cache-dir yt-dlp && \
     rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
@@ -37,7 +38,7 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ARG BUILD_DATE
 ARG COMMIT_SHA
 ARG VERSION
-ENV BUILD_DATE=${BUILD_DATE} COMMIT_SHA=${COMMIT_SHA} VERSION=${VERSION}
+ENV BUILD_DATE=${BUILD_DATE} COMMIT_SHA=${COMMIT_SHA} VERSION=${VERSION} DATA_DIR=/app/data
 
 EXPOSE 8080
 

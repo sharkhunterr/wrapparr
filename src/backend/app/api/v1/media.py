@@ -51,7 +51,7 @@ async def get_poster(
         return Response(content=image_data, media_type=resp.headers.get("content-type", "image/jpeg"))
 
 
-MUSIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "music_cache")
+MUSIC_DIR = settings.music_dir
 
 
 @router.get("/music/{filename}")

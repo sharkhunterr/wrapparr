@@ -26,22 +26,28 @@ class Settings(BaseSettings):
     app_name: str = "Wrapparr"
     debug: bool = False
 
+    # Data directory (for SQLite, music, keys)
+    data_dir: str = "data"
+
     model_config = {"env_file": ("../.env", ".env", "/app/.env"), "extra": "ignore"}
+
+    @property
+    def music_dir(self) -> str:
+        import os
+        return os.path.join(self.data_dir, "music")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        import os
+        os.makedirs(self.data_dir, exist_ok=True)
+        os.makedirs(os.path.join(self.data_dir, "music"), exist_ok=True)
         # Auto-generate keys if not set (persisted in data dir)
         if not self.secret_key or not self.encryption_key:
             self._auto_generate_keys()
 
     def _auto_generate_keys(self):
         import os
-        keys_file = os.path.join(os.path.dirname(self.database_url.replace("sqlite+aiosqlite:///", "").split("?")[0]) if "sqlite" in self.database_url else "data", ".keys")
-        try:
-            os.makedirs(os.path.dirname(keys_file) if os.path.dirname(keys_file) else "data", exist_ok=True)
-        except Exception:
-            keys_file = "data/.keys"
-            os.makedirs("data", exist_ok=True)
+        keys_file = os.path.join(self.data_dir, ".keys")
 
         if os.path.exists(keys_file):
             with open(keys_file) as f:
