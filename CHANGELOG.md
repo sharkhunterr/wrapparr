@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.12](https://github.com/your-username/wrapparr/-/compare/v0.1.11...v0.1.12) (2026-03-30)
+
+
+### Features
+
+* edition utilisateurs admin — nom, email, reset mot de passe ([daf7c82](https://github.com/your-username/wrapparr/-/commit/daf7c82faf4a7487818863516c51bfc8ef58e8f2))
+* page utilisateurs unifiee + reset Wrapparr ([883450f](https://github.com/your-username/wrapparr/-/commit/883450fccd6daa2c34171aac0c9b15e1da5c2ccb))
+* recupere email depuis Tautulli pour le setup wizard ([af20b50](https://github.com/your-username/wrapparr/-/commit/af20b50c7a17199dfcc0dd68ef42d805c9e3348e))
+
+
+### Bug Fixes
+
+* chemins fichiers centralises + yt-dlp Docker + select services fallback ([ac77a2a](https://github.com/your-username/wrapparr/-/commit/ac77a2a49d05aacebd56df43d32b44d3c3ee2bd9))
+
 ### [0.1.11](https://github.com/your-username/wrapparr/-/compare/v0.1.10...v0.1.11) (2026-03-29)
 
 
