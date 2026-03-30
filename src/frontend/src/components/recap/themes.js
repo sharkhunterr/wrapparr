@@ -1118,6 +1118,7 @@ export const THEMES = {
       noirRain: true,
       noirDesaturate: true,
       noirBlinds: true,
+      bloodDrips: true,
     },
 
     cssExtra: `

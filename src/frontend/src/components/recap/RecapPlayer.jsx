@@ -730,6 +730,44 @@ function XmasLights() {
   )
 }
 
+function BloodDrips({ accent }) {
+  const drips = useRef(Array.from({ length: 8 }, () => ({
+    x: 5 + Math.random() * 90,
+    width: 3 + Math.random() * 6,
+    height: 40 + Math.random() * 120,
+    delay: Math.random() * 15,
+    dur: 6 + Math.random() * 8,
+    bulge: 4 + Math.random() * 8,
+  }))).current
+  const color = accent || "#ff0033"
+  return <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 3, pointerEvents: "none", height: "100vh", overflow: "hidden" }}>
+    <style>{`@keyframes th-drip{0%{transform:translateY(-100%);opacity:0}5%{opacity:0.4}80%{opacity:0.3}100%{transform:translateY(100vh);opacity:0}}`}</style>
+    {drips.map((d, i) => (
+      <div key={i} style={{
+        position: "absolute", left: d.x + "%", top: 0,
+        width: d.width, display: "flex", flexDirection: "column", alignItems: "center",
+        animation: `th-drip ${d.dur}s ease-in ${d.delay}s infinite`,
+        opacity: 0,
+      }}>
+        {/* Drip trail */}
+        <div style={{
+          width: d.width * 0.6, height: d.height,
+          background: `linear-gradient(to bottom, ${color}50, ${color}30, transparent)`,
+          borderRadius: "0 0 2px 2px",
+        }} />
+        {/* Drip bulge at bottom */}
+        <div style={{
+          width: d.bulge, height: d.bulge * 1.2,
+          borderRadius: "40% 40% 50% 50%",
+          background: color + "40",
+          marginTop: -2,
+          boxShadow: `0 2px 6px ${color}20`,
+        }} />
+      </div>
+    ))}
+  </div>
+}
+
 function NoirBlinds() {
   return <div style={{
     position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2, opacity: 0.06,
@@ -1295,6 +1333,7 @@ export default function RecapPlayer() {
   const [recapData, setRecapData] = useState(null)
   const [myRecapUserId, setMyRecapUserId] = useState(null)
   const [theme, setTheme] = useState(null)
+  const [originalTheme, setOriginalTheme] = useState(null)
   const [dbPalettes, setDbPalettes] = useState([])
   const [slideConfigs, setSlideConfigs] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -1338,7 +1377,9 @@ export default function RecapPlayer() {
         const activeTheme = themes.find((t) => t.id === adminThemeId)
           || themes.find((t) => t.id === me.theme_pack_id)
           || themes[0]
-        setTheme(activeTheme?.config || null)
+        const initialThemeConfig = activeTheme?.config || null
+        setTheme(initialThemeConfig)
+        setOriginalTheme(initialThemeConfig)
         setDbPalettes(themes)
         setSlideConfigs(parsedCfg)
 
@@ -1577,6 +1618,7 @@ export default function RecapPlayer() {
       {/* Sin City */}
       {eff.noirRain && <NoirRain />}
       {eff.noirBlinds && <NoirBlinds />}
+      {eff.bloodDrips && <BloodDrips accent={accent} />}
       {/* Abyss */}
       {eff.caustics && <div className="th-caustics" />}
       {eff.biolum && <Bioluminescence />}
@@ -1623,6 +1665,9 @@ export default function RecapPlayer() {
         if (t.defaultPalette) {
           const pal = dbPalettes.find((p) => p.slug === t.defaultPalette)
           if (pal) setTheme(pal.config || null)
+        } else {
+          // No default palette (e.g. Glass Dark) → restore original admin-selected palette
+          setTheme(originalTheme)
         }
       }} />}
       <FullscreenButton />
@@ -1654,6 +1699,8 @@ export default function RecapPlayer() {
                     if (t.defaultPalette) {
                       const pal = dbPalettes.find(p => p.slug === t.defaultPalette)
                       if (pal) setTheme(pal.config || null)
+                    } else {
+                      setTheme(originalTheme)
                     }
                   }
                 }}

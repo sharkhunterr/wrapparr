@@ -16,7 +16,7 @@ const EFFECT_LABELS = {
   screenOff: "Ecran CRT", sabers: "Sabres laser",
   terminalOverlay: "Terminal MUTHUR",
   filmStrip: "Bandes pellicule", silentSlate: "Ardoise transition",
-  noirRain: "Pluie noir", noirDesaturate: "Desaturation", noirBlinds: "Store venitien",
+  noirRain: "Pluie noir", noirDesaturate: "Desaturation", noirBlinds: "Store venitien", bloodDrips: "Coulures de sang",
   stBars: "Barres LED rouges",
   vhsHud: "HUD VHS", vhsTracking: "Tracking VHS", vhsChromatic: "Aberration chromatique",
   halftone: "Halftone BD", comicBorders: "Bordures BD",
