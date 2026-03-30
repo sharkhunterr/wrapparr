@@ -89,12 +89,14 @@ class RecapPipeline:
             # Step 1: Collect data for each mapped user
             await self._update_progress(recap, "collecting", 10, "Collecte des données en cours...")
 
+            logger.info("Users to collect: %s", [(u.display_name, str(u.id)) for u in users_to_collect])
             users_data = {}
             for i, u in enumerate(users_to_collect):
                 pct = 10 + int((i / max(1, len(users_to_collect))) * 30)
                 await self._update_progress(recap, "collecting", pct, f"Collecte pour {u.display_name or u.email}...")
                 try:
                     collected = await self._collect(u.id, year)
+                    logger.info("Collected for %s: %s services (%s)", u.display_name, len(collected) if collected else 0, list(collected.keys()) if collected else [])
                     if collected:
                         processed = self._process(collected)
                         users_data[str(u.id)] = {
@@ -203,6 +205,7 @@ class RecapPipeline:
             select(UserServiceMapping).where(UserServiceMapping.user_id == user_id)
         )
         mappings = {m.service_type: m.service_username for m in result.scalars().all()}
+        logger.info("User %s mappings: %s", user_id, mappings)
 
         # Extract TMDB API key if configured as a service
         tmdb_key = None
