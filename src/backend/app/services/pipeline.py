@@ -170,7 +170,7 @@ class RecapPipeline:
                 recap_id=recap.id,
                 user_id=user_id,
                 year=year,
-                recap_data=processed,
+                recap_data=recap_data,
                 slide_config={},  # Will be populated once SlideConfig exists
                 theme_pack={},    # Will be populated once ThemePack is selected
             )
