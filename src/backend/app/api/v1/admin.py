@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import os
 import re
@@ -367,7 +368,7 @@ async def download_music(updates: dict, _admin=Depends(require_admin)):
     duration = 0
     try:
         meta_proc = await asyncio.create_subprocess_exec(
-            "yt-dlp", "--print", "title", "--print", "duration", "--no-download", url,
+            sys.executable, "-m", "yt_dlp", "--print", "title", "--print", "duration", "--no-download", url,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
         )
         meta_out, _ = await meta_proc.communicate()
@@ -389,7 +390,7 @@ async def download_music(updates: dict, _admin=Depends(require_admin)):
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "yt-dlp", "-x", "--audio-format", "mp3", "--audio-quality", "5",
+            sys.executable, "-m", "yt_dlp", "-x", "--audio-format", "mp3", "--audio-quality", "5",
             "-o", output_path.replace(".mp3", ".%(ext)s"),
             url,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
