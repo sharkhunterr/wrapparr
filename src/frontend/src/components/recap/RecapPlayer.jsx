@@ -306,11 +306,17 @@ export default function RecapPlayer() {
       <ComparisonButton active={comparisonActive} onToggle={() => setComparisonActive((v) => !v)} accent={accent} year={year} visible={hasComparison} />
       {recapConfig.allow_user_themes !== false && <ThemeSelector currentThemeId={visualTheme.id} dbPalettes={dbPalettes} onSelect={(t) => {
         setVisualTheme({ ...t, effects: { ...t.effects, ...(recapConfig.visual_theme_effects || {}) } })
+        // Persist visual theme choice
+        api("/admin/config", { method: "PATCH", body: { visual_theme: t.id } }).catch(() => {})
         if (t.defaultPalette) {
           const pal = dbPalettes.find((p) => p.slug === t.defaultPalette)
-          if (pal) setTheme(pal.config || null)
+          if (pal) {
+            setTheme(pal.config || null)
+            // Persist palette choice
+            api("/admin/config", { method: "PATCH", body: { active_theme: pal.id } }).catch(() => {})
+            api("/themes/users/me/theme", { method: "PUT", body: { theme_pack_id: pal.id } }).catch(() => {})
+          }
         } else {
-          // No default palette (e.g. Glass Dark) → restore original admin-selected palette
           setTheme(originalTheme)
         }
       }} />}
@@ -340,9 +346,14 @@ export default function RecapPlayer() {
                   const t = getAllThemes().find(th => th.id === id)
                   if (t) {
                     setVisualTheme({ ...t, effects: { ...t.effects, ...(recapConfig.visual_theme_effects || {}) } })
+                    api("/admin/config", { method: "PATCH", body: { visual_theme: t.id } }).catch(() => {})
                     if (t.defaultPalette) {
                       const pal = dbPalettes.find(p => p.slug === t.defaultPalette)
-                      if (pal) setTheme(pal.config || null)
+                      if (pal) {
+                        setTheme(pal.config || null)
+                        api("/admin/config", { method: "PATCH", body: { active_theme: pal.id } }).catch(() => {})
+                        api("/themes/users/me/theme", { method: "PUT", body: { theme_pack_id: pal.id } }).catch(() => {})
+                      }
                     } else {
                       setTheme(originalTheme)
                     }
