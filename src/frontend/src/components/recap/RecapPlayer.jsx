@@ -1712,7 +1712,7 @@ export default function RecapPlayer() {
                 availableYears={availableYears}
                 onChangeYear={(y) => { window.location.href = "/recap/" + y }}
               />
-            : curr.component}
+            : (() => { console.log("[RENDER] slide:", curr.id, "component:", curr.component?.type?.name); return curr.component })()}
         </div>
       </ComparisonProvider>
 
@@ -2539,11 +2539,11 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     })
   }
 
-  // All-time ranking (films + series combined)
+  // All-time ranking v2 (films + series combined)
   const rankingAccent = accents.ranking || "#f87171"
   if (allUsersData.length >= 1) {
     slides.push({
-      id: "ranking", accent: rankingAccent, bg: baseBg,
+      id: "classement-general", accent: rankingAccent, bg: baseBg,
       component: <AllTimeRankingSlide accent={rankingAccent} allUsers={allUsersData} year={year} me={myNameInData} />,
     })
   }

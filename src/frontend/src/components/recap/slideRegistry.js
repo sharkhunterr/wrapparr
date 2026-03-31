@@ -428,8 +428,13 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
   {
-    id: "ranking", label: "Classement global", group: "global",
-    desc: "Classement inter-utilisateurs",
+    id: "ranking", label: "Classement global (ancien)", group: "global",
+    desc: "Ancien classement — desactiver",
+    params: [],
+  },
+  {
+    id: "classement-general", label: "Classement general", group: "global",
+    desc: "Classement films+series avec badges de progression",
     params: [],
   },
   {
