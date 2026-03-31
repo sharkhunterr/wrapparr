@@ -334,44 +334,58 @@ class RecapPipeline:
                 from app.services.overseerr import OverseerrClient
                 ov_client = OverseerrClient(overseerr_url, overseerr_key)
 
-                # Try to find Overseerr user by matching display name or plex username
+                # Find Overseerr user ID
                 ov_user_id = None
+                ov_users = await ov_client.get_users()
                 overseerr_mapping = mappings.get("overseerr")
-                if overseerr_mapping:
-                    # Direct mapping exists
-                    ov_users = await ov_client.get_users()
-                    for ou in ov_users:
-                        if ou["name"] == overseerr_mapping or ou.get("plex_username") == overseerr_mapping:
-                            ov_user_id = int(ou["id"])
-                            break
-                else:
-                    # Try auto-match with tautulli/plex username
-                    plex_username = mappings.get("tautulli") or mappings.get("plex") or mappings.get("jellyfin")
-                    if plex_username:
-                        ov_users = await ov_client.get_users()
-                        for ou in ov_users:
-                            if ou.get("plex_username") == plex_username or ou["name"].lower() == plex_username.lower():
-                                ov_user_id = int(ou["id"])
-                                break
+                plex_username = mappings.get("tautulli") or mappings.get("plex") or mappings.get("jellyfin")
+                for ou in ov_users:
+                    if overseerr_mapping and (ou["name"] == overseerr_mapping or ou.get("plex_username") == overseerr_mapping):
+                        ov_user_id = int(ou["id"])
+                        break
+                    if not overseerr_mapping and plex_username and (ou.get("plex_username") == plex_username or ou["name"].lower() == plex_username.lower()):
+                        ov_user_id = int(ou["id"])
+                        break
 
+                # Current year requests
                 requests_data = await ov_client.get_requests_for_year(year, ov_user_id)
 
-                # Cross-reference with watched titles
-                watched_titles = []
+                # Previous year for comparison
+                prev_requests = await ov_client.get_requests_for_year(year - 1, ov_user_id)
+
+                # Collect watched items for matching (with tmdb_ids)
+                watched_items = []
                 for svc_data in collected.values():
                     for item in svc_data.get("top", []):
-                        if item.get("t"):
-                            watched_titles.append(item["t"])
-                    for item in svc_data.get("extra", {}).get("films", {}).get("top", []):
-                        if item.get("t"):
-                            watched_titles.append(item["t"])
-                    for item in svc_data.get("extra", {}).get("series", {}).get("top", []):
-                        if item.get("t"):
-                            watched_titles.append(item["t"])
+                        watched_items.append(item)
+                    for section in ("films", "series"):
+                        for item in svc_data.get("extra", {}).get(section, {}).get("top", []):
+                            watched_items.append(item)
 
-                match_data = await ov_client.match_requests_with_watched(requests_data, watched_titles)
-                collected["overseerr"] = {**requests_data, **match_data}
-                logger.info("Enrichissement Overseerr OK: %d demandes", requests_data.get("total", 0))
+                match_data = ov_client.match_requests_with_watched(requests_data, watched_items)
+
+                # Community-level: all requests + popularity
+                all_requests_data = await ov_client.get_all_requests_for_year(year)
+
+                collected["overseerr"] = {
+                    **requests_data,
+                    **match_data,
+                    "prev_year": {
+                        "total": prev_requests.get("total", 0),
+                        "movies": prev_requests.get("movies", 0),
+                        "series": prev_requests.get("series", 0),
+                        "approved": prev_requests.get("approved", 0),
+                    },
+                    "community": {
+                        "total": all_requests_data.get("total", 0),
+                        "top_requesters": all_requests_data.get("top_requesters", []),
+                        "top": all_requests_data.get("top", []),
+                    },
+                }
+                # Remove all_requests to save space
+                collected["overseerr"].pop("all_requests", None)
+
+                logger.info("Enrichissement Overseerr OK: %d demandes (%d communaute)", requests_data.get("total", 0), all_requests_data.get("total", 0))
             except Exception:
                 logger.exception("Enrichissement Overseerr echoue")
 

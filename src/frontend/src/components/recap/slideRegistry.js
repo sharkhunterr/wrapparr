@@ -432,6 +432,11 @@ export const SLIDE_REGISTRY = [
     desc: "Match entre les demandes et ce qui a ete regarde",
     params: [],
   },
+  {
+    id: "overseerr-community", label: "Demandeurs + popularite", group: "global",
+    desc: "Classement des demandeurs et demandes les plus populaires (vues par le plus d'utilisateurs)",
+    params: [],
+  },
 
   // Global slides
   {

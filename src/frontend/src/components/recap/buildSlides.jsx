@@ -15,6 +15,7 @@ import CompareServiceSlide from "./slides/CompareServiceSlide"
 import ServerRankingSlide from "./slides/ServerRankingSlide"
 import OverseerrRequestsSlide from "./slides/OverseerrRequestsSlide"
 import OverseerrMatchSlide from "./slides/OverseerrMatchSlide"
+import OverseerrCommunitySlide from "./slides/OverseerrCommunitySlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import OnboardingSlide from "./slides/OnboardingSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/community"
@@ -567,6 +568,12 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     slides.push({
       id: "overseerr-match", accent: overseerrAccent, bg: baseBg,
       component: <OverseerrMatchSlide accent={overseerrAccent} data={data} year={year} />,
+    })
+  }
+  if (data.overseerr?.community?.total > 0 && isSlideEnabled(sc, "overseerr-community")) {
+    slides.push({
+      id: "overseerr-community", accent: overseerrAccent, bg: baseBg,
+      component: <OverseerrCommunitySlide accent={overseerrAccent} data={data} year={year} userName={userName} />,
     })
   }
 

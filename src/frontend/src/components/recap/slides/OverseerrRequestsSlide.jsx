@@ -10,7 +10,8 @@ export default function OverseerrRequestsSlide({ accent, data, year }) {
   if (!ov || !ov.total) return null
 
   const approvalRate = ov.total > 0 ? Math.round((ov.approved / ov.total) * 100) : 0
-  const prevOv = comp.active ? comp.data?.overseerr : null
+  const prev = ov.prev_year || {}
+  const hasPrev = comp.active && prev.total > 0
 
   return (
     <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
@@ -26,9 +27,9 @@ export default function OverseerrRequestsSlide({ accent, data, year }) {
 
       {/* Stats badges */}
       <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-        <StatBadge value={active ? ov.total : 0} label="demandes" accent={accent} primary prev={prevOv?.total} />
-        <StatBadge value={active ? ov.movies : 0} label="films" accent={null} prev={prevOv?.movies} />
-        <StatBadge value={active ? ov.series : 0} label="series" accent={null} prev={prevOv?.series} />
+        <StatBadge value={active ? ov.total : 0} label="demandes" accent={accent} primary prev={hasPrev ? prev.total : null} />
+        <StatBadge value={active ? ov.movies : 0} label="films" accent={null} prev={hasPrev ? prev.movies : null} />
+        <StatBadge value={active ? ov.series : 0} label="series" accent={null} prev={hasPrev ? prev.series : null} />
       </div>
 
       {/* Approval rate */}
@@ -52,6 +53,19 @@ export default function OverseerrRequestsSlide({ accent, data, year }) {
             </div>
           </div>
         </div>
+        {/* Comparison badge */}
+        {hasPrev && prev.approved > 0 && (() => {
+          const prevRate = Math.round((prev.approved / prev.total) * 100)
+          const diff = approvalRate - prevRate
+          return diff !== 0 ? (
+            <div style={{ marginTop: 6, fontSize: 9, color: "var(--th-text-dim)" }}>
+              {year - 1} : {prevRate}%
+              <span style={{ marginLeft: 6, fontWeight: 700, color: diff > 0 ? "#4ade80" : "#f87171", padding: "1px 6px", borderRadius: 6, background: diff > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)" }}>
+                {diff > 0 ? "+" : ""}{diff}pp
+              </span>
+            </div>
+          ) : null
+        })()}
       </div>
 
       {/* Monthly chart */}
