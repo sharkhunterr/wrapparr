@@ -261,6 +261,7 @@ async def lifespan(app: FastAPI):
                 logger.info("Premier compte admin créé: %s", settings.first_admin_email)
 
         # Builtin themes — create or update config
+        seeded = 0
         for t in BUILTIN_THEMES:
             result = await db.execute(select(ThemePack).where(ThemePack.slug == t["slug"]))
             existing = result.scalar_one_or_none()
@@ -268,6 +269,9 @@ async def lifespan(app: FastAPI):
                 existing.config = t["config"]
             else:
                 db.add(ThemePack(name=t["name"], slug=t["slug"], is_builtin=True, config=t["config"]))
+                seeded += 1
+        if seeded:
+            logger.info("Palettes builtin créées: %d", seeded)
 
         # Default global config
         for key, value in DEFAULT_CONFIG.items():
