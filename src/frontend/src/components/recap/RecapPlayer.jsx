@@ -2541,7 +2541,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
   // All-time ranking (films + series combined)
   const rankingAccent = accents.ranking || "#f87171"
-  if (allUsersData.length >= 2) {
+  if (allUsersData.length >= 1) {
     slides.push({
       id: "ranking", accent: rankingAccent, bg: baseBg,
       component: <AllTimeRankingSlide accent={rankingAccent} allUsers={allUsersData} year={year} me={myNameInData} />,
