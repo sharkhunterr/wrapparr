@@ -104,7 +104,8 @@ class RecapPipeline:
                             **processed,
                         }
                 except Exception as e:
-                    logger.warning("Collecte echouee pour %s: %s", u.display_name, e)
+                    import traceback
+                    logger.error("Collecte echouee pour %s: %s\n%s", u.display_name, e, traceback.format_exc())
 
             # Step 2: Build global recap with all users' data
             await self._update_progress(recap, "processing", 50, "Calcul des statistiques...")
@@ -211,20 +212,27 @@ class RecapPipeline:
         tmdb_key = None
         for svc in services:
             if svc.service_type == "tmdb":
-                tmdb_key = decrypt(svc.api_key_enc)
+                try:
+                    tmdb_key = decrypt(svc.api_key_enc)
+                except Exception:
+                    logger.warning("Impossible de dechiffrer la cle TMDB — enrichissement desactive")
                 break
 
         collected = {}
 
         for svc in services:
-            # Skip TMDB — it's not a data collector, just a key provider
             if svc.service_type == "tmdb":
                 continue
             cls = COLLECTOR_MAP.get(svc.service_type)
             if not cls:
                 continue
             service_username = mappings.get(svc.service_type)
-            collector = cls(base_url=svc.base_url, api_key=decrypt(svc.api_key_enc))
+            try:
+                api_key = decrypt(svc.api_key_enc)
+            except Exception:
+                logger.error("Impossible de dechiffrer la cle pour %s — service ignore", svc.service_type)
+                continue
+            collector = cls(base_url=svc.base_url, api_key=api_key)
             collector.target_user = service_username
             collector.tmdb_api_key = tmdb_key  # Pass TMDB key to all collectors
             try:
