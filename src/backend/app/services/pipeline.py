@@ -270,10 +270,6 @@ class RecapPipeline:
             "prev_by_views": prev_by_views,
             "prev_by_hours": prev_by_hours,
         }
-            if self.progress_callback:
-                await self.progress_callback(str(recap.id), "failed", recap.progress, str(e))
-
-        return recap
 
     async def _collect(self, user_id, year: int) -> dict[str, Any]:
         # Get all service connectors
