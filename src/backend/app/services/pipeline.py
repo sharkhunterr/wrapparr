@@ -375,6 +375,7 @@ class RecapPipeline:
                         "movies": prev_requests.get("movies", 0),
                         "series": prev_requests.get("series", 0),
                         "approved": prev_requests.get("approved", 0),
+                        "monthly": prev_requests.get("monthly", []),
                     },
                     "community": {
                         "total": all_requests_data.get("total", 0),

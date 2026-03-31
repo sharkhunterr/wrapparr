@@ -423,18 +423,34 @@ export const SLIDE_REGISTRY = [
 
   // Overseerr slides (shown only if service configured)
   {
-    id: "overseerr-requests", label: "Demandes Overseerr", group: "global",
-    desc: "Nombre de demandes, repartition films/series, taux d'approbation, top demandes",
+    id: "cat-overseerr", label: "Annonce Demandes", group: "global", cat: true,
+    desc: "Slide d'annonce de la section demandes Overseerr",
+    params: [
+      { key: "customIcon", label: "Icone (emoji)", type: "text", default: "📋" },
+      { key: "customLabel", label: "Titre", type: "text", default: "DEMANDES" },
+      { key: "customSub", label: "Sous-titre", type: "text", default: "Overseerr · Requetes media" },
+    ],
+  },
+  {
+    id: "overseerr-requests", label: "Bilan demandes", group: "global",
+    desc: "Nombre de demandes, repartition films/series, statuts, courbe mensuelle avec comparaison",
     params: [],
   },
   {
     id: "overseerr-match", label: "Demandes vs regarde", group: "global",
-    desc: "Match entre les demandes et ce qui a ete regarde",
+    desc: "Match entre les demandes et ce qui a ete regarde, avec profil demandeur",
+    params: [
+      { key: "categories", label: "Profils demandeur", type: "phrases", default: [] },
+    ],
+  },
+  {
+    id: "overseerr-popular", label: "Top demandes populaires", group: "global",
+    desc: "Demandes de l'utilisateur les plus vues par la communaute",
     params: [],
   },
   {
-    id: "overseerr-community", label: "Demandeurs + popularite", group: "global",
-    desc: "Classement des demandeurs et demandes les plus populaires (vues par le plus d'utilisateurs)",
+    id: "overseerr-community", label: "Classement demandeurs", group: "global",
+    desc: "Classement des plus gros demandeurs du serveur",
     params: [],
   },
 

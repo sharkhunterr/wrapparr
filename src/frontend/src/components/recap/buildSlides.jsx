@@ -15,6 +15,7 @@ import CompareServiceSlide from "./slides/CompareServiceSlide"
 import ServerRankingSlide from "./slides/ServerRankingSlide"
 import OverseerrRequestsSlide from "./slides/OverseerrRequestsSlide"
 import OverseerrMatchSlide from "./slides/OverseerrMatchSlide"
+import OverseerrPopularSlide from "./slides/OverseerrPopularSlide"
 import OverseerrCommunitySlide from "./slides/OverseerrCommunitySlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import OnboardingSlide from "./slides/OnboardingSlide"
@@ -556,25 +557,40 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     })
   }
 
-  // Overseerr slides — only shown if data.overseerr exists
+  // Overseerr section — only shown if data.overseerr exists
   const overseerrAccent = accents.compare || "#6366f1"
-  if (data.overseerr && data.overseerr.total > 0 && isSlideEnabled(sc, "overseerr-requests")) {
-    slides.push({
-      id: "overseerr-requests", accent: overseerrAccent, bg: baseBg,
-      component: <OverseerrRequestsSlide accent={overseerrAccent} data={data} year={year} />,
-    })
-  }
-  if (data.overseerr && (data.overseerr.matched?.length > 0 || data.overseerr.not_watched?.length > 0) && isSlideEnabled(sc, "overseerr-match")) {
-    slides.push({
-      id: "overseerr-match", accent: overseerrAccent, bg: baseBg,
-      component: <OverseerrMatchSlide accent={overseerrAccent} data={data} year={year} />,
-    })
-  }
-  if (data.overseerr?.community?.total > 0 && isSlideEnabled(sc, "overseerr-community")) {
-    slides.push({
-      id: "overseerr-community", accent: overseerrAccent, bg: baseBg,
-      component: <OverseerrCommunitySlide accent={overseerrAccent} data={data} year={year} userName={userName} />,
-    })
+  if (data.overseerr && data.overseerr.total > 0) {
+    // Category slide (section separator)
+    if (isSlideEnabled(sc, "cat-overseerr")) {
+      slides.push({
+        id: "cat-overseerr", accent: overseerrAccent, bg: baseBg, cat: true, fullscreen: true,
+        component: <CategorySlide accent={overseerrAccent} {...catProps("cat-overseerr", { icon: "📋", label: "DEMANDES", sub: "Overseerr · Requetes media" })} />,
+      })
+    }
+    if (isSlideEnabled(sc, "overseerr-requests")) {
+      slides.push({
+        id: "overseerr-requests", accent: overseerrAccent, bg: baseBg,
+        component: <OverseerrRequestsSlide accent={overseerrAccent} data={data} year={year} config={getSlideConfig(sc, "overseerr-requests")} />,
+      })
+    }
+    if (isSlideEnabled(sc, "overseerr-match")) {
+      slides.push({
+        id: "overseerr-match", accent: overseerrAccent, bg: baseBg,
+        component: <OverseerrMatchSlide accent={overseerrAccent} data={data} year={year} config={getSlideConfig(sc, "overseerr-match")} />,
+      })
+    }
+    if (isSlideEnabled(sc, "overseerr-popular")) {
+      slides.push({
+        id: "overseerr-popular", accent: overseerrAccent, bg: baseBg,
+        component: <OverseerrPopularSlide accent={overseerrAccent} data={data} year={year} />,
+      })
+    }
+    if (data.overseerr?.community?.total > 0 && isSlideEnabled(sc, "overseerr-community")) {
+      slides.push({
+        id: "overseerr-community", accent: overseerrAccent, bg: baseBg,
+        component: <OverseerrCommunitySlide accent={overseerrAccent} data={data} year={year} userName={userName} />,
+      })
+    }
   }
 
   // Server ranking — cumulative all-time

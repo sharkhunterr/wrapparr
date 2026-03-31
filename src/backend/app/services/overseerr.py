@@ -269,7 +269,9 @@ class OverseerrClient:
 
         total = len(matched) + len(not_watched)
         return {
-            "matched": matched[:10],
-            "not_watched": not_watched[:10],
+            "matched": matched[:20],
+            "not_watched": not_watched[:20],
+            "matched_count": len(matched),
+            "not_watched_count": len(not_watched),
             "match_rate": round(len(matched) / total * 100) if total > 0 else 0,
         }
