@@ -2,7 +2,6 @@ export const christmas = {
   id: "christmas",
   defaultPalette: "feerie",
   name: "Noel",
-  defaultPalette: "ember",
   description: "Neige, givre, chaleur, feerie",
   preview: "linear-gradient(180deg, #0a0a18 0%, #0e1428 50%, #0a0a12 100%)",
 

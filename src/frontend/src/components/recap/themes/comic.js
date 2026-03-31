@@ -2,7 +2,6 @@ export const comic = {
   id: "comic",
   defaultPalette: "pop-art",
   name: "Comic Book",
-  defaultPalette: "neon-arcade",
   description: "Halftone, cases, onomatopees, BD pop",
   preview: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
 

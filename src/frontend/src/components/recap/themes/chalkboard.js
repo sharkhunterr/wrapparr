@@ -2,7 +2,6 @@ export const chalkboard = {
   id: "chalkboard",
   defaultPalette: "craie",
   name: "Tableau Noir",
-  defaultPalette: "forest",
   description: "Ardoise, craie, poussiere, ecole",
   preview: "linear-gradient(135deg, #1a2a1a 0%, #1e3320 50%, #152515 100%)",
 

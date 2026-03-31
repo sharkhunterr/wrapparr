@@ -2,7 +2,6 @@ export const vhs = {
   id: "vhs",
   defaultPalette: "videoclub",
   name: "VHS 90s",
-  defaultPalette: "ember",
   description: "Cassette video, tracking, static, PLAY/REC",
   preview: "linear-gradient(135deg, #0a0a0a 0%, #1a1020 50%, #0a0808 100%)",
 
