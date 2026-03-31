@@ -2,18 +2,18 @@ import { useLabels } from "../ThemeContext"
 import { Tag, Lbl, useComparison } from "../SharedUI"
 
 function RankBadge({ name, currentList, prevList }) {
-  const comp = useComparison()
-  if (!comp.active || !prevList?.length) return null
+  if (!prevList?.length) return null
   const currIdx = currentList.findIndex(u => u.name === name)
   const prevIdx = prevList.findIndex(u => u.name === name)
-  if (currIdx < 0 || prevIdx < 0) return null
+  if (currIdx < 0) return null
+  if (prevIdx < 0) return <span style={{ display: "inline-flex", alignItems: "center", gap: 2, fontSize: 9, fontWeight: 700, marginLeft: 6, padding: "2px 8px", borderRadius: 10, background: "rgba(34,197,94,0.15)", color: "#4ade80" }}>NEW</span>
   const diff = prevIdx - currIdx
-  if (diff === 0) return <span style={{ fontSize: 8, color: "var(--th-text-muted)", marginLeft: 4 }}>=</span>
+  if (diff === 0) return <span style={{ display: "inline-flex", alignItems: "center", fontSize: 9, fontWeight: 700, marginLeft: 6, padding: "2px 8px", borderRadius: 10, background: "rgba(100,180,255,0.1)", color: "rgba(100,180,255,0.6)" }}>=</span>
   return (
     <span style={{
-      display: "inline-flex", alignItems: "center", gap: 2, fontSize: 8, fontWeight: 700, marginLeft: 5,
-      padding: "1px 6px", borderRadius: 8,
-      background: diff > 0 ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.1)",
+      display: "inline-flex", alignItems: "center", gap: 2, fontSize: 9, fontWeight: 800, marginLeft: 6,
+      padding: "2px 8px", borderRadius: 10,
+      background: diff > 0 ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.12)",
       color: diff > 0 ? "#4ade80" : "#f87171",
     }}>
       {diff > 0 ? "↑" : "↓"}{Math.abs(diff)}
@@ -89,11 +89,11 @@ export default function ServerRankingSlide({ accent, data, year, userName }) {
                     color: isMe ? accent : (i === 0 ? accent : "var(--th-text-secondary)"),
                   }}>
                     {u.name}{isMe && <span style={{ fontSize: 8, color: accent, marginLeft: 4, opacity: 0.7 }}>· moi</span>}
-                    <RankBadge name={u.name} currentList={byViews} prevList={prevByViews} />
                   </span>
                   <span style={{ fontSize: 11, fontWeight: 700, color: isMe ? accent : "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono)" }}>
                     {u.views.toLocaleString("fr-FR")}
                   </span>
+                  <RankBadge name={u.name} currentList={byViews} prevList={prevByViews} />
                 </div>
                 <div style={{ height: 5, background: "var(--th-surface-subtle)", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{
@@ -138,6 +138,7 @@ export default function ServerRankingSlide({ accent, data, year, userName }) {
                   <span style={{ fontSize: 11, fontWeight: 700, color: isMe ? accent : "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono)" }}>
                     {Math.round(u.hours).toLocaleString("fr-FR")}h
                   </span>
+                  <RankBadge name={u.name} currentList={byHours} prevList={prevByHours} />
                 </div>
                 <div style={{ height: 5, background: "var(--th-surface-subtle)", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{
