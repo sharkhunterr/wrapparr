@@ -1,0 +1,101 @@
+export const neonRetro = {
+  id: "neon-retro",
+  defaultPalette: "synthwave",
+  name: "Neon Retro",
+  description: "Synthwave, grille perspective, neons scintillants",
+  preview: "linear-gradient(180deg, #0a0020 0%, #1a0040 50%, #2d0060 100%)",
+
+  css: {
+    "--th-surface": "rgba(180,100,255,0.07)",
+    "--th-surface-hover": "rgba(180,100,255,0.12)",
+    "--th-surface-dim": "rgba(180,100,255,0.025)",
+    "--th-surface-subtle": "rgba(180,100,255,0.04)",
+    "--th-surface-faint": "rgba(180,100,255,0.015)",
+    "--th-border": "rgba(255,0,220,0.25)",
+    "--th-border-dim": "rgba(255,0,220,0.1)",
+    "--th-border-subtle": "rgba(255,0,220,0.15)",
+    "--th-border-strong": "rgba(255,0,220,0.35)",
+    "--th-text": "#f0e0ff",
+    "--th-text-secondary": "rgba(240,224,255,0.65)",
+    "--th-text-tertiary": "rgba(240,224,255,0.5)",
+    "--th-text-muted": "rgba(240,224,255,0.32)",
+    "--th-text-dim": "rgba(240,224,255,0.22)",
+    "--th-text-faint": "rgba(240,224,255,0.14)",
+    "--th-blur": "0px",
+    "--th-radius": "2px",
+    "--th-radius-sm": "2px",
+    "--th-radius-xs": "1px",
+    "--th-radius-pill": "2px",
+    "--th-bar-bg": "rgba(180,100,255,0.06)",
+    "--th-bar-prev": "rgba(0,255,255,0.15)",
+    "--th-font-body": "'Orbitron',sans-serif",
+    "--th-font-mono": "'Share Tech Mono',monospace",
+    "--th-glass-bg": "rgba(10,0,30,0.88)",
+    "--th-glass-border": "rgba(255,0,220,0.25)",
+    "--th-glass-blur": "blur(0px)",
+    "--th-tooltip-bg": "#0a0020",
+    "--th-tooltip-border": "rgba(255,0,220,0.25)",
+  },
+
+  effects: {
+    stars: false,
+    orbs: false,
+    grain: false,
+    spotlights: true,
+    confetti: false,
+    fireworks: true,
+    scanlines: true,
+    grid: true,
+    vhs: false,
+    filmGrain: false,
+  },
+
+  cssExtra: `
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
+.th-scanlines{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0.035;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,0,220,0.06) 2px,rgba(255,0,220,0.06) 4px)}
+.th-grid{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.th-grid::before{content:'';position:absolute;left:-20%;right:-20%;bottom:0;height:70vh;background-image:linear-gradient(rgba(180,100,255,0.35) 1px,transparent 1px),linear-gradient(90deg,rgba(180,100,255,0.35) 1px,transparent 1px);background-size:60px 60px;transform:perspective(300px) rotateX(60deg);transform-origin:center bottom;animation:th-grid-flow 3s linear infinite}
+@keyframes th-grid-flow{0%{background-position:0 0}100%{background-position:0 60px}}
+.th-grid::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,0,32,0.85) 0%,rgba(10,0,32,0.3) 40%,transparent 65%,transparent 100%);pointer-events:none}
+.recap-root h2,.recap-root h1,.recap-root h3{text-shadow:0 0 20px rgba(255,0,220,0.5),0 0 40px rgba(255,0,220,0.2)!important;animation:th-neon-flicker 4s ease-in-out infinite!important}
+@keyframes th-neon-flicker{0%,100%{opacity:1;text-shadow:0 0 20px rgba(255,0,220,0.5),0 0 40px rgba(255,0,220,0.2)}92%{opacity:1}93%{opacity:0.7;text-shadow:0 0 10px rgba(255,0,220,0.3)}94%{opacity:1}96%{opacity:0.85;text-shadow:0 0 30px rgba(255,0,220,0.6)}97%{opacity:1}}
+.glass{box-shadow:0 0 15px rgba(255,0,220,0.08),inset 0 0 15px rgba(180,100,255,0.04)!important;border-color:rgba(255,0,220,0.2)!important}
+`,
+
+  labels: {
+    brand: "WRAPPARR",
+    viewed: "decoded",
+    episodes: "ep.",
+    hours: "connectees",
+    monthlyActivity: "Frequence mensuelle",
+    favoriteDay: "Jour de connexion",
+    consumptionTime: "Heure de scan",
+    goldenMonth: "Overload",
+    recordDay: "Peak system",
+    whenYouConsume: "Quand tu",
+    consume: "te connectes",
+    budgetTitle: "Le prix de",
+    yourFilms: "tes donnees",
+    ratingsTitle: "Tes scores",
+    worldTitle: "a travers",
+    theWorld: "la matrice",
+    countriesRepresented: "noeuds actifs",
+    bestNote: "High score",
+    worstNote: "Game over",
+    mostExpensive: "Premium tier",
+    leastExpensive: "Free tier",
+    bestROI: "Meilleur rendement systeme",
+    avgBudget: "Cout moyen par entree",
+    totalCumulated: "cumul",
+    distributionTitle: "Distribution des couts",
+    budgetPerFilm: "Cout unitaire",
+    on: "sur",
+    films: "entrees",
+    rated: "scores",
+    average: "moyenne",
+    viewsUnit: "scans",
+    hoursUnit: "h",
+    ofTotal: "du flux",
+    viewing: "de stream",
+  },
+}
