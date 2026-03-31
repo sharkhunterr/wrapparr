@@ -1,7 +1,7 @@
 export const glassDark = {
   id: "glass-dark",
   name: "Glass Dark",
-  defaultPalette: null,
+  defaultPalette: "cinematic",
   description: "Effet verre depoli sur fond sombre",
   preview: "linear-gradient(135deg, #0a0a1a, #15152a)",
 
