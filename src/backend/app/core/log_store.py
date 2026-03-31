@@ -37,15 +37,22 @@ log_store = LogStore(max_entries=500)
 
 
 def setup_logging():
-    """Attach log_store to root + uvicorn + wrapparr loggers."""
+    """Attach log_store + console handler to wrapparr loggers."""
     formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%H:%M:%S")
     log_store.setFormatter(formatter)
     log_store.setLevel(logging.DEBUG)
 
-    for name in ("wrapparr", "uvicorn", "uvicorn.error", "uvicorn.access", "sqlalchemy.engine"):
+    # Console handler so logs appear in stdout/file
+    console = logging.StreamHandler()
+    console.setFormatter(formatter)
+    console.setLevel(logging.INFO)
+
+    for name in ("wrapparr", "uvicorn", "uvicorn.error", "uvicorn.access"):
         logger = logging.getLogger(name)
         logger.addHandler(log_store)
+        if name.startswith("wrapparr"):
+            logger.addHandler(console)
+            logger.setLevel(logging.DEBUG)
 
-    # Also capture root logger warnings/errors
     root = logging.getLogger()
     root.addHandler(log_store)

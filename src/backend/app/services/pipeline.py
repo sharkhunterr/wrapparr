@@ -159,7 +159,15 @@ class RecapPipeline:
                         )
                     recap_data["comparison"] = root_comparison
 
-            # Step 3: Posters
+            # Step 3: Server ranking — cumulative across all years up to current
+            await self._update_progress(recap, "processing", 65, "Calcul du classement serveur...")
+            try:
+                server_ranking = await self._build_server_ranking(year, users_data)
+                recap_data["server_ranking"] = server_ranking
+            except Exception as e:
+                logger.warning("Server ranking failed: %s", e)
+
+            # Step 4: Posters
             await self._update_progress(recap, "fetching_posters", 70, "Recuperation des affiches...")
 
             recap.data = recap_data
@@ -189,6 +197,79 @@ class RecapPipeline:
             recap.error_message = str(e)
             recap.progress_msg = f"Erreur: {e}"
             await self.db.commit()
+
+    async def _build_server_ranking(self, current_year: int, current_users_data: dict) -> dict:
+        """Build cumulative server ranking across all years up to current_year."""
+        from app.models.recap import YearlyRecap
+
+        # Get all completed recaps up to current year (excluding current which is in progress)
+        result = await self.db.execute(
+            select(YearlyRecap).where(
+                YearlyRecap.status == "completed",
+                YearlyRecap.year < current_year,
+            )
+        )
+        past_recaps = result.scalars().all()
+
+        # Accumulate per user: {uid: {name, views, hours}}
+        cumulative = {}
+
+        # Add past years
+        for recap in past_recaps:
+            if not recap.data or "users" not in recap.data:
+                continue
+            for uid, udata in recap.data["users"].items():
+                if uid not in cumulative:
+                    cumulative[uid] = {"name": udata.get("name", uid), "views": 0, "hours": 0}
+                svc = udata.get("tautulli") or udata.get("plex") or udata.get("jellyfin") or {}
+                films_views = svc.get("extra", {}).get("films", {}).get("total", 0) or svc.get("total_items", 0)
+                series_views = svc.get("extra", {}).get("series", {}).get("episodes", 0)
+                films_hours = svc.get("extra", {}).get("films", {}).get("hours", 0) or svc.get("total_hours", 0)
+                series_hours = svc.get("extra", {}).get("series", {}).get("hours", 0)
+                cumulative[uid]["views"] += films_views + series_views
+                cumulative[uid]["hours"] += round(films_hours + series_hours, 1)
+
+        # Add current year
+        for uid, udata in current_users_data.items():
+            if uid not in cumulative:
+                cumulative[uid] = {"name": udata.get("name", uid), "views": 0, "hours": 0}
+            svc = udata.get("tautulli") or udata.get("plex") or udata.get("jellyfin") or {}
+            films_views = svc.get("extra", {}).get("films", {}).get("total", 0) or svc.get("total_items", 0)
+            series_views = svc.get("extra", {}).get("series", {}).get("episodes", 0)
+            films_hours = svc.get("extra", {}).get("films", {}).get("hours", 0) or svc.get("total_hours", 0)
+            series_hours = svc.get("extra", {}).get("series", {}).get("hours", 0)
+            cumulative[uid]["views"] += films_views + series_views
+            cumulative[uid]["hours"] += round(films_hours + series_hours, 1)
+
+        # Build previous year cumulative (for comparison badges)
+        prev_cumulative = {}
+        for uid, data in cumulative.items():
+            prev_cumulative[uid] = {"name": data["name"], "views": 0, "hours": 0}
+        for recap in past_recaps:
+            if not recap.data or "users" not in recap.data:
+                continue
+            for uid, udata in recap.data["users"].items():
+                if uid not in prev_cumulative:
+                    prev_cumulative[uid] = {"name": udata.get("name", uid), "views": 0, "hours": 0}
+                svc = udata.get("tautulli") or udata.get("plex") or udata.get("jellyfin") or {}
+                films_views = svc.get("extra", {}).get("films", {}).get("total", 0) or svc.get("total_items", 0)
+                series_views = svc.get("extra", {}).get("series", {}).get("episodes", 0)
+                films_hours = svc.get("extra", {}).get("films", {}).get("hours", 0) or svc.get("total_hours", 0)
+                series_hours = svc.get("extra", {}).get("series", {}).get("hours", 0)
+                prev_cumulative[uid]["views"] += films_views + series_views
+                prev_cumulative[uid]["hours"] += round(films_hours + series_hours, 1)
+
+        by_views = sorted(cumulative.values(), key=lambda x: x["views"], reverse=True)
+        by_hours = sorted(cumulative.values(), key=lambda x: x["hours"], reverse=True)
+        prev_by_views = sorted(prev_cumulative.values(), key=lambda x: x["views"], reverse=True)
+        prev_by_hours = sorted(prev_cumulative.values(), key=lambda x: x["hours"], reverse=True)
+
+        return {
+            "by_views": by_views,
+            "by_hours": by_hours,
+            "prev_by_views": prev_by_views,
+            "prev_by_hours": prev_by_hours,
+        }
             if self.progress_callback:
                 await self.progress_callback(str(recap.id), "failed", recap.progress, str(e))
 

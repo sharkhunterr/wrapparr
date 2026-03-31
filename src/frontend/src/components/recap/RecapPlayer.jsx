@@ -22,7 +22,7 @@ import FavoriteDirectorsSlide from "./slides/FavoriteDirectorsSlide"
 import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import CompareServiceSlide from "./slides/CompareServiceSlide"
-import AllTimeRankingSlide from "./slides/AllTimeRankingSlide"
+import ServerRankingSlide from "./slides/ServerRankingSlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/CommunitySlides"
 import { ComparisonProvider } from "./SharedUI"
@@ -2539,12 +2539,12 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     })
   }
 
-  // All-time ranking v2 (films + series combined)
+  // Server ranking — cumulative all-time
   const rankingAccent = accents.ranking || "#f87171"
-  if (allUsersData.length >= 1) {
+  if (data.server_ranking) {
     slides.push({
-      id: "classement-general", accent: rankingAccent, bg: baseBg,
-      component: <AllTimeRankingSlide accent={rankingAccent} allUsers={allUsersData} year={year} me={myNameInData} />,
+      id: "classement-serveur", accent: rankingAccent, bg: baseBg,
+      component: <ServerRankingSlide accent={rankingAccent} data={data} year={year} userName={userName} />,
     })
   }
 
