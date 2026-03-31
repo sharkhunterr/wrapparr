@@ -1427,7 +1427,7 @@ export default function RecapPlayer() {
           if (data.users && userId && data.users[userId]) {
             // Use this user's specific data, keep global/users for comparison
             const userData = data.users[userId]
-            data = { ...userData, users: data.users, comparison: data.comparison }
+            data = { ...userData, users: data.users, comparison: data.comparison, server_ranking: data.server_ranking }
             // Remove "name" field that's not needed for rendering
             delete data.name
             setMyRecapUserId(userId)
