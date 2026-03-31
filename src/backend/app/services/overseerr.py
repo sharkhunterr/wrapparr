@@ -11,6 +11,7 @@ class OverseerrClient:
     def __init__(self, base_url: str, api_key: str):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
+        self._media_cache: dict[str, dict] = {}  # "movie:12345" -> {title, poster, ...}
 
     async def test_connection(self) -> tuple[bool, str]:
         try:
@@ -27,7 +28,6 @@ class OverseerrClient:
             return False, str(e)
 
     async def get_users(self) -> list[dict]:
-        """Fetch Overseerr users for mapping."""
         users = []
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
@@ -51,14 +51,43 @@ class OverseerrClient:
             logger.warning("Erreur fetch users Overseerr: %s", e)
         return users
 
+    async def _resolve_media(self, client: httpx.AsyncClient, media_type: str, tmdb_id: int) -> dict:
+        """Resolve tmdb_id to title + poster via Overseerr's own endpoints."""
+        cache_key = f"{media_type}:{tmdb_id}"
+        if cache_key in self._media_cache:
+            return self._media_cache[cache_key]
+
+        endpoint = "movie" if media_type == "movie" else "tv"
+        try:
+            resp = await client.get(
+                f"{self.base_url}/api/v1/{endpoint}/{tmdb_id}",
+                headers={"X-Api-Key": self.api_key},
+            )
+            if resp.status_code == 200:
+                d = resp.json()
+                info = {
+                    "title": d.get("title") or d.get("name") or d.get("originalTitle") or "?",
+                    "poster": f"https://image.tmdb.org/t/p/w185{d['posterPath']}" if d.get("posterPath") else None,
+                    "year": (d.get("releaseDate") or d.get("firstAirDate") or "")[:4],
+                }
+                self._media_cache[cache_key] = info
+                return info
+        except Exception:
+            pass
+
+        fallback = {"title": "?", "poster": None, "year": ""}
+        self._media_cache[cache_key] = fallback
+        return fallback
+
     async def get_requests_for_year(self, year: int, overseerr_user_id: int | None = None) -> dict:
-        """Fetch all requests created during `year`, optionally filtered by user."""
         all_requests = []
         page = 1
         page_size = 50
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
+                # Phase 1: collect raw requests
+                raw_requests = []
                 while True:
                     params = {"take": page_size, "skip": (page - 1) * page_size, "sort": "added"}
                     if overseerr_user_id:
@@ -69,7 +98,6 @@ class OverseerrClient:
                         params=params,
                     )
                     if resp.status_code != 200:
-                        logger.warning("Overseerr requests HTTP %s", resp.status_code)
                         break
 
                     data = resp.json()
@@ -83,39 +111,58 @@ class OverseerrClient:
                             dt = datetime.fromisoformat(created.replace("Z", "+00:00"))
                         except (ValueError, AttributeError):
                             continue
-
                         if dt.year < year:
-                            return self._build_summary(all_requests, year)
+                            break
                         if dt.year == year:
-                            all_requests.append(self._parse_request(req, dt))
+                            raw_requests.append((req, dt))
+
+                    # Stop if we went past the target year
+                    if results:
+                        last_created = results[-1].get("createdAt", "")
+                        try:
+                            last_dt = datetime.fromisoformat(last_created.replace("Z", "+00:00"))
+                            if last_dt.year < year:
+                                break
+                        except (ValueError, AttributeError):
+                            pass
 
                     total = data.get("pageInfo", {}).get("results", 0)
                     if page * page_size >= total:
                         break
                     page += 1
 
+                # Phase 2: resolve media details (batch, with cache)
+                for req, dt in raw_requests:
+                    parsed = await self._parse_request(client, req, dt)
+                    all_requests.append(parsed)
+
         except Exception as e:
             logger.warning("Erreur fetch requests Overseerr: %s", e)
 
         return self._build_summary(all_requests, year)
 
-    async def get_all_requests_for_year(self, year: int) -> dict:
-        """Fetch ALL requests (all users) for community-level stats."""
-        return await self.get_requests_for_year(year, overseerr_user_id=None)
-
-    def _parse_request(self, req: dict, dt: datetime) -> dict:
+    async def _parse_request(self, client: httpx.AsyncClient, req: dict, dt: datetime) -> dict:
         media = req.get("media", {})
         media_type = req.get("type", media.get("mediaType", "unknown"))
+        tmdb_id = media.get("tmdbId")
+
         status_val = media.get("status", req.get("status", 0))
         status_map = {1: "unknown", 2: "pending", 3: "processing", 4: "partial", 5: "available"}
         status = status_map.get(status_val, str(status_val))
 
+        # Resolve title + poster from Overseerr
+        if tmdb_id:
+            info = await self._resolve_media(client, media_type, tmdb_id)
+        else:
+            info = {"title": "?", "poster": None, "year": ""}
+
         return {
             "id": req.get("id"),
             "type": "movie" if media_type == "movie" else "tv",
-            "title": media.get("title") or media.get("name") or "?",
-            "tmdb_id": media.get("tmdbId"),
-            "poster": f"https://image.tmdb.org/t/p/w185{media.get('posterPath')}" if media.get("posterPath") else None,
+            "title": info["title"],
+            "tmdb_id": tmdb_id,
+            "poster": info["poster"],
+            "year": info["year"],
             "status": status,
             "month": dt.month,
             "requested_by": req.get("requestedBy", {}).get("displayName")
@@ -143,7 +190,7 @@ class OverseerrClient:
             monthly_counts[m] = monthly_counts.get(m, 0) + 1
         monthly = [{"m": m, "v": monthly_counts.get(m, 0)} for m in month_names]
 
-        # Top requested (deduplicate by tmdb_id or title)
+        # Top requested (deduplicate by tmdb_id)
         title_map = {}
         for r in requests:
             key = str(r.get("tmdb_id") or "") or r["title"].lower().strip()
@@ -152,7 +199,7 @@ class OverseerrClient:
             title_map[key]["count"] += 1
         top = sorted(title_map.values(), key=lambda x: -x["count"])[:10]
 
-        # Top requesters (community level)
+        # Top requesters
         requester_map = {}
         for r in requests:
             name = r.get("requested_by", "?")
@@ -173,7 +220,7 @@ class OverseerrClient:
             "by_status": by_status,
             "monthly": monthly,
             "top": top,
-            "all_requests": requests,  # Keep all for matching
+            "all_requests": requests,
             "top_requesters": top_requesters,
         }
 
@@ -183,7 +230,7 @@ class OverseerrClient:
         if not all_reqs:
             return {"matched": [], "not_watched": [], "match_rate": 0}
 
-        # Build lookup sets from watched items
+        # Build lookup sets
         watched_tmdb_ids = set()
         watched_titles = set()
         for item in watched_items:
@@ -192,7 +239,7 @@ class OverseerrClient:
             if item.get("t"):
                 watched_titles.add(item["t"].lower().strip())
 
-        # Deduplicate requests by tmdb_id/title
+        # Deduplicate requests
         seen = set()
         unique_reqs = []
         for r in all_reqs:
@@ -205,11 +252,11 @@ class OverseerrClient:
         not_watched = []
         for r in unique_reqs:
             is_match = False
-            # Match by tmdb_id first (most reliable)
+            # Match by tmdb_id (most reliable)
             if r.get("tmdb_id") and str(r["tmdb_id"]) in watched_tmdb_ids:
                 is_match = True
-            # Fallback: fuzzy title match
-            if not is_match:
+            # Fallback: fuzzy title
+            if not is_match and r["title"] != "?":
                 req_title = r["title"].lower().strip()
                 for wt in watched_titles:
                     if req_title == wt or req_title in wt or wt in req_title:
@@ -226,63 +273,3 @@ class OverseerrClient:
             "not_watched": not_watched[:10],
             "match_rate": round(len(matched) / total * 100) if total > 0 else 0,
         }
-
-    def compute_popular_requests(self, requests_data: dict, all_users_watched: dict) -> list[dict]:
-        """Find requests that were watched by the most users (popularity score)."""
-        all_reqs = requests_data.get("all_requests", [])
-        if not all_reqs:
-            return []
-
-        # Build per-user watched tmdb_ids and titles
-        user_watched = {}  # user_name -> set of tmdb_ids/titles
-        for uid, udata in all_users_watched.items():
-            titles = set()
-            tmdb_ids = set()
-            for item in udata.get("top", []):
-                if item.get("t"):
-                    titles.add(item["t"].lower().strip())
-                if item.get("tmdb_id"):
-                    tmdb_ids.add(str(item["tmdb_id"]))
-            for section in ("films", "series"):
-                for item in udata.get("extra", {}).get(section, {}).get("top", []):
-                    if item.get("t"):
-                        titles.add(item["t"].lower().strip())
-                    if item.get("tmdb_id"):
-                        tmdb_ids.add(str(item["tmdb_id"]))
-            user_watched[uid] = {"titles": titles, "tmdb_ids": tmdb_ids}
-
-        # For each unique request, count how many users watched it
-        seen = set()
-        results = []
-        for r in all_reqs:
-            key = str(r.get("tmdb_id") or "") or r["title"].lower().strip()
-            if key in seen:
-                continue
-            seen.add(key)
-
-            viewers = 0
-            viewer_names = []
-            req_title = r["title"].lower().strip()
-            req_tmdb = str(r.get("tmdb_id") or "")
-
-            for uid, wdata in user_watched.items():
-                matched = False
-                if req_tmdb and req_tmdb in wdata["tmdb_ids"]:
-                    matched = True
-                if not matched:
-                    for wt in wdata["titles"]:
-                        if req_title == wt or req_title in wt or wt in req_title:
-                            matched = True
-                            break
-                if matched:
-                    viewers += 1
-                    viewer_names.append(uid)
-
-            results.append({
-                **r,
-                "viewers": viewers,
-                "viewer_names": viewer_names,
-                "total_users": len(user_watched),
-            })
-
-        return sorted(results, key=lambda x: (-x["viewers"], -x.get("count", 0)))[:10]

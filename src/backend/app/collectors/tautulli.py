@@ -230,8 +230,8 @@ class TautulliCollector(BaseCollector):
             return {}
         poster = tmdb.get("poster_path", "")
         return {
-            "title": tmdb.get("title", ""),
-            "year": int(tmdb.get("release_date", "0000")[:4]) if tmdb.get("release_date") else 0,
+            "title": tmdb.get("title") or tmdb.get("name", ""),
+            "year": int((tmdb.get("release_date") or tmdb.get("first_air_date") or "0000")[:4]) or 0,
             "genres": [g["name"] for g in tmdb.get("genres", [])],
             "audience_rating": str(round(tmdb.get("vote_average", 0), 1)) if tmdb.get("vote_average") else "",
             "rating": "",
@@ -241,6 +241,7 @@ class TautulliCollector(BaseCollector):
             "budget": tmdb.get("budget", 0),
             "revenue": tmdb.get("revenue", 0),
             "runtime": tmdb.get("runtime", 0),
+            "tmdb_id": tmdb.get("id"),
             "_source": "tmdb",
         }
 
@@ -600,6 +601,7 @@ class TautulliCollector(BaseCollector):
                     "thumb": self._poster_url(meta.get("thumb") or r.get("thumb", "")),
                     "art": self._poster_url(meta.get("art", "")),
                     "rk": rk,
+                    "tmdb_id": meta.get("tmdb_id"),
                     "budget": meta.get("budget", 0),
                     "revenue": meta.get("revenue", 0),
                     "runtime": meta.get("runtime", 0),
@@ -632,6 +634,7 @@ class TautulliCollector(BaseCollector):
                     "ep": 0,
                     "thumb": self._poster_url(meta.get("thumb") or r.get("grandparent_thumb") or r.get("thumb", "")),
                     "art": self._poster_url(meta.get("art", "")),
+                    "tmdb_id": meta.get("tmdb_id"),
                     "seasons": meta.get("number_of_seasons", 0),
                     "total_episodes": meta.get("number_of_episodes", 0),
                     "status": meta.get("status", ""),
