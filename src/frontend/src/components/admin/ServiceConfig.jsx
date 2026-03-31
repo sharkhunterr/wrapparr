@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Clapperboard, MonitorPlay, Gamepad2, Headphones, BookOpen, Library, CircleCheck, CircleX, Trash2, Plug, Film, Pencil, X } from "lucide-react"
+import { Clapperboard, MonitorPlay, Gamepad2, Headphones, BookOpen, Library, CircleCheck, CircleX, Trash2, Plug, Film, Pencil, X, Bell } from "lucide-react"
 import { api } from "../../services/api"
 
 const SERVICE_TYPES = [
@@ -10,6 +10,7 @@ const SERVICE_TYPES = [
   { type: "komga", label: "Komga", Icon: Library, color: "#c084fc", placeholder_url: "http://komga:25600", authMode: "login", placeholder_user: "email", placeholder_pass: "Mot de passe" },
   { type: "booklore", label: "Booklore", Icon: BookOpen, color: "#a78bfa", placeholder_url: "http://booklore:8080", authMode: "apikey", placeholder_key: "Token API" },
   { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", authMode: "apikey", placeholder_key: "Cle API TMDB (v3)" },
+  { type: "overseerr", label: "Overseerr", Icon: Bell, color: "#6366f1", placeholder_url: "http://overseerr:5055", authMode: "apikey", placeholder_key: "Cle API Overseerr" },
 ]
 
 function getMeta(type) {

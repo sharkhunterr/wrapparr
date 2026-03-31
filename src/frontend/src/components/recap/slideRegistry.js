@@ -421,6 +421,18 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
 
+  // Overseerr slides (shown only if service configured)
+  {
+    id: "overseerr-requests", label: "Demandes Overseerr", group: "global",
+    desc: "Nombre de demandes, repartition films/series, taux d'approbation, top demandes",
+    params: [],
+  },
+  {
+    id: "overseerr-match", label: "Demandes vs regarde", group: "global",
+    desc: "Match entre les demandes et ce qui a ete regarde",
+    params: [],
+  },
+
   // Global slides
   {
     id: "compare", label: "Comparaison", group: "global",

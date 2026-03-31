@@ -35,12 +35,22 @@ class SetupUser(BaseModel):
     role: str = "user"
 
 
+class OptionalService(BaseModel):
+    service_type: str
+    base_url: str
+    api_key: str
+    display_name: str = ""
+
+
 class SetupFinishRequest(BaseModel):
     # Service
     service_type: str
     service_base_url: str
     service_api_key: str
     service_display_name: str = "Tautulli"
+
+    # Optional services (TMDB, Overseerr, etc.)
+    optional_services: list[OptionalService] = []
 
     # Users
     users: list[SetupUser]

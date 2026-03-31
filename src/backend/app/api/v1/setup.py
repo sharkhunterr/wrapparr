@@ -82,6 +82,16 @@ async def test_service(data: SetupTestServiceRequest, db: AsyncSession = Depends
                 if resp.status_code == 200:
                     return SetupTestServiceResponse(ok=True)
                 return SetupTestServiceResponse(ok=False, error=f"Jellyfin: HTTP {resp.status_code}")
+            elif data.service_type == "tmdb":
+                resp = await client.get("https://api.themoviedb.org/3/configuration", params={"api_key": data.api_key})
+                if resp.status_code == 200:
+                    return SetupTestServiceResponse(ok=True)
+                return SetupTestServiceResponse(ok=False, error="Cle API TMDB invalide" if resp.status_code == 401 else f"TMDB: HTTP {resp.status_code}")
+            elif data.service_type == "overseerr":
+                resp = await client.get(f"{data.base_url}/api/v1/status", headers={"X-Api-Key": data.api_key})
+                if resp.status_code == 200:
+                    return SetupTestServiceResponse(ok=True)
+                return SetupTestServiceResponse(ok=False, error=f"Overseerr: HTTP {resp.status_code}")
             else:
                 return SetupTestServiceResponse(ok=False, error=f"Service non supporte: {data.service_type}")
     except Exception as e:
@@ -163,6 +173,18 @@ async def _do_finish(data: SetupFinishRequest, db: AsyncSession):
         is_active=True,
     )
     db.add(svc)
+
+    # 3. Create optional services (TMDB, Overseerr, etc.)
+    for opt in data.optional_services:
+        opt_svc = ServiceConnector(
+            user_id=admin.id,
+            service_type=opt.service_type,
+            display_name=opt.display_name or opt.service_type.capitalize(),
+            base_url=opt.base_url,
+            api_key_enc=encrypt(opt.api_key),
+            is_active=True,
+        )
+        db.add(opt_svc)
 
     # 4. Store auth method in config
     from app.models.share import GlobalConfig

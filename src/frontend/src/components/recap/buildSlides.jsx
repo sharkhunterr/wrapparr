@@ -13,6 +13,8 @@ import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import CompareServiceSlide from "./slides/CompareServiceSlide"
 import ServerRankingSlide from "./slides/ServerRankingSlide"
+import OverseerrRequestsSlide from "./slides/OverseerrRequestsSlide"
+import OverseerrMatchSlide from "./slides/OverseerrMatchSlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import OnboardingSlide from "./slides/OnboardingSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/community"
@@ -550,6 +552,21 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     slides.push({
       id: "compare", accent: compareAccent, bg: baseBg,
       component: <CompareSlide accent={compareAccent} comparison={data.comparison} year={year} />,
+    })
+  }
+
+  // Overseerr slides — only shown if data.overseerr exists
+  const overseerrAccent = accents.compare || "#6366f1"
+  if (data.overseerr && data.overseerr.total > 0 && isSlideEnabled(sc, "overseerr-requests")) {
+    slides.push({
+      id: "overseerr-requests", accent: overseerrAccent, bg: baseBg,
+      component: <OverseerrRequestsSlide accent={overseerrAccent} data={data} year={year} />,
+    })
+  }
+  if (data.overseerr && (data.overseerr.matched?.length > 0 || data.overseerr.not_watched?.length > 0) && isSlideEnabled(sc, "overseerr-match")) {
+    slides.push({
+      id: "overseerr-match", accent: overseerrAccent, bg: baseBg,
+      component: <OverseerrMatchSlide accent={overseerrAccent} data={data} year={year} />,
     })
   }
 

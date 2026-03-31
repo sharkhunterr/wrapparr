@@ -133,7 +133,7 @@ async def test_connection(
     if not svc:
         raise HTTPException(status_code=404, detail="Service introuvable")
 
-    # Special handling for TMDB — not a collector, just an API key test
+    # Special handling for enrichment-only services (not collectors)
     if svc.service_type == "tmdb":
         import httpx
         api_key = decrypt(svc.api_key_enc)
@@ -148,6 +148,10 @@ async def test_connection(
                     ok, msg = False, f"Erreur TMDB: {resp.status_code}"
         except Exception as e:
             ok, msg = False, str(e)
+    elif svc.service_type == "overseerr":
+        from app.services.overseerr import OverseerrClient
+        client = OverseerrClient(svc.base_url, decrypt(svc.api_key_enc))
+        ok, msg = await client.test_connection()
     else:
         collector = _get_collector(svc)
         try:

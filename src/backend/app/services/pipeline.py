@@ -287,18 +287,25 @@ class RecapPipeline:
 
         # Extract TMDB API key if configured as a service
         tmdb_key = None
+        overseerr_url = None
+        overseerr_key = None
         for svc in services:
             if svc.service_type == "tmdb":
                 try:
                     tmdb_key = decrypt(svc.api_key_enc)
                 except Exception:
                     logger.warning("Impossible de dechiffrer la cle TMDB — enrichissement desactive")
-                break
+            elif svc.service_type == "overseerr":
+                try:
+                    overseerr_url = svc.base_url
+                    overseerr_key = decrypt(svc.api_key_enc)
+                except Exception:
+                    logger.warning("Impossible de dechiffrer la cle Overseerr — enrichissement desactive")
 
         collected = {}
 
         for svc in services:
-            if svc.service_type == "tmdb":
+            if svc.service_type in ("tmdb", "overseerr"):
                 continue
             cls = COLLECTOR_MAP.get(svc.service_type)
             if not cls:
@@ -320,6 +327,53 @@ class RecapPipeline:
                 logger.exception("Collecte %s échouée — service ignoré", svc.service_type)
             finally:
                 await collector.close()
+
+        # Overseerr enrichment — fetch requests for this user
+        if overseerr_url and overseerr_key:
+            try:
+                from app.services.overseerr import OverseerrClient
+                ov_client = OverseerrClient(overseerr_url, overseerr_key)
+
+                # Try to find Overseerr user by matching display name or plex username
+                ov_user_id = None
+                overseerr_mapping = mappings.get("overseerr")
+                if overseerr_mapping:
+                    # Direct mapping exists
+                    ov_users = await ov_client.get_users()
+                    for ou in ov_users:
+                        if ou["name"] == overseerr_mapping or ou.get("plex_username") == overseerr_mapping:
+                            ov_user_id = int(ou["id"])
+                            break
+                else:
+                    # Try auto-match with tautulli/plex username
+                    plex_username = mappings.get("tautulli") or mappings.get("plex") or mappings.get("jellyfin")
+                    if plex_username:
+                        ov_users = await ov_client.get_users()
+                        for ou in ov_users:
+                            if ou.get("plex_username") == plex_username or ou["name"].lower() == plex_username.lower():
+                                ov_user_id = int(ou["id"])
+                                break
+
+                requests_data = await ov_client.get_requests_for_year(year, ov_user_id)
+
+                # Cross-reference with watched titles
+                watched_titles = []
+                for svc_data in collected.values():
+                    for item in svc_data.get("top", []):
+                        if item.get("t"):
+                            watched_titles.append(item["t"])
+                    for item in svc_data.get("extra", {}).get("films", {}).get("top", []):
+                        if item.get("t"):
+                            watched_titles.append(item["t"])
+                    for item in svc_data.get("extra", {}).get("series", {}).get("top", []):
+                        if item.get("t"):
+                            watched_titles.append(item["t"])
+
+                match_data = await ov_client.match_requests_with_watched(requests_data, watched_titles)
+                collected["overseerr"] = {**requests_data, **match_data}
+                logger.info("Enrichissement Overseerr OK: %d demandes", requests_data.get("total", 0))
+            except Exception:
+                logger.exception("Enrichissement Overseerr echoue")
 
         return collected
 
