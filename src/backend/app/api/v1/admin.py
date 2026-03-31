@@ -567,11 +567,16 @@ async def reset_wrapparr(
     if confirm != "RESET_WRAPPARR":
         raise HTTPException(status_code=400, detail="Confirmation requise: envoyez {\"confirm\": \"RESET_WRAPPARR\"}")
 
+    from sqlalchemy import text
     from app.core.database import Base, engine
 
-    # Drop and recreate all tables
+    # Truncate all tables (works with both PostgreSQL and SQLite)
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+        table_names = await conn.run_sync(lambda c: Base.metadata.sorted_tables)
+        for table in reversed(table_names):
+            try:
+                await conn.execute(text(f'DELETE FROM "{table.name}"'))
+            except Exception:
+                pass
 
-    return {"status": "ok", "message": "Toutes les donnees ont ete supprimees. Redemarrez l'application."}
+    return {"status": "ok", "message": "Toutes les donnees ont ete supprimees."}
