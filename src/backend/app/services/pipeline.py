@@ -365,7 +365,7 @@ class RecapPipeline:
                 match_data = ov_client.match_requests_with_watched(requests_data, watched_items)
 
                 # Community-level: all requests + popularity
-                all_requests_data = await ov_client.get_all_requests_for_year(year)
+                all_requests_data = await ov_client.get_requests_for_year(year)
 
                 collected["overseerr"] = {
                     **requests_data,
