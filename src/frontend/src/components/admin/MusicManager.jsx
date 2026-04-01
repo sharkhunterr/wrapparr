@@ -10,9 +10,12 @@ const MODE_OPTIONS = [
 const SECTION_LABELS = {
   _background: "Musique de fond (toutes les slides)",
   intro: "Intro",
-  films: "Section Films",
-  series: "Section Series",
-  community: "Section Communaute",
+  films: "Films",
+  series: "Series",
+  audiobook: "Livres Audio",
+  grimmory: "Lecture (Grimmory)",
+  demandes: "Demandes (Overseerr)",
+  community: "Communaute",
   finale: "Finale",
 }
 
@@ -107,7 +110,7 @@ export default function MusicManager() {
     save({ ...config, tracks })
   }
 
-  const sections = config.mode === "single" ? ["_background"] : ["intro", "films", "series", "community", "finale"]
+  const sections = config.mode === "single" ? ["_background"] : ["intro", "films", "series", "audiobook", "grimmory", "demandes", "community", "finale"]
 
   return (
     <div>

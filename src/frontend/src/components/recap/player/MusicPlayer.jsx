@@ -4,7 +4,9 @@ import { createPortal } from "react-dom"
 export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange, accent }) {
   const mode = musicConfig?.mode || "single"
   const tracks = musicConfig?.tracks || {}
+  const pool = musicConfig?.pool || []
   const [playing, setPlaying] = useState(false)
+  const [trackIdx, setTrackIdx] = useState(0)
   const audioRef = useRef(null)
   const [el, setEl] = useState(null)
 
@@ -13,26 +15,50 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     if (slot) setEl(slot)
   }, [])
 
-  // Determine audio path based on mode + current slide
+  // Determine section from current slide ID
+  const getSection = (slideId) => {
+    if (!slideId) return ""
+    if (slideId === "intro" || slideId === "onboarding") return "intro"
+    if (slideId === "finale") return "finale"
+    if (slideId.startsWith("cat-overseerr") || slideId.startsWith("overseerr-")) return "demandes"
+    if (slideId.startsWith("cat-community") || slideId.startsWith("community-")) return "community"
+    if (slideId.includes("audiobookshelf")) return "audiobook"
+    if (slideId.includes("grimmory")) return "grimmory"
+    if (slideId.includes("-series")) return "series"
+    if (slideId.includes("tautulli") || slideId.includes("plex") || slideId.includes("jellyfin")) return "films"
+    if (slideId.startsWith("cat-")) return "films"
+    return ""
+  }
+
+  // Build playlist for single mode (pool or single track)
+  const playlist = mode === "single"
+    ? (pool.length > 1
+      ? pool.filter(p => p.audioPath).map(p => p.audioPath)
+      : [tracks._background?.audioPath].filter(Boolean))
+    : []
+
+  // Determine audio path
   let audioPath = ""
   if (mode === "single") {
-    const t = tracks._background
-    audioPath = (t?.enabled !== false) ? (t?.audioPath || "") : ""
+    if (playlist.length > 0) {
+      audioPath = playlist[trackIdx % playlist.length] || ""
+    } else {
+      const t = tracks._background
+      audioPath = (t?.enabled !== false) ? (t?.audioPath || "") : ""
+    }
   } else {
-    const section = currentSlideId?.startsWith("cat-") ? "films"
-      : currentSlideId?.includes("-series") ? "series"
-      : currentSlideId?.startsWith("community") ? "community"
-      : currentSlideId === "finale" ? "finale"
-      : currentSlideId === "intro" ? "intro"
-      : currentSlideId?.includes("tautulli") || currentSlideId?.includes("plex") || currentSlideId?.includes("jellyfin") ? "films"
-      : ""
+    const section = getSection(currentSlideId)
     const t = tracks[section]
     audioPath = (t?.enabled !== false ? t?.audioPath : "") || tracks._background?.audioPath || ""
   }
 
-  const hasAnyTrack = Object.values(tracks).some((t) => t?.audioPath && t?.enabled !== false)
+  const hasAnyTrack = mode === "single"
+    ? (playlist.length > 0 || (tracks._background?.audioPath && tracks._background?.enabled !== false))
+    : Object.values(tracks).some((t) => t?.audioPath && t?.enabled !== false)
 
-  // Play/pause audio
+  // Should loop? Only if single mode with 1 track (or no pool)
+  const shouldLoop = mode === "single" && playlist.length <= 1
+
   const doPlay = useCallback(() => {
     if (!audioRef.current) return
     audioRef.current.volume = 0.3
@@ -44,14 +70,13 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     audioRef.current.pause()
   }, [])
 
-  // When playing state or audioPath changes
   useEffect(() => {
     if (!audioRef.current || !audioPath) return
     if (playing) doPlay()
     else doPause()
   }, [playing, audioPath, doPlay, doPause])
 
-  // Start playing on first user interaction (click anywhere)
+  // Auto-start on first interaction
   useEffect(() => {
     if (!hasAnyTrack || !audioPath) return
     setPlaying(true)
@@ -70,7 +95,7 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     }
   }, [hasAnyTrack, audioPath])
 
-  // Pause when tab is hidden, resume when visible
+  // Pause when tab hidden
   useEffect(() => {
     const handler = () => {
       if (!audioRef.current) return
@@ -80,6 +105,13 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     document.addEventListener("visibilitychange", handler)
     return () => document.removeEventListener("visibilitychange", handler)
   }, [playing, doPlay, doPause])
+
+  // On track ended: next in playlist (single mode with pool)
+  const onEnded = useCallback(() => {
+    if (mode === "single" && playlist.length > 1) {
+      setTrackIdx(prev => (prev + 1) % playlist.length)
+    }
+  }, [mode, playlist.length])
 
   if (!hasAnyTrack) return null
 
@@ -92,7 +124,6 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
   }
 
   const musicGroup = <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-    {/* Sound bar animation */}
     {playing && (
       <div style={{ display: "flex", alignItems: "flex-end", gap: 1, height: 14, padding: "0 2px" }}>
         {[0, 0.2, 0.4, 0.1].map((d, i) => (
@@ -125,7 +156,7 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
   </div>
 
   return <>
-    {audioPath && <audio ref={audioRef} src={audioPath} loop preload="auto" />}
+    {audioPath && <audio ref={audioRef} src={audioPath} loop={shouldLoop} preload="auto" onEnded={onEnded} />}
     {el ? createPortal(musicGroup, el) : null}
   </>
 }
