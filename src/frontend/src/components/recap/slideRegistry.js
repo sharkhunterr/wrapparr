@@ -497,7 +497,7 @@ export function expandRegistry(dataServices = []) {
 
   // 2. Per service — all slides for service1, then all for service2, etc.
   // Skip non-collector services (tmdb is an enrichment source, not a data collector)
-  const SKIP_SERVICES = new Set(["tmdb"])
+  const SKIP_SERVICES = new Set(["tmdb", "overseerr"])
   for (const svc of dataServices.filter((s) => !SKIP_SERVICES.has(s))) {
     for (const tmpl of serviceTemplates.filter((t) => !t.onlyFor || t.onlyFor.includes(svc))) {
       const svcLabel = svc.charAt(0).toUpperCase() + svc.slice(1)
