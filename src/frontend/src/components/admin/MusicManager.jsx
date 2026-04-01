@@ -206,54 +206,103 @@ export default function MusicManager() {
       {/* Section assignments */}
       {config.pool.length > 0 && (
         <div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 8, fontWeight: 600 }}>Assignation aux sections</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {sections.map((section) => {
-              const track = config.tracks?.[section]
-              const poolItem = track ? config.pool.find((p) => p.url === track.url) : null
-              const assignedName = poolItem?.name || extractYouTubeId(track?.url) || "?"
-              const assignedDuration = poolItem?.duration || 0
-              return (
-                <div key={section} style={{
-                  display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderRadius: 8,
-                  background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-                }}>
-                  <Music size={13} color="rgba(255,255,255,0.2)" />
-                  <span style={{ fontSize: 12, color: "white", fontWeight: 500, width: 140, flexShrink: 0 }}>{SECTION_LABELS[section]}</span>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 8, fontWeight: 600 }}>
+            {config.mode === "single" ? "Playlist de fond" : "Assignation aux sections"}
+          </div>
 
-                  {track ? (
-                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 6, background: track.enabled ? "rgba(34,197,94,0.08)" : "rgba(255,255,255,0.02)", border: "1px solid " + (track.enabled ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.06)"), flex: 1, minWidth: 0 }}>
-                        <Play size={9} color={track.enabled ? "#4ade80" : "rgba(255,255,255,0.15)"} />
-                        <span style={{ fontSize: 10, color: track.enabled ? "#4ade80" : "rgba(255,255,255,0.25)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{assignedName}</span>
-                        {assignedDuration > 0 && <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{formatDuration(assignedDuration)}</span>}
-                      </div>
-                      <button onClick={() => toggleTrack(section)} style={{
-                        background: "none", border: "none", cursor: "pointer", padding: 2,
-                        color: track.enabled ? "#4ade80" : "rgba(255,255,255,0.2)",
-                      }}>
-                        {track.enabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-                      </button>
-                      <button onClick={() => removeTrack(section)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: "rgba(255,255,255,0.15)" }}>
-                        <Trash2 size={12} />
+          {config.mode === "single" ? (
+            /* ── Single mode: playlist builder ── */
+            <div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 8 }}>
+                Les musiques s'enchainent dans l'ordre. Si une seule, elle boucle en repeat.
+              </div>
+              {/* Current playlist */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
+                {(config.playlist || []).map((item, i) => {
+                  const poolItem = config.pool.find(p => p.audioPath === item.audioPath || p.url === item.url)
+                  const name = poolItem?.name || item.name || "?"
+                  const dur = poolItem?.duration || 0
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 6, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", width: 16, textAlign: "center", flexShrink: 0 }}>{i + 1}</span>
+                      <Play size={9} color="#4ade80" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: 10, color: "white", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
+                      {dur > 0 && <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{formatDuration(dur)}</span>}
+                      <button onClick={() => {
+                        const pl = [...(config.playlist || [])]
+                        pl.splice(i, 1)
+                        save({ ...config, playlist: pl, tracks: { ...config.tracks, _background: pl[0] || {} } })
+                      }} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.15)", padding: 2 }}>
+                        <Trash2 size={11} />
                       </button>
                     </div>
-                  ) : (
-                    <select onChange={(e) => { if (e.target.value) assignTrack(section, parseInt(e.target.value)) }} value="" style={{
-                      flex: 1, padding: "5px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)",
-                      background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)", fontSize: 10, outline: "none",
-                      fontFamily: "Nunito,sans-serif",
-                    }}>
-                      <option value="">Choisir une musique...</option>
-                      {config.pool.map((p, i) => (
-                        <option key={i} value={i} style={{ background: "#15151e", color: "white" }}>{p.name || extractYouTubeId(p.url) || p.url}{p.duration ? ` (${formatDuration(p.duration)})` : ""}</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                  )
+                })}
+              </div>
+              {/* Add to playlist */}
+              <select onChange={(e) => {
+                if (!e.target.value) return
+                const idx = parseInt(e.target.value)
+                const p = config.pool[idx]
+                if (!p) return
+                const pl = [...(config.playlist || []), { url: p.url, audioPath: p.audioPath, name: p.name }]
+                save({ ...config, playlist: pl, tracks: { ...config.tracks, _background: pl[0] || {} } })
+                e.target.value = ""
+              }} value="" style={{
+                width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)", fontSize: 10, outline: "none",
+              }}>
+                <option value="">+ Ajouter une musique a la playlist...</option>
+                {config.pool.map((p, i) => (
+                  <option key={i} value={i} style={{ background: "#15151e", color: "white" }}>{p.name || extractYouTubeId(p.url) || p.url}{p.duration ? ` (${formatDuration(p.duration)})` : ""}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            /* ── Per-section mode: one track per section ── */
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {sections.map((section) => {
+                const track = config.tracks?.[section]
+                const poolItem = track ? config.pool.find((p) => p.url === track.url) : null
+                const assignedName = poolItem?.name || extractYouTubeId(track?.url) || "?"
+                const assignedDuration = poolItem?.duration || 0
+                return (
+                  <div key={section} style={{
+                    display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderRadius: 8,
+                    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                  }}>
+                    <Music size={13} color="rgba(255,255,255,0.2)" />
+                    <span style={{ fontSize: 12, color: "white", fontWeight: 500, width: 140, flexShrink: 0 }}>{SECTION_LABELS[section]}</span>
+                    {track ? (
+                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 6, background: track.enabled ? "rgba(34,197,94,0.08)" : "rgba(255,255,255,0.02)", border: "1px solid " + (track.enabled ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.06)"), flex: 1, minWidth: 0 }}>
+                          <Play size={9} color={track.enabled ? "#4ade80" : "rgba(255,255,255,0.15)"} />
+                          <span style={{ fontSize: 10, color: track.enabled ? "#4ade80" : "rgba(255,255,255,0.25)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{assignedName}</span>
+                          {assignedDuration > 0 && <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", flexShrink: 0 }}>{formatDuration(assignedDuration)}</span>}
+                        </div>
+                        <button onClick={() => toggleTrack(section)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: track.enabled ? "#4ade80" : "rgba(255,255,255,0.2)" }}>
+                          {track.enabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                        </button>
+                        <button onClick={() => removeTrack(section)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: "rgba(255,255,255,0.15)" }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <select onChange={(e) => { if (e.target.value) assignTrack(section, parseInt(e.target.value)) }} value="" style={{
+                        flex: 1, padding: "5px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)", fontSize: 10, outline: "none",
+                      }}>
+                        <option value="">Choisir une musique...</option>
+                        {config.pool.map((p, i) => (
+                          <option key={i} value={i} style={{ background: "#15151e", color: "white" }}>{p.name || extractYouTubeId(p.url) || p.url}{p.duration ? ` (${formatDuration(p.duration)})` : ""}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

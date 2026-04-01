@@ -1,14 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
 
+const FADE_MS = 1500
+
 export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange, accent }) {
   const mode = musicConfig?.mode || "single"
   const tracks = musicConfig?.tracks || {}
-  const pool = musicConfig?.pool || []
+  const playlist = musicConfig?.playlist || []
   const [playing, setPlaying] = useState(false)
   const [trackIdx, setTrackIdx] = useState(0)
   const audioRef = useRef(null)
+  const nextAudioRef = useRef(null)
+  const fadeTimerRef = useRef(null)
   const [el, setEl] = useState(null)
+  const prevPathRef = useRef("")
 
   useEffect(() => {
     const slot = document.getElementById("recap-topbar-extra")
@@ -30,34 +35,74 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     return ""
   }
 
-  // Build playlist for single mode (pool or single track)
-  const playlist = mode === "single"
-    ? (pool.length > 1
-      ? pool.filter(p => p.audioPath).map(p => p.audioPath)
+  // Build paths for single mode
+  const singlePaths = mode === "single"
+    ? (playlist.length > 0
+      ? playlist.map(p => p.audioPath).filter(Boolean)
       : [tracks._background?.audioPath].filter(Boolean))
     : []
 
-  // Determine audio path
+  // Determine current audio path
   let audioPath = ""
   if (mode === "single") {
-    if (playlist.length > 0) {
-      audioPath = playlist[trackIdx % playlist.length] || ""
-    } else {
-      const t = tracks._background
-      audioPath = (t?.enabled !== false) ? (t?.audioPath || "") : ""
-    }
+    audioPath = singlePaths.length > 0 ? (singlePaths[trackIdx % singlePaths.length] || "") : ""
   } else {
     const section = getSection(currentSlideId)
     const t = tracks[section]
     audioPath = (t?.enabled !== false ? t?.audioPath : "") || tracks._background?.audioPath || ""
   }
 
+  const shouldLoop = mode === "single" && singlePaths.length <= 1
   const hasAnyTrack = mode === "single"
-    ? (playlist.length > 0 || (tracks._background?.audioPath && tracks._background?.enabled !== false))
-    : Object.values(tracks).some((t) => t?.audioPath && t?.enabled !== false)
+    ? singlePaths.length > 0
+    : Object.values(tracks).some(t => t?.audioPath && t?.enabled !== false)
 
-  // Should loop? Only if single mode with 1 track (or no pool)
-  const shouldLoop = mode === "single" && playlist.length <= 1
+  // Crossfade helper
+  const crossfadeTo = useCallback((newPath) => {
+    if (!audioRef.current || !newPath) return
+    const oldAudio = audioRef.current
+
+    // Create new audio element for crossfade
+    const newAudio = new Audio(newPath)
+    newAudio.volume = 0
+    newAudio.loop = shouldLoop
+    nextAudioRef.current = newAudio
+
+    // Fade out old, fade in new
+    const steps = 20
+    const stepMs = FADE_MS / steps
+    let step = 0
+    const oldVol = oldAudio.volume
+
+    clearInterval(fadeTimerRef.current)
+    newAudio.play().catch(() => {})
+
+    fadeTimerRef.current = setInterval(() => {
+      step++
+      const progress = step / steps
+      oldAudio.volume = Math.max(0, oldVol * (1 - progress))
+      newAudio.volume = Math.min(0.3, 0.3 * progress)
+      if (step >= steps) {
+        clearInterval(fadeTimerRef.current)
+        oldAudio.pause()
+        oldAudio.src = ""
+        audioRef.current = newAudio
+        newAudio.onended = () => onEnded()
+      }
+    }, stepMs)
+  }, [shouldLoop])
+
+  // Track audio path changes for crossfade (per-section mode)
+  useEffect(() => {
+    if (!playing || !audioPath || mode === "single") return
+    if (prevPathRef.current && prevPathRef.current !== audioPath) {
+      crossfadeTo(audioPath)
+    } else if (!prevPathRef.current && audioRef.current) {
+      audioRef.current.volume = 0.3
+      audioRef.current.play().catch(() => {})
+    }
+    prevPathRef.current = audioPath
+  }, [audioPath, playing, mode, crossfadeTo])
 
   const doPlay = useCallback(() => {
     if (!audioRef.current) return
@@ -72,9 +117,17 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
 
   useEffect(() => {
     if (!audioRef.current || !audioPath) return
+    if (mode !== "single") return // handled by crossfade effect
     if (playing) doPlay()
     else doPause()
-  }, [playing, audioPath, doPlay, doPause])
+  }, [playing, audioPath, doPlay, doPause, mode])
+
+  // Single mode: play/pause
+  useEffect(() => {
+    if (mode !== "single" || !audioRef.current || !audioPath) return
+    if (playing) doPlay()
+    else doPause()
+  }, [playing, trackIdx])
 
   // Auto-start on first interaction
   useEffect(() => {
@@ -106,12 +159,24 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     return () => document.removeEventListener("visibilitychange", handler)
   }, [playing, doPlay, doPause])
 
-  // On track ended: next in playlist (single mode with pool)
+  // On track ended: crossfade to next (single mode playlist)
   const onEnded = useCallback(() => {
-    if (mode === "single" && playlist.length > 1) {
-      setTrackIdx(prev => (prev + 1) % playlist.length)
+    if (mode === "single" && singlePaths.length > 1) {
+      const nextIdx = (trackIdx + 1) % singlePaths.length
+      setTrackIdx(nextIdx)
+      // Crossfade to next track
+      const nextPath = singlePaths[nextIdx]
+      if (nextPath && audioRef.current) {
+        crossfadeTo(nextPath)
+      }
     }
-  }, [mode, playlist.length])
+  }, [mode, singlePaths, trackIdx, crossfadeTo])
+
+  // Cleanup
+  useEffect(() => () => {
+    clearInterval(fadeTimerRef.current)
+    if (nextAudioRef.current) { nextAudioRef.current.pause(); nextAudioRef.current = null }
+  }, [])
 
   if (!hasAnyTrack) return null
 
