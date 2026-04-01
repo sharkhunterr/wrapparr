@@ -143,7 +143,6 @@ export default function OverseerrPopularSlide({ accent, data, year }) {
                     <span style={{ fontSize: 10, fontWeight: 700, color: "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono)" }}>{item.totalPlays}</span>
                   </div>
                 )}
-                <span style={{ fontSize: 7, color: "var(--th-text-dim)" }}>sur {totalUsers}</span>
               </div>
             </div>
           )
