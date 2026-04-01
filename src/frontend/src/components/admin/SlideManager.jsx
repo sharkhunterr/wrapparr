@@ -276,7 +276,17 @@ export default function SlideManager() {
           const meta = SECTION_META[sec.key] || { label: sec.key, icon: "📦" }
           const isCollapsed = collapsedSections[sec.key]
           const isLocked = meta.locked
+          const nonLockedSlides = sec.slides.filter(s => !s.locked)
           const enabledCount = sec.slides.filter(s => s.enabled).length
+          const allOn = nonLockedSlides.length > 0 && nonLockedSlides.every(s => s.enabled)
+
+          const toggleAllSection = (e) => {
+            e.stopPropagation()
+            if (isLocked) return
+            const newEnabled = !allOn
+            const ids = new Set(nonLockedSlides.map(s => s.id))
+            setSlides(slides.map(s => ids.has(s.id) ? { ...s, enabled: newEnabled } : s))
+          }
 
           return (
             <div key={sec.key + secIdx} style={{ borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden" }}>
@@ -298,8 +308,15 @@ export default function SlideManager() {
                 <span style={{ fontSize: 16 }}>{meta.icon}</span>
                 <div style={{ flex: 1 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "white" }}>{meta.label}</span>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginLeft: 8 }}>{enabledCount}/{sec.slides.length} slides</span>
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginLeft: 8 }}>{enabledCount}/{sec.slides.length}</span>
                 </div>
+                {!isLocked && (
+                  <button onClick={toggleAllSection} style={{
+                    padding: "3px 10px", borderRadius: 5, border: "none", fontSize: 9, fontFamily: "JetBrains Mono,monospace", flexShrink: 0, cursor: "pointer",
+                    background: allOn ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.08)",
+                    color: allOn ? "#4ade80" : "#f87171",
+                  }}>{allOn ? "on" : "off"}</button>
+                )}
                 {isCollapsed ? <ChevronRight size={14} color="rgba(255,255,255,0.3)" /> : <ChevronDown size={14} color="rgba(255,255,255,0.3)" />}
               </div>
 
