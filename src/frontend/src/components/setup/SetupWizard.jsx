@@ -51,6 +51,9 @@ export default function SetupWizard({ onComplete }) {
   // Step 5 — Auth method
   const [authMethod, setAuthMethod] = useState("password")
 
+  // Import backup data (kept in memory until finish)
+  const [importedBackup, setImportedBackup] = useState(null)
+
   const [finishing, setFinishing] = useState(false)
 
   const admins = selectedUsers.filter(u => u.role === "admin")
@@ -94,39 +97,57 @@ export default function SetupWizard({ onComplete }) {
   }
 
   const finish = async () => {
-    if (!hasAdmin) { setError("Selectionnez au moins un administrateur"); return }
     if (adminPassword !== adminPassword2) { setError("Les mots de passe ne correspondent pas"); return }
     if (!adminPassword || adminPassword.length < 4) { setError("Le mot de passe doit faire au moins 4 caracteres"); return }
     if (!adminEmail) { setError("Email requis pour le compte admin"); return }
 
-    // Build optional services list
-    const optional_services = []
-    for (const svc of OPTIONAL_SERVICES) {
-      const cfg = optServices[svc.type]
-      if (cfg?.api_key && optTested[svc.type] === "ok") {
-        optional_services.push({
-          service_type: svc.type,
-          base_url: svc.fixedUrl ? svc.placeholder_url : (cfg.base_url || svc.placeholder_url),
-          api_key: cfg.api_key,
-          display_name: svc.label,
-        })
-      }
-    }
-
     setFinishing(true); setError("")
     try {
-      const firstAdmin = admins[0]
-      const res = await post("/finish", {
-        service_type: serviceType, service_base_url: baseUrl, service_api_key: apiKey,
-        service_display_name: serviceType.charAt(0).toUpperCase() + serviceType.slice(1),
-        users: selectedUsers, auth_method: authMethod,
-        admin_email: adminEmail, admin_password: adminPassword,
-        admin_display_name: firstAdmin.display_name,
-        optional_services,
-      })
-      setAccessToken(res.access_token)
-      setStep(6)
-      setTimeout(() => onComplete(), 2500)
+      if (importedBackup) {
+        // ── Import mode: send backup + admin credentials ──
+        const formData = new FormData()
+        formData.append("file", new Blob([JSON.stringify(importedBackup)], { type: "application/json" }), "backup.json")
+        formData.append("admin_email", adminEmail)
+        formData.append("admin_password", adminPassword)
+        const resp = await fetch(API + "/import-restore", {
+          method: "POST",
+          body: formData,
+        })
+        const data = await resp.json()
+        if (!resp.ok) throw new Error(data.detail || "Erreur import")
+        setAccessToken(data.access_token)
+        setStep(6)
+        setTimeout(() => onComplete(), 2500)
+      } else {
+        // ── Normal wizard mode ──
+        if (!hasAdmin) { setError("Selectionnez au moins un administrateur"); setFinishing(false); return }
+
+        const optional_services = []
+        for (const svc of OPTIONAL_SERVICES) {
+          const cfg = optServices[svc.type]
+          if (cfg?.api_key && optTested[svc.type] === "ok") {
+            optional_services.push({
+              service_type: svc.type,
+              base_url: svc.fixedUrl ? svc.placeholder_url : (cfg.base_url || svc.placeholder_url),
+              api_key: cfg.api_key,
+              display_name: svc.label,
+            })
+          }
+        }
+
+        const firstAdmin = admins[0]
+        const res = await post("/finish", {
+          service_type: serviceType, service_base_url: baseUrl, service_api_key: apiKey,
+          service_display_name: serviceType.charAt(0).toUpperCase() + serviceType.slice(1),
+          users: selectedUsers, auth_method: authMethod,
+          admin_email: adminEmail, admin_password: adminPassword,
+          admin_display_name: firstAdmin.display_name,
+          optional_services,
+        })
+        setAccessToken(res.access_token)
+        setStep(6)
+        setTimeout(() => onComplete(), 2500)
+      }
     } catch (e) { setError(e.message) }
     setFinishing(false)
   }
@@ -210,13 +231,17 @@ export default function SetupWizard({ onComplete }) {
                   if (!file) return
                   setError("")
                   try {
-                    const formData = new FormData()
-                    formData.append("file", file)
-                    const resp = await fetch("/api/v1/backup/import-setup", { method: "POST", body: formData })
-                    const data = await resp.json()
-                    if (!resp.ok) throw new Error(data.detail || "Erreur import")
-                    setStep(6)
-                    setTimeout(() => onComplete(), 2500)
+                    const text = await file.text()
+                    const data = JSON.parse(text)
+                    if (!data._wrapparr_backup) throw new Error("Ce fichier n'est pas un backup Wrapparr")
+                    // Store backup data and pre-fill admin email from backup
+                    setImportedBackup(data)
+                    const adminUser = data.users?.find(u => u.role === "admin")
+                    if (adminUser) {
+                      setAdminEmail(adminUser.email || "")
+                    }
+                    // Jump to admin credentials step
+                    setStep(3)
                   } catch (err) { setError(err.message) }
                 }} />
               </label>
@@ -334,8 +359,16 @@ export default function SetupWizard({ onComplete }) {
         {/* ═══ Step 3: Admin credentials ═══ */}
         {step === 3 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {importedBackup && (
+              <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.15)", marginBottom: 4 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>Backup charge</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
+                  {importedBackup.users?.length || 0} utilisateurs · {importedBackup.services?.length || 0} services · La configuration sera restauree apres la creation du compte admin.
+                </div>
+              </div>
+            )}
             <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(229,160,13,0.06)", border: "1px solid rgba(229,160,13,0.15)" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#E5A00D" }}>★ {admins[0]?.display_name || "Admin"}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#E5A00D" }}>★ {importedBackup ? "Compte administrateur" : (admins[0]?.display_name || "Admin")}</div>
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>Definissez les identifiants de connexion pour ce compte</div>
             </div>
             <div>
@@ -471,7 +504,12 @@ export default function SetupWizard({ onComplete }) {
         {step > 0 && step < 6 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 10 }}>
             <button onClick={goBack} style={{ ...btn, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", flex: 1 }}>Retour</button>
-            {step < 5 ? (
+            {/* In import mode, step 3 goes directly to finish */}
+            {importedBackup && step === 3 ? (
+              <button onClick={finish} disabled={finishing} style={{ ...btn, flex: 1, opacity: finishing ? 0.6 : 1 }}>
+                {finishing ? "Restauration..." : "Restaurer et creer le compte"}
+              </button>
+            ) : step < 5 ? (
               <button onClick={goNext} disabled={step === 1 && !tested} style={{
                 ...btn, flex: 1,
                 opacity: (step === 1 && !tested) || (step === 2 && !hasAdmin) ? 0.4 : 1,

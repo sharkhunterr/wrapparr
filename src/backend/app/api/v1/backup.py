@@ -280,15 +280,23 @@ async def import_config(file: UploadFile = File(...), _admin=Depends(require_adm
     return {"status": "ok", "imported": imported}
 
 
-@router.post("/import-setup")
-async def import_setup(file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
-    """Import configuration during setup (no auth required, only if no users exist)."""
+@router.post("/import-restore")
+async def import_restore(
+    file: UploadFile = File(...),
+    admin_email: str = "",
+    admin_password: str = "",
+    db: AsyncSession = Depends(get_db),
+):
+    """Import configuration during setup + create admin account. No auth required, only if no users exist."""
     from app.api.v1.setup import _is_setup_needed
+    from app.services.auth_service import issue_tokens_for_user
 
     if not await _is_setup_needed(db):
         raise HTTPException(status_code=403, detail="Setup deja termine. Utilisez /backup/import avec authentification admin.")
 
-    # Reuse import logic but without admin auth
+    if not admin_email or not admin_password or len(admin_password) < 4:
+        raise HTTPException(status_code=400, detail="Email et mot de passe admin requis (4 caracteres minimum)")
+
     import json
     try:
         content = await file.read()
@@ -299,35 +307,63 @@ async def import_setup(file: UploadFile = File(...), db: AsyncSession = Depends(
     if not data.get("_wrapparr_backup"):
         raise HTTPException(status_code=400, detail="Ce fichier n'est pas un backup Wrapparr")
 
-    # Create users with hashed passwords reset (they'll need to set new passwords)
+    admin = None
+    old_id_to_new_id = {}
+
+    # Create all users from backup
     for u in data.get("users", []):
-        user = User(
-            email=u["email"],
-            display_name=u.get("display_name", u["email"]),
-            role=u.get("role", "user"),
-            is_active=u.get("is_active", True),
-            allow_comparison=u.get("allow_comparison", True),
-            hashed_password=None,
-        )
+        is_admin = u.get("role") == "admin"
+        # First admin gets the provided credentials
+        if is_admin and admin is None:
+            user = User(
+                email=admin_email,
+                hashed_password=hash_password(admin_password),
+                display_name=u.get("display_name", "Admin"),
+                role="admin",
+                is_active=True,
+                allow_comparison=u.get("allow_comparison", True),
+            )
+        else:
+            user = User(
+                email=u.get("email", f"user.{u.get('display_name', 'x').lower().replace(' ', '_')}@local.wrapparr"),
+                hashed_password=None,
+                display_name=u.get("display_name", u.get("email", "User")),
+                role=u.get("role", "user"),
+                is_active=u.get("is_active", True),
+                allow_comparison=u.get("allow_comparison", True),
+            )
         db.add(user)
         await db.flush()
+        old_id_to_new_id[u.get("id", "")] = user.id
+        if is_admin and admin is None:
+            admin = user
 
-        # Services for this user
-        for s in data.get("services", []):
-            if s.get("user_id") == u.get("id"):
-                db.add(ServiceConnector(
-                    user_id=user.id,
-                    service_type=s["service_type"],
-                    display_name=s.get("display_name", s["service_type"]),
-                    base_url=s.get("base_url", ""),
-                    api_key_enc=encrypt(s.get("api_key", "")),
-                    is_active=s.get("is_active", True),
-                ))
+    if not admin:
+        # No admin in backup — create one
+        admin = User(
+            email=admin_email, hashed_password=hash_password(admin_password),
+            display_name="Admin", role="admin", is_active=True,
+        )
+        db.add(admin)
+        await db.flush()
 
-        # Mappings for this user
-        for m in data.get("mappings", []):
-            if m.get("user_id") == u.get("id"):
-                db.add(UserServiceMapping(user_id=user.id, service_type=m["service_type"], service_username=m["service_username"]))
+    # Services
+    for s in data.get("services", []):
+        new_user_id = old_id_to_new_id.get(s.get("user_id"), admin.id)
+        db.add(ServiceConnector(
+            user_id=new_user_id,
+            service_type=s["service_type"],
+            display_name=s.get("display_name", s["service_type"]),
+            base_url=s.get("base_url", ""),
+            api_key_enc=encrypt(s.get("api_key", "")),
+            is_active=s.get("is_active", True),
+        ))
+
+    # Mappings
+    for m in data.get("mappings", []):
+        new_user_id = old_id_to_new_id.get(m.get("user_id"))
+        if new_user_id:
+            db.add(UserServiceMapping(user_id=new_user_id, service_type=m["service_type"], service_username=m["service_username"]))
 
     # Global config
     for key, value in data.get("config", {}).items():
@@ -353,4 +389,12 @@ async def import_setup(file: UploadFile = File(...), db: AsyncSession = Depends(
 
     await db.commit()
 
-    return {"status": "ok", "message": "Configuration importee. Les mots de passe des utilisateurs doivent etre redefinis."}
+    # Issue tokens for admin
+    access, refresh = await issue_tokens_for_user(db, admin)
+
+    return {
+        "status": "ok",
+        "access_token": access,
+        "refresh_token": refresh,
+        "user": {"id": str(admin.id), "email": admin.email, "display_name": admin.display_name, "role": admin.role},
+    }
