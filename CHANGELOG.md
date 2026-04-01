@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.14](https://github.com/your-username/wrapparr/-/compare/v0.1.13...v0.1.14) (2026-04-01)
+
+
+### Bug Fixes
+
+* CI se declenche uniquement sur les tags + GITHUB_RELEASES.md ([4ab4869](https://github.com/your-username/wrapparr/-/commit/4ab48690f8ea9533a597fd1f658f44ad1833db9d))
+
 ### [0.1.13](https://github.com/your-username/wrapparr/-/compare/v0.1.12...v0.1.13) (2026-04-01)
 
 

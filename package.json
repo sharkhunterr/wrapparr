@@ -1,6 +1,6 @@
 {
   "name": "wrapparr",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Spotify Wrapped-style media recap for homelab servers",
   "scripts": {
     "predev": "npm run kill",
