@@ -21,12 +21,13 @@ function PosterImg({ src, size = 56, accent, noFrame }) {
 
 const PODIUM_H = [88, 110, 132]
 
-export default function PodiumSlide({ accent, bg, data = [], title, icon, jokes = [], statLabel, statKey, statSuffix = "", config = {}, backdrop }) {
+export default function PodiumSlide({ accent, bg, data = [], title, icon, jokes = [], statLabel, statKey, statSuffix = "", config = {}, backdrop, serviceType }) {
   const cfg = { ...DEFAULT_CONFIG, ...config }
   const comp = useComparison()
   const L = useLabels()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
-  const prevTop = prevSvc?.films?.top?.previous || []
+  // Use comparison data for the correct service
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevTop = prevSvc?.films?.top?.previous || prevSvc?.top?.previous || []
   const [phase, setPhase] = useState(0)
   const [jokeIdx, setJokeIdx] = useState(0)
   const [jokeVisible, setJokeVisible] = useState(true)
