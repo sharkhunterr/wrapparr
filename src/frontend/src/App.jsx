@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom"
 import { useEffect, useState } from "react"
 import {
-  LayoutDashboard, Link2, Users2, Film, Palette, UserCog,
+  LayoutDashboard, Link2, Users2, Film, Palette, UserCog, Shield,
   KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music, ScrollText,
 } from "lucide-react"
 import LoginPage from "./components/auth/LoginPage"
@@ -21,6 +21,7 @@ import SlideManager from "./components/admin/SlideManager"
 import ConnectionConfig from "./components/admin/ConnectionConfig"
 import RecapManager from "./components/admin/RecapManager"
 import MusicManager from "./components/admin/MusicManager"
+import BackupManager from "./components/admin/BackupManager"
 import LogsPanel from "./components/admin/LogsPanel"
 
 /* ── Auth guard ── */
@@ -135,6 +136,7 @@ const NAV_ITEMS = [
     { to: "/admin/users", icon: UserCog, label: "Utilisateurs", short: "Users" },
     { to: "/admin/connections", icon: KeyRound, label: "Connexions & SSO", short: "SSO" },
     { to: "/admin/config", icon: Settings, label: "Configuration", short: "Config" },
+    { to: "/admin/backup", icon: Shield, label: "Sauvegarde", short: "Backup" },
     { to: "/admin/logs", icon: ScrollText, label: "Logs", short: "Logs" },
   ]},
 ]
@@ -331,6 +333,7 @@ export default function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="connections" element={<ConnectionConfig />} />
           <Route path="config" element={<ConfigPanel />} />
+          <Route path="backup" element={<BackupManager />} />
           <Route path="logs" element={<LogsPanel />} />
         </Route>
       </Routes>

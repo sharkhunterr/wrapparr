@@ -189,21 +189,53 @@ export default function SetupWizard({ onComplete }) {
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, maxWidth: 380, margin: "0 auto 20px" }}>
               Wrapparr genere un recap annuel de vos habitudes media, inspire de Spotify Wrapped. Films, series, jeux, livres — tout y passe.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "left", maxWidth: 340, margin: "0 auto" }}>
-              {[
-                { icon: "📡", text: "Connectez votre serveur media (Tautulli, Jellyfin...)" },
-                { icon: "👥", text: "Importez vos utilisateurs automatiquement" },
-                { icon: "🎬", text: "Enrichissez avec TMDB, Overseerr..." },
-                { icon: "🔐", text: "Configurez l'authentification" },
-              ].map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                  <span style={{ fontSize: 18 }}>{item.icon}</span>
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>{item.text}</span>
-                </div>
-              ))}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 380, margin: "0 auto" }}>
+              {/* Option 1: Start wizard */}
+              <button onClick={goNext} style={{ ...btn, width: "100%", padding: "14px 20px", fontSize: 14 }}>
+                Commencer la configuration
+              </button>
+
+              {/* Option 2: Import backup */}
+              <label style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                width: "100%", padding: "12px 20px", borderRadius: 8, cursor: "pointer",
+                background: "rgba(96,165,250,0.08)", border: "1px solid rgba(96,165,250,0.2)",
+                color: "#60a5fa", fontSize: 12, fontWeight: 600,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                Importer une sauvegarde
+                <input type="file" accept=".json" style={{ display: "none" }} onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setError("")
+                  try {
+                    const formData = new FormData()
+                    formData.append("file", file)
+                    const resp = await fetch("/api/v1/backup/import-setup", { method: "POST", body: formData })
+                    const data = await resp.json()
+                    if (!resp.ok) throw new Error(data.detail || "Erreur import")
+                    setStep(6)
+                    setTimeout(() => onComplete(), 2500)
+                  } catch (err) { setError(err.message) }
+                }} />
+              </label>
+
+              {/* Option 3: Skip */}
+              <button onClick={() => {
+                // Create a minimal admin account and skip setup
+                setStep(3) // Jump to admin credentials
+              }} style={{
+                background: "none", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 8, padding: "10px 20px", cursor: "pointer",
+                color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 500,
+              }}>
+                Ignorer et configurer plus tard
+              </button>
             </div>
+
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 16 }}>
-              Cette configuration prend environ 2 minutes
+              La configuration complete prend environ 2 minutes
             </div>
           </div>
         )}
@@ -435,15 +467,11 @@ export default function SetupWizard({ onComplete }) {
           </div>
         )}
 
-        {/* Navigation */}
-        {step < 6 && (
+        {/* Navigation — hidden on welcome (step 0 has its own buttons) */}
+        {step > 0 && step < 6 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 10 }}>
-            {step > 0 ? (
-              <button onClick={goBack} style={{ ...btn, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", flex: 1 }}>Retour</button>
-            ) : <div />}
-            {step === 0 ? (
-              <button onClick={goNext} style={{ ...btn, flex: 1 }}>Commencer</button>
-            ) : step < 5 ? (
+            <button onClick={goBack} style={{ ...btn, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", flex: 1 }}>Retour</button>
+            {step < 5 ? (
               <button onClick={goNext} disabled={step === 1 && !tested} style={{
                 ...btn, flex: 1,
                 opacity: (step === 1 && !tested) || (step === 2 && !hasAdmin) ? 0.4 : 1,
