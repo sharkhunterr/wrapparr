@@ -21,7 +21,7 @@ export default function OnboardingSlide({
   accent, year, slideCount, hasComparison, hasMusic,
   comparisonActive, onToggleComparison, allowUserThemes,
   currentThemeId, onSelectTheme, musicPlaying, onToggleMusic,
-  hasFilms, hasSeries, hasCommunity,
+  sections = [],
   availableYears, onChangeYear,
 }) {
   const L = useLabels()
@@ -52,32 +52,20 @@ export default function OnboardingSlide({
       </div>
 
       {/* Contenu */}
-      <div className="s2 glass" style={{ padding: "12px 14px", marginBottom: 12 }}>
-        <div style={{ fontSize: "clamp(9px, 1.1vw, 11px)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Au programme</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {hasFilms && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>🎬</span>
-              <span style={{ fontSize: "clamp(11px, 1.3vw, 13px)", color: "var(--th-text)", fontWeight: 600 }}>Recap Films</span>
-              <span style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", marginLeft: "auto" }}>Podium, stats, genres, notes...</span>
-            </div>
-          )}
-          {hasSeries && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>📺</span>
-              <span style={{ fontSize: "clamp(11px, 1.3vw, 13px)", color: "var(--th-text)", fontWeight: 600 }}>Recap Series</span>
-              <span style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", marginLeft: "auto" }}>Top series, habitudes, acteurs...</span>
-            </div>
-          )}
-          {hasCommunity && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>👥</span>
-              <span style={{ fontSize: "clamp(11px, 1.3vw, 13px)", color: "var(--th-text)", fontWeight: 600 }}>Recap Communaute</span>
-              <span style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", marginLeft: "auto" }}>Classements, tendances...</span>
-            </div>
-          )}
+      {sections.length > 0 && (
+        <div className="s2 glass" style={{ padding: "12px 14px", marginBottom: 12 }}>
+          <div style={{ fontSize: "clamp(9px, 1.1vw, 11px)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Au programme</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {sections.map((sec, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 16 }}>{sec.icon}</span>
+                <span style={{ fontSize: "clamp(11px, 1.3vw, 13px)", color: "var(--th-text)", fontWeight: 600 }}>{sec.label}</span>
+                <span style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", marginLeft: "auto" }}>{sec.desc}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Parametres */}
       <div className="s3" style={{ marginBottom: 12 }}>
