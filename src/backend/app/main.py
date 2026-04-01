@@ -19,7 +19,7 @@ BUILTIN_THEMES = [
         "name": "Cinematic", "slug": "cinematic",
         "config": {
             "palette": {"primary": "#E5A00D", "background": "#05050e",
-                        "accents": {"films": "#E5A00D", "series": "#e05c9a", "romm": "#34d399", "audio": "#f97316", "komga": "#a78bfa", "booklore": "#38bdf8", "compare": "#60a5fa", "ranking": "#f87171", "overseerr": "#818cf8"}},
+                        "accents": {"films": "#E5A00D", "series": "#e05c9a", "romm": "#34d399", "audio": "#f97316", "komga": "#a78bfa", "booklore": "#38bdf8", "compare": "#60a5fa", "ranking": "#f87171", "overseerr": "#a78bfa"}},
             "card_style": "glass", "transition": "slide-up", "particles": True, "orbs": True,
             "grain": True, "spotlights": True, "finale_effect": "fireworks",
             "fonts": {"heading": "Syne", "body": "Outfit", "mono": "DM Mono"},
