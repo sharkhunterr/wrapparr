@@ -440,7 +440,14 @@ export const SLIDE_REGISTRY = [
     id: "overseerr-match", label: "Demandes vs regarde", group: "global",
     desc: "Match entre les demandes et ce qui a ete regarde, avec profil demandeur",
     params: [
-      { key: "categories", label: "Profils demandeur", type: "phrases", default: [] },
+      { key: "categories", label: "Profils demandeur (par % de match)", type: "profiles", default: [
+        { min: 0, max: 15, name: "Collectionneur fantome", desc: "Tu demandes mais tu ne regardes pas", emoji: "👻" },
+        { min: 15, max: 35, name: "Demandeur distrait", desc: "Ta wishlist deborde un peu", emoji: "🫣" },
+        { min: 35, max: 55, name: "Demandeur equilibre", desc: "Tu regardes une bonne partie de tes demandes", emoji: "⚖️" },
+        { min: 55, max: 75, name: "Demandeur assidu", desc: "Tu honores la plupart de tes demandes", emoji: "🎯" },
+        { min: 75, max: 90, name: "Demandeur exemplaire", desc: "Presque tout est regarde", emoji: "🏅" },
+        { min: 90, max: 101, name: "Demandeur parfait", desc: "Tu regardes tout ce que tu demandes", emoji: "👑" },
+      ]},
     ],
   },
   {

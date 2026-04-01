@@ -2,12 +2,12 @@ import { useLabels } from "../ThemeContext"
 import { useActive, AN, Tag, Lbl } from "../SharedUI"
 
 const DEFAULT_PROFILES = [
-  { min: 0, max: 15, name: "Collectionneur fantome", desc: "Tu demandes mais tu ne regardes pas" },
-  { min: 15, max: 35, name: "Demandeur distrait", desc: "Ta wishlist deborde un peu" },
-  { min: 35, max: 55, name: "Demandeur equilibre", desc: "Tu regardes une bonne partie de tes demandes" },
-  { min: 55, max: 75, name: "Demandeur assidu", desc: "Tu honores la plupart de tes demandes" },
-  { min: 75, max: 90, name: "Demandeur exemplaire", desc: "Presque tout est regarde" },
-  { min: 90, max: 101, name: "Demandeur parfait", desc: "Tu regardes tout ce que tu demandes" },
+  { min: 0, max: 15, name: "Collectionneur fantome", desc: "Tu demandes mais tu ne regardes pas", emoji: "👻" },
+  { min: 15, max: 35, name: "Demandeur distrait", desc: "Ta wishlist deborde un peu", emoji: "🫣" },
+  { min: 35, max: 55, name: "Demandeur equilibre", desc: "Tu regardes une bonne partie de tes demandes", emoji: "⚖️" },
+  { min: 55, max: 75, name: "Demandeur assidu", desc: "Tu honores la plupart de tes demandes", emoji: "🎯" },
+  { min: 75, max: 90, name: "Demandeur exemplaire", desc: "Presque tout est regarde", emoji: "🏅" },
+  { min: 90, max: 101, name: "Demandeur parfait", desc: "Tu regardes tout ce que tu demandes", emoji: "👑" },
 ]
 
 function CheckIcon({ size = 14, color = "currentColor" }) {
@@ -79,10 +79,13 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
       </div>
 
       {/* Profile badge */}
-      <div className="s1" style={{ position: "relative", padding: "10px 14px", borderRadius: "var(--th-radius)", background: gaugeColor + "0c", border: "1px solid " + gaugeColor + "25", marginBottom: 12, overflow: "hidden" }}>
+      <div className="s1" style={{ position: "relative", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--th-radius)", background: gaugeColor + "0c", border: "1px solid " + gaugeColor + "25", marginBottom: 12, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${gaugeColor}18 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
-        <div style={{ fontSize: 14, fontWeight: 800, color: gaugeColor, position: "relative" }}>{profile.name}</div>
-        <div style={{ fontSize: 10, color: "var(--th-text-secondary)", position: "relative", marginTop: 2 }}>{profile.desc}</div>
+        {profile.emoji && <span style={{ fontSize: 24, position: "relative" }}>{profile.emoji}</span>}
+        <div style={{ position: "relative" }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: gaugeColor }}>{profile.name}</div>
+          <div style={{ fontSize: 10, color: "var(--th-text-secondary)", marginTop: 2 }}>{profile.desc}</div>
+        </div>
       </div>
 
       {/* Matched list */}
