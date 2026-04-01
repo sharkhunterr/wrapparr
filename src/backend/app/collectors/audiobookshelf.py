@@ -241,7 +241,10 @@ class AudiobookshelfCollector(BaseCollector):
             except (ValueError, IndexError):
                 pass
         month_names = ["Jan", "Fev", "Mar", "Avr", "Mai", "Jun", "Jul", "Aou", "Sep", "Oct", "Nov", "Dec"]
-        monthly_data = [{"m": month_names[i], "v": round(monthly[i] / 3600, 1)} for i in range(12)]
+        # Use minutes if total listening is under 1 hour, otherwise hours
+        use_minutes = total_seconds < 3600
+        divisor = 60 if use_minutes else 3600
+        monthly_data = [{"m": month_names[i], "v": round(monthly[i] / divisor, 1)} for i in range(12)]
 
         # Day of week from year sessions
         dow_counts = Counter()
@@ -251,7 +254,7 @@ class AudiobookshelfCollector(BaseCollector):
                 dow_counts[dow] += sess.get("timeListening", 0)
         dow_map = {"Monday": "Lun", "Tuesday": "Mar", "Wednesday": "Mer", "Thursday": "Jeu", "Friday": "Ven", "Saturday": "Sam", "Sunday": "Dim"}
         dow_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        day_of_week = [{"d": dow_map.get(d, d), "v": round(dow_counts.get(d, 0) / 3600, 1)} for d in dow_order]
+        day_of_week = [{"d": dow_map.get(d, d), "v": round(dow_counts.get(d, 0) / divisor, 1)} for d in dow_order]
 
         # Top authors and narrators from year data
         author_time = Counter()
@@ -269,7 +272,7 @@ class AudiobookshelfCollector(BaseCollector):
         return NormalizedData(
             service_type="audiobookshelf",
             total_items=len(book_time),
-            total_hours=round(total_hours, 1),
+            total_hours=round(total_hours, 1) if not use_minutes else round(total_seconds / 60, 1),
             top=top[:4],
             genres=genres,
             monthly=monthly_data,
@@ -282,5 +285,6 @@ class AudiobookshelfCollector(BaseCollector):
                 "top_narrators": top_narrators,
                 "books_finished": year_stats.get("numBooksFinished", 0),
                 "longest_finished": year_stats.get("longestAudiobookFinished"),
+                "time_unit": "min" if use_minutes else "h",
             },
         )
