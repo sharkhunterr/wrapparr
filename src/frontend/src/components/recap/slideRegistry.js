@@ -444,6 +444,39 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
 
+  // Grimmory-specific slides (reading + listening)
+  {
+    id: "{service}-bilan", label: "Bilan lecture", group: "service", onlyFor: ["grimmory"],
+    desc: "Bilan annuel : livres lus, temps, profil lecteur, genres, top livres",
+    params: [
+      { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
+      { key: "stampText", label: "Texte du tampon", type: "text", default: "Lu" },
+      { key: "categories", label: "Profils lecteur (par heures)", type: "profiles", default: [
+        { min: 0, max: 5, name: "Lecteur curieux", desc: "Tu commences a decouvrir la lecture", emoji: "📖" },
+        { min: 5, max: 20, name: "Lecteur regulier", desc: "La lecture fait partie de ton quotidien", emoji: "📚" },
+        { min: 20, max: 50, name: "Devoeur de livres", desc: "Tu enchaines les chapitres sans relache", emoji: "🔥" },
+        { min: 50, max: 100, name: "Rat de bibliotheque", desc: "Les librairies n'ont plus de secrets", emoji: "🐀" },
+        { min: 100, max: 300, name: "Marathonien litteraire", desc: "Tu vis et respires lecture", emoji: "🏆" },
+        { min: 300, max: 99999, name: "Legende de la lecture", desc: "Tu as probablement lu plus que ton auteur prefere", emoji: "👑" },
+      ]},
+    ],
+  },
+  {
+    id: "{service}-favorites", label: "Auteurs favoris", group: "service", onlyFor: ["grimmory"],
+    desc: "Classement des auteurs les plus lus par temps de lecture",
+    params: [],
+  },
+  {
+    id: "{service}-streak", label: "Streak de lecture", group: "service", onlyFor: ["grimmory"],
+    desc: "Streak actuel, record personnel, jours de lecture sur l'annee",
+    params: [],
+  },
+  {
+    id: "{service}-page-turners", label: "Livres addictifs", group: "service", onlyFor: ["grimmory"],
+    desc: "Les livres que tu n'as pas pu lacher (score d'engagement)",
+    params: [],
+  },
+
   // Overseerr slides (shown only if service configured)
   {
     id: "cat-overseerr", label: "Separation de section", group: "global", cat: true,

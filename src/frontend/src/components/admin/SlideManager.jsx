@@ -90,7 +90,7 @@ function getSlideAccentKey(slideId) {
   if (slideId.includes("-series")) return "series"
   if (slideId.startsWith("overseerr") || slideId.startsWith("cat-overseerr")) return "overseerr"
   const svc = slideId.replace(/^cat-/, "").split("-")[0]
-  const map = { tautulli: "films", plex: "films", jellyfin: "films", romm: "romm", audiobookshelf: "audio", komga: "komga", booklore: "booklore" }
+  const map = { tautulli: "films", plex: "films", jellyfin: "films", romm: "romm", audiobookshelf: "audio", grimmory: "booklore", komga: "komga", booklore: "booklore" }
   return map[svc] || null
 }
 
@@ -120,6 +120,7 @@ const SECTION_META = {
   jellyfin: { label: "Jellyfin", icon: "📺" },
   romm: { label: "Jeux Video", icon: "🎮" },
   audiobookshelf: { label: "Livres Audio", icon: "🎧" },
+  grimmory: { label: "Lecture", icon: "📖" },
   komga: { label: "Manga", icon: "📚" },
   booklore: { label: "Livres", icon: "📖" },
   communaute: { label: "Communaute", icon: "👥" },

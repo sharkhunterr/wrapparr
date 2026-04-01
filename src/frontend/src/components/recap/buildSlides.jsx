@@ -15,6 +15,8 @@ import CompareServiceSlide from "./slides/CompareServiceSlide"
 import ServerRankingSlide from "./slides/ServerRankingSlide"
 import AudiobookBilanSlide from "./slides/AudiobookBilanSlide"
 import AudiobookFavoritesSlide from "./slides/AudiobookFavoritesSlide"
+import GrimmoryStreakSlide from "./slides/GrimmoryStreakSlide"
+import GrimmoryPageTurnerSlide from "./slides/GrimmoryPageTurnerSlide"
 import OverseerrRequestsSlide from "./slides/OverseerrRequestsSlide"
 import OverseerrMatchSlide from "./slides/OverseerrMatchSlide"
 import OverseerrPopularSlide from "./slides/OverseerrPopularSlide"
@@ -71,6 +73,7 @@ const SERVICE_SLIDE_CONFIG = {
   audiobookshelf: { icon: "🎧", label: "LIVRES AUDIO", sub: "Sci-Fi · Thriller · Post-Apo", accent: "#fb923c", bgCat: "#0a0300", bgPod: "#080300", bgStats: "#110500", statKey: "h", statLabel: "heures", statSuffix: "h" },
   komga: { icon: "📚", label: "MANGA", sub: "Shonen · Seinen · Dark Fantasy", accent: "#c084fc", bgCat: "#060012", bgPod: "#050010", bgStats: "#0a0018", statKey: "vols", statLabel: "volumes", statSuffix: "" },
   booklore: { icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD", accent: "#a78bfa", bgCat: "#050010", bgPod: "#040008", bgStats: "#060012", statKey: "pages", statLabel: "pages", statSuffix: "" },
+  grimmory: { icon: "📖", label: "LECTURE", sub: "Livres · Audiobooks · Comics", accent: "#10b981", bgCat: "#010a05", bgPod: "#010806", bgStats: "#020f08", statKey: "h", statLabel: "heures", statSuffix: "h" },
 }
 
 function getSlideConfig(slideSettings, slideId) {
@@ -145,7 +148,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   })
 
   // Per-service: Category → Podium → Stats → Deep
-  const serviceOrder = ["tautulli", "plex", "jellyfin", "romm", "audiobookshelf", "komga", "booklore"]
+  const serviceOrder = ["tautulli", "plex", "jellyfin", "romm", "audiobookshelf", "grimmory", "komga", "booklore"]
   const seen = new Set()
 
   for (const svc of serviceOrder) {
@@ -157,7 +160,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     seen.add(svcKey)
 
     // Map service to theme accent key
-    const ACCENT_KEY_MAP = { tautulli: "films", plex: "films", jellyfin: "films", audiobookshelf: "audio" }
+    const ACCENT_KEY_MAP = { tautulli: "films", plex: "films", jellyfin: "films", audiobookshelf: "audio", grimmory: "booklore" }
     const accentKey = ACCENT_KEY_MAP[svc] || svc
 
     const cfg = SERVICE_SLIDE_CONFIG[svc] || {}
@@ -447,6 +450,32 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       }
     }
 
+    // Grimmory-specific slides (reading + listening)
+    if (svc === "grimmory") {
+      pushSlide({
+        id: svc + "-bilan", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <AudiobookBilanSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-bilan")} serviceType={svc} />,
+      })
+      if (svcData.extra?.top_authors?.length > 0) {
+        pushSlide({
+          id: svc + "-favorites", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <AudiobookFavoritesSlide accent={svcAccent} data={svcData} year={year} serviceType={svc} />,
+        })
+      }
+      if (svcData.extra?.streak?.current > 0 || svcData.extra?.streak?.longest > 0) {
+        pushSlide({
+          id: svc + "-streak", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <GrimmoryStreakSlide accent={svcAccent} data={svcData} year={year} />,
+        })
+      }
+      if (svcData.extra?.page_turners?.length > 0) {
+        pushSlide({
+          id: svc + "-page-turners", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <GrimmoryPageTurnerSlide accent={svcAccent} data={svcData} year={year} />,
+        })
+      }
+    }
+
     // Comparison slide for all services (including standard)
     if (!cfg.hasSeries) {
       const svcCompare = data.comparison?.[svc]
@@ -651,7 +680,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   const enabledSlides = slides.filter((s) => LOCKED.has(s.id) || isSlideEnabled(sc, s.id))
 
   // Detect active services from enabled slide IDs (e.g. "tautulli-pod" -> "tautulli")
-  const SVC_NAMES = ["tautulli", "plex", "jellyfin", "romm", "audiobookshelf", "komga", "booklore"]
+  const SVC_NAMES = ["tautulli", "plex", "jellyfin", "romm", "audiobookshelf", "grimmory", "komga", "booklore"]
   const detectedServices = [...new Set(enabledSlides.map((s) => SVC_NAMES.find((svc) => s.id.startsWith(svc))).filter(Boolean))]
 
   // Inject FinaleSlide component with activeServices
@@ -664,7 +693,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   }
 
   // Inject OnboardingSlide with dynamic data
-  const SERVICE_CFG = { tautulli: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, plex: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, jellyfin: { icon: "📺", label: "Jellyfin", sub: "Films · Series" }, romm: { icon: "🎮", label: "Jeux Video", sub: "Switch · PC" }, audiobookshelf: { icon: "🎧", label: "Livres Audio", sub: "Podcasts" }, komga: { icon: "📚", label: "Manga", sub: "BD · Comics" }, booklore: { icon: "📖", label: "Livres", sub: "Romans · Essais" } }
+  const SERVICE_CFG = { tautulli: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, plex: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, jellyfin: { icon: "📺", label: "Jellyfin", sub: "Films · Series" }, romm: { icon: "🎮", label: "Jeux Video", sub: "Switch · PC" }, audiobookshelf: { icon: "🎧", label: "Livres Audio", sub: "Podcasts" }, grimmory: { icon: "📖", label: "Lecture", sub: "Livres · Audiobooks" }, komga: { icon: "📚", label: "Manga", sub: "BD · Comics" }, booklore: { icon: "📖", label: "Livres", sub: "Romans · Essais" } }
   const svcList = detectedServices.map((s) => ({ key: s, ...(SERVICE_CFG[s] || { icon: "📦", label: s, sub: "" }) }))
   for (const s of enabledSlides) {
     if (s.id === "onboarding" && s._onboardingProps) {

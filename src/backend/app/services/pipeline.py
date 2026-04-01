@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.collectors.audiobookshelf import AudiobookshelfCollector
 from app.collectors.booklore import BookloreCollector
+from app.collectors.grimmory import GrimmoryCollector
 from app.collectors.jellyfin import JellyfinCollector
 from app.collectors.komga import KomgaCollector
 from app.collectors.romm import ROMMCollector
@@ -27,6 +28,7 @@ COLLECTOR_MAP = {
     "audiobookshelf": AudiobookshelfCollector,
     "komga": KomgaCollector,
     "booklore": BookloreCollector,
+    "grimmory": GrimmoryCollector,
 }
 
 

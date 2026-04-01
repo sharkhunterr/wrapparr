@@ -9,6 +9,7 @@ const SERVICE_TYPES = [
   { type: "audiobookshelf", label: "Audiobookshelf", Icon: Headphones, color: "#fb923c", placeholder_url: "http://audiobookshelf:13378", authMode: "apikey", placeholder_key: "Token API" },
   { type: "komga", label: "Komga", Icon: Library, color: "#c084fc", placeholder_url: "http://komga:25600", authMode: "login", placeholder_user: "email", placeholder_pass: "Mot de passe" },
   { type: "booklore", label: "Booklore", Icon: BookOpen, color: "#a78bfa", placeholder_url: "http://booklore:8080", authMode: "apikey", placeholder_key: "Token API" },
+  { type: "grimmory", label: "Grimmory", Icon: BookOpen, color: "#10b981", placeholder_url: "http://grimmory:6060", authMode: "apikey", placeholder_key: "Token API Grimmory" },
   { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", authMode: "apikey", placeholder_key: "Cle API TMDB (v3)" },
   { type: "overseerr", label: "Overseerr", Icon: Bell, color: "#6366f1", placeholder_url: "http://overseerr:5055", authMode: "apikey", placeholder_key: "Cle API Overseerr" },
 ]
