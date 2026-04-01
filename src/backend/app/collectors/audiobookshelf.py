@@ -266,8 +266,8 @@ class AudiobookshelfCollector(BaseCollector):
             if meta.get("narrator"):
                 narrator_time[meta["narrator"]] += seconds
 
-        top_authors = [{"name": n, "hours": round(s / 3600, 1)} for n, s in author_time.most_common(5)]
-        top_narrators = [{"name": n, "hours": round(s / 3600, 1)} for n, s in narrator_time.most_common(5)]
+        top_authors = [{"name": n, "hours": round(s / divisor, 1)} for n, s in author_time.most_common(5)]
+        top_narrators = [{"name": n, "hours": round(s / divisor, 1)} for n, s in narrator_time.most_common(5)]
 
         return NormalizedData(
             service_type="audiobookshelf",
