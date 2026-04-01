@@ -1,7 +1,7 @@
 import { Tag, Lbl, DayChart, TimeChart, AreaG, useComparison, CompBadge, CompLegend } from "../SharedUI"
 import { useLabels } from "../ThemeContext"
 
-export default function ServiceDeepSlide({ accent, label, icon, data, me, year }) {
+export default function ServiceDeepSlide({ accent, label, icon, data, me, year, serviceType }) {
   const L = useLabels()
 
   // Use films-only data if available (for tautulli/plex), fallback to combined
@@ -19,7 +19,7 @@ export default function ServiceDeepSlide({ accent, label, icon, data, me, year }
 
   // Comparison data
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevFilms = prevSvc?.films || {}
   const prevItems = prevFilms.previous
   const prevHours = prevFilms.hours?.previous

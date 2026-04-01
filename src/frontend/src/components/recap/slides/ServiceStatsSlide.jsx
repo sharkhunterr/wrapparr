@@ -8,15 +8,15 @@ function PosterImg({ src, size = 52, radius = 7 }) {
   return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: radius, objectFit: "cover", flexShrink: 0, boxShadow: "0 4px 14px rgba(0,0,0,0.4)" }} />
 }
 
-export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
+export default function ServiceStatsSlide({ accent, label, icon, data, year, serviceType }) {
   const active = useActive()
   const comp = useComparison()
   const L = useLabels()
   const top = data.top || []
   const monthly = data.monthly || []
 
-  // Find previous year comparison data for this service
-  const prevData = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  // Find previous year comparison data for the correct service
+  const prevData = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevItems = prevData?.total_items?.previous
   const prevHours = prevData?.total_hours?.previous
 
@@ -40,7 +40,7 @@ export default function ServiceStatsSlide({ accent, label, icon, data, year }) {
               {item.g && <Pill accent={accent}>{item.g}</Pill>}
               {item.r > 0 && <Pill accent="#fbbf24">★ {item.r}</Pill>}
               {item.plays > 1 && <Pill accent="var(--th-text-muted)">{item.plays}x vus</Pill>}
-              {item.h > 0 && <Pill accent="var(--th-text-muted)">{item.h}h</Pill>}
+              {item.h > 0 && <Pill accent="var(--th-text-muted)">{item.h}{item.h_unit || "h"}</Pill>}
               {item.ep > 0 && <Pill accent="var(--th-text-muted)">{item.ep} ep</Pill>}
             </div>
           </div>

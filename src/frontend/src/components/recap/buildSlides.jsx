@@ -191,7 +191,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
         slides.push({
           id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} />,
+          component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} serviceType={svc} />,
         })
       }
 
@@ -305,7 +305,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesExtraData.day_of_week?.length > 0 || seriesExtraData.time_of_day?.length > 0) {
           slides.push({
             id: svc + "-series-deep", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <ServiceDeepSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={{ ...svcData, ...seriesData, extra: { ...svcData.extra, films: seriesExtraData } }} me={userName} year={year} />,
+            component: <ServiceDeepSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={{ ...svcData, ...seriesData, extra: { ...svcData.extra, films: seriesExtraData } }} me={userName} year={year} serviceType={svc} />,
           })
         }
 
@@ -402,13 +402,13 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
       slides.push({
         id: svc + "-stats", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} year={year} />,
+        component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} year={year} serviceType={svc} />,
       })
 
       if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
         slides.push({
           id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} />,
+          component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} serviceType={svc} />,
         })
       }
     }
