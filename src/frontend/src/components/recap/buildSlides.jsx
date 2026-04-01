@@ -698,37 +698,8 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   for (const s of enabledSlides) {
     if (s.id === "onboarding" && s._onboardingProps) {
       const p = s._onboardingProps
-      // Build sections list from enabled slides
-      const sectionsList = []
-      const seenSections = new Set()
-      const SECTION_INFO = {
-        films: { icon: "🎬", label: "Recap Films", desc: "Podium, stats, genres, notes..." },
-        series: { icon: "📺", label: "Recap Series", desc: "Top series, habitudes, acteurs..." },
-        audiobookshelf: { icon: "🎧", label: "Livres Audio", desc: "Ecoute, auteurs, narrateurs..." },
-        grimmory: { icon: "📖", label: "Lecture", desc: "Livres, streak, page-turners..." },
-        romm: { icon: "🎮", label: "Jeux Video", desc: "Top jeux, plateformes, genres..." },
-        komga: { icon: "📚", label: "Manga", desc: "Volumes lus, genres, auteurs..." },
-        booklore: { icon: "📖", label: "Livres", desc: "Lectures, genres, auteurs..." },
-        overseerr: { icon: "📋", label: "Demandes", desc: "Bilan, match, popularite..." },
-        community: { icon: "👥", label: "Communaute", desc: "Classements, tendances..." },
-      }
-      for (const sl of enabledSlides) {
-        let sec = null
-        if (sl.id.includes("-pod") && !sl.id.includes("series")) sec = "films"
-        else if (sl.id.includes("-series-pod")) sec = "series"
-        else if (sl.id.startsWith("cat-audiobookshelf")) sec = "audiobookshelf"
-        else if (sl.id.startsWith("cat-grimmory") || sl.id === "grimmory-bilan") sec = "grimmory"
-        else if (sl.id.startsWith("cat-overseerr")) sec = "overseerr"
-        else if (sl.id === "cat-community") sec = "community"
-        else if (sl.id.startsWith("cat-romm")) sec = "romm"
-        else if (sl.id.startsWith("cat-komga")) sec = "komga"
-        else if (sl.id.startsWith("cat-booklore")) sec = "booklore"
-        if (sec && !seenSections.has(sec) && SECTION_INFO[sec]) {
-          seenSections.add(sec)
-          sectionsList.push(SECTION_INFO[sec])
-        }
-      }
-      s.component = <OnboardingSlide {...p} slideCount={enabledSlides.length} sections={sectionsList} />
+      // Sections will be injected after reordering (see _injectOnboardingSections)
+      s.component = <OnboardingSlide {...p} slideCount={enabledSlides.length} sections={[]} />
       delete s._onboardingProps
     }
   }
@@ -770,10 +741,53 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (finale) ordered.push(finale)
     }
 
+    _injectOnboardingSections(ordered)
     return ordered
   }
 
+  _injectOnboardingSections(enabledSlides)
   return enabledSlides
+}
+
+const SECTION_INFO = {
+  films: { icon: "🎬", label: "Recap Films", desc: "Podium, stats, genres, notes..." },
+  series: { icon: "📺", label: "Recap Series", desc: "Top series, habitudes, acteurs..." },
+  audiobookshelf: { icon: "🎧", label: "Livres Audio", desc: "Ecoute, auteurs, narrateurs..." },
+  grimmory: { icon: "📖", label: "Lecture", desc: "Livres, streak, page-turners..." },
+  romm: { icon: "🎮", label: "Jeux Video", desc: "Top jeux, plateformes, genres..." },
+  komga: { icon: "📚", label: "Manga", desc: "Volumes lus, genres, auteurs..." },
+  booklore: { icon: "📖", label: "Livres", desc: "Lectures, genres, auteurs..." },
+  overseerr: { icon: "📋", label: "Demandes", desc: "Bilan, match, popularite..." },
+  community: { icon: "👥", label: "Communaute", desc: "Classements, tendances..." },
+}
+
+function _injectOnboardingSections(slides) {
+  const onboarding = slides.find(s => s.id === "onboarding")
+  if (!onboarding?.component) return
+
+  const sectionsList = []
+  const seen = new Set()
+  for (const sl of slides) {
+    let sec = null
+    if (sl.id.startsWith("cat-tautulli") && !sl.id.includes("series")) sec = "films"
+    else if (sl.id.startsWith("cat-plex") && !sl.id.includes("series")) sec = "films"
+    else if (sl.id.startsWith("cat-jellyfin")) sec = "films"
+    else if (sl.id.includes("-series") && sl.id.startsWith("cat-")) sec = "series"
+    else if (sl.id.startsWith("cat-audiobookshelf")) sec = "audiobookshelf"
+    else if (sl.id.startsWith("cat-grimmory")) sec = "grimmory"
+    else if (sl.id.startsWith("cat-overseerr")) sec = "overseerr"
+    else if (sl.id === "cat-community") sec = "community"
+    else if (sl.id.startsWith("cat-romm")) sec = "romm"
+    else if (sl.id.startsWith("cat-komga")) sec = "komga"
+    else if (sl.id.startsWith("cat-booklore")) sec = "booklore"
+    if (sec && !seen.has(sec) && SECTION_INFO[sec]) {
+      seen.add(sec)
+      sectionsList.push(SECTION_INFO[sec])
+    }
+  }
+
+  // Update component props in-place
+  onboarding.component = { ...onboarding.component, props: { ...onboarding.component.props, sections: sectionsList } }
 }
 
 export default buildSlides
