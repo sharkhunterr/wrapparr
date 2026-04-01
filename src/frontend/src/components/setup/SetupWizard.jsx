@@ -109,7 +109,7 @@ export default function SetupWizard({ onComplete }) {
         formData.append("file", new Blob([JSON.stringify(importedBackup)], { type: "application/json" }), "backup.json")
         formData.append("admin_email", adminEmail)
         formData.append("admin_password", adminPassword)
-        const resp = await fetch(API + "/import-restore", {
+        const resp = await fetch("/api/v1/backup/import-restore", {
           method: "POST",
           body: formData,
         })
