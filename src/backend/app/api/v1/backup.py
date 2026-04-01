@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -283,8 +283,8 @@ async def import_config(file: UploadFile = File(...), _admin=Depends(require_adm
 @router.post("/import-restore")
 async def import_restore(
     file: UploadFile = File(...),
-    admin_email: str = "",
-    admin_password: str = "",
+    admin_email: str = Form(""),
+    admin_password: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
     """Import configuration during setup + create admin account. No auth required, only if no users exist."""
