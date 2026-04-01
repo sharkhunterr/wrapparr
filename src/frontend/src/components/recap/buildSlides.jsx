@@ -558,7 +558,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   }
 
   // Overseerr section — only shown if data.overseerr exists
-  const overseerrAccent = accents.compare || "#6366f1"
+  const overseerrAccent = accents.overseerr || "#818cf8"
   if (data.overseerr && data.overseerr.total > 0) {
     // Category slide (section separator)
     if (isSlideEnabled(sc, "cat-overseerr")) {

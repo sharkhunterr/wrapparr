@@ -246,7 +246,33 @@ export default function SlideManager() {
     setSaving(false)
   }
 
-  let lastGroup = null
+  // Determine section for each slide
+  const getSection = (s) => {
+    if (s.id === "intro" || s.id === "onboarding") return "intro"
+    if (s.id === "finale") return "finale"
+    if (s.id?.startsWith("cat-overseerr") || s.id?.startsWith("overseerr-")) return "demandes"
+    if (s.id?.startsWith("cat-community") || s.id?.startsWith("community-")) return "communaute"
+    if (s.id === "compare" || s.id === "ranking" || s.id === "classement-serveur") return "global"
+    if (s._service) return s._service
+    return "global"
+  }
+
+  const SECTION_LABELS = {
+    intro: "Introduction",
+    tautulli: "Films & Series",
+    plex: "Films & Series",
+    jellyfin: "Jellyfin",
+    romm: "Jeux Video",
+    audiobookshelf: "Livres Audio",
+    komga: "Manga",
+    booklore: "Livres",
+    communaute: "Communaute",
+    demandes: "Demandes",
+    global: "Global",
+    finale: "Finale",
+  }
+
+  let lastSection = null
 
   return (
     <div>
@@ -269,25 +295,21 @@ export default function SlideManager() {
           const isExpandable = hasParams || hasAccent
           const Icon = getSlideIcon(s.id)
 
-          // Show service group separator
+          // Section separator
           let separator = null
-          const svcName = s._service || null
-          if (svcName && svcName !== lastGroup) {
-            lastGroup = svcName
+          const section = getSection(s)
+          if (section !== lastSection) {
+            // Add separator bar before new section (except first)
+            const showBar = lastSection !== null
+            lastSection = section
             separator = (
-              <div key={"sep-" + svcName} style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", padding: "14px 12px 4px", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "JetBrains Mono,monospace", borderTop: "1px solid rgba(255,255,255,0.04)", marginTop: 8 }}>
-                {svcName}
+              <div key={"sep-" + section + slideIdx}>
+                {showBar && <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "10px 0" }} />}
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", padding: "6px 12px 4px", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "JetBrains Mono,monospace" }}>
+                  {SECTION_LABELS[section] || section}
+                </div>
               </div>
             )
-          } else if (!svcName && s.group === "global" && lastGroup !== "global") {
-            lastGroup = "global"
-            if (s.id === "compare") {
-              separator = (
-                <div key="sep-global-end" style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", padding: "14px 12px 4px", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "JetBrains Mono,monospace", borderTop: "1px solid rgba(255,255,255,0.04)", marginTop: 8 }}>
-                  Global
-                </div>
-              )
-            }
           }
 
           return (
