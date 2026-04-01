@@ -421,6 +421,29 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
 
+  // Audiobookshelf-specific slides
+  {
+    id: "{service}-bilan", label: "Bilan ecoute {service}", group: "service", onlyFor: ["audiobookshelf"],
+    desc: "Bilan annuel : livres ecoutes, temps, profil auditeur, genres, top livres",
+    params: [
+      { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
+      { key: "stampText", label: "Texte du tampon", type: "text", default: "Ecoute" },
+      { key: "categories", label: "Profils auditeur (par heures)", type: "profiles", default: [
+        { min: 0, max: 1, name: "Curieux debutant", desc: "Tu as effleure le monde des livres audio", emoji: "👂" },
+        { min: 1, max: 10, name: "Auditeur occasionnel", desc: "Tu ecoutes de temps en temps", emoji: "🎧" },
+        { min: 10, max: 30, name: "Lecteur regulier", desc: "Les livres audio font partie de ton quotidien", emoji: "📖" },
+        { min: 30, max: 80, name: "Devoeur de livres", desc: "Tu enchaines les chapitres sans relache", emoji: "📚" },
+        { min: 80, max: 200, name: "Marathonien litteraire", desc: "Tu vis et respires livres audio", emoji: "🏆" },
+        { min: 200, max: 99999, name: "Legende de l'ecoute", desc: "Tu as probablement ecoute plus que ton narrateur prefere", emoji: "👑" },
+      ]},
+    ],
+  },
+  {
+    id: "{service}-favorites", label: "Auteurs & Narrateurs {service}", group: "service", onlyFor: ["audiobookshelf"],
+    desc: "Classement des auteurs et narrateurs les plus ecoutes",
+    params: [],
+  },
+
   // Overseerr slides (shown only if service configured)
   {
     id: "cat-overseerr", label: "Annonce Demandes", group: "global", cat: true,

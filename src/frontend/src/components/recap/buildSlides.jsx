@@ -13,6 +13,8 @@ import GenresSlide from "./slides/GenresSlide"
 import CompareSlide from "./slides/CompareSlide"
 import CompareServiceSlide from "./slides/CompareServiceSlide"
 import ServerRankingSlide from "./slides/ServerRankingSlide"
+import AudiobookBilanSlide from "./slides/AudiobookBilanSlide"
+import AudiobookFavoritesSlide from "./slides/AudiobookFavoritesSlide"
 import OverseerrRequestsSlide from "./slides/OverseerrRequestsSlide"
 import OverseerrMatchSlide from "./slides/OverseerrMatchSlide"
 import OverseerrPopularSlide from "./slides/OverseerrPopularSlide"
@@ -420,6 +422,22 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         slides.push({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} serviceType={svc} />,
+        })
+      }
+    }
+
+    // Audiobookshelf-specific slides
+    if (svc === "audiobookshelf") {
+      if (isSlideEnabled(sc, svc + "-bilan")) {
+        slides.push({
+          id: svc + "-bilan", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <AudiobookBilanSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-bilan")} serviceType={svc} />,
+        })
+      }
+      if ((svcData.extra?.top_authors?.length > 0 || svcData.extra?.top_narrators?.length > 0) && isSlideEnabled(sc, svc + "-favorites")) {
+        slides.push({
+          id: svc + "-favorites", accent: svcAccent, bg: cfg.bgStats || baseBg,
+          component: <AudiobookFavoritesSlide accent={svcAccent} data={svcData} year={year} serviceType={svc} />,
         })
       }
     }
