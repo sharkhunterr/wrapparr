@@ -12,13 +12,13 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
   {
-    id: "onboarding", label: "Presentation du recap", group: "global",
+    id: "onboarding", label: "Presentation", group: "global",
     desc: "Nombre de slides, services, parametres rapides, navigation",
     params: [],
   },
   // Per-service slides — generated dynamically per service, but these define the templates
   {
-    id: "cat-{service}", label: "Annonce {service}", group: "service", cat: true,
+    id: "cat-{service}", label: "Separation de section", group: "service", cat: true,
     desc: "Slide d'annonce plein ecran de la categorie",
     // defaults are resolved per-service in expandRegistry
     params: [
@@ -37,7 +37,7 @@ export const SLIDE_REGISTRY = [
     },
   },
   {
-    id: "{service}-pod", label: "Podium {service}", group: "service", pod: true,
+    id: "{service}-pod", label: "Top 3", group: "service", pod: true,
     desc: "Top 3 avec reveal anime, jokes, et backdrop",
     params: [
       { key: "phaseWait", label: "Attente avant jokes (ms)", type: "number", default: 1800 },
@@ -59,7 +59,7 @@ export const SLIDE_REGISTRY = [
     },
   },
   {
-    id: "{service}-stats", label: "Stats {service}", group: "service",
+    id: "{service}-stats", label: "Statistiques", group: "service",
     desc: "Donnees detaillees : top items, genres, graphe mensuel",
     params: [
       { key: "showTop", label: "Nombre d'items top", type: "number", default: 4 },
@@ -68,8 +68,8 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-stats-enriched", label: "Stats enrichies {service}", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
-    desc: "Stats films enrichies : top films, donut genres, equivalent temps, categorie fun, affiches",
+    id: "{service}-stats-enriched", label: "Bilan cinema", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Bilan films : top films, donut genres, profil cinephile, temps equivalent, affiches",
     params: [
       { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
       { key: "stampText", label: "Texte du tampon", type: "text", default: "Approuve" },
@@ -84,7 +84,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-deep", label: "Habitudes {service}", group: "service",
+    id: "{service}-deep", label: "Stats et habitudes", group: "service",
     desc: "Horaires, jours preferes, classement",
     params: [
       { key: "showDayChart", label: "Afficher jours", type: "bool", default: true },
@@ -93,7 +93,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-budgets", label: "Budgets films {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-budgets", label: "Budgets", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Analyse des budgets des films vus",
     params: [
       { key: "displayMode", label: "Mode d'affichage distribution", type: "select", default: "bars", options: [
@@ -103,7 +103,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-timeline", label: "Profil cinephile {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-timeline", label: "Profil cinephile", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Analyse des annees de sortie — quel type de spectateur es-tu ?",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 8000 },
@@ -117,14 +117,14 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-worldmap", label: "Carte du monde {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-worldmap", label: "Carte du monde", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Pays d'origine des films vus",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 15000 },
     ],
   },
   {
-    id: "{service}-ratings", label: "Notes {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-ratings", label: "Notes et evaluations", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Moyenne des notes et distribution par tranches",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 10000 },
@@ -138,7 +138,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-actors", label: "Acteurs favoris {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-actors", label: "Acteurs favoris", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Acteurs les plus presents dans tes films",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
@@ -147,7 +147,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-directors", label: "Realisateurs favoris {service}", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-directors", label: "Realisateurs favoris", group: "service", tmdb: true, onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Realisateurs les plus presents dans tes films",
     params: [
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
@@ -156,7 +156,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-genres", label: "Genres {service}", group: "service",
+    id: "{service}-genres", label: "Genres favoris", group: "service",
     desc: "Visualisation des genres les plus consommes",
     params: [
       { key: "displayMode", label: "Mode d'affichage", type: "select", default: "race", options: [
@@ -179,7 +179,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-compare", label: "Comparaison {service}", group: "service",
+    id: "{service}-compare", label: "Comparaison annuelle", group: "service",
     desc: "Comparaison avec l'annee precedente ou les autres utilisateurs",
     params: [
       { key: "compareMode", label: "Mode de comparaison", type: "select", default: "year_vs_year", options: [
@@ -217,7 +217,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-pod", label: "Podium series {service}", group: "service", pod: true,
+    id: "{service}-series-pod", label: "Top 3", group: "service", pod: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Top series avec reveal anime",
     params: [
@@ -231,7 +231,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-stats-enriched", label: "Bilan series {service}", group: "service", tmdb: true,
+    id: "{service}-series-stats-enriched", label: "Bilan series", group: "service",
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Stats series enrichies : donut genres, acteurs, records, affiches",
     params: [
@@ -248,7 +248,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-deep", label: "Habitudes series {service}", group: "service",
+    id: "{service}-series-deep", label: "Stats et habitudes", group: "service",
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Quand tu regardes tes series : jour, heure, mois record",
     params: [],
@@ -262,7 +262,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-worldmap", label: "Carte du monde series {service}", group: "service", tmdb: true,
+    id: "{service}-series-worldmap", label: "Carte du monde", group: "service", tmdb: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Pays d'origine des series vues",
     params: [
@@ -270,7 +270,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-ratings", label: "Notes series {service}", group: "service", tmdb: true,
+    id: "{service}-series-ratings", label: "Notes et evaluations", group: "service", tmdb: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Moyenne des notes et distribution des series",
     params: [
@@ -278,7 +278,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-directors", label: "Realisateurs series {service}", group: "service", tmdb: true,
+    id: "{service}-series-directors", label: "Realisateurs favoris", group: "service", tmdb: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Realisateurs les plus presents dans tes series",
     params: [
@@ -288,7 +288,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-genres", label: "Genres series {service}", group: "service",
+    id: "{service}-series-genres", label: "Genres favoris", group: "service",
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Genres les plus regardes en series",
     params: [
@@ -312,7 +312,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-actors", label: "Acteurs series {service}", group: "service", tmdb: true,
+    id: "{service}-series-actors", label: "Acteurs favoris", group: "service", tmdb: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Acteurs les plus vus dans tes series",
     params: [
@@ -322,7 +322,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-compare", label: "Comparaison series {service}", group: "service",
+    id: "{service}-series-compare", label: "Comparaison annuelle", group: "service",
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Comparaison series avec l'annee precedente",
     params: [
@@ -351,7 +351,7 @@ export const SLIDE_REGISTRY = [
 
   // Community slides
   {
-    id: "cat-community", label: "Annonce communaute", group: "global", cat: true,
+    id: "cat-community", label: "Separation de section", group: "global", cat: true,
     desc: "Slide d'annonce de la section comparaison entre utilisateurs",
     params: [
       { key: "customIcon", label: "Icone (emoji)", type: "text", default: "👥" },
@@ -360,70 +360,70 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "community-mostviewed-films", label: "Films les plus vus", group: "global",
+    id: "community-mostviewed-films", label: "Top vus (films)", group: "global",
     desc: "Top 10 films par nombre de vues avec details par utilisateur",
     params: [],
   },
   {
-    id: "community-activity-films", label: "Activite communaute (films)", group: "global",
+    id: "community-activity-films", label: "Activite (films)", group: "global",
     desc: "Activite mensuelle de tous les utilisateurs superposee — films",
     params: [],
   },
   {
-    id: "community-top-films", label: "Top films populaires", group: "global",
+    id: "community-top-films", label: "Top populaires (films)", group: "global",
     desc: "Films les plus vus par la communaute avec affiches et details",
     params: [],
   },
   {
-    id: "community-rankings-films", label: "Classement films", group: "global",
+    id: "community-rankings-films", label: "Classement (films)", group: "global",
     desc: "Classement des utilisateurs en nombre de vues et heures — films",
     params: [],
   },
   {
-    id: "community-genres-films", label: "Genres communaute (films)", group: "global",
+    id: "community-genres-films", label: "Genres (films)", group: "global",
     desc: "Genres preferes de la communaute avec classement — films",
     params: [],
   },
   {
-    id: "community-mostviewed-series", label: "Series les plus vues", group: "global",
+    id: "community-mostviewed-series", label: "Top vues (series)", group: "global",
     desc: "Top 10 series par nombre de vues avec details par utilisateur",
     params: [],
   },
   {
-    id: "community-activity-series", label: "Activite communaute (series)", group: "global",
+    id: "community-activity-series", label: "Activite (series)", group: "global",
     desc: "Activite mensuelle de tous les utilisateurs superposee — series",
     params: [],
   },
   {
-    id: "community-top-series", label: "Top series populaires", group: "global",
+    id: "community-top-series", label: "Top populaires (series)", group: "global",
     desc: "Series les plus vues par la communaute avec affiches et details",
     params: [],
   },
   {
-    id: "community-rankings-series", label: "Classement series", group: "global",
+    id: "community-rankings-series", label: "Classement (series)", group: "global",
     desc: "Classement des utilisateurs en nombre de vues et heures — series",
     params: [],
   },
   {
-    id: "community-genres-series", label: "Genres communaute (series)", group: "global",
+    id: "community-genres-series", label: "Genres (series)", group: "global",
     desc: "Genres preferes de la communaute avec classement — series",
     params: [],
   },
 
   {
-    id: "community-compare-films", label: "Comparaison films (annee vs annee)", group: "global",
+    id: "community-compare-films", label: "Comparaison (films)", group: "global",
     desc: "Comparaison films avec l'annee precedente : activite, genres, totaux",
     params: [],
   },
   {
-    id: "community-compare-series", label: "Comparaison series (annee vs annee)", group: "global",
+    id: "community-compare-series", label: "Comparaison (series)", group: "global",
     desc: "Comparaison series avec l'annee precedente : activite, genres, totaux",
     params: [],
   },
 
   // Audiobookshelf-specific slides
   {
-    id: "{service}-bilan", label: "Bilan ecoute {service}", group: "service", onlyFor: ["audiobookshelf"],
+    id: "{service}-bilan", label: "Bilan ecoute", group: "service", onlyFor: ["audiobookshelf"],
     desc: "Bilan annuel : livres ecoutes, temps, profil auditeur, genres, top livres",
     params: [
       { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
@@ -439,14 +439,14 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-favorites", label: "Auteurs & Narrateurs {service}", group: "service", onlyFor: ["audiobookshelf"],
+    id: "{service}-favorites", label: "Auteurs et narrateurs", group: "service", onlyFor: ["audiobookshelf"],
     desc: "Classement des auteurs et narrateurs les plus ecoutes",
     params: [],
   },
 
   // Overseerr slides (shown only if service configured)
   {
-    id: "cat-overseerr", label: "Annonce Demandes", group: "global", cat: true,
+    id: "cat-overseerr", label: "Separation de section", group: "global", cat: true,
     desc: "Slide d'annonce de la section demandes Overseerr",
     params: [
       { key: "customIcon", label: "Icone (emoji)", type: "text", default: "📋" },
@@ -455,7 +455,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "overseerr-requests", label: "Bilan demandes", group: "global",
+    id: "overseerr-requests", label: "Bilan des demandes", group: "global",
     desc: "Nombre de demandes, repartition films/series, statuts, courbe mensuelle avec comparaison",
     params: [],
   },
@@ -474,24 +474,24 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "overseerr-popular", label: "Top demandes populaires", group: "global",
+    id: "overseerr-popular", label: "Demandes a succes", group: "global",
     desc: "Demandes de l'utilisateur les plus vues par la communaute",
     params: [],
   },
   {
-    id: "overseerr-community", label: "Classement demandeurs", group: "global",
+    id: "overseerr-community", label: "Top demandeurs", group: "global",
     desc: "Classement des plus gros demandeurs du serveur",
     params: [],
   },
 
   // Global slides
   {
-    id: "compare", label: "Comparaison", group: "global",
+    id: "compare", label: "Comparaison globale", group: "global",
     desc: "Annee en cours vs annee precedente",
     params: [],
   },
   {
-    id: "ranking", label: "Classement global (ancien)", group: "global",
+    id: "ranking", label: "Classement (ancien)", group: "global",
     desc: "Ancien classement — desactiver",
     params: [],
   },
