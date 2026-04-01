@@ -98,6 +98,11 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   const slideOrder = slideConfigs?.order || []
   const sc = slideSettings
 
+  // Helper: push slide only if enabled (or forced for locked slides)
+  const pushSlide = (slide, force = false) => {
+    if (force || isSlideEnabled(sc, slide.id)) slides.push(slide)
+  }
+
   // Helpers for reading slide config overrides
   const resolveAccent = (slideId, defaultAccent) => getAccentOverride(sc, slideId) || defaultAccent
   const catProps = (slideId, defaults) => {
@@ -128,13 +133,13 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   const slides = []
 
   // 0 — Intro
-  slides.push({
+  pushSlide({
     id: "intro", accent: primary, bg: baseBg, fullscreen: false,
     _introProps: { accent: primary, userName, year, hasComparison: !!data.comparison },
   })
 
   // 1 — Onboarding (slideCount injected later)
-  slides.push({
+  pushSlide({
     id: "onboarding", accent: primary, bg: baseBg,
     _onboardingProps: { accent: primary, year, hasComparison: !!data.comparison },
   })
@@ -175,7 +180,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       }
 
       // ═══ FILMS SECTION ═══
-      slides.push({
+      pushSlide({
         id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
         component: <CategorySlide accent={svcAccent} {...catProps("cat-" + svc, cfg)} />,
       })
@@ -183,7 +188,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       const filmsBackdrop = svcData.extra?.backdrop || (filmsTop[0]?.art) || ""
       const filmsCat = catProps("cat-" + svc, cfg)
       if (filmsTop.length >= 2) {
-        slides.push({
+        pushSlide({
           id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
           component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={filmsTop} title={"Top " + filmsCat.label + " " + year} icon={filmsCat.icon} jokes={podJokes(svc + "-pod", jokes)} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={filmsBackdrop} config={getSlideConfig(sc, svc + "-pod")} serviceType={svc} />,
         })
@@ -191,7 +196,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
       // Deep slide (habitudes) — uses combined data
       if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
-        slides.push({
+        pushSlide({
           id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} serviceType={svc} />,
         })
@@ -200,7 +205,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       // Film-specific slides (timeline, worldmap, ratings, actors, directors)
       const hasYears = filmsTop.some((t) => t.y && t.y > 1890)
       if (hasYears) {
-        slides.push({
+        pushSlide({
           id: svc + "-timeline", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} serviceType={svc} />,
         })
@@ -208,7 +213,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
       const countryData = svcData.extra?.countries || []
       if (countryData.length > 0) {
-        slides.push({
+        pushSlide({
           id: svc + "-worldmap", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} serviceType={svc} />,
         })
@@ -223,7 +228,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
             min: b.min, max: b.max, label: b.name, emoji: b.emoji,
           }))
         }
-        slides.push({
+        pushSlide({
           id: svc + "-ratings", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} serviceType={svc} />,
         })
@@ -232,7 +237,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       // Budget slide (if budget data available)
       const budgetData = svcData.extra?.budgets
       if (budgetData && budgetData.count > 0) {
-        slides.push({
+        pushSlide({
           id: svc + "-budgets", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <BudgetSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-budgets")} serviceType={svc} />,
         })
@@ -241,7 +246,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       const actorsData = svcData.extra?.actors || []
       const actorsConfig = getSlideConfig(sc, svc + "-actors")
       if (actorsData.filter((a) => a.count >= (actorsConfig?.minAppearances || 2)).length > 0) {
-        slides.push({
+        pushSlide({
           id: svc + "-actors", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <FavoriteActorsSlide accent={svcAccent} data={svcData} year={year} config={actorsConfig} serviceType={svc} />,
         })
@@ -250,7 +255,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       const directorsData = svcData.extra?.directors || []
       const directorsConfig = getSlideConfig(sc, svc + "-directors")
       if (directorsData.filter((d) => d.count >= (directorsConfig?.minAppearances || 2)).length > 0) {
-        slides.push({
+        pushSlide({
           id: svc + "-directors", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <FavoriteDirectorsSlide accent={svcAccent} data={svcData} year={year} config={directorsConfig} serviceType={svc} />,
         })
@@ -259,7 +264,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       // Genres slide (films section)
       const topGenres = svcData.extra?.top_genres || svcData.genres || []
       if (topGenres.length >= 1) {
-        slides.push({
+        pushSlide({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} serviceType={svc} />,
         })
@@ -269,14 +274,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       const filmCompare = data.comparison?.[svc]
       if (filmCompare) {
         const bilanConfig = getSlideConfig(sc, svc + "-stats-enriched")
-        slides.push({
+        pushSlide({
           id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <CompareServiceSlide accent={svcAccent} compareData={filmCompare} year={year} mediaType="films" config={getSlideConfig(sc, svc + "-compare")} bilanCategories={bilanConfig.categories} serviceType={svc} />,
         })
       }
 
       // Stats enriched / bilan cinema (fin de section films)
-      slides.push({
+      pushSlide({
         id: svc + "-stats-enriched", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} serviceType={svc} />,
       })
@@ -287,7 +292,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         const seriesExtraData = svcData.extra?.series || {}
 
         // Category
-        slides.push({
+        pushSlide({
           id: "cat-" + svc + "-series", accent: seriesAccent, bg: cfg.seriesBgCat || baseBg, cat: true, fullscreen: true,
           component: <CategorySlide accent={seriesAccent} {...catProps("cat-" + svc + "-series", { icon: cfg.seriesIcon, label: cfg.seriesLabel, sub: cfg.seriesSub })} />,
         })
@@ -297,7 +302,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesTop.length >= 2) {
           const seriesBackdrop = (seriesTop[0]?.art) || ""
           const defaultSeriesJokes = ["Voyons quelles series t'ont accroche...", "Des episodes enchaines sans fin.", "Le binge-watching, un art de vivre.", "Voici ton podium series"]
-          slides.push({
+          pushSlide({
             id: svc + "-series-pod", accent: seriesAccent, bg: cfg.seriesBgPod || baseBg, pod: true, fullscreen: true,
             component: <PodiumSlide accent={seriesAccent} bg={cfg.seriesBgPod || baseBg} data={seriesTop} title={"Top " + seriesCat.label + " " + year} icon={seriesCat.icon} jokes={podJokes(svc + "-series-pod", defaultSeriesJokes)} statLabel="episodes" statKey="ep" statSuffix="" backdrop={seriesBackdrop} config={getSlideConfig(sc, svc + "-series-pod")} serviceType={svc} />,
           })
@@ -305,7 +310,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
         // Habitudes series
         if (seriesExtraData.day_of_week?.length > 0 || seriesExtraData.time_of_day?.length > 0) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-deep", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <ServiceDeepSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={{ ...svcData, ...seriesData, extra: { ...svcData.extra, films: seriesExtraData } }} me={userName} year={year} serviceType={svc} />,
           })
@@ -314,7 +319,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         // Profil seriephile (timeline)
         const seriesHasYears = seriesTop.some((t) => t.y && t.y > 1890)
         if (seriesHasYears) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-timeline", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <FilmTimelineSlide accent={seriesAccent} data={{ ...svcData, top: seriesTop, extra: { ...svcData.extra, films: { top: (seriesExtraData.top || seriesTop) } } }} year={year} config={getSlideConfig(sc, svc + "-series-timeline")} mediaType="series" serviceType={svc} />,
           })
@@ -323,7 +328,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         // Carte du monde series
         const seriesCountries = seriesExtraData.countries || []
         if (seriesCountries.length > 0) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-worldmap", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <WorldMapSlide accent={seriesAccent} data={{ extra: { countries: seriesCountries } }} year={year} config={getSlideConfig(sc, svc + "-series-worldmap")} mediaType="series" serviceType={svc} />,
           })
@@ -332,7 +337,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         // Notes series
         const seriesRatings = seriesExtraData.ratings || []
         if (seriesRatings.length >= 2) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-ratings", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <RatingsSlide accent={seriesAccent} data={{ extra: { ratings: seriesRatings, films: { top: seriesExtraData.top || [] } }, top: seriesTop }} year={year} config={getSlideConfig(sc, svc + "-series-ratings")} mediaType="series" serviceType={svc} />,
           })
@@ -342,7 +347,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         const seriesActors = seriesExtraData.actors || svcData.extra?.series_actors || []
         const seriesActorsConfig = getSlideConfig(sc, svc + "-series-actors")
         if (seriesActors.filter((a) => a.count >= (seriesActorsConfig?.minAppearances || 2)).length > 0) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-actors", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <FavoriteActorsSlide accent={seriesAccent} data={{ extra: { actors: seriesActors } }} year={year} config={seriesActorsConfig} serviceType={svc} />,
           })
@@ -352,7 +357,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         const seriesDirectors = seriesExtraData.directors || []
         const seriesDirectorsConfig = getSlideConfig(sc, svc + "-series-directors")
         if (seriesDirectors.filter((d) => d.count >= (seriesDirectorsConfig?.minAppearances || 2)).length > 0) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-directors", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <FavoriteDirectorsSlide accent={seriesAccent} data={{ extra: { directors: seriesDirectors } }} year={year} config={seriesDirectorsConfig} serviceType={svc} />,
           })
@@ -361,7 +366,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         // Genres series
         const seriesGenres = seriesExtraData.genres || svcData.extra?.series_genres || []
         if (seriesGenres.length >= 3) {
-          slides.push({
+          pushSlide({
             id: svc + "-series-genres", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <GenresSlide accent={seriesAccent} genres={seriesGenres} year={year} config={{ displayMode: "race", ...getSlideConfig(sc, svc + "-series-genres") }} serviceType={svc} />,
           })
@@ -371,14 +376,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         const seriesCompare = data.comparison?.[svc]
         if (seriesCompare) {
           const seriesBilanConfig = getSlideConfig(sc, svc + "-series-stats-enriched")
-          slides.push({
+          pushSlide({
             id: svc + "-series-compare", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
             component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} mediaType="series" config={getSlideConfig(sc, svc + "-series-compare")} bilanCategories={seriesBilanConfig.categories} serviceType={svc} />,
           })
         }
 
         // Bilan series (fin de section)
-        slides.push({
+        pushSlide({
           id: svc + "-series-stats-enriched", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
           component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} mediaType="series" serviceType={svc} />,
         })
@@ -388,7 +393,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       // ── Standard service (romm, audiobookshelf, komga, booklore) ──
       const top = svcData.top || []
 
-      slides.push({
+      pushSlide({
         id: "cat-" + svc, accent: svcAccent, bg: cfg.bgCat || baseBg, cat: true, fullscreen: true,
         component: <CategorySlide accent={svcAccent} {...catProps("cat-" + svc, cfg)} />,
       })
@@ -396,19 +401,19 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       const stdCat = catProps("cat-" + svc, cfg)
       const backdropUrl = (top[0]?.art) || ""
       if (top.length >= 2) {
-        slides.push({
+        pushSlide({
           id: svc + "-pod", accent: svcAccent, bg: cfg.bgPod || baseBg, pod: true, fullscreen: true,
           component: <PodiumSlide accent={svcAccent} bg={cfg.bgPod || baseBg} data={top} title={"Top " + stdCat.label + " " + year} icon={stdCat.icon} jokes={podJokes(svc + "-pod", jokes)} statLabel={cfg.statLabel} statKey={cfg.statKey} statSuffix={cfg.statSuffix} backdrop={backdropUrl} config={getSlideConfig(sc, svc + "-pod")} serviceType={svc} />,
         })
       }
 
-      slides.push({
+      pushSlide({
         id: svc + "-stats", accent: svcAccent, bg: cfg.bgStats || baseBg,
         component: <ServiceStatsSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} year={year} serviceType={svc} />,
       })
 
       if (svcData.day_of_week?.length > 0 || svcData.time_of_day?.length > 0 || svcData.ranking?.length > 0) {
-        slides.push({
+        pushSlide({
           id: svc + "-deep", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <ServiceDeepSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={svcData} me={userName} year={year} serviceType={svc} />,
         })
@@ -419,7 +424,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     if (!cfg.hasSeries) {
       const topGenres = svcData.extra?.top_genres || svcData.genres || []
       if (topGenres.length >= 1) {
-        slides.push({
+        pushSlide({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} serviceType={svc} />,
         })
@@ -429,13 +434,13 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     // Audiobookshelf-specific slides
     if (svc === "audiobookshelf") {
       if (isSlideEnabled(sc, svc + "-bilan")) {
-        slides.push({
+        pushSlide({
           id: svc + "-bilan", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <AudiobookBilanSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-bilan")} serviceType={svc} />,
         })
       }
       if ((svcData.extra?.top_authors?.length > 0 || svcData.extra?.top_narrators?.length > 0) && isSlideEnabled(sc, svc + "-favorites")) {
-        slides.push({
+        pushSlide({
           id: svc + "-favorites", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <AudiobookFavoritesSlide accent={svcAccent} data={svcData} year={year} serviceType={svc} />,
         })
@@ -446,7 +451,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     if (!cfg.hasSeries) {
       const svcCompare = data.comparison?.[svc]
       if (svcCompare) {
-        slides.push({
+        pushSlide({
           id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <CompareServiceSlide accent={svcAccent} compareData={svcCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} serviceType={svc} />,
         })
@@ -494,7 +499,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
   if (allUsersData.length >= 2) {
     // Category slide for community section
-    slides.push({
+    pushSlide({
       id: "cat-community", accent: communityAccent, bg: baseBg, cat: true, fullscreen: true,
       component: <CategorySlide accent={communityAccent} icon="👥" label="COMMUNAUTE" sub="Comparaison entre utilisateurs" />,
     })
@@ -502,30 +507,30 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     // Films community slides
     const hasFilmsData = allUsersData.some((u) => (u.data.extra?.films?.total || u.data.total_items || 0) > 0)
     if (hasFilmsData) {
-      slides.push({
+      pushSlide({
         id: "community-top-films", accent: communityAccent, bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-mostviewed-films", accent: communityAccent, bg: baseBg,
         component: <CommunityMostViewedSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-activity-films", accent: communityAccent, bg: baseBg,
         component: <CommunityActivitySlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-rankings-films", accent: communityAccent, bg: baseBg,
         component: <CommunityRankingsSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-genres-films", accent: communityAccent, bg: baseBg,
         component: <CommunityGenresSlide accent={communityAccent} allUsers={allUsersData} year={year} me={myNameInData} mediaType="films" />,
       })
       // Comparison films year vs year
       const filmCompareData = data.comparison?.tautulli || data.comparison?.plex || data.comparison?.jellyfin
       if (filmCompareData) {
-        slides.push({
+        pushSlide({
           id: "community-compare-films", accent: communityAccent, bg: baseBg,
           component: <CommunityCompareSlide accent={communityAccent} compareData={filmCompareData} year={year} mediaType="films" />,
         })
@@ -535,30 +540,30 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     // Series community slides
     const hasSeriesData = allUsersData.some((u) => (u.data.extra?.series?.episodes || 0) > 0)
     if (hasSeriesData) {
-      slides.push({
+      pushSlide({
         id: "community-top-series", accent: accents.series || "#fb923c", bg: baseBg, fullscreen: true,
         component: <CommunityTopSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-mostviewed-series", accent: accents.series || "#fb923c", bg: baseBg,
         component: <CommunityMostViewedSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-activity-series", accent: accents.series || "#fb923c", bg: baseBg,
         component: <CommunityActivitySlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-rankings-series", accent: accents.series || "#fb923c", bg: baseBg,
         component: <CommunityRankingsSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
-      slides.push({
+      pushSlide({
         id: "community-genres-series", accent: accents.series || "#fb923c", bg: baseBg,
         component: <CommunityGenresSlide accent={accents.series || "#fb923c"} allUsers={allUsersData} year={year} me={myNameInData} mediaType="series" />,
       })
       // Comparison series year vs year
       const seriesCompareData = data.comparison?.tautulli || data.comparison?.plex || data.comparison?.jellyfin
       if (seriesCompareData) {
-        slides.push({
+        pushSlide({
           id: "community-compare-series", accent: accents.series || "#fb923c", bg: baseBg,
           component: <CommunityCompareSlide accent={accents.series || "#fb923c"} compareData={seriesCompareData} year={year} mediaType="series" />,
         })
@@ -569,7 +574,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   // Compare
   const compareAccent = accents.compare || "#60a5fa"
   if (data.comparison) {
-    slides.push({
+    pushSlide({
       id: "compare", accent: compareAccent, bg: baseBg,
       component: <CompareSlide accent={compareAccent} comparison={data.comparison} year={year} />,
     })
@@ -580,31 +585,31 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   if (data.overseerr && data.overseerr.total > 0) {
     // Category slide (section separator)
     if (isSlideEnabled(sc, "cat-overseerr")) {
-      slides.push({
+      pushSlide({
         id: "cat-overseerr", accent: overseerrAccent, bg: baseBg, cat: true, fullscreen: true,
         component: <CategorySlide accent={overseerrAccent} {...catProps("cat-overseerr", { icon: "📋", label: "DEMANDES", sub: "Overseerr · Requetes media" })} />,
       })
     }
     if (isSlideEnabled(sc, "overseerr-requests")) {
-      slides.push({
+      pushSlide({
         id: "overseerr-requests", accent: overseerrAccent, bg: baseBg,
         component: <OverseerrRequestsSlide accent={overseerrAccent} data={data} year={year} config={getSlideConfig(sc, "overseerr-requests")} />,
       })
     }
     if (isSlideEnabled(sc, "overseerr-match")) {
-      slides.push({
+      pushSlide({
         id: "overseerr-match", accent: overseerrAccent, bg: baseBg,
         component: <OverseerrMatchSlide accent={overseerrAccent} data={data} year={year} config={getSlideConfig(sc, "overseerr-match")} />,
       })
     }
     if (isSlideEnabled(sc, "overseerr-popular")) {
-      slides.push({
+      pushSlide({
         id: "overseerr-popular", accent: overseerrAccent, bg: baseBg,
         component: <OverseerrPopularSlide accent={overseerrAccent} data={data} year={year} />,
       })
     }
     if (data.overseerr?.community?.total > 0 && isSlideEnabled(sc, "overseerr-community")) {
-      slides.push({
+      pushSlide({
         id: "overseerr-community", accent: overseerrAccent, bg: baseBg,
         component: <OverseerrCommunitySlide accent={overseerrAccent} data={data} year={year} userName={userName} />,
       })
@@ -614,14 +619,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   // Server ranking — cumulative all-time
   const rankingAccent = accents.ranking || "#f87171"
   if (data.server_ranking) {
-    slides.push({
+    pushSlide({
       id: "classement-serveur", accent: rankingAccent, bg: baseBg,
       component: <ServerRankingSlide accent={rankingAccent} data={data} year={year} userName={userName} />,
     })
   }
 
   // Finale — activeServices will be injected after slide filtering
-  slides.push({
+  pushSlide({
     id: "finale", accent: primary, bg: baseBg, fullscreen: true,
     _finaleProps: { accent: primary, userName, year, globalStats, recapData: data },
   })
