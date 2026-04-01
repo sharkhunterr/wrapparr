@@ -21,18 +21,23 @@ export default function OverseerrPopularSlide({ accent, data, year }) {
   if (!userRequests.length) return null
 
   // Build per-user watched sets
+  // User data structure: { tautulli: { top: [...], extra: { films: { top: [...] } } } }
   const userWatched = {}
   for (const [uid, udata] of Object.entries(allUsersData)) {
+    if (!udata || typeof udata !== "object") continue
     const titles = new Set()
     const tmdbIds = new Set()
-    for (const item of (udata?.top || [])) {
-      if (item?.t) titles.add(item.t.toLowerCase().trim())
-      if (item?.tmdb_id) tmdbIds.add(String(item.tmdb_id))
-    }
-    for (const section of ["films", "series"]) {
-      for (const item of (udata?.extra?.[section]?.top || [])) {
+    for (const svcData of Object.values(udata)) {
+      if (!svcData || typeof svcData !== "object") continue
+      for (const item of (svcData?.top || [])) {
         if (item?.t) titles.add(item.t.toLowerCase().trim())
         if (item?.tmdb_id) tmdbIds.add(String(item.tmdb_id))
+      }
+      for (const section of ["films", "series"]) {
+        for (const item of (svcData?.extra?.[section]?.top || [])) {
+          if (item?.t) titles.add(item.t.toLowerCase().trim())
+          if (item?.tmdb_id) tmdbIds.add(String(item.tmdb_id))
+        }
       }
     }
     if (titles.size > 0 || tmdbIds.size > 0) {

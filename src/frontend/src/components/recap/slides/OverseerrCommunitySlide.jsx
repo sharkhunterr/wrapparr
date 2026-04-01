@@ -121,18 +121,26 @@ function computePopularity(topRequests, allUsersData) {
   if (!topRequests.length || !Object.keys(allUsersData).length) return []
 
   // Build per-user watched sets (titles lowercase)
+  // User data structure: { tautulli: { top: [...], extra: { films: { top: [...] }, series: { top: [...] } } } }
   const userWatched = {}
   for (const [uid, udata] of Object.entries(allUsersData)) {
+    if (!udata || typeof udata !== "object") continue
     const titles = new Set()
-    for (const item of (udata?.top || [])) {
-      if (item?.t) titles.add(item.t.toLowerCase().trim())
-    }
-    for (const section of ["films", "series"]) {
-      for (const item of (udata?.extra?.[section]?.top || [])) {
+    // Search in all service data (tautulli, jellyfin, etc.)
+    for (const svcData of Object.values(udata)) {
+      if (!svcData || typeof svcData !== "object") continue
+      // Direct top array
+      for (const item of (svcData?.top || [])) {
         if (item?.t) titles.add(item.t.toLowerCase().trim())
       }
+      // Nested extra.films.top / extra.series.top
+      for (const section of ["films", "series"]) {
+        for (const item of (svcData?.extra?.[section]?.top || [])) {
+          if (item?.t) titles.add(item.t.toLowerCase().trim())
+        }
+      }
     }
-    if (titles.size > 0) userWatched[uid] = titles
+    if (titles.size > 0) userWatched[udata?.name || uid] = titles
   }
 
   const totalUsers = Object.keys(userWatched).length
