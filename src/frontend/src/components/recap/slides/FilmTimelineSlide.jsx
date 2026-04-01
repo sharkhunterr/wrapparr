@@ -16,7 +16,7 @@ function getProfile(avgYear, profiles) {
   return profiles.find((p) => avgYear >= p.min && avgYear <= p.max) || profiles[profiles.length - 1]
 }
 
-export default function FilmTimelineSlide({ accent, data, year, config = {}, mediaType = "films" }) {
+export default function FilmTimelineSlide({ accent, data, year, config = {}, mediaType = "films", serviceType }) {
   const L = useLabels()
   const isSeries = mediaType === "series"
   const animSpeed = config.animationSpeed || 8000
@@ -58,7 +58,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
 
   // Comparison data
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevYearDist = prevSvc?.films?.year_dist?.previous || null
   const prevYearBuckets = prevYearDist?.years || {}
   const prevAvgYear = prevYearDist?.avg_year || 0

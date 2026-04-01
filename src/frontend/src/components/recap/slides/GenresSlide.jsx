@@ -32,7 +32,7 @@ function buildPalette(accent) {
   return offsets.map((off) => hsl((h + off) % 1, Math.min(1, s * (0.7 + off * 0.4)), Math.min(0.65, l * (0.85 + off * 0.2))))
 }
 
-export default function GenresSlide({ accent, genres = [], year, config = {} }) {
+export default function GenresSlide({ accent, genres = [], year, config = {}, serviceType }) {
   const L = useLabels()
   const mode = config.displayMode || "race"
   const maxGenres = config.maxGenres || 6
@@ -43,7 +43,7 @@ export default function GenresSlide({ accent, genres = [], year, config = {} }) 
 
   // Comparison data — previous year genres
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevGenres = (prevSvc?.films?.genres || prevSvc?.genres || [])
     .filter((g) => (g.previous || 0) > 0)
     .sort((a, b) => (b.previous || 0) - (a.previous || 0))

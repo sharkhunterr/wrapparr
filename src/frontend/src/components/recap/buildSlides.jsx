@@ -200,7 +200,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (hasYears) {
         slides.push({
           id: svc + "-timeline", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} />,
+          component: <FilmTimelineSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-timeline")} serviceType={svc} />,
         })
       }
 
@@ -208,7 +208,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (countryData.length > 0) {
         slides.push({
           id: svc + "-worldmap", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} />,
+          component: <WorldMapSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-worldmap")} serviceType={svc} />,
         })
       }
 
@@ -223,7 +223,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         }
         slides.push({
           id: svc + "-ratings", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} />,
+          component: <RatingsSlide accent={svcAccent} data={svcData} year={year} config={ratingsConfig} serviceType={svc} />,
         })
       }
 
@@ -232,7 +232,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (budgetData && budgetData.count > 0) {
         slides.push({
           id: svc + "-budgets", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <BudgetSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-budgets")} />,
+          component: <BudgetSlide accent={svcAccent} data={svcData} year={year} config={getSlideConfig(sc, svc + "-budgets")} serviceType={svc} />,
         })
       }
 
@@ -241,7 +241,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (actorsData.filter((a) => a.count >= (actorsConfig?.minAppearances || 2)).length > 0) {
         slides.push({
           id: svc + "-actors", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <FavoriteActorsSlide accent={svcAccent} data={svcData} year={year} config={actorsConfig} />,
+          component: <FavoriteActorsSlide accent={svcAccent} data={svcData} year={year} config={actorsConfig} serviceType={svc} />,
         })
       }
 
@@ -250,7 +250,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (directorsData.filter((d) => d.count >= (directorsConfig?.minAppearances || 2)).length > 0) {
         slides.push({
           id: svc + "-directors", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <FavoriteDirectorsSlide accent={svcAccent} data={svcData} year={year} config={directorsConfig} />,
+          component: <FavoriteDirectorsSlide accent={svcAccent} data={svcData} year={year} config={directorsConfig} serviceType={svc} />,
         })
       }
 
@@ -259,7 +259,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (topGenres.length >= 1) {
         slides.push({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
+          component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} serviceType={svc} />,
         })
       }
 
@@ -269,14 +269,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         const bilanConfig = getSlideConfig(sc, svc + "-stats-enriched")
         slides.push({
           id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <CompareServiceSlide accent={svcAccent} compareData={filmCompare} year={year} mediaType="films" config={getSlideConfig(sc, svc + "-compare")} bilanCategories={bilanConfig.categories} />,
+          component: <CompareServiceSlide accent={svcAccent} compareData={filmCompare} year={year} mediaType="films" config={getSlideConfig(sc, svc + "-compare")} bilanCategories={bilanConfig.categories} serviceType={svc} />,
         })
       }
 
       // Stats enriched / bilan cinema (fin de section films)
       slides.push({
         id: svc + "-stats-enriched", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} />,
+        component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} serviceType={svc} />,
       })
 
       // ═══ SERIES SECTION ═══
@@ -314,7 +314,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesHasYears) {
           slides.push({
             id: svc + "-series-timeline", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <FilmTimelineSlide accent={seriesAccent} data={{ ...svcData, top: seriesTop, extra: { ...svcData.extra, films: { top: (seriesExtraData.top || seriesTop) } } }} year={year} config={getSlideConfig(sc, svc + "-series-timeline")} mediaType="series" />,
+            component: <FilmTimelineSlide accent={seriesAccent} data={{ ...svcData, top: seriesTop, extra: { ...svcData.extra, films: { top: (seriesExtraData.top || seriesTop) } } }} year={year} config={getSlideConfig(sc, svc + "-series-timeline")} mediaType="series" serviceType={svc} />,
           })
         }
 
@@ -323,7 +323,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesCountries.length > 0) {
           slides.push({
             id: svc + "-series-worldmap", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <WorldMapSlide accent={seriesAccent} data={{ extra: { countries: seriesCountries } }} year={year} config={getSlideConfig(sc, svc + "-series-worldmap")} mediaType="series" />,
+            component: <WorldMapSlide accent={seriesAccent} data={{ extra: { countries: seriesCountries } }} year={year} config={getSlideConfig(sc, svc + "-series-worldmap")} mediaType="series" serviceType={svc} />,
           })
         }
 
@@ -332,7 +332,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesRatings.length >= 2) {
           slides.push({
             id: svc + "-series-ratings", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <RatingsSlide accent={seriesAccent} data={{ extra: { ratings: seriesRatings, films: { top: seriesExtraData.top || [] } }, top: seriesTop }} year={year} config={getSlideConfig(sc, svc + "-series-ratings")} mediaType="series" />,
+            component: <RatingsSlide accent={seriesAccent} data={{ extra: { ratings: seriesRatings, films: { top: seriesExtraData.top || [] } }, top: seriesTop }} year={year} config={getSlideConfig(sc, svc + "-series-ratings")} mediaType="series" serviceType={svc} />,
           })
         }
 
@@ -342,7 +342,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesActors.filter((a) => a.count >= (seriesActorsConfig?.minAppearances || 2)).length > 0) {
           slides.push({
             id: svc + "-series-actors", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <FavoriteActorsSlide accent={seriesAccent} data={{ extra: { actors: seriesActors } }} year={year} config={seriesActorsConfig} />,
+            component: <FavoriteActorsSlide accent={seriesAccent} data={{ extra: { actors: seriesActors } }} year={year} config={seriesActorsConfig} serviceType={svc} />,
           })
         }
 
@@ -352,7 +352,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesDirectors.filter((d) => d.count >= (seriesDirectorsConfig?.minAppearances || 2)).length > 0) {
           slides.push({
             id: svc + "-series-directors", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <FavoriteDirectorsSlide accent={seriesAccent} data={{ extra: { directors: seriesDirectors } }} year={year} config={seriesDirectorsConfig} />,
+            component: <FavoriteDirectorsSlide accent={seriesAccent} data={{ extra: { directors: seriesDirectors } }} year={year} config={seriesDirectorsConfig} serviceType={svc} />,
           })
         }
 
@@ -361,7 +361,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         if (seriesGenres.length >= 3) {
           slides.push({
             id: svc + "-series-genres", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <GenresSlide accent={seriesAccent} genres={seriesGenres} year={year} config={{ displayMode: "race", ...getSlideConfig(sc, svc + "-series-genres") }} />,
+            component: <GenresSlide accent={seriesAccent} genres={seriesGenres} year={year} config={{ displayMode: "race", ...getSlideConfig(sc, svc + "-series-genres") }} serviceType={svc} />,
           })
         }
 
@@ -371,14 +371,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
           const seriesBilanConfig = getSlideConfig(sc, svc + "-series-stats-enriched")
           slides.push({
             id: svc + "-series-compare", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-            component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} mediaType="series" config={getSlideConfig(sc, svc + "-series-compare")} bilanCategories={seriesBilanConfig.categories} />,
+            component: <CompareServiceSlide accent={seriesAccent} compareData={seriesCompare} year={year} mediaType="series" config={getSlideConfig(sc, svc + "-series-compare")} bilanCategories={seriesBilanConfig.categories} serviceType={svc} />,
           })
         }
 
         // Bilan series (fin de section)
         slides.push({
           id: svc + "-series-stats-enriched", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-          component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} mediaType="series" />,
+          component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} mediaType="series" serviceType={svc} />,
         })
 
       }
@@ -419,7 +419,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (topGenres.length >= 1) {
         slides.push({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
+          component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} serviceType={svc} />,
         })
       }
     }
@@ -430,7 +430,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       if (svcCompare) {
         slides.push({
           id: svc + "-compare", accent: svcAccent, bg: cfg.bgStats || baseBg,
-          component: <CompareServiceSlide accent={svcAccent} compareData={svcCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} />,
+          component: <CompareServiceSlide accent={svcAccent} compareData={svcCompare} year={year} config={getSlideConfig(sc, svc + "-compare")} serviceType={svc} />,
         })
       }
     }

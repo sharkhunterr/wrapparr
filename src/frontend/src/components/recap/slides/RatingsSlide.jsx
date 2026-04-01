@@ -109,7 +109,7 @@ function Gauge({ value, max = 10, accent, animated, size = 240, prevValue, prevY
   )
 }
 
-export default function RatingsSlide({ accent, data, year, config = {}, mediaType = "films" }) {
+export default function RatingsSlide({ accent, data, year, config = {}, mediaType = "films", serviceType }) {
   const L = useLabels()
   const animSpeed = config.animationSpeed || 10000
   const rawBrackets = config.brackets || DEFAULT_BRACKETS
@@ -141,7 +141,7 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
 
   // Comparison data
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevRatingsStats = prevSvc?.films?.ratings_stats?.previous || null
   const prevAvg = prevRatingsStats?.avg || 0
   const prevDist = prevRatingsStats?.distribution || []

@@ -116,7 +116,7 @@ function MiniStat({ iconKey, value, label, accent }) {
   )
 }
 
-export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {}, mediaType = "films" }) {
+export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year, config = {}, mediaType = "films", serviceType }) {
   const isSeries = mediaType === "series"
   const active = useActive()
   const L = useLabels()
@@ -152,7 +152,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   // Comparison data
   const comp = useComparison()
   const mediaKey = isSeries ? "series" : "films"
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevMedia = prevSvc?.[mediaKey] || {}
   const prevItems = prevMedia.previous
   const prevHours = prevMedia.hours?.previous

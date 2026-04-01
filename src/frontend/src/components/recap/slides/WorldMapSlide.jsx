@@ -34,11 +34,11 @@ const FLAGS = {
 import { useComparison } from "../SharedUI"
 import { useLabels } from "../ThemeContext"
 
-export default function WorldMapSlide({ accent, data, year, config = {}, mediaType = "films" }) {
+export default function WorldMapSlide({ accent, data, year, config = {}, mediaType = "films", serviceType }) {
   const animSpeed = config.animationSpeed || 15000
   const countries = data?.extra?.countries || []
   const comp = useComparison()
-  const prevCountries = comp.active ? (comp.data?.tautulli?.countries || comp.data?.plex?.countries || comp.data?.jellyfin?.countries || null) : null
+  const prevCountries = comp.active ? (comp.data?.[serviceType]?.countries || comp.data?.tautulli?.countries || comp.data?.plex?.countries || comp.data?.jellyfin?.countries || null) : null
   const prevTop3 = prevCountries?.previous?.slice(0, 3) || []
   const N = countries.length
   const L = useLabels()

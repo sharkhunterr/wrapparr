@@ -77,14 +77,14 @@ function PersonCard({ person, index, accent, revealed, rank, L }) {
   )
 }
 
-export default function FavoriteActorsSlide({ accent, data, year, config = {} }) {
+export default function FavoriteActorsSlide({ accent, data, year, config = {}, serviceType }) {
   const L = useLabels()
   const animSpeed = config.animationSpeed || 12000
   const minAppearances = config.minAppearances || 2
   const maxCards = config.maxCards || 6
   const actors = (data?.extra?.actors || []).filter((a) => a.count >= minAppearances).slice(0, maxCards)
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevActors = (prevSvc?.films?.actors?.previous || prevSvc?.actors?.previous || []).slice(0, 3)
 
   const [phase, setPhase] = useState(0) // 0=idle, 1=reveal cards, 2=done

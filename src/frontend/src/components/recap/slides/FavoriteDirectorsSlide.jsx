@@ -88,14 +88,14 @@ function DirectorCard({ person, index, accent, revealed, rank }) {
   )
 }
 
-export default function FavoriteDirectorsSlide({ accent, data, year, config = {} }) {
+export default function FavoriteDirectorsSlide({ accent, data, year, config = {}, serviceType }) {
   const L = useLabels()
   const animSpeed = config.animationSpeed || 12000
   const minAppearances = config.minAppearances || 2
   const maxCards = config.maxCards || 6
   const directors = (data?.extra?.directors || []).filter((d) => d.count >= minAppearances).slice(0, maxCards)
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevDirectors = (prevSvc?.films?.directors?.previous || prevSvc?.directors?.previous || []).slice(0, 3)
 
   const [phase, setPhase] = useState(0)

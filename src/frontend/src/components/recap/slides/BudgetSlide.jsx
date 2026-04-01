@@ -213,7 +213,7 @@ function FilmBudgetCard({ film, accent, rank, delay, animated }) {
   )
 }
 
-export default function BudgetSlide({ accent, data, year, config = {} }) {
+export default function BudgetSlide({ accent, data, year, config = {}, serviceType }) {
   const L = useLabels()
   const budgets = data?.extra?.budgets
   const displayMode = config.displayMode || "bars"
@@ -221,7 +221,7 @@ export default function BudgetSlide({ accent, data, year, config = {} }) {
 
   // Comparison data
   const comp = useComparison()
-  const prevSvc = comp.active ? (comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
+  const prevSvc = comp.active ? (comp.data?.[serviceType] || comp.data?.tautulli || comp.data?.plex || comp.data?.jellyfin || null) : null
   const prevBudgets = prevSvc?.budgets?.previous || null
 
   useEffect(() => {
