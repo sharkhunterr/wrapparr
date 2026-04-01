@@ -15,67 +15,85 @@ export default function OverseerrPopularSlide({ accent, data, year }) {
   const ov = data?.overseerr
   if (!ov) return null
 
-  // Get user's requests and cross-reference with all users' watched data
-  const allUsersData = data?.users || {}
-  const userRequests = ov.top || ov.all_requests || []
-  if (!userRequests.length) return null
+  // Only the current user's requests (ov.top = user's top, not community)
+  const myRequests = ov.top || []
+  if (!myRequests.length) return null
 
-  // Build per-user watched sets
-  // User data structure: { tautulli: { top: [...], extra: { films: { top: [...] } } } }
+  const allUsersData = data?.users || {}
+
+  // Build per-user watched data: { userName: { titles, tmdbIds, plays } }
+  // plays maps tmdb_id/title -> play count for that user
   const userWatched = {}
   for (const [uid, udata] of Object.entries(allUsersData)) {
     if (!udata || typeof udata !== "object") continue
     const titles = new Set()
     const tmdbIds = new Set()
+    const plays = {} // key -> play count
     for (const svcData of Object.values(udata)) {
       if (!svcData || typeof svcData !== "object") continue
       for (const item of (svcData?.top || [])) {
         if (item?.t) titles.add(item.t.toLowerCase().trim())
         if (item?.tmdb_id) tmdbIds.add(String(item.tmdb_id))
+        const k = String(item?.tmdb_id || "") || item?.t?.toLowerCase().trim()
+        if (k) plays[k] = (plays[k] || 0) + (item.plays || item.v || 1)
       }
       for (const section of ["films", "series"]) {
         for (const item of (svcData?.extra?.[section]?.top || [])) {
           if (item?.t) titles.add(item.t.toLowerCase().trim())
           if (item?.tmdb_id) tmdbIds.add(String(item.tmdb_id))
+          const k = String(item?.tmdb_id || "") || item?.t?.toLowerCase().trim()
+          if (k) plays[k] = (plays[k] || 0) + (item.plays || item.v || 1)
         }
       }
     }
     if (titles.size > 0 || tmdbIds.size > 0) {
-      userWatched[udata?.name || uid] = { titles, tmdbIds }
+      userWatched[udata?.name || uid] = { titles, tmdbIds, plays }
     }
   }
 
   const totalUsers = Object.keys(userWatched).length
 
-  // For each unique request, count viewers
+  // For each of MY requests, count viewers + total plays
   const seen = new Set()
   const results = []
-  for (const req of userRequests) {
+  for (const req of myRequests) {
     const key = String(req.tmdb_id || "") || req.title?.toLowerCase().trim()
     if (!key || seen.has(key)) continue
     seen.add(key)
 
-    const viewers = []
     const reqTitle = (req.title || "").toLowerCase().trim()
     const reqTmdb = String(req.tmdb_id || "")
 
+    let viewerCount = 0
+    let totalPlays = 0
+
     for (const [uname, wdata] of Object.entries(userWatched)) {
       let matched = false
-      if (reqTmdb && wdata.tmdbIds.has(reqTmdb)) matched = true
+      let matchKey = null
+      if (reqTmdb && wdata.tmdbIds.has(reqTmdb)) { matched = true; matchKey = reqTmdb }
       if (!matched && reqTitle) {
         for (const wt of wdata.titles) {
-          if (reqTitle === wt || reqTitle.includes(wt) || wt.includes(reqTitle)) { matched = true; break }
+          if (reqTitle === wt || reqTitle.includes(wt) || wt.includes(reqTitle)) {
+            matched = true
+            matchKey = wt
+            break
+          }
         }
       }
-      if (matched) viewers.push(uname)
+      if (matched) {
+        viewerCount++
+        // Sum plays for this match
+        const p = wdata.plays[reqTmdb] || wdata.plays[reqTitle] || wdata.plays[matchKey] || 0
+        totalPlays += p
+      }
     }
 
-    if (viewers.length > 0) {
-      results.push({ ...req, viewers: viewers.length, viewerNames: viewers, totalUsers })
+    if (viewerCount > 0) {
+      results.push({ ...req, viewers: viewerCount, totalPlays, totalUsers })
     }
   }
 
-  results.sort((a, b) => b.viewers - a.viewers || (b.count || 0) - (a.count || 0))
+  results.sort((a, b) => b.viewers - a.viewers || b.totalPlays - a.totalPlays)
   const topResults = results.slice(0, 8)
 
   if (!topResults.length) return null
@@ -111,13 +129,20 @@ export default function OverseerrPopularSlide({ accent, data, year }) {
                   <div style={{ flex: 1, height: 4, borderRadius: 2, background: "var(--th-surface-subtle)", overflow: "hidden" }}>
                     <div style={{ height: "100%", borderRadius: 2, background: accent, width: viewRate + "%", transformOrigin: "left", animation: "bar-grow .7s ease " + (0.3 + i * 0.06) + "s both" }} />
                   </div>
+                  <span style={{ fontSize: 8, color: "var(--th-text-dim)", flexShrink: 0, fontFamily: "var(--th-font-mono)" }}>{item.viewers}/{totalUsers}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, gap: 2 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, gap: 1, minWidth: 42 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                  <UsersIcon size={11} color={accent} />
-                  <span style={{ fontSize: 13, fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono)" }}>{item.viewers}</span>
+                  <UsersIcon size={10} color={accent} />
+                  <span style={{ fontSize: 12, fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono)" }}>{item.viewers}</span>
                 </div>
+                {item.totalPlays > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                    <EyeIcon size={9} color="var(--th-text-tertiary)" />
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono)" }}>{item.totalPlays}</span>
+                  </div>
+                )}
                 <span style={{ fontSize: 7, color: "var(--th-text-dim)" }}>sur {totalUsers}</span>
               </div>
             </div>
