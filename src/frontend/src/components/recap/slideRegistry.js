@@ -59,7 +59,7 @@ export const SLIDE_REGISTRY = [
     },
   },
   {
-    id: "{service}-stats", label: "Statistiques", group: "service",
+    id: "{service}-stats", label: "Statistiques", group: "service", onlyFor: ["romm", "komga", "booklore"],
     desc: "Donnees detaillees : top items, genres, graphe mensuel",
     params: [
       { key: "showTop", label: "Nombre d'items top", type: "number", default: 4 },
