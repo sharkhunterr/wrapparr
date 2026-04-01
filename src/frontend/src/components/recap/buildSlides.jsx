@@ -256,7 +256,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
 
       // Genres slide (films section)
       const topGenres = svcData.extra?.top_genres || svcData.genres || []
-      if (topGenres.length >= 3) {
+      if (topGenres.length >= 1) {
         slides.push({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
@@ -416,7 +416,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     // Genres slide for standard services (non-hasSeries)
     if (!cfg.hasSeries) {
       const topGenres = svcData.extra?.top_genres || svcData.genres || []
-      if (topGenres.length >= 3) {
+      if (topGenres.length >= 1) {
         slides.push({
           id: svc + "-genres", accent: svcAccent, bg: cfg.bgStats || baseBg,
           component: <GenresSlide accent={svcAccent} genres={topGenres} year={year} config={getSlideConfig(sc, svc + "-genres")} />,
