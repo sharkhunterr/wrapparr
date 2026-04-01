@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
 
 const FADE_MS = 1500
+const FADE_STEPS = 20
 
 export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChange, accent }) {
   const mode = musicConfig?.mode || "single"
@@ -10,17 +11,15 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
   const [playing, setPlaying] = useState(false)
   const [trackIdx, setTrackIdx] = useState(0)
   const audioRef = useRef(null)
-  const nextAudioRef = useRef(null)
   const fadeTimerRef = useRef(null)
   const [el, setEl] = useState(null)
-  const prevPathRef = useRef("")
+  const currentPathRef = useRef("")
 
   useEffect(() => {
     const slot = document.getElementById("recap-topbar-extra")
     if (slot) setEl(slot)
   }, [])
 
-  // Determine section from current slide ID
   const getSection = (slideId) => {
     if (!slideId) return ""
     if (slideId === "intro" || slideId === "onboarding") return "intro"
@@ -42,14 +41,14 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
       : [tracks._background?.audioPath].filter(Boolean))
     : []
 
-  // Determine current audio path
-  let audioPath = ""
+  // Determine target audio path
+  let targetPath = ""
   if (mode === "single") {
-    audioPath = singlePaths.length > 0 ? (singlePaths[trackIdx % singlePaths.length] || "") : ""
+    targetPath = singlePaths.length > 0 ? (singlePaths[trackIdx % singlePaths.length] || "") : ""
   } else {
     const section = getSection(currentSlideId)
     const t = tracks[section]
-    audioPath = (t?.enabled !== false ? t?.audioPath : "") || tracks._background?.audioPath || ""
+    targetPath = (t?.enabled !== false ? t?.audioPath : "") || tracks._background?.audioPath || ""
   }
 
   const shouldLoop = mode === "single" && singlePaths.length <= 1
@@ -57,85 +56,81 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     ? singlePaths.length > 0
     : Object.values(tracks).some(t => t?.audioPath && t?.enabled !== false)
 
-  // Crossfade helper
+  // Crossfade to a new audio path
   const crossfadeTo = useCallback((newPath) => {
-    if (!audioRef.current || !newPath) return
     const oldAudio = audioRef.current
+    if (!oldAudio || !newPath) return
 
-    // Create new audio element for crossfade
     const newAudio = new Audio(newPath)
     newAudio.volume = 0
-    newAudio.loop = shouldLoop
-    nextAudioRef.current = newAudio
-
-    // Fade out old, fade in new
-    const steps = 20
-    const stepMs = FADE_MS / steps
-    let step = 0
-    const oldVol = oldAudio.volume
+    newAudio.preload = "auto"
 
     clearInterval(fadeTimerRef.current)
+
+    let step = 0
+    const oldVol = oldAudio.volume
+    const stepMs = FADE_MS / FADE_STEPS
+
     newAudio.play().catch(() => {})
 
     fadeTimerRef.current = setInterval(() => {
       step++
-      const progress = step / steps
+      const progress = step / FADE_STEPS
       oldAudio.volume = Math.max(0, oldVol * (1 - progress))
       newAudio.volume = Math.min(0.3, 0.3 * progress)
-      if (step >= steps) {
+      if (step >= FADE_STEPS) {
         clearInterval(fadeTimerRef.current)
         oldAudio.pause()
         oldAudio.src = ""
         audioRef.current = newAudio
-        newAudio.onended = () => onEnded()
+        currentPathRef.current = newPath
       }
     }, stepMs)
-  }, [shouldLoop])
+  }, [])
 
-  // Track audio path changes for crossfade (per-section mode)
+  // React to target path changes — only crossfade when path actually differs
   useEffect(() => {
-    if (!playing || !audioPath || mode === "single") return
-    if (prevPathRef.current && prevPathRef.current !== audioPath) {
-      crossfadeTo(audioPath)
-    } else if (!prevPathRef.current && audioRef.current) {
-      audioRef.current.volume = 0.3
-      audioRef.current.play().catch(() => {})
+    if (!playing || !targetPath) return
+
+    // Same path -> do nothing (music continues)
+    if (currentPathRef.current === targetPath) return
+
+    if (!currentPathRef.current) {
+      // First play
+      if (audioRef.current) {
+        audioRef.current.src = targetPath
+        audioRef.current.volume = 0.3
+        audioRef.current.loop = shouldLoop
+        audioRef.current.play().catch(() => {})
+        currentPathRef.current = targetPath
+      }
+    } else {
+      // Different path -> crossfade
+      crossfadeTo(targetPath)
     }
-    prevPathRef.current = audioPath
-  }, [audioPath, playing, mode, crossfadeTo])
+  }, [targetPath, playing, crossfadeTo, shouldLoop])
 
-  const doPlay = useCallback(() => {
-    if (!audioRef.current) return
-    audioRef.current.volume = 0.3
-    audioRef.current.play().catch(() => {})
-  }, [])
-
-  const doPause = useCallback(() => {
-    if (!audioRef.current) return
-    audioRef.current.pause()
-  }, [])
-
+  // On track ended: next in playlist (single mode)
   useEffect(() => {
-    if (!audioRef.current || !audioPath) return
-    if (mode !== "single") return // handled by crossfade effect
-    if (playing) doPlay()
-    else doPause()
-  }, [playing, audioPath, doPlay, doPause, mode])
+    const audio = audioRef.current
+    if (!audio) return
+    const handler = () => {
+      if (mode === "single" && singlePaths.length > 1) {
+        const nextIdx = (trackIdx + 1) % singlePaths.length
+        setTrackIdx(nextIdx)
+      }
+    }
+    audio.addEventListener("ended", handler)
+    return () => audio.removeEventListener("ended", handler)
+  }, [mode, singlePaths.length, trackIdx])
 
-  // Single mode: play/pause
+  // Auto-start
   useEffect(() => {
-    if (mode !== "single" || !audioRef.current || !audioPath) return
-    if (playing) doPlay()
-    else doPause()
-  }, [playing, trackIdx])
-
-  // Auto-start on first interaction
-  useEffect(() => {
-    if (!hasAnyTrack || !audioPath) return
+    if (!hasAnyTrack || !targetPath) return
     setPlaying(true)
     if (onPlayingChange) onPlayingChange(true)
     const startOnInteraction = () => {
-      if (audioRef.current && audioRef.current.paused && playing) {
+      if (audioRef.current && audioRef.current.paused) {
         audioRef.current.volume = 0.3
         audioRef.current.play().catch(() => {})
       }
@@ -146,37 +141,21 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
       document.removeEventListener("click", startOnInteraction, { capture: true })
       document.removeEventListener("touchstart", startOnInteraction, { capture: true })
     }
-  }, [hasAnyTrack, audioPath])
+  }, [hasAnyTrack])
 
   // Pause when tab hidden
   useEffect(() => {
     const handler = () => {
       if (!audioRef.current) return
-      if (document.hidden) doPause()
-      else if (playing) doPlay()
+      if (document.hidden) audioRef.current.pause()
+      else if (playing) { audioRef.current.volume = 0.3; audioRef.current.play().catch(() => {}) }
     }
     document.addEventListener("visibilitychange", handler)
     return () => document.removeEventListener("visibilitychange", handler)
-  }, [playing, doPlay, doPause])
-
-  // On track ended: crossfade to next (single mode playlist)
-  const onEnded = useCallback(() => {
-    if (mode === "single" && singlePaths.length > 1) {
-      const nextIdx = (trackIdx + 1) % singlePaths.length
-      setTrackIdx(nextIdx)
-      // Crossfade to next track
-      const nextPath = singlePaths[nextIdx]
-      if (nextPath && audioRef.current) {
-        crossfadeTo(nextPath)
-      }
-    }
-  }, [mode, singlePaths, trackIdx, crossfadeTo])
+  }, [playing])
 
   // Cleanup
-  useEffect(() => () => {
-    clearInterval(fadeTimerRef.current)
-    if (nextAudioRef.current) { nextAudioRef.current.pause(); nextAudioRef.current = null }
-  }, [])
+  useEffect(() => () => { clearInterval(fadeTimerRef.current) }, [])
 
   if (!hasAnyTrack) return null
 
@@ -184,8 +163,8 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     const next = !playing
     setPlaying(next)
     if (onPlayingChange) onPlayingChange(next)
-    if (next) doPlay()
-    else doPause()
+    if (next && audioRef.current) { audioRef.current.volume = 0.3; audioRef.current.play().catch(() => {}) }
+    else if (audioRef.current) audioRef.current.pause()
   }
 
   const musicGroup = <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -220,8 +199,9 @@ export default function MusicPlayer({ musicConfig, currentSlideId, onPlayingChan
     </button>
   </div>
 
+  // Initial audio element (managed via refs, not re-rendered on path change)
   return <>
-    {audioPath && <audio ref={audioRef} src={audioPath} loop={shouldLoop} preload="auto" onEnded={onEnded} />}
+    <audio ref={audioRef} preload="auto" />
     {el ? createPortal(musicGroup, el) : null}
   </>
 }
