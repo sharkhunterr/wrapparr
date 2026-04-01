@@ -13,7 +13,7 @@ export default function BackupManager() {
     setExporting(true)
     setError("")
     try {
-      const token = localStorage.getItem("access_token")
+      const token = localStorage.getItem("wrapparr_token")
       const resp = await fetch("/api/v1/backup/export", {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -40,7 +40,7 @@ export default function BackupManager() {
     setError("")
     setResult(null)
     try {
-      const token = localStorage.getItem("access_token")
+      const token = localStorage.getItem("wrapparr_token")
       const formData = new FormData()
       formData.append("file", file)
       const resp = await fetch("/api/v1/backup/import", {
