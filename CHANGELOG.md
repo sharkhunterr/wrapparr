@@ -2,6 +2,67 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.13](https://github.com/your-username/wrapparr/-/compare/v0.1.12...v0.1.13) (2026-04-01)
+
+
+### Features
+
+* bouton on/off par section dans page Gestion slides ([62aef2e](https://github.com/your-username/wrapparr/-/commit/62aef2ef62ed9417472dbc5c944443b0a3112db7))
+* classement-general — nouvelle slide avec nouvel ID ([e78e31b](https://github.com/your-username/wrapparr/-/commit/e78e31b2b08d8c564ecff7abf447f09108c72b45))
+* couleur overseerr distincte + separations par section dans admin ([1973ed3](https://github.com/your-username/wrapparr/-/commit/1973ed30495103fad53690ca23e15def25350ef3)), closes [#818cf8](https://github.com/your-username/wrapparr/-/issues/818cf8)
+* coulures de sang Sin City + fix palette Glass Dark ([ac28e9f](https://github.com/your-username/wrapparr/-/commit/ac28e9fcb6dd0848558713af241c7dae8d6707ce))
+* integration Grimmory — lecture + audiobooks avec stats riches ([e1146b6](https://github.com/your-username/wrapparr/-/commit/e1146b6ee605a9ef432a2f80ba2008bffaa33b12)), closes [#10b981](https://github.com/your-username/wrapparr/-/issues/10b981)
+* integration Overseerr + refonte wizard setup ([d1a1ac0](https://github.com/your-username/wrapparr/-/commit/d1a1ac05a687ac070ca854b6114f9dd1115b1bcb)), closes [#6366f1](https://github.com/your-username/wrapparr/-/issues/6366f1)
+* nouvelle slide classement general (films+series) avec progression ([2216d7a](https://github.com/your-username/wrapparr/-/commit/2216d7a61d566f6a8afc87a75cd2b9ae20d54157)), closes [#1](https://github.com/your-username/wrapparr/-/issues/1) [#2](https://github.com/your-username/wrapparr/-/issues/2)
+* playlist multi-pistes en mode single + crossfade entre musiques ([d3ffffb](https://github.com/your-username/wrapparr/-/commit/d3ffffbacbb2c8578c842162fd0829a7daca62c7))
+* playlist musique + sections manquantes dans le lecteur ([d8b33f6](https://github.com/your-username/wrapparr/-/commit/d8b33f61377b8f0750c50e04195454b8c15167b3))
+* profils configurables pour slide demandes vs regarde ([4f58e2b](https://github.com/your-username/wrapparr/-/commit/4f58e2b7f961b49c100ae355ed99eb4280db661a))
+* refonte complete slides Overseerr ([0598d13](https://github.com/your-username/wrapparr/-/commit/0598d1337ee4c9d351631236d619d226dd238091))
+* refonte page Gestion slides — blocs par section + labels uniformises ([28d44ee](https://github.com/your-username/wrapparr/-/commit/28d44eede3f7506ff8992100373d6b3f77ebc100))
+* slide bilan audiobook + slide auteurs/narrateurs favoris ([5d3b171](https://github.com/your-username/wrapparr/-/commit/5d3b1714f2627205b8095343398039ba9e508da6))
+* slide classement serveur — cumul total depuis le debut ([cac1da0](https://github.com/your-username/wrapparr/-/commit/cac1da0b6cfd6b8b59369d070bea12d9b1e53f08)), closes [#1](https://github.com/your-username/wrapparr/-/issues/1) [#2](https://github.com/your-username/wrapparr/-/issues/2)
+* systeme de backup export/import + wizard ameliore ([5ad6eb3](https://github.com/your-username/wrapparr/-/commit/5ad6eb389cbb0a8114f84453c2f6e4c16b3f86a5))
+
+
+### Bug Fixes
+
+* ajout log seeding palettes builtin + seed manquant dans PostgreSQL ([e44dfa3](https://github.com/your-username/wrapparr/-/commit/e44dfa3ca146a3151d030d0f54a64958ae2f1636))
+* appel get_all_requests_for_year renomme en get_requests_for_year ([d43f498](https://github.com/your-username/wrapparr/-/commit/d43f4988e34d72a2e3aa47e6f6e05ff79ead22a3))
+* audiobookshelf filtre par annee et par utilisateur ([d57a566](https://github.com/your-username/wrapparr/-/commit/d57a566c6f112a0dfa199c0a8063a021a7557edc))
+* auteurs/narrateurs audiobookshelf a 0 min (divisaient par 3600 au lieu de 60) ([aa67cf0](https://github.com/your-username/wrapparr/-/commit/aa67cf0e18e7d4c9d80322856ed47fcb6eac7772))
+* backup utilisait mauvaise cle localStorage pour le token (access_token -> wrapparr_token) ([1798e58](https://github.com/your-username/wrapparr/-/commit/1798e58438525a9a0e4a3c355d860b2ea54e4e1b))
+* badges progression visibles, a droite des valeurs, toujours affichés ([34102e6](https://github.com/your-username/wrapparr/-/commit/34102e63ff48bc7b1b34c99f65f17772d13948d7))
+* couleur overseerr adaptee par palette (23 palettes corrigees) ([bf7ebc1](https://github.com/your-username/wrapparr/-/commit/bf7ebc1bec70628fbfaad0ea692528e29ba130e6))
+* doublons defaultPalette dans 4 themes (vhs, christmas, comic, chalkboard) ([63f3b3b](https://github.com/your-username/wrapparr/-/commit/63f3b3b9665737c3da07ef6de56ad315dc79fbb0))
+* glass-dark associe a la palette "cinematic" par defaut ([bd2ac67](https://github.com/your-username/wrapparr/-/commit/bd2ac673b6779ac5f26f64a2364ac3eadcc479dd))
+* graphiques audiobookshelf plats quand ecoute < 1h ([27d3a01](https://github.com/your-username/wrapparr/-/commit/27d3a015b3f82f41369839650dc6644c06132c8a))
+* import backup dans wizard cree le compte admin avec mot de passe ([7e0cf6e](https://github.com/your-username/wrapparr/-/commit/7e0cf6e514e90d242a817ed6ccd3f9b068c0220d))
+* import-restore recevait email/password comme query params au lieu de Form fields ([4442bdb](https://github.com/your-username/wrapparr/-/commit/4442bdb89a615a4e8fa85eec05bf75dfb0f8a733))
+* IndentationError dans pipeline.py ([fb454f3](https://github.com/your-username/wrapparr/-/commit/fb454f34961ba6ba50b9f595a606183f5813705d))
+* musique continue entre sections avec meme piste + crossfade propre ([3224656](https://github.com/your-username/wrapparr/-/commit/32246567a9bfe6719ce4c845e0bd27334bbd08ef))
+* overseerr match intelligent + comparaison + slides communaute ([7ece3c1](https://github.com/your-username/wrapparr/-/commit/7ece3c1c5a878768d42eb80534c86858c78f3408))
+* persister le choix de theme/palette depuis le recap player ([a84557d](https://github.com/your-username/wrapparr/-/commit/a84557d01475cff55bf7e9679fcf71c02ef799c0))
+* pipeline resilient au dechiffrement — skip service si cle corrompue ([4f75c76](https://github.com/your-username/wrapparr/-/commit/4f75c764f6af4c7dee78d6d1e5a6bcebe0907c77))
+* pipeline snapshot utilise recap_data au lieu de processed (variable non definie) ([6ba2e8b](https://github.com/your-username/wrapparr/-/commit/6ba2e8ba213951ee56891b5cc8a2eba45d6b4575))
+* PodiumSlide comparaison utilisait toujours tautulli ([cb4f136](https://github.com/your-username/wrapparr/-/commit/cb4f1367fc672206a986938709e79d876ab936f2))
+* reset utilise DELETE au lieu de drop_all (fonctionne avec PostgreSQL) ([f66c75e](https://github.com/your-username/wrapparr/-/commit/f66c75e51ad69542fa87543041c968822ae662bc))
+* resolution titres Overseerr via API + match par tmdb_id ([b846c5f](https://github.com/your-username/wrapparr/-/commit/b846c5f15ef9cb609089c5469c1e5b9cff72e410))
+* server_ranking preservé lors du spread userData ([5c5501a](https://github.com/your-username/wrapparr/-/commit/5c5501a9cda2297a05dbefe2455261761f95d192))
+* slide classement general affichee meme avec 1 seul utilisateur ([bc1e0e1](https://github.com/your-username/wrapparr/-/commit/bc1e0e163a0e9e549772489bc374c7bf6bf9c6de))
+* slide communaute Overseerr vide — mauvaise structure de donnees ([c34bc25](https://github.com/your-username/wrapparr/-/commit/c34bc25b1023b74275d972b87311bd5c8ac02a25))
+* slide comparaison generique restreinte a romm/komga/booklore ([f143d69](https://github.com/your-username/wrapparr/-/commit/f143d691b2ea0328ad3a3caf738e5827311c4490))
+* slide genres affichee des 1 genre (au lieu de 3 minimum) ([deb7500](https://github.com/your-username/wrapparr/-/commit/deb7500f4c5e30252eecd1391c8d59f1a91b2fc5))
+* slide popularite affiche vues + filtre demandes utilisateur ([3259595](https://github.com/your-username/wrapparr/-/commit/3259595090c0d7699e555a48d809051e879eb3ea))
+* slide Statistiques restreinte aux services sans bilan dedie ([368810f](https://github.com/your-username/wrapparr/-/commit/368810f556766d4af55fe87f65817b57664e88fe))
+* slides desactivees apparaissaient quand meme dans le recap ([9d0443d](https://github.com/your-username/wrapparr/-/commit/9d0443dee9842732e776cf0f362e4a57ba6d798a))
+* slides fantomes Overseerr + ordre non respecte ([2665b2a](https://github.com/your-username/wrapparr/-/commit/2665b2abc161c66ac4fbbb4f8695c3ca7f825464))
+* slides generiques utilisaient comparaison tautulli pour tous services ([8a0bbb4](https://github.com/your-username/wrapparr/-/commit/8a0bbb4d117901ebccbb2b0f22c81fad9809a47e))
+* supprime doublon 'sur X' dans slide popularite ([8cbf806](https://github.com/your-username/wrapparr/-/commit/8cbf806f8c1ce4cba04d8d72b627a247be7cc9bd))
+* toutes les slides generees sont dans le registre et l'admin ([0aa8c7d](https://github.com/your-username/wrapparr/-/commit/0aa8c7d80e56867d183bc61374e6780da437c0d7))
+* toutes les slides utilisent le bon service pour la comparaison ([8d4da54](https://github.com/your-username/wrapparr/-/commit/8d4da54a9fcf46cd441b650d520ffa3a6ffc6c41))
+* wizard import appelait /setup/import-restore au lieu de /backup/import-restore ([dcd5f5f](https://github.com/your-username/wrapparr/-/commit/dcd5f5f79a992ed586056dc7253e28014a1f04f8))
+* yt-dlp utilise python -m yt_dlp au lieu du binaire systeme (version trop ancienne) ([c87b5b9](https://github.com/your-username/wrapparr/-/commit/c87b5b9d4ff6ec634ee1c257a53c6ab9d00c0164))
+
 ## [0.2.0](https://github.com/your-username/wrapparr/-/compare/v0.1.12...v0.2.0) (2026-04-01)
 
 ### Architecture
