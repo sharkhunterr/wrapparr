@@ -2,6 +2,86 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/your-username/wrapparr/-/compare/v0.1.12...v0.2.0) (2026-04-01)
+
+### Architecture
+
+* **Architecture modulaire** : RecapPlayer reduit de 2644 a 373 lignes. Themes (16 fichiers), effets (28 fichiers), slides communaute (6 fichiers), player (5 fichiers) extraits en modules independants
+* **Documentation d'extensibilite** : guide complet pour ajouter themes, effets, slides et palettes (`docs/EXTENSIBILITY.md`)
+
+### Nouvelles integrations
+
+* **Overseerr** : integration complete du service de demandes media
+  - Client API avec resolution des titres via TMDB ID
+  - 5 slides : bilan demandes (progressbars statuts, courbe mensuelle avec comparaison), demandes vs regarde (match par tmdb_id, profils configurables), demandes a succes (popularite par utilisateurs), classement demandeurs, separation de section
+  - Comparaison annee precedente sur toutes les slides
+  - Couleur accent dediee par palette (23 palettes)
+* **Grimmory** : integration du successeur de Booklore pour la lecture et les audiobooks
+  - Collecteur utilisant 26 endpoints stats (reading + listening)
+  - Filtrage natif par annee sur tous les endpoints
+  - Slides : bilan lecture (profils configurables), auteurs favoris, streak de lecture (actuel/record/jours), livres addictifs (score page-turner)
+  - Reutilise les slides AudiobookBilan et AudiobookFavorites
+
+### Audiobookshelf
+
+* **Filtrage par annee** : sessions filtrees par date (plus de stats globales toutes annees confondues)
+* **Filtrage par utilisateur** : resolution du user ID via `/api/users` puis sessions specifiques
+* **Stats annuelles** : utilise `/api/me/stats/year/{year}` pour les donnees pre-calculees
+* **Slide bilan ecoute** : profils auditeur configurables, donut genres, top auteurs/narrateurs, graphique mensuel, tampon anime
+* **Slide auteurs et narrateurs favoris** : classement avec barres de progression et temps d'ecoute
+* **Unite adaptive** : minutes au lieu d'heures quand le total est < 1h
+
+### Systeme de backup
+
+* **Export** : telecharge un JSON contenant toute la configuration (utilisateurs, services avec cles dechiffrees, mappings, slides, musique, themes custom, OIDC, phrases)
+* **Import admin** : restaure la configuration avec merge intelligent (met a jour les existants, cree les nouveaux)
+* **Import setup** : import pendant le premier demarrage avec creation du compte admin et mot de passe
+* **Page admin Sauvegarde** dans le menu Systeme
+
+### Wizard setup
+
+* **Page de bienvenue** avec 3 options : commencer, importer un backup, ignorer
+* **Services optionnels** : configuration TMDB et Overseerr directement dans le wizard avec test de connexion inline
+* **Import backup** : charge le fichier en memoire, redirige vers l'etape admin credentials, restaure tout en un clic
+
+### Gestion des slides (admin)
+
+* **Blocs par section** collapsibles : Films, Series, Livres Audio, Communaute, Demandes, Global, Introduction, Finale
+* **Boutons monter/descendre** pour deplacer les sections entieres
+* **Bouton on/off par section** pour activer/desactiver toutes les slides d'un groupe
+* **Labels uniformises** : noms descriptifs clairs pour toutes les slides
+* **pushSlide()** : les slides desactivees ne sont plus generees dans le recap
+
+### Musique
+
+* **Playlist multi-pistes** en mode single : les musiques s'enchainent automatiquement
+* **Crossfade 1.5s** entre les pistes (fade out/fade in progressif sur 20 steps)
+* **Continuite** : la musique ne coupe plus entre deux sections qui ont la meme piste
+* **Sections ajoutees** : Livres Audio, Lecture (Grimmory), Demandes (Overseerr) dans le mode per-section
+
+### Themes et palettes
+
+* **Glass-dark** associe a la palette Cinematic par defaut
+* **Doublons defaultPalette corriges** dans 4 themes (VHS, Christmas, Comic, Chalkboard)
+* **Persistance** du choix de theme/palette depuis le recap player
+* **Couleur overseerr** adaptee par palette (23 palettes avec couleurs harmonisees)
+* **Couleur classement** Cinematic changee en teal pour eviter confusion avec communaute
+
+### Comparaison et donnees
+
+* **Toutes les slides** utilisent le bon service pour la comparaison (plus de donnees tautulli dans les slides audiobookshelf/romm/etc.)
+* **tmdb_id** propage dans les items Tautulli (films et series) pour le matching Overseerr
+* **Server ranking** preservee lors du spread userData
+* **Slide genres** affichee des 1 genre (au lieu de 3 minimum)
+
+### Bug Fixes
+
+* reset utilise DELETE au lieu de drop_all (PostgreSQL)
+* badges progression visibles et positionnes a droite des valeurs
+* yt-dlp utilise `python -m yt_dlp` au lieu du binaire systeme
+* pipeline resilient au dechiffrement (skip service si cle corrompue)
+* seeding palettes builtin dans PostgreSQL (table vide corrigee)
+
 ### [0.1.12](https://github.com/your-username/wrapparr/-/compare/v0.1.11...v0.1.12) (2026-03-30)
 
 
