@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.15](https://github.com/your-username/wrapparr/-/compare/v0.1.14...v0.1.15) (2026-04-01)
+
+
+### Bug Fixes
+
+* slide presentation affiche toutes les sections presentes ([0d70db2](https://github.com/your-username/wrapparr/-/commit/0d70db23685e75510d48dccfd6aa77be6697b82a))
+* slide presentation respecte l'ordre des sections defini dans l'admin ([ca98a3c](https://github.com/your-username/wrapparr/-/commit/ca98a3c0d037320d99275b6f7d4b6054545c884f))
+
 ### [0.1.14](https://github.com/your-username/wrapparr/-/compare/v0.1.13...v0.1.14) (2026-04-01)
 
 
