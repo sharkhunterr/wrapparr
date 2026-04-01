@@ -59,7 +59,7 @@ export const SLIDE_REGISTRY = [
     },
   },
   {
-    id: "{service}-stats", label: "Statistiques", group: "service", onlyFor: ["romm", "komga", "booklore"],
+    id: "{service}-stats", label: "Statistiques", group: "service",
     desc: "Donnees detaillees : top items, genres, graphe mensuel",
     params: [
       { key: "showTop", label: "Nombre d'items top", type: "number", default: 4 },
@@ -179,7 +179,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-compare", label: "Comparaison annuelle", group: "service", onlyFor: ["romm", "komga", "booklore"],
+    id: "{service}-compare", label: "Comparaison annuelle", group: "service",
     desc: "Comparaison avec l'annee precedente ou les autres utilisateurs",
     params: [
       { key: "compareMode", label: "Mode de comparaison", type: "select", default: "year_vs_year", options: [
