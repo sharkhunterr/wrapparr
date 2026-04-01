@@ -179,7 +179,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-compare", label: "Comparaison annuelle", group: "service",
+    id: "{service}-compare", label: "Comparaison annuelle", group: "service", onlyFor: ["romm", "komga", "booklore"],
     desc: "Comparaison avec l'annee precedente ou les autres utilisateurs",
     params: [
       { key: "compareMode", label: "Mode de comparaison", type: "select", default: "year_vs_year", options: [
