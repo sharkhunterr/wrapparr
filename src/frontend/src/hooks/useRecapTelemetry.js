@@ -114,8 +114,12 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
     }
 
     window.addEventListener("beforeunload", handleUnload)
-    return () => window.removeEventListener("beforeunload", handleUnload)
-  }, [year, totalSlides, themeId, paletteSlug, musicEnabled, comparisonEnabled])
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload)
+      // Component unmount (SPA navigation) — send via flush
+      if (!sent.current) flush()
+    }
+  }, [year, totalSlides, themeId, paletteSlug, musicEnabled, comparisonEnabled, flush])
 
   return { onSlideChange, onInteraction, flush }
 }
