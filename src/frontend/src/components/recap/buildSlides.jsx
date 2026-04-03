@@ -23,6 +23,8 @@ import OverseerrPopularSlide from "./slides/OverseerrPopularSlide"
 import OverseerrCommunitySlide from "./slides/OverseerrCommunitySlide"
 import FinaleSlide from "./slides/FinaleSlide"
 import OnboardingSlide from "./slides/OnboardingSlide"
+import ThisOrThatSlide from "./slides/ThisOrThatSlide"
+import EstimationSlide from "./slides/EstimationSlide"
 import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, CommunityRankingsSlide, CommunityGenresSlide, CommunityCompareSlide } from "./slides/community"
 
 const JOKES = {
@@ -289,6 +291,16 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         component: <FilmStatsEnrichedSlide accent={svcAccent} label={cfg.label} icon={cfg.icon} data={filmsData} year={year} config={getSlideConfig(sc, svc + "-stats-enriched")} serviceType={svc} />,
       })
 
+      // Interactive slides (films)
+      pushSlide({
+        id: svc + "-thisorthat", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <ThisOrThatSlide accent={svcAccent} data={data} year={year} section="films" config={getSlideConfig(sc, svc + "-thisorthat")} />,
+      })
+      pushSlide({
+        id: svc + "-estimation", accent: svcAccent, bg: cfg.bgStats || baseBg,
+        component: <EstimationSlide accent={svcAccent} data={data} year={year} section="films" config={getSlideConfig(sc, svc + "-estimation")} />,
+      })
+
       // ═══ SERIES SECTION ═══
       if (seriesTop.length >= 1) {
         const seriesAccent = accents.series || cfg.seriesAccent || "#fb923c"
@@ -389,6 +401,16 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         pushSlide({
           id: svc + "-series-stats-enriched", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
           component: <FilmStatsEnrichedSlide accent={seriesAccent} label={cfg.seriesLabel} icon={cfg.seriesIcon} data={seriesData} year={year} config={getSlideConfig(sc, svc + "-series-stats-enriched")} mediaType="series" serviceType={svc} />,
+        })
+
+        // Interactive slides (series)
+        pushSlide({
+          id: svc + "-series-thisorthat", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+          component: <ThisOrThatSlide accent={seriesAccent} data={data} year={year} section="series" config={getSlideConfig(sc, svc + "-series-thisorthat")} />,
+        })
+        pushSlide({
+          id: svc + "-series-estimation", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
+          component: <EstimationSlide accent={seriesAccent} data={data} year={year} section="series" config={getSlideConfig(sc, svc + "-series-estimation")} />,
         })
 
       }
@@ -600,6 +622,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     }
   }
 
+  // Interactive slide (community)
+  if (allUsersData.length >= 2) {
+    pushSlide({
+      id: "community-thisorthat", accent: communityAccent, bg: baseBg,
+      component: <ThisOrThatSlide accent={communityAccent} data={data} year={year} section="community" config={getSlideConfig(sc, "community-thisorthat")} />,
+    })
+  }
+
   // Compare
   const compareAccent = accents.compare || "#60a5fa"
   if (data.comparison) {
@@ -641,6 +671,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       pushSlide({
         id: "overseerr-community", accent: overseerrAccent, bg: baseBg,
         component: <OverseerrCommunitySlide accent={overseerrAccent} data={data} year={year} userName={userName} />,
+      })
+    }
+
+    // Interactive slide (demandes estimation)
+    if (data.overseerr?.total > 0) {
+      pushSlide({
+        id: "overseerr-estimation", accent: overseerrAccent, bg: baseBg,
+        component: <EstimationSlide accent={overseerrAccent} data={data} year={year} section="demandes" config={getSlideConfig(sc, "overseerr-estimation")} />,
       })
     }
   }

@@ -205,6 +205,22 @@ export const SLIDE_REGISTRY = [
     ],
   },
 
+  // ── Interactive slides (per service) ──
+  {
+    id: "{service}-thisorthat", label: "This or That", group: "service",
+    desc: "Quiz interactif : devinez entre deux choix lequel domine",
+    params: [
+      { key: "enabled", label: "Activer la slide", type: "bool", default: true },
+    ],
+  },
+  {
+    id: "{service}-estimation", label: "A ton avis ?", group: "service",
+    desc: "Estimez vos stats avant de decouvrir la realite (curseur interactif)",
+    params: [
+      { key: "enabled", label: "Activer la slide", type: "bool", default: true },
+    ],
+  },
+
   // ── Series-specific slides (for services that have separate series data) ──
   {
     id: "cat-{service}-series", label: "Annonce series {service}", group: "service", cat: true,
@@ -346,6 +362,24 @@ export const SLIDE_REGISTRY = [
         { value: "monthly", label: "Activite mensuelle" },
       ]},
       { key: "animationSpeed", label: "Duree animation (ms)", type: "number", default: 12000 },
+    ],
+  },
+
+  // ── Interactive slides (series) ──
+  {
+    id: "{service}-series-thisorthat", label: "This or That (series)", group: "service",
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Quiz interactif series : devinez entre deux choix",
+    params: [
+      { key: "enabled", label: "Activer la slide", type: "bool", default: true },
+    ],
+  },
+  {
+    id: "{service}-series-estimation", label: "A ton avis ? (series)", group: "service",
+    onlyFor: ["tautulli", "plex", "jellyfin"],
+    desc: "Estimez vos stats series avant de decouvrir la realite",
+    params: [
+      { key: "enabled", label: "Activer la slide", type: "bool", default: true },
     ],
   },
 
@@ -515,6 +549,23 @@ export const SLIDE_REGISTRY = [
     id: "overseerr-community", label: "Top demandeurs", group: "global",
     desc: "Classement des plus gros demandeurs du serveur",
     params: [],
+  },
+
+  // ── Interactive slides (overseerr) ──
+  {
+    id: "overseerr-estimation", label: "A ton avis ? (demandes)", group: "global",
+    desc: "Estimez vos stats demandes avant de decouvrir la realite",
+    params: [
+      { key: "enabled", label: "Activer la slide", type: "bool", default: true },
+    ],
+  },
+  // ── Interactive slides (community) ──
+  {
+    id: "community-thisorthat", label: "This or That (communaute)", group: "global",
+    desc: "Quiz interactif communaute : devinez qui regarde le plus",
+    params: [
+      { key: "enabled", label: "Activer la slide", type: "bool", default: true },
+    ],
   },
 
   // Global slides
