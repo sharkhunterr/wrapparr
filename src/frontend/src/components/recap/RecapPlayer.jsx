@@ -198,10 +198,10 @@ export default function RecapPlayer() {
   })
 
   // Track slide changes
+  const currSlideId = slides[slide]?.id
   useEffect(() => {
-    const curr = slides[slide]
-    if (curr?.id) telemetry.onSlideChange(curr.id)
-  }, [slide, slides])
+    if (currSlideId) telemetry.onSlideChange(currSlideId)
+  }, [currSlideId])
 
   const goTo = useCallback((n) => {
     if (n < 0 || n >= slides.length || fade) return
