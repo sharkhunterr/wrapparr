@@ -13,6 +13,7 @@ import ThemeEffects from "./effects"
 import buildSlides from "./buildSlides.jsx"
 import MusicPlayer from "./player/MusicPlayer"
 import ThemeSelector from "./player/ThemeSelector"
+import useRecapTelemetry from "../../hooks/useRecapTelemetry"
 import FullscreenButton from "./player/FullscreenButton"
 import ComparisonButton from "./player/ComparisonButton"
 import NavChevron from "./player/NavChevron"
@@ -186,6 +187,22 @@ export default function RecapPlayer() {
   // Build slide list from data + config
   const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId)
 
+  // Telemetry
+  const telemetry = useRecapTelemetry({
+    year,
+    totalSlides: slides.length,
+    themeId: visualTheme?.id,
+    paletteSlug: theme?.slug || null,
+    musicEnabled: musicPlaying,
+    comparisonEnabled: comparisonActive,
+  })
+
+  // Track slide changes
+  useEffect(() => {
+    const curr = slides[slide]
+    if (curr?.id) telemetry.onSlideChange(curr.id)
+  }, [slide, slides])
+
   const goTo = useCallback((n) => {
     if (n < 0 || n >= slides.length || fade) return
     setDir(n > slide ? 1 : -1)
@@ -253,6 +270,11 @@ export default function RecapPlayer() {
   const isCat = !!curr.cat
   const isPod = curr.id?.includes("-pod")
   const isFinale = curr.id === "finale"
+
+  // Send telemetry when reaching finale
+  useEffect(() => {
+    if (isFinale) telemetry.flush()
+  }, [isFinale])
   const isCommunityTop = curr.id?.startsWith("community-top-")
   const needSpotlights = isCat || isPod || isFinale || isCommunityTop
   const spotlightIntensity = isCat ? 0.9 : (isPod || isCommunityTop) ? 1.2 : isFinale ? 0.65 : 0.7

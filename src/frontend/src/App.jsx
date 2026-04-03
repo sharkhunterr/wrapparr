@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink, Outlet, useNavigate, u
 import { useEffect, useState } from "react"
 import {
   LayoutDashboard, Link2, Users2, Film, Palette, UserCog, Shield,
-  KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music, ScrollText,
+  KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music, ScrollText, BarChart2,
 } from "lucide-react"
 import LoginPage from "./components/auth/LoginPage"
 import SetupWizard from "./components/setup/SetupWizard"
@@ -22,6 +22,7 @@ import ConnectionConfig from "./components/admin/ConnectionConfig"
 import RecapManager from "./components/admin/RecapManager"
 import MusicManager from "./components/admin/MusicManager"
 import BackupManager from "./components/admin/BackupManager"
+import AnalyticsDashboard from "./components/admin/AnalyticsDashboard"
 import LogsPanel from "./components/admin/LogsPanel"
 
 /* ── Auth guard ── */
@@ -137,6 +138,7 @@ const NAV_ITEMS = [
     { to: "/admin/connections", icon: KeyRound, label: "Connexions & SSO", short: "SSO" },
     { to: "/admin/config", icon: Settings, label: "Configuration", short: "Config" },
     { to: "/admin/backup", icon: Shield, label: "Sauvegarde", short: "Backup" },
+    { to: "/admin/analytics", icon: BarChart2, label: "Statistiques", short: "Stats" },
     { to: "/admin/logs", icon: ScrollText, label: "Logs", short: "Logs" },
   ]},
 ]
@@ -334,6 +336,7 @@ export default function App() {
           <Route path="connections" element={<ConnectionConfig />} />
           <Route path="config" element={<ConfigPanel />} />
           <Route path="backup" element={<BackupManager />} />
+          <Route path="analytics" element={<AnalyticsDashboard />} />
           <Route path="logs" element={<LogsPanel />} />
         </Route>
       </Routes>

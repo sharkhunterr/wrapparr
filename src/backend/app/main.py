@@ -312,6 +312,7 @@ from app.api.v1 import recaps as recaps_router
 from app.api.v1 import services as services_router
 from app.api.v1 import share as share_router
 from app.api.v1 import slides as slides_router
+from app.api.v1 import analytics as analytics_router
 from app.api.v1 import backup as backup_router
 from app.api.v1 import themes as themes_router
 from app.websocket.handlers import ws_admin_logs, ws_recap_progress
@@ -327,6 +328,7 @@ app.include_router(themes_router.router, prefix="/api/v1")
 app.include_router(share_router.router, prefix="/api/v1")
 app.include_router(admin_router.router, prefix="/api/v1")
 app.include_router(backup_router.router, prefix="/api/v1")
+app.include_router(analytics_router.router, prefix="/api/v1")
 
 app.add_api_websocket_route("/ws/recap-progress", ws_recap_progress)
 app.add_api_websocket_route("/ws/admin-logs", ws_admin_logs)
