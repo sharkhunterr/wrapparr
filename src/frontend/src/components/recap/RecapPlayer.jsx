@@ -126,7 +126,13 @@ export default function RecapPlayer() {
         if (recapResult && recapResult.data) {
           // Extract current user's data from multi-user recap
           let data = recapResult.data
-          const userId = me?.id ? String(me.id) : null
+          const rawUserId = me?.id ? String(me.id) : null
+          // Normalize UUID: try with and without dashes
+          const toUuidDash = (id) => id && id.length === 32 ? id.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, "$1-$2-$3-$4-$5") : id
+          const userId = rawUserId && data.users?.[rawUserId] ? rawUserId
+            : rawUserId && data.users?.[toUuidDash(rawUserId)] ? toUuidDash(rawUserId)
+            : rawUserId && data.users?.[rawUserId?.replace(/-/g, "")] ? rawUserId.replace(/-/g, "")
+            : rawUserId
           if (data.users && userId && data.users[userId]) {
             // Use this user's specific data, keep global/users for comparison
             const userData = data.users[userId]
@@ -189,19 +195,11 @@ export default function RecapPlayer() {
 
   // Telemetry
   const telemetry = useRecapTelemetry({
-    year,
-    totalSlides: slides.length,
-    themeId: visualTheme?.id,
-    paletteSlug: theme?.slug || null,
-    musicEnabled: musicPlaying,
-    comparisonEnabled: comparisonActive,
+    year, totalSlides: slides.length, themeId: visualTheme?.id,
+    paletteSlug: theme?.slug || null, musicEnabled: musicPlaying, comparisonEnabled: comparisonActive,
   })
-
-  // Track slide changes
   const currSlideId = slides[slide]?.id
-  useEffect(() => {
-    if (currSlideId) telemetry.onSlideChange(currSlideId)
-  }, [currSlideId])
+  useEffect(() => { if (currSlideId) telemetry.onSlideChange(currSlideId) }, [currSlideId])
 
   const goTo = useCallback((n) => {
     if (n < 0 || n >= slides.length || fade) return
