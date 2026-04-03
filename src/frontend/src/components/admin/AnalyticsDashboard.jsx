@@ -55,6 +55,7 @@ function SessionRow({ session, expanded, onToggle }) {
             {session.user_name}
           </div>
         </td>
+        <td style={{ padding: "8px 6px", fontSize: 11, color: accent, ...mono, textAlign: "center", fontWeight: 700 }}>{session.year}</td>
         <td style={{ padding: "8px 6px", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{formatDate(session.started_at)}</td>
         <td style={{ padding: "8px 6px", fontSize: 11, color: accent, ...mono, textAlign: "right" }}>{formatTime(session.duration_seconds)}</td>
         <td style={{ padding: "8px 6px", textAlign: "center" }}>
@@ -79,7 +80,7 @@ function SessionRow({ session, expanded, onToggle }) {
       </tr>
       {expanded && (
         <tr>
-          <td colSpan={6} style={{ padding: "0 10px 10px 40px", background: "rgba(255,255,255,0.01)" }}>
+          <td colSpan={7} style={{ padding: "0 10px 10px 40px", background: "rgba(255,255,255,0.01)" }}>
             <SessionExpandedDetail session={session} />
           </td>
         </tr>
@@ -180,6 +181,7 @@ export default function AnalyticsDashboard() {
   const [expandedId, setExpandedId] = useState(null)
   // Filters
   const [filterUser, setFilterUser] = useState("")
+  const [filterYear, setFilterYear] = useState("")
   const [filterCompleted, setFilterCompleted] = useState("all") // "all", "completed", "incomplete"
 
   useEffect(() => {
@@ -198,12 +200,14 @@ export default function AnalyticsDashboard() {
   if (loading) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Chargement...</div>
   if (!summary) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Aucune donnee</div>
 
-  // Unique users for filter
+  // Unique users and years for filters
   const userNames = [...new Set(allSessions.map(s => s.user_name))].sort()
+  const years = [...new Set(allSessions.map(s => s.year).filter(Boolean))].sort((a, b) => b - a)
 
   // Apply filters
   const filtered = allSessions.filter(s => {
     if (filterUser && s.user_name !== filterUser) return false
+    if (filterYear && s.year !== parseInt(filterYear)) return false
     if (filterCompleted === "completed" && (s.slides_viewed < s.total_slides || !s.total_slides)) return false
     if (filterCompleted === "incomplete" && s.slides_viewed >= s.total_slides && s.total_slides > 0) return false
     return true
@@ -235,6 +239,12 @@ export default function AnalyticsDashboard() {
           <option value="">Tous les utilisateurs</option>
           {userNames.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
+        <select value={filterYear} onChange={e => setFilterYear(e.target.value)} style={{
+          padding: "4px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.6)", fontSize: 10,
+        }}>
+          <option value="">Toutes les annees</option>
+          {years.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
         <select value={filterCompleted} onChange={e => setFilterCompleted(e.target.value)} style={{
           padding: "4px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.6)", fontSize: 10,
         }}>
@@ -251,6 +261,7 @@ export default function AnalyticsDashboard() {
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <th style={{ padding: "8px 10px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Utilisateur</th>
+              <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Annee</th>
               <th style={{ padding: "8px 6px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Date</th>
               <th style={{ padding: "8px 6px", textAlign: "right", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Duree</th>
               <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Progression</th>
@@ -263,7 +274,7 @@ export default function AnalyticsDashboard() {
               <SessionRow key={s.id} session={s} expanded={expandedId === s.id} onToggle={() => setExpandedId(expandedId === s.id ? null : s.id)} />
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: 20, textAlign: "center", ...dim }}>Aucune session</td></tr>
+              <tr><td colSpan={7} style={{ padding: 20, textAlign: "center", ...dim }}>Aucune session</td></tr>
             )}
           </tbody>
         </table>
