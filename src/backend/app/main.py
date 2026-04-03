@@ -226,6 +226,8 @@ DEFAULT_CONFIG = {
     "recap_schedule": "0 2 1 1 *",
     "max_history_years": 5,
     "public_share_expiry_days": 30,
+    "telemetry_enabled": True,
+    "telemetry_idle_timeout_min": 30,
 }
 
 

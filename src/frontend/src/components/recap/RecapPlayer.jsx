@@ -197,9 +197,12 @@ export default function RecapPlayer() {
   const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId)
 
   // Telemetry
+  const telemetryEnabled = recapConfig.telemetry_enabled !== false
   const telemetry = useRecapTelemetry({
     year, totalSlides: slides.length, themeId: visualTheme?.id,
     paletteSlug: theme?.slug || null, musicEnabled: musicPlaying, comparisonEnabled: comparisonActive,
+    enabled: telemetryEnabled,
+    idleTimeoutMin: recapConfig.telemetry_idle_timeout_min || 30,
   })
   const currSlideId = slides[slide]?.id
   useEffect(() => {

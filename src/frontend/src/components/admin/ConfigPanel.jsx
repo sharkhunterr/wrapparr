@@ -10,6 +10,8 @@ const CONFIG_FIELDS = [
   { key: "recap_schedule", label: "Planification recap (cron)", type: "text" },
   { key: "max_history_years", label: "Historique max (annees)", type: "number" },
   { key: "public_share_expiry_days", label: "Expiration partage (jours)", type: "number" },
+  { key: "telemetry_enabled", label: "Telemetrie des visionnages", type: "bool" },
+  { key: "telemetry_idle_timeout_min", label: "Timeout inactivite telemetrie (min)", type: "number" },
 ]
 
 export default function ConfigPanel() {
