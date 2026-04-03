@@ -145,6 +145,8 @@ export default function RecapPlayer() {
             const meNameNorm = me?.display_name?.toLowerCase().trim()
             for (const [uid, udata] of Object.entries(data.users)) {
               if (udata.name && udata.name.toLowerCase().trim() === meNameNorm) {
+                data = { ...udata, users: data.users, comparison: data.comparison, server_ranking: data.server_ranking }
+                delete data.name
                 setMyRecapUserId(uid)
                 break
               }
