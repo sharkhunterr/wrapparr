@@ -207,14 +207,14 @@ export const SLIDE_REGISTRY = [
 
   // ── Interactive slides (per service) ──
   {
-    id: "{service}-thisorthat", label: "This or That", group: "service",
+    id: "{service}-thisorthat", label: "This or That", group: "service", interactive: true,
     desc: "Quiz interactif : devinez entre deux choix lequel domine",
     params: [
       { key: "enabled", label: "Activer la slide", type: "bool", default: true },
     ],
   },
   {
-    id: "{service}-estimation", label: "A ton avis ?", group: "service",
+    id: "{service}-estimation", label: "A ton avis ?", group: "service", interactive: true,
     desc: "Estimez vos stats avant de decouvrir la realite (curseur interactif)",
     params: [
       { key: "enabled", label: "Activer la slide", type: "bool", default: true },
@@ -367,7 +367,7 @@ export const SLIDE_REGISTRY = [
 
   // ── Interactive slides (series) ──
   {
-    id: "{service}-series-thisorthat", label: "This or That (series)", group: "service",
+    id: "{service}-series-thisorthat", label: "This or That (series)", group: "service", interactive: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Quiz interactif series : devinez entre deux choix",
     params: [
@@ -375,7 +375,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-series-estimation", label: "A ton avis ? (series)", group: "service",
+    id: "{service}-series-estimation", label: "A ton avis ? (series)", group: "service", interactive: true,
     onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Estimez vos stats series avant de decouvrir la realite",
     params: [
@@ -553,7 +553,7 @@ export const SLIDE_REGISTRY = [
 
   // ── Interactive slides (overseerr) ──
   {
-    id: "overseerr-estimation", label: "A ton avis ? (demandes)", group: "global",
+    id: "overseerr-estimation", label: "A ton avis ? (demandes)", group: "global", interactive: true,
     desc: "Estimez vos stats demandes avant de decouvrir la realite",
     params: [
       { key: "enabled", label: "Activer la slide", type: "bool", default: true },
@@ -561,7 +561,7 @@ export const SLIDE_REGISTRY = [
   },
   // ── Interactive slides (community) ──
   {
-    id: "community-thisorthat", label: "This or That (communaute)", group: "global",
+    id: "community-thisorthat", label: "This or That (communaute)", group: "global", interactive: true,
     desc: "Quiz interactif communaute : devinez qui regarde le plus",
     params: [
       { key: "enabled", label: "Activer la slide", type: "bool", default: true },

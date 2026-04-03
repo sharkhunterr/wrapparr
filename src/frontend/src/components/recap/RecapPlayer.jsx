@@ -193,17 +193,17 @@ export default function RecapPlayer() {
 
   const R = useResponsive()
 
-  // Build slide list from data + config
-  const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId)
-
-  // Telemetry
+  // Telemetry (must be before buildSlides so onInteraction is available)
   const telemetryEnabled = recapConfig.telemetry_enabled !== false
   const telemetry = useRecapTelemetry({
-    year, totalSlides: slides.length, themeId: visualTheme?.id,
+    year, totalSlides: 0, themeId: visualTheme?.id,
     paletteSlug: theme?.slug || null, musicEnabled: musicPlaying, comparisonEnabled: comparisonActive,
     enabled: telemetryEnabled,
     idleTimeoutMin: recapConfig.telemetry_idle_timeout_min || 30,
   })
+
+  // Build slide list from data + config
+  const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId, telemetry.onInteraction)
   const currSlideId = slides[slide]?.id
   useEffect(() => {
     if (currSlideId) telemetry.onSlideChange(currSlideId)

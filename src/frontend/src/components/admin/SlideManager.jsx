@@ -358,6 +358,7 @@ export default function SlideManager() {
                               {s.cat && <span style={badge("#E5A00D")}>section</span>}
                               {s.pod && <span style={badge("#fb923c")}>podium</span>}
                               {s.tmdb && <span style={badge(hasTmdb ? "#06b6d4" : "#ef4444")}>{hasTmdb ? "TMDB" : "TMDB requis"}</span>}
+                              {s.interactive && <span style={badge("#8b5cf6")}>interactif</span>}
                             </div>
                             <div style={{ color: "rgba(255,255,255,0.15)", fontSize: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.desc}</div>
                           </div>

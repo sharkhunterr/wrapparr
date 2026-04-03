@@ -97,11 +97,12 @@ function getAccentOverride(slideSettings, slideId) {
   return slideSettings[slideId]?.accentOverride || ""
 }
 
-function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
+function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInteraction) {
   if (!data) return []
   const slideSettings = slideConfigs?.settings || slideConfigs || {}
   const slideOrder = slideConfigs?.order || []
   const sc = slideSettings
+  const interactionCb = (slideId) => (interactionData) => onInteraction?.(slideId, interactionData)
 
   // Helper: push slide only if enabled (or forced for locked slides)
   const pushSlide = (slide, force = false) => {
@@ -294,11 +295,11 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
       // Interactive slides (films)
       pushSlide({
         id: svc + "-thisorthat", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <ThisOrThatSlide accent={svcAccent} data={data} year={year} section="films" config={getSlideConfig(sc, svc + "-thisorthat")} />,
+        component: <ThisOrThatSlide accent={svcAccent} data={data} year={year} section="films" config={getSlideConfig(sc, svc + "-thisorthat")} onInteraction={interactionCb(svc + "-thisorthat")} />,
       })
       pushSlide({
         id: svc + "-estimation", accent: svcAccent, bg: cfg.bgStats || baseBg,
-        component: <EstimationSlide accent={svcAccent} data={data} year={year} section="films" config={getSlideConfig(sc, svc + "-estimation")} />,
+        component: <EstimationSlide accent={svcAccent} data={data} year={year} section="films" config={getSlideConfig(sc, svc + "-estimation")} onInteraction={interactionCb(svc + "-estimation")} />,
       })
 
       // ═══ SERIES SECTION ═══
@@ -406,11 +407,11 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
         // Interactive slides (series)
         pushSlide({
           id: svc + "-series-thisorthat", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-          component: <ThisOrThatSlide accent={seriesAccent} data={data} year={year} section="series" config={getSlideConfig(sc, svc + "-series-thisorthat")} />,
+          component: <ThisOrThatSlide accent={seriesAccent} data={data} year={year} section="series" config={getSlideConfig(sc, svc + "-series-thisorthat")} onInteraction={interactionCb(svc + "-series-thisorthat")} />,
         })
         pushSlide({
           id: svc + "-series-estimation", accent: seriesAccent, bg: cfg.seriesBgStats || baseBg,
-          component: <EstimationSlide accent={seriesAccent} data={data} year={year} section="series" config={getSlideConfig(sc, svc + "-series-estimation")} />,
+          component: <EstimationSlide accent={seriesAccent} data={data} year={year} section="series" config={getSlideConfig(sc, svc + "-series-estimation")} onInteraction={interactionCb(svc + "-series-estimation")} />,
         })
 
       }
@@ -626,7 +627,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
   if (allUsersData.length >= 2) {
     pushSlide({
       id: "community-thisorthat", accent: communityAccent, bg: baseBg,
-      component: <ThisOrThatSlide accent={communityAccent} data={data} year={year} section="community" config={getSlideConfig(sc, "community-thisorthat")} />,
+      component: <ThisOrThatSlide accent={communityAccent} data={data} year={year} section="community" config={getSlideConfig(sc, "community-thisorthat")} onInteraction={interactionCb("community-thisorthat")} />,
     })
   }
 
@@ -678,7 +679,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId) {
     if (data.overseerr?.total > 0) {
       pushSlide({
         id: "overseerr-estimation", accent: overseerrAccent, bg: baseBg,
-        component: <EstimationSlide accent={overseerrAccent} data={data} year={year} section="demandes" config={getSlideConfig(sc, "overseerr-estimation")} />,
+        component: <EstimationSlide accent={overseerrAccent} data={data} year={year} section="demandes" config={getSlideConfig(sc, "overseerr-estimation")} onInteraction={interactionCb("overseerr-estimation")} />,
       })
     }
   }

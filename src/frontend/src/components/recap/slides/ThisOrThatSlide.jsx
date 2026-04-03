@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useActive, Tag } from "../SharedUI"
 
 const ANIM_DURATION = 600
@@ -177,7 +177,7 @@ function buildQuestions(data, section) {
   return questions.slice(0, 3)
 }
 
-export default function ThisOrThatSlide({ accent, data, year, section = "films", config = {} }) {
+export default function ThisOrThatSlide({ accent, data, year, section = "films", config = {}, onInteraction }) {
   const active = useActive()
   const questions = buildQuestions(data, section)
   const [current, setCurrent] = useState(0)
@@ -185,12 +185,14 @@ export default function ThisOrThatSlide({ accent, data, year, section = "films",
   const [revealed, setRevealed] = useState(false)
   const [score, setScore] = useState(0)
   const [done, setDone] = useState(false)
+  const answers = useRef([])
 
   const q = questions[current]
 
   const handleSelect = useCallback((side) => {
     if (revealed || !q) return
     setSelected(side)
+    answers.current.push({ question: q.question, chosen: side, correct: q.winner, isCorrect: side === q.winner })
     setTimeout(() => {
       setRevealed(true)
       if (side === q.winner) setScore(s => s + 1)
@@ -200,6 +202,8 @@ export default function ThisOrThatSlide({ accent, data, year, section = "films",
   const handleNext = useCallback(() => {
     if (current + 1 >= questions.length) {
       setDone(true)
+      const finalScore = answers.current.filter(a => a.isCorrect).length
+      onInteraction?.({ slideType: "thisorthat", score: finalScore, total: questions.length, answers: answers.current })
     } else {
       setCurrent(c => c + 1)
       setSelected(null)

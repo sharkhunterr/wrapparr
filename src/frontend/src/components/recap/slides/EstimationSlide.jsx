@@ -216,7 +216,7 @@ function buildEstimations(data, section) {
   return estimations.slice(0, 3)
 }
 
-export default function EstimationSlide({ accent, data, year, section = "films", config = {} }) {
+export default function EstimationSlide({ accent, data, year, section = "films", config = {}, onInteraction }) {
   const active = useActive()
   const estimations = buildEstimations(data, section)
   const [values, setValues] = useState({})
@@ -241,6 +241,13 @@ export default function EstimationSlide({ accent, data, year, section = "films",
     }
     setScore(pts)
     setSubmitted(true)
+    const answers = estimations.map(est => ({
+      label: est.label,
+      estimated: Math.round((values[est.key] ?? est.default) * 10) / 10,
+      actual: est.actual,
+      unit: est.unit,
+    }))
+    onInteraction?.({ slideType: "estimation", score: pts, total: estimations.length * 3, answers })
   }
 
   if (!estimations.length) return null
