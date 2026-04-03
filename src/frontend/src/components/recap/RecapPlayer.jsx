@@ -155,6 +155,7 @@ export default function RecapPlayer() {
           setRecapData(data)
         }
       } catch (e) {
+        console.error("[RecapPlayer] load error:", e)
         setError(e.message)
       }
       setLoading(false)
@@ -201,7 +202,10 @@ export default function RecapPlayer() {
     paletteSlug: theme?.slug || null, musicEnabled: musicPlaying, comparisonEnabled: comparisonActive,
   })
   const currSlideId = slides[slide]?.id
-  useEffect(() => { if (currSlideId) telemetry.onSlideChange(currSlideId) }, [currSlideId])
+  useEffect(() => {
+    if (currSlideId) telemetry.onSlideChange(currSlideId)
+    if (currSlideId === "finale") telemetry.flush()
+  }, [currSlideId])
 
   const goTo = useCallback((n) => {
     if (n < 0 || n >= slides.length || fade) return
@@ -270,11 +274,6 @@ export default function RecapPlayer() {
   const isCat = !!curr.cat
   const isPod = curr.id?.includes("-pod")
   const isFinale = curr.id === "finale"
-
-  // Send telemetry when reaching finale
-  useEffect(() => {
-    if (isFinale) telemetry.flush()
-  }, [isFinale])
   const isCommunityTop = curr.id?.startsWith("community-top-")
   const needSpotlights = isCat || isPod || isFinale || isCommunityTop
   const spotlightIntensity = isCat ? 0.9 : (isPod || isCommunityTop) ? 1.2 : isFinale ? 0.65 : 0.7
