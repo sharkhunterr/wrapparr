@@ -204,6 +204,7 @@ export default function RecapPlayer() {
 
   // Build slide list from data + config
   const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId, telemetry.onInteraction)
+  telemetry.setTotalSlides(slides.length)
   const currSlideId = slides[slide]?.id
   useEffect(() => {
     if (currSlideId) telemetry.onSlideChange(currSlideId)

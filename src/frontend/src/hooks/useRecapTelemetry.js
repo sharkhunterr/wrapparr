@@ -190,5 +190,7 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
     }
   }, [])
 
-  return { onSlideChange, onInteraction, flush }
+  const setTotalSlides = useCallback((n) => { latestRef.current.totalSlides = n }, [])
+
+  return { onSlideChange, onInteraction, flush, setTotalSlides }
 }
