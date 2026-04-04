@@ -99,15 +99,18 @@ function useSlideReady(slideId, slideConfigs) {
   return ready
 }
 
-const REACTION_EMOJIS = ["🔥", "😍", "👏", "😂", "🤯", "❤️", "💀", "🥳"]
+const REACTION_QUICK = ["🔥", "😍", "👏", "😂", "🤯", "❤️", "💀", "🥳", "💩"]
+const REACTION_EXTENDED = ["😭", "🙌", "🫠", "🤩", "😱", "🥶", "👀", "💯", "🎉", "🤮", "😴", "🫡", "🤡", "👑", "💎", "🚀", "⭐", "🍿", "🎬", "📺"]
 
 function ReactionPanel({ accent, year }) {
   const [selected, setSelected] = useState(null)
   const [particles, setParticles] = useState([])
+  const [showMore, setShowMore] = useState(false)
   const idCounter = useRef(0)
 
   const handleReaction = (emoji) => {
     setSelected(emoji)
+    setShowMore(false)
     // Spawn particles across the full page
     const newParticles = Array.from({ length: 16 }, () => ({
       id: idCounter.current++,
@@ -123,7 +126,7 @@ function ReactionPanel({ accent, year }) {
     setParticles(prev => [...prev, ...newParticles])
     setTimeout(() => setParticles(prev => prev.filter(p => !newParticles.includes(p))), 3500)
 
-    // Send to backend
+    // Send to backend (last reaction wins)
     try {
       const token = localStorage.getItem("wrapparr_token")
       if (token) {
@@ -135,6 +138,22 @@ function ReactionPanel({ accent, year }) {
       }
     } catch {}
   }
+
+  const EmojiBtn = ({ emoji }) => (
+    <button onClick={() => handleReaction(emoji)} style={{
+      background: selected === emoji ? accent + "25" : "transparent",
+      border: selected === emoji ? `1px solid ${accent}40` : "1px solid transparent",
+      borderRadius: 10, padding: "3px 5px", cursor: "pointer",
+      fontSize: 16, lineHeight: 1,
+      transform: selected === emoji ? "scale(1.3)" : "scale(1)",
+      transition: "all .2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    }}
+      onMouseEnter={e => e.target.style.transform = "scale(1.2)"}
+      onMouseLeave={e => { if (selected !== emoji) e.target.style.transform = "scale(1)" }}
+    >
+      {emoji}
+    </button>
+  )
 
   return (
     <>
@@ -152,26 +171,36 @@ function ReactionPanel({ accent, year }) {
         </div>
       ))}
 
-      {/* Inline emoji bar — rendered inside FinaleSlide via portal or inline */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 20,
-        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-      }}>
-        {REACTION_EMOJIS.map(emoji => (
-          <button key={emoji} onClick={() => handleReaction(emoji)} style={{
-            background: selected === emoji ? accent + "25" : "transparent",
-            border: selected === emoji ? `1px solid ${accent}40` : "1px solid transparent",
-            borderRadius: 10, padding: "3px 5px", cursor: "pointer",
-            fontSize: 16, lineHeight: 1,
-            transform: selected === emoji ? "scale(1.3)" : "scale(1)",
-            transition: "all .2s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          }}
-            onMouseEnter={e => { if (!selected) e.target.style.transform = "scale(1.2)" }}
-            onMouseLeave={e => { if (selected !== emoji) e.target.style.transform = "scale(1)" }}
-          >
-            {emoji}
+      {/* Inline emoji bar */}
+      <div style={{ position: "relative" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 3, padding: "4px 6px", borderRadius: 20,
+          background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+        }}>
+          {REACTION_QUICK.map(emoji => <EmojiBtn key={emoji} emoji={emoji} />)}
+          <button onClick={() => setShowMore(!showMore)} style={{
+            background: showMore ? accent + "20" : "transparent",
+            border: "1px solid " + (showMore ? accent + "30" : "rgba(255,255,255,0.1)"),
+            borderRadius: 10, padding: "3px 6px", cursor: "pointer",
+            fontSize: 12, lineHeight: 1, color: showMore ? accent : "rgba(255,255,255,0.3)",
+            transition: "all .2s ease",
+          }}>
+            {showMore ? "×" : "+"}
           </button>
-        ))}
+        </div>
+
+        {/* Extended emoji picker */}
+        {showMore && (
+          <div style={{
+            position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
+            display: "flex", flexWrap: "wrap", gap: 2, padding: "8px 10px", borderRadius: 14,
+            background: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.1)",
+            backdropFilter: "blur(16px)", maxWidth: 240, justifyContent: "center",
+            animation: "slide-up .25s ease both", zIndex: 10,
+          }}>
+            {REACTION_EXTENDED.map(emoji => <EmojiBtn key={emoji} emoji={emoji} />)}
+          </div>
+        )}
       </div>
 
       <style>{`
