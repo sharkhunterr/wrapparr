@@ -62,6 +62,119 @@ function extractUserData(fullData, userOrId) {
   return { data: fullData, userId: null }
 }
 
+function SlideReadyHint({ onNext, accent, slideId }) {
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    setVisible(false)
+    const t = setTimeout(() => setVisible(true), 3500)
+    return () => clearTimeout(t)
+  }, [slideId])
+  if (!visible) return null
+  return (
+    <div onClick={onNext} style={{
+      position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 90,
+      display: "flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 20,
+      background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.08)",
+      backdropFilter: "blur(12px)", cursor: "pointer",
+      animation: "slide-up .5s ease both", transition: "opacity .3s",
+    }}>
+      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>Suivant</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
+        <path d="M6 9l6 6 6-6" style={{ animation: "bounce-arrow 1.5s ease-in-out infinite" }} />
+      </svg>
+      <style>{`@keyframes bounce-arrow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }`}</style>
+    </div>
+  )
+}
+
+const REACTION_EMOJIS = ["🔥", "😍", "👏", "😂", "🤯", "❤️", "💀", "🥳"]
+
+function ReactionPanel({ accent, year }) {
+  const [selected, setSelected] = useState(null)
+  const [particles, setParticles] = useState([])
+  const idCounter = useRef(0)
+
+  const handleReaction = (emoji) => {
+    setSelected(emoji)
+    // Spawn animated particles
+    const newParticles = Array.from({ length: 8 }, (_, i) => ({
+      id: idCounter.current++,
+      emoji,
+      x: 50 + (Math.random() - 0.5) * 40,
+      y: 100,
+      angle: -60 - Math.random() * 60,
+      speed: 3 + Math.random() * 4,
+      scale: 0.8 + Math.random() * 0.8,
+      rotation: (Math.random() - 0.5) * 40,
+    }))
+    setParticles(prev => [...prev, ...newParticles])
+    setTimeout(() => setParticles(prev => prev.filter(p => !newParticles.includes(p))), 2000)
+
+    // Send to backend
+    try {
+      const token = localStorage.getItem("wrapparr_token")
+      if (token) {
+        fetch("/api/v1/analytics/reactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ session_id: "00000000-0000-0000-0000-000000000000", year, slide_id: "finale", reaction_type: "emoji", value: emoji }),
+        }).catch(() => {})
+      }
+    } catch {}
+  }
+
+  return (
+    <div style={{
+      position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 90,
+      display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+      animation: "slide-up .6s ease .5s both",
+    }}>
+      {/* Floating particles */}
+      {particles.map(p => (
+        <div key={p.id} style={{
+          position: "fixed", left: p.x + "%", bottom: 80,
+          fontSize: 24 * p.scale, pointerEvents: "none", zIndex: 91,
+          animation: `reaction-float 1.8s ease-out both`,
+          transform: `rotate(${p.rotation}deg)`,
+        }}>
+          {p.emoji}
+        </div>
+      ))}
+
+      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 2 }}>
+        {selected ? "Merci !" : "Ta reaction ?"}
+      </div>
+      <div style={{
+        display: "flex", gap: 4, padding: "6px 10px", borderRadius: 24,
+        background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(12px)",
+      }}>
+        {REACTION_EMOJIS.map(emoji => (
+          <button key={emoji} onClick={() => handleReaction(emoji)} style={{
+            background: selected === emoji ? accent + "25" : "transparent",
+            border: selected === emoji ? `1px solid ${accent}40` : "1px solid transparent",
+            borderRadius: 12, padding: "4px 6px", cursor: "pointer",
+            fontSize: 18, lineHeight: 1,
+            transform: selected === emoji ? "scale(1.3)" : "scale(1)",
+            transition: "all .2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}
+            onMouseEnter={e => { if (!selected) e.target.style.transform = "scale(1.25)" }}
+            onMouseLeave={e => { if (selected !== emoji) e.target.style.transform = "scale(1)" }}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+      <style>{`
+        @keyframes reaction-float {
+          0% { transform: translateY(0) scale(1); opacity: 1; }
+          100% { transform: translateY(-120px) scale(1.5) rotate(15deg); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 function AdminUserSelect({ recapUsers, currentUid, originalUid, impersonating, accent, onSelect }) {
   const [el, setEl] = useState(null)
   useEffect(() => {
@@ -480,6 +593,12 @@ export default function RecapPlayer() {
 
       {/* Bottom chevron — go next */}
       {slide < slides.length - 1 && <NavChevron direction="down" onClick={() => goTo(slide + 1)} />}
+
+      {/* Next slide hint (appears after animations finish) */}
+      {slide < slides.length - 1 && !isCat && !fade && <SlideReadyHint onNext={() => goTo(slide + 1)} accent={accent} slideId={currSlideId} />}
+
+      {/* Reaction button on finale */}
+      {isFinale && <ReactionPanel accent={accent} year={year} />}
     </div>
     </ThemeProvider>
   )
