@@ -14,10 +14,16 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
   const lastActivity = useRef(Date.now())
   const slideEnterTime = useRef(0)
 
-  // Store latest values in refs
-  const latestRef = useRef({ year, totalSlides, themeId, paletteSlug, musicEnabled, comparisonEnabled })
+  // Store latest values in refs (preserve manually set fields like totalSlides, reaction)
+  const latestRef = useRef({ year, totalSlides, themeId, paletteSlug, musicEnabled, comparisonEnabled, reaction: null })
   useEffect(() => {
-    latestRef.current = { year, totalSlides, themeId, paletteSlug, musicEnabled, comparisonEnabled }
+    const prev = latestRef.current
+    latestRef.current = {
+      ...prev,
+      year, themeId, paletteSlug, musicEnabled, comparisonEnabled,
+      // Keep totalSlides from setTotalSlides if it was set, otherwise use prop
+      totalSlides: prev.totalSlides || totalSlides,
+    }
   })
 
   // Track user activity (mouse, touch, keyboard, scroll)
