@@ -49,6 +49,7 @@ function SessionRow({ session, expanded, onToggle }) {
   return (
     <>
       <tr onClick={onToggle} style={{ cursor: "pointer", background: expanded ? "rgba(255,255,255,0.02)" : "transparent", transition: "background .15s" }}>
+        <td style={{ padding: "8px 6px", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{formatDate(session.started_at)}</td>
         <td style={{ padding: "8px 10px", fontSize: 11, color: "white", fontWeight: 600 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <div style={{ width: 22, height: 22, borderRadius: "50%", background: accent + "15", border: "1px solid " + accent + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: accent, flexShrink: 0 }}>{session.user_name?.[0]?.toUpperCase() || "?"}</div>
@@ -56,7 +57,6 @@ function SessionRow({ session, expanded, onToggle }) {
           </div>
         </td>
         <td style={{ padding: "8px 6px", fontSize: 11, color: accent, ...mono, textAlign: "center", fontWeight: 700 }}>{session.year}</td>
-        <td style={{ padding: "8px 6px", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{formatDate(session.started_at)}</td>
         <td style={{ padding: "8px 6px", fontSize: 11, color: accent, ...mono, textAlign: "right" }}>{formatTime(session.duration_seconds)}</td>
         <td style={{ padding: "8px 6px", textAlign: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "center" }}>
@@ -260,9 +260,9 @@ export default function AnalyticsDashboard() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <th style={{ padding: "8px 6px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Date</th>
               <th style={{ padding: "8px 10px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Utilisateur</th>
               <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Annee</th>
-              <th style={{ padding: "8px 6px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Date</th>
               <th style={{ padding: "8px 6px", textAlign: "right", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Duree</th>
               <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Progression</th>
               <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Options</th>
