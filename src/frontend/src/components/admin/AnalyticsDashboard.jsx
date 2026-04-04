@@ -128,6 +128,16 @@ function SessionExpandedDetail({ session }) {
             ))}
           </div>
         )}
+        {session.reactions?.length > 0 && (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Reaction</div>
+            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              {session.reactions.map((r, i) => (
+                <span key={i} style={{ fontSize: 22 }}>{r.value}</span>
+              ))}
+            </div>
+          </div>
+        )}
         <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Parametres</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {session.theme_id && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>Theme: <span style={{ color: "#a78bfa" }}>{session.theme_id}</span></div>}
