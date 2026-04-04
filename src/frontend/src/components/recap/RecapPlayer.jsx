@@ -54,7 +54,7 @@ function extractUserData(fullData, userOrId) {
 
   if (userId && fullData.users[userId]) {
     const userData = fullData.users[userId]
-    const data = { ...userData, users: fullData.users, comparison: fullData.comparison, server_ranking: fullData.server_ranking }
+    const data = { ...userData, users: fullData.users, comparison: userData.comparison || fullData.comparison, server_ranking: fullData.server_ranking }
     delete data.name
     return { data, userId }
   }
