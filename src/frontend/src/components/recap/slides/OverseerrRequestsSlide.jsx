@@ -121,7 +121,7 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
             </div>
           )}
           <ResponsiveContainer width="100%" height={100}>
-            <AreaChart data={hasPrev ? monthlyWithPrev : ov.monthly} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+            <AreaChart data={hasPrev ? monthlyWithPrev : ov.monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="ov-fill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={accent} stopOpacity={0.3} />
@@ -134,7 +134,7 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal vertical={false} />
               <XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={20} allowDecimals={false} />
+              <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={(() => { const src = hasPrev ? monthlyWithPrev : (ov.monthly || []); const max = Math.max(...src.map(d => Math.max(d?.v || 0, d?.prev || 0)), 0); if (max >= 1000) return 38; if (max >= 100) return 32; return 28 })()} allowDecimals={false} />
               <Tooltip content={<OvTooltip hasPrev={hasPrev} year={year} />} />
               <Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill="url(#ov-fill)" dot={false} animationBegin={200} animationDuration={1200} name={String(year)} />
               {hasPrev && <Area type="monotone" dataKey="prev" stroke="rgba(255,255,255,0.25)" strokeWidth={1.5} strokeDasharray="4 3" fill="url(#ov-prev)" dot={false} animationBegin={400} animationDuration={1200} name={String(year - 1)} />}

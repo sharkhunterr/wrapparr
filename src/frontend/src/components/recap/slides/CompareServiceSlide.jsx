@@ -136,7 +136,7 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       <div className="s1" style={card}>
         <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
         <ResponsiveContainer width="100%" height={90}>
-          <AreaChart data={monthly} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+          <AreaChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id={"svc-cur-" + mediaType} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={accent} stopOpacity={0.3} />
@@ -149,7 +149,7 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--th-surface-subtle)" horizontal vertical={false} />
             <XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} />
+            <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={(() => { const max = Math.max(...(monthly || []).map(d => Math.max(d?.current || 0, d?.previous || 0)), 0); if (max >= 1000) return 38; if (max >= 100) return 32; return 28 })()} />
             <Area type="monotone" dataKey="current" stroke={accent} strokeWidth={2} fill={"url(#svc-cur-" + mediaType + ")"} dot={false} animationBegin={200} animationDuration={1200} />
             <Area type="monotone" dataKey="previous" stroke="var(--th-text-dim)" strokeWidth={1.5} strokeDasharray="4 3" fill={"url(#svc-prev-" + mediaType + ")"} dot={false} animationBegin={400} animationDuration={1200} />
           </AreaChart>

@@ -98,7 +98,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
     <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
       <Lbl c={accent} size={8}>Activite mensuelle par utilisateur</Lbl>
       <ResponsiveContainer width="100%" height={170}>
-        <AreaChart data={multiMonthlyData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+        <AreaChart data={multiMonthlyData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
           <defs>
             {allUsers.map((u, i) => (
               <linearGradient key={u.name} id={gId + i} x1="0" y1="0" x2="0" y2="1">
@@ -113,7 +113,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal vertical={false} />
           <XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} />
+          <YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={(() => { const max = Math.max(...(multiMonthlyData || []).map(d => d?._total || 0), 0); if (max >= 1000) return 38; if (max >= 100) return 32; return 28 })()} />
           <Tooltip content={<MultiUserTooltip />} />
           {/* Total curve */}
           {!hidden._total && <Area type="monotone" dataKey="_total" stroke="rgba(255,255,255,0.5)" strokeWidth={2} strokeDasharray="4 3"
