@@ -62,27 +62,61 @@ function extractUserData(fullData, userOrId) {
   return { data: fullData, userId: null }
 }
 
+function getSlideDelay(slideId) {
+  if (!slideId) return 3000
+  // Podium: jokes + 3 reveals = ~15-20s
+  if (slideId.includes("-pod")) return 18000
+  // Category slides: short animation
+  if (slideId.startsWith("cat-")) return 2500
+  // Genre race slides
+  if (slideId.includes("-genres")) return 12000
+  // Timeline / profil cinephile
+  if (slideId.includes("-timeline")) return 10000
+  // Ratings gauge
+  if (slideId.includes("-ratings")) return 8000
+  // Actors/Directors reveal
+  if (slideId.includes("-actors") || slideId.includes("-directors")) return 8000
+  // Interactive slides: wait for user interaction, longer
+  if (slideId.includes("-thisorthat") || slideId.includes("-estimation")) return 15000
+  // Bilan / stats enriched
+  if (slideId.includes("-stats-enriched") || slideId.includes("-bilan")) return 6000
+  // Compare
+  if (slideId.includes("-compare") || slideId.includes("compare")) return 8000
+  // Community slides
+  if (slideId.startsWith("community-")) return 5000
+  // Overseerr
+  if (slideId.startsWith("overseerr-")) return 5000
+  // Default
+  return 4000
+}
+
 function SlideReadyHint({ onNext, accent, slideId }) {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
     setVisible(false)
-    const t = setTimeout(() => setVisible(true), 3500)
+    const delay = getSlideDelay(slideId)
+    const t = setTimeout(() => setVisible(true), delay)
     return () => clearTimeout(t)
   }, [slideId])
   if (!visible) return null
   return (
     <div onClick={onNext} style={{
-      position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 90,
-      display: "flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 20,
-      background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.08)",
-      backdropFilter: "blur(12px)", cursor: "pointer",
-      animation: "slide-up .5s ease both", transition: "opacity .3s",
+      position: "fixed", bottom: 28, left: 0, right: 0, zIndex: 90,
+      display: "flex", justifyContent: "center",
+      pointerEvents: "none",
     }}>
-      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>Suivant</span>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
-        <path d="M6 9l6 6 6-6" style={{ animation: "bounce-arrow 1.5s ease-in-out infinite" }} />
-      </svg>
-      <style>{`@keyframes bounce-arrow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }`}</style>
+      <div onClick={onNext} style={{
+        display: "flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 20,
+        background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(12px)", cursor: "pointer", pointerEvents: "auto",
+        animation: "slide-up .5s ease both",
+      }}>
+        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>Suivant</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
+          <path d="M6 9l6 6 6-6" style={{ animation: "bounce-arrow 1.5s ease-in-out infinite" }} />
+        </svg>
+        <style>{`@keyframes bounce-arrow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }`}</style>
+      </div>
     </div>
   )
 }
@@ -595,7 +629,7 @@ export default function RecapPlayer() {
       {slide < slides.length - 1 && <NavChevron direction="down" onClick={() => goTo(slide + 1)} />}
 
       {/* Next slide hint (appears after animations finish) */}
-      {slide < slides.length - 1 && !isCat && !fade && <SlideReadyHint onNext={() => goTo(slide + 1)} accent={accent} slideId={currSlideId} />}
+      {slide < slides.length - 1 && !fade && <SlideReadyHint onNext={() => goTo(slide + 1)} accent={accent} slideId={currSlideId} />}
 
       {/* Reaction button on finale */}
       {isFinale && <ReactionPanel accent={accent} year={year} />}
