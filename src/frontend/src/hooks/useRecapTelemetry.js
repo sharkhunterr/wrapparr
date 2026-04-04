@@ -193,6 +193,7 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
           comparison_enabled: vals.comparisonEnabled,
           slide_data: slideData,
           interactions: interactions.current,
+          reaction: vals.reaction || null,
           device: navigator.userAgent.substring(0, 200),
         }
         const blob = new Blob([JSON.stringify(payload)], { type: "application/json" })
