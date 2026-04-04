@@ -28,13 +28,48 @@ const SERVICE_META = {
   booklore: { key: "booklore", icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD" },
 }
 
+const toUuidDash = (id) => id && id.length === 32 ? id.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, "$1-$2-$3-$4-$5") : id
+
+function extractUserData(fullData, userOrId) {
+  if (!fullData?.users) return { data: fullData, userId: null }
+  // If userOrId is a string (uid), use directly; otherwise extract from user object
+  const rawId = typeof userOrId === "string" ? userOrId : (userOrId?.id ? String(userOrId.id) : null)
+  const displayName = typeof userOrId === "string" ? null : userOrId?.display_name
+
+  // Try exact, dashed, undashed
+  const tryIds = rawId ? [rawId, toUuidDash(rawId), rawId.replace(/-/g, "")] : []
+  let userId = null
+  for (const id of tryIds) {
+    if (fullData.users[id]) { userId = id; break }
+  }
+
+  // Fallback by display_name
+  if (!userId && displayName) {
+    const norm = displayName.toLowerCase().trim()
+    for (const [uid, udata] of Object.entries(fullData.users)) {
+      if (udata.name && udata.name.toLowerCase().trim() === norm) { userId = uid; break }
+    }
+  }
+
+  if (userId && fullData.users[userId]) {
+    const userData = fullData.users[userId]
+    const data = { ...userData, users: fullData.users, comparison: fullData.comparison, server_ranking: fullData.server_ranking }
+    delete data.name
+    return { data, userId }
+  }
+
+  return { data: fullData, userId: null }
+}
+
 export default function RecapPlayer() {
   const { year: paramYear } = useParams()
   const user = useAuthStore((s) => s.user)
 
   const [year, setYear] = useState(parseInt(paramYear, 10) || null)
   const [recapData, setRecapData] = useState(null)
+  const [rawRecapData, setRawRecapData] = useState(null) // Full multi-user data for admin impersonation
   const [myRecapUserId, setMyRecapUserId] = useState(null)
+  const [impersonateUserId, setImpersonateUserId] = useState(null)
   const [theme, setTheme] = useState(null)
   const [originalTheme, setOriginalTheme] = useState(null)
   const [dbPalettes, setDbPalettes] = useState([])
@@ -124,35 +159,11 @@ export default function RecapPlayer() {
         }
 
         if (recapResult && recapResult.data) {
-          // Extract current user's data from multi-user recap
-          let data = recapResult.data
-          const rawUserId = me?.id ? String(me.id) : null
-          // Normalize UUID: try with and without dashes
-          const toUuidDash = (id) => id && id.length === 32 ? id.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, "$1-$2-$3-$4-$5") : id
-          const userId = rawUserId && data.users?.[rawUserId] ? rawUserId
-            : rawUserId && data.users?.[toUuidDash(rawUserId)] ? toUuidDash(rawUserId)
-            : rawUserId && data.users?.[rawUserId?.replace(/-/g, "")] ? rawUserId.replace(/-/g, "")
-            : rawUserId
-          if (data.users && userId && data.users[userId]) {
-            // Use this user's specific data, keep global/users for comparison
-            const userData = data.users[userId]
-            data = { ...userData, users: data.users, comparison: data.comparison, server_ranking: data.server_ranking }
-            // Remove "name" field that's not needed for rendering
-            delete data.name
-            setMyRecapUserId(userId)
-          } else if (data.users) {
-            // Fallback: try to find by display_name match
-            const meNameNorm = me?.display_name?.toLowerCase().trim()
-            for (const [uid, udata] of Object.entries(data.users)) {
-              if (udata.name && udata.name.toLowerCase().trim() === meNameNorm) {
-                data = { ...udata, users: data.users, comparison: data.comparison, server_ranking: data.server_ranking }
-                delete data.name
-                setMyRecapUserId(uid)
-                break
-              }
-            }
-          }
-          setRecapData(data)
+          const fullData = recapResult.data
+          setRawRecapData(fullData)
+          const extracted = extractUserData(fullData, me)
+          setRecapData(extracted.data)
+          setMyRecapUserId(extracted.userId)
         }
       } catch (e) {
         console.error("[RecapPlayer] load error:", e)
@@ -217,6 +228,27 @@ export default function RecapPlayer() {
     setFade(true)
     setTimeout(() => { setSlide(n); setFade(false) }, 230)
   }, [slide, fade, slides.length])
+
+  // Admin impersonation: switch user view
+  const handleImpersonate = useCallback((uid) => {
+    if (!rawRecapData?.users) return
+    setImpersonateUserId(uid || null)
+    if (uid) {
+      const extracted = extractUserData(rawRecapData, uid)
+      setRecapData(extracted.data)
+      setMyRecapUserId(extracted.userId)
+    } else {
+      // Back to self
+      const extracted = extractUserData(rawRecapData, user)
+      setRecapData(extracted.data)
+      setMyRecapUserId(extracted.userId)
+    }
+    setSlide(0)
+  }, [rawRecapData, user])
+
+  // List of all users in recap (for admin selector)
+  const recapUsers = rawRecapData?.users ? Object.entries(rawRecapData.users).map(([uid, u]) => ({ uid, name: u.name || uid })).sort((a, b) => a.name.localeCompare(b.name)) : []
+  const isAdmin = user?.role === "admin"
 
   useEffect(() => {
     const h = (e) => {
@@ -346,6 +378,29 @@ export default function RecapPlayer() {
         }
       }} />}
       <FullscreenButton />
+
+      {/* Admin: impersonate user */}
+      {isAdmin && recapUsers.length > 1 && (
+        <div style={{ position: "fixed", top: R.counterTop, right: 140, zIndex: 100 }}>
+          <select
+            value={impersonateUserId || myRecapUserId || ""}
+            onChange={e => handleImpersonate(e.target.value)}
+            style={{
+              padding: "3px 6px", borderRadius: 6, fontSize: 9,
+              background: "rgba(0,0,0,0.5)", color: accent,
+              border: "1px solid " + accent + "40",
+              backdropFilter: "blur(8px)", cursor: "pointer",
+              fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)",
+            }}
+          >
+            {recapUsers.map(u => (
+              <option key={u.uid} value={u.uid} style={{ background: "#111", color: "#ccc" }}>
+                {u.name}{u.uid === myRecapUserId && !impersonateUserId ? " (moi)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Slide content */}
       <ComparisonProvider value={comparisonCtx}>
