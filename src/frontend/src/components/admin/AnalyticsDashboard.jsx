@@ -182,7 +182,10 @@ export default function AnalyticsDashboard() {
   // Filters
   const [filterUser, setFilterUser] = useState("")
   const [filterYear, setFilterYear] = useState("")
-  const [filterCompleted, setFilterCompleted] = useState("all") // "all", "completed", "incomplete"
+  const [filterCompleted, setFilterCompleted] = useState("all")
+  // Sort
+  const [sortCol, setSortCol] = useState("started_at")
+  const [sortDir, setSortDir] = useState("desc")
 
   useEffect(() => {
     Promise.all([
@@ -211,6 +214,26 @@ export default function AnalyticsDashboard() {
     if (filterCompleted === "completed" && (s.slides_viewed < s.total_slides || !s.total_slides)) return false
     if (filterCompleted === "incomplete" && s.slides_viewed >= s.total_slides && s.total_slides > 0) return false
     return true
+  })
+
+  // Apply sort
+  const toggleSort = (col) => {
+    if (sortCol === col) setSortDir(d => d === "asc" ? "desc" : "asc")
+    else { setSortCol(col); setSortDir("desc") }
+  }
+  const sorted = [...filtered].sort((a, b) => {
+    let va, vb
+    switch (sortCol) {
+      case "started_at": va = a.started_at || ""; vb = b.started_at || ""; break
+      case "user_name": va = (a.user_name || "").toLowerCase(); vb = (b.user_name || "").toLowerCase(); break
+      case "year": va = a.year || 0; vb = b.year || 0; break
+      case "duration": va = a.duration_seconds || 0; vb = b.duration_seconds || 0; break
+      case "progress": va = a.total_slides > 0 ? a.slides_viewed / a.total_slides : 0; vb = b.total_slides > 0 ? b.slides_viewed / b.total_slides : 0; break
+      default: va = a.started_at || ""; vb = b.started_at || ""
+    }
+    if (va < vb) return sortDir === "asc" ? -1 : 1
+    if (va > vb) return sortDir === "asc" ? 1 : -1
+    return 0
   })
 
   return (
@@ -252,7 +275,7 @@ export default function AnalyticsDashboard() {
           <option value="completed">Termines</option>
           <option value="incomplete">Non termines</option>
         </select>
-        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", ...mono }}>{filtered.length} session{filtered.length > 1 ? "s" : ""}</span>
+        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", ...mono }}>{sorted.length} session{sorted.length > 1 ? "s" : ""}</span>
       </div>
 
       {/* Sessions table */}
@@ -260,20 +283,20 @@ export default function AnalyticsDashboard() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-              <th style={{ padding: "8px 6px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Date</th>
-              <th style={{ padding: "8px 10px", textAlign: "left", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Utilisateur</th>
-              <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Annee</th>
-              <th style={{ padding: "8px 6px", textAlign: "right", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Duree</th>
-              <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Progression</th>
+              <SortTh col="started_at" label="Date" align="left" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+              <SortTh col="user_name" label="Utilisateur" align="left" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} pad={10} />
+              <SortTh col="year" label="Annee" align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+              <SortTh col="duration" label="Duree" align="right" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+              <SortTh col="progress" label="Progression" align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
               <th style={{ padding: "8px 6px", textAlign: "center", fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>Options</th>
               <th style={{ padding: "8px 6px", width: 30 }}></th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((s) => (
+            {sorted.map((s) => (
               <SessionRow key={s.id} session={s} expanded={expandedId === s.id} onToggle={() => setExpandedId(expandedId === s.id ? null : s.id)} />
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr><td colSpan={7} style={{ padding: 20, textAlign: "center", ...dim }}>Aucune session</td></tr>
             )}
           </tbody>
@@ -283,5 +306,22 @@ export default function AnalyticsDashboard() {
       {/* Slide stats expandable */}
       <SlideStatsSection slides={slideStats} />
     </div>
+  )
+}
+
+function SortTh({ col, label, align = "left", sortCol, sortDir, onClick, pad = 6 }) {
+  const active = sortCol === col
+  return (
+    <th onClick={() => onClick(col)} style={{
+      padding: `8px ${pad}px`, textAlign: align, fontSize: 9, fontWeight: 600,
+      textTransform: "uppercase", letterSpacing: ".05em", cursor: "pointer",
+      color: active ? accent : "rgba(255,255,255,0.3)",
+      userSelect: "none", transition: "color .15s",
+    }}>
+      {label}
+      <span style={{ marginLeft: 3, fontSize: 8, opacity: active ? 1 : 0.3 }}>
+        {active ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+      </span>
+    </th>
   )
 }
