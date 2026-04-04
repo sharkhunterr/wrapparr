@@ -40,6 +40,7 @@ class SessionCreate(BaseModel):
     comparison_enabled: bool = False
     slide_data: list[SlideDataEntry] | None = None
     interactions: list[InteractionData] | None = None
+    reaction: str | None = None
     device: str | None = None
 
 class ReactionCreate(BaseModel):
@@ -77,7 +78,7 @@ async def create_session(
         comparison_enabled=data.comparison_enabled,
         slide_data=slide_dict,
         interactions=interactions_dict,
-        reactions=[],
+        reactions=[{"type": "emoji", "value": data.reaction}] if data.reaction else [],
         device=data.device,
     )
     db.add(session)
@@ -133,7 +134,7 @@ async def create_session_beacon(
         comparison_enabled=data.get("comparison_enabled", False),
         slide_data=data.get("slide_data", []),
         interactions=data.get("interactions", {}),
-        reactions=[],
+        reactions=[{"type": "emoji", "value": data["reaction"]}] if data.get("reaction") else [],
         device=data.get("device"),
     )
     db.add(session)

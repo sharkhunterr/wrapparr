@@ -84,6 +84,10 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
     interactions.current.push({ slideId, ...data })
   }, [])
 
+  const setReaction = useCallback((emoji) => {
+    latestRef.current.reaction = emoji
+  }, [])
+
   const buildPayload = useCallback(() => {
     const now = Date.now()
     // Close current slide
@@ -118,6 +122,7 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
       comparison_enabled: vals.comparisonEnabled,
       slide_data: slideData,
       interactions: interactions.current,
+      reaction: vals.reaction || null,
       device: navigator.userAgent.substring(0, 200),
     }
   }, [])
@@ -192,5 +197,5 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
 
   const setTotalSlides = useCallback((n) => { latestRef.current.totalSlides = n }, [])
 
-  return { onSlideChange, onInteraction, flush, setTotalSlides }
+  return { onSlideChange, onInteraction, flush, setTotalSlides, setReaction }
 }

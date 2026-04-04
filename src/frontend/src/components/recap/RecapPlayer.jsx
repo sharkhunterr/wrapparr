@@ -102,7 +102,7 @@ function useSlideReady(slideId, slideConfigs) {
 const REACTION_QUICK = ["🔥", "😍", "👏", "😂", "🤯", "❤️", "💀", "🥳", "💩"]
 const REACTION_EXTENDED = ["😭", "🙌", "🫠", "🤩", "😱", "🥶", "👀", "💯", "🎉", "🤮", "😴", "🫡", "🤡", "👑", "💎", "🚀", "⭐", "🍿", "🎬", "📺"]
 
-function ReactionPanel({ accent, year }) {
+function ReactionPanel({ accent, year, onReaction }) {
   const [selected, setSelected] = useState(null)
   const [particles, setParticles] = useState([])
   const [showMore, setShowMore] = useState(false)
@@ -111,6 +111,7 @@ function ReactionPanel({ accent, year }) {
   const handleReaction = (emoji) => {
     setSelected(emoji)
     setShowMore(false)
+    onReaction?.(emoji)
     // Spawn particles across the full page
     const newParticles = Array.from({ length: 16 }, () => ({
       id: idCounter.current++,
@@ -628,7 +629,7 @@ export default function RecapPlayer() {
                 onChangeYear={(y) => { window.location.href = "/recap/" + y }}
               />
             : isFinale && curr.component
-            ? cloneElement(curr.component, { reactionSlot: <ReactionPanel accent={accent} year={year} /> })
+            ? cloneElement(curr.component, { reactionSlot: <ReactionPanel accent={accent} year={year} onReaction={telemetry.setReaction} /> })
             : curr.component}
         </div>
       </ComparisonProvider>

@@ -72,6 +72,7 @@ function SessionRow({ session, expanded, onToggle }) {
             {session.theme_id && <Tag label={session.theme_id} color="#a78bfa" />}
             {session.music_enabled && <Tag label="♫" color="#34d399" />}
             {session.comparison_enabled && <Tag label="⇋" color="#60a5fa" />}
+            {session.reactions?.[0]?.value && <span style={{ fontSize: 14 }}>{session.reactions[0].value}</span>}
           </div>
         </td>
         <td style={{ padding: "8px 6px", textAlign: "center" }}>
