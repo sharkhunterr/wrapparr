@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, cloneElement } from "react"
 import { createPortal } from "react-dom"
 import { useParams } from "react-router-dom"
 import { api } from "../../services/api"
@@ -62,63 +62,41 @@ function extractUserData(fullData, userOrId) {
   return { data: fullData, userId: null }
 }
 
-function getSlideDelay(slideId) {
+function getSlideDelay(slideId, slideConfigs) {
   if (!slideId) return 3000
-  // Podium: jokes + 3 reveals = ~15-20s
-  if (slideId.includes("-pod")) return 18000
-  // Category slides: short animation
+  // Read config for this slide's animation speed
+  const cfg = slideConfigs?.settings?.[slideId] || {}
+  const customSpeed = cfg.animationSpeed
+
+  if (slideId.includes("-pod")) {
+    const phaseWait = cfg.phaseWait || 1800
+    const jokeDuration = cfg.jokeDuration || 2200
+    const jokes = (cfg.jokes?.length || 3)
+    return phaseWait + jokes * jokeDuration + 6000 // jokes + reveals
+  }
   if (slideId.startsWith("cat-")) return 2500
-  // Genre race slides
-  if (slideId.includes("-genres")) return 12000
-  // Timeline / profil cinephile
-  if (slideId.includes("-timeline")) return 10000
-  // Ratings gauge
-  if (slideId.includes("-ratings")) return 8000
-  // Actors/Directors reveal
-  if (slideId.includes("-actors") || slideId.includes("-directors")) return 8000
-  // Interactive slides: wait for user interaction, longer
-  if (slideId.includes("-thisorthat") || slideId.includes("-estimation")) return 15000
-  // Bilan / stats enriched
+  if (slideId.includes("-genres")) return customSpeed ? customSpeed + 2000 : 14000
+  if (slideId.includes("-timeline")) return customSpeed ? customSpeed + 2000 : 10000
+  if (slideId.includes("-ratings")) return customSpeed ? customSpeed + 1000 : 8000
+  if (slideId.includes("-actors") || slideId.includes("-directors")) return customSpeed ? customSpeed + 1000 : 10000
+  if (slideId.includes("-thisorthat") || slideId.includes("-estimation")) return 20000
   if (slideId.includes("-stats-enriched") || slideId.includes("-bilan")) return 6000
-  // Compare
-  if (slideId.includes("-compare") || slideId.includes("compare")) return 8000
-  // Community slides
+  if (slideId.includes("-compare") || slideId === "compare") return customSpeed ? customSpeed + 1000 : 10000
+  if (slideId.includes("-worldmap")) return 6000
   if (slideId.startsWith("community-")) return 5000
-  // Overseerr
   if (slideId.startsWith("overseerr-")) return 5000
-  // Default
   return 4000
 }
 
-function SlideReadyHint({ onNext, accent, slideId }) {
-  const [visible, setVisible] = useState(false)
+function useSlideReady(slideId, slideConfigs) {
+  const [ready, setReady] = useState(false)
   useEffect(() => {
-    setVisible(false)
-    const delay = getSlideDelay(slideId)
-    const t = setTimeout(() => setVisible(true), delay)
+    setReady(false)
+    const delay = getSlideDelay(slideId, slideConfigs)
+    const t = setTimeout(() => setReady(true), delay)
     return () => clearTimeout(t)
   }, [slideId])
-  if (!visible) return null
-  return (
-    <div onClick={onNext} style={{
-      position: "fixed", bottom: 28, left: 0, right: 0, zIndex: 90,
-      display: "flex", justifyContent: "center",
-      pointerEvents: "none",
-    }}>
-      <div onClick={onNext} style={{
-        display: "flex", alignItems: "center", gap: 6, padding: "6px 16px", borderRadius: 20,
-        background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(12px)", cursor: "pointer", pointerEvents: "auto",
-        animation: "slide-up .5s ease both",
-      }}>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 500 }}>Suivant</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
-          <path d="M6 9l6 6 6-6" style={{ animation: "bounce-arrow 1.5s ease-in-out infinite" }} />
-        </svg>
-        <style>{`@keyframes bounce-arrow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }`}</style>
-      </div>
-    </div>
-  )
+  return ready
 }
 
 const REACTION_EMOJIS = ["🔥", "😍", "👏", "😂", "🤯", "❤️", "💀", "🥳"]
@@ -130,19 +108,20 @@ function ReactionPanel({ accent, year }) {
 
   const handleReaction = (emoji) => {
     setSelected(emoji)
-    // Spawn animated particles
-    const newParticles = Array.from({ length: 8 }, (_, i) => ({
+    // Spawn particles across the full page
+    const newParticles = Array.from({ length: 16 }, () => ({
       id: idCounter.current++,
       emoji,
-      x: 50 + (Math.random() - 0.5) * 40,
-      y: 100,
-      angle: -60 - Math.random() * 60,
-      speed: 3 + Math.random() * 4,
-      scale: 0.8 + Math.random() * 0.8,
-      rotation: (Math.random() - 0.5) * 40,
+      x: 10 + Math.random() * 80,
+      startY: 70 + Math.random() * 25,
+      scale: 0.7 + Math.random() * 1.2,
+      rotation: (Math.random() - 0.5) * 60,
+      duration: 1.5 + Math.random() * 1.5,
+      delay: Math.random() * 0.4,
+      drift: (Math.random() - 0.5) * 30,
     }))
     setParticles(prev => [...prev, ...newParticles])
-    setTimeout(() => setParticles(prev => prev.filter(p => !newParticles.includes(p))), 2000)
+    setTimeout(() => setParticles(prev => prev.filter(p => !newParticles.includes(p))), 3500)
 
     // Send to backend
     try {
@@ -158,54 +137,52 @@ function ReactionPanel({ accent, year }) {
   }
 
   return (
-    <div style={{
-      position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 90,
-      display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-      animation: "slide-up .6s ease .5s both",
-    }}>
-      {/* Floating particles */}
+    <>
+      {/* Particles floating across the full page */}
       {particles.map(p => (
         <div key={p.id} style={{
-          position: "fixed", left: p.x + "%", bottom: 80,
-          fontSize: 24 * p.scale, pointerEvents: "none", zIndex: 91,
-          animation: `reaction-float 1.8s ease-out both`,
-          transform: `rotate(${p.rotation}deg)`,
+          position: "fixed", left: p.x + "%", top: p.startY + "%",
+          fontSize: 28 * p.scale, pointerEvents: "none", zIndex: 200,
+          opacity: 0,
+          animation: `reaction-burst ${p.duration}s ease-out ${p.delay}s both`,
+          "--drift": p.drift + "px",
+          "--rot": p.rotation + "deg",
         }}>
           {p.emoji}
         </div>
       ))}
 
-      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 2 }}>
-        {selected ? "Merci !" : "Ta reaction ?"}
-      </div>
+      {/* Inline emoji bar — rendered inside FinaleSlide via portal or inline */}
       <div style={{
-        display: "flex", gap: 4, padding: "6px 10px", borderRadius: 24,
-        background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(12px)",
+        display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 20,
+        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
       }}>
         {REACTION_EMOJIS.map(emoji => (
           <button key={emoji} onClick={() => handleReaction(emoji)} style={{
             background: selected === emoji ? accent + "25" : "transparent",
             border: selected === emoji ? `1px solid ${accent}40` : "1px solid transparent",
-            borderRadius: 12, padding: "4px 6px", cursor: "pointer",
-            fontSize: 18, lineHeight: 1,
+            borderRadius: 10, padding: "3px 5px", cursor: "pointer",
+            fontSize: 16, lineHeight: 1,
             transform: selected === emoji ? "scale(1.3)" : "scale(1)",
             transition: "all .2s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
-            onMouseEnter={e => { if (!selected) e.target.style.transform = "scale(1.25)" }}
+            onMouseEnter={e => { if (!selected) e.target.style.transform = "scale(1.2)" }}
             onMouseLeave={e => { if (selected !== emoji) e.target.style.transform = "scale(1)" }}
           >
             {emoji}
           </button>
         ))}
       </div>
+
       <style>{`
-        @keyframes reaction-float {
-          0% { transform: translateY(0) scale(1); opacity: 1; }
-          100% { transform: translateY(-120px) scale(1.5) rotate(15deg); opacity: 0; }
+        @keyframes reaction-burst {
+          0% { transform: translateY(0) translateX(0) rotate(0deg) scale(0.3); opacity: 1; }
+          70% { opacity: 1; }
+          100% { transform: translateY(-40vh) translateX(var(--drift)) rotate(var(--rot)) scale(1.3); opacity: 0; }
         }
+        @keyframes bounce-arrow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
       `}</style>
-    </div>
+    </>
   )
 }
 
@@ -405,6 +382,9 @@ export default function RecapPlayer() {
     if (currSlideId) telemetry.onSlideChange(currSlideId)
     if (currSlideId === "finale") telemetry.flush()
   }, [currSlideId])
+
+  // Slide ready hint (replaces bottom chevron when animations finish)
+  const slideReady = useSlideReady(currSlideId, slideConfigs)
 
   const goTo = useCallback((n) => {
     if (n < 0 || n >= slides.length || fade) return
@@ -618,21 +598,42 @@ export default function RecapPlayer() {
                 availableYears={availableYears}
                 onChangeYear={(y) => { window.location.href = "/recap/" + y }}
               />
-            : (() => { console.log("[RENDER] slide:", curr.id, "component:", curr.component?.type?.name); return curr.component })()}
+            : isFinale && curr.component
+            ? cloneElement(curr.component, { reactionSlot: <ReactionPanel accent={accent} year={year} /> })
+            : curr.component}
         </div>
       </ComparisonProvider>
 
       {/* Top chevron — go back */}
       {slide > 0 && <NavChevron direction="up" onClick={() => goTo(slide - 1)} />}
 
-      {/* Bottom chevron — go next */}
-      {slide < slides.length - 1 && <NavChevron direction="down" onClick={() => goTo(slide + 1)} />}
-
-      {/* Next slide hint (appears after animations finish) */}
-      {slide < slides.length - 1 && !fade && <SlideReadyHint onNext={() => goTo(slide + 1)} accent={accent} slideId={currSlideId} />}
-
-      {/* Reaction button on finale */}
-      {isFinale && <ReactionPanel accent={accent} year={year} />}
+      {/* Bottom: chevron OR ready button */}
+      {slide < slides.length - 1 && (
+        slideReady ? (
+          <div onClick={() => goTo(slide + 1)} style={{
+            position: "fixed", bottom: 16, left: 0, right: 0, zIndex: 90,
+            display: "flex", justifyContent: "center", pointerEvents: "none",
+          }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "7px 18px", borderRadius: 20,
+              background: accent + "18", border: "1px solid " + accent + "35",
+              backdropFilter: "blur(12px)", cursor: "pointer", pointerEvents: "auto",
+              animation: "slide-up .4s ease both",
+              transition: "background .2s",
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = accent + "30"}
+              onMouseLeave={e => e.currentTarget.style.background = accent + "18"}
+            >
+              <span style={{ fontSize: 10, color: accent, fontWeight: 600 }}>Suivant</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
+                <path d="M6 9l6 6 6-6" style={{ animation: "bounce-arrow 1.5s ease-in-out infinite" }} />
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <NavChevron direction="down" onClick={() => goTo(slide + 1)} />
+        )
+      )}
     </div>
     </ThemeProvider>
   )

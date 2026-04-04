@@ -94,7 +94,7 @@ function MiniPoster({ src, size = 32 }) {
   return <img src={src} alt="" onError={() => setErr(true)} style={{ width: size, height: size * 1.45, borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }} />
 }
 
-export default function FinaleSlide({ accent, userName, year, globalStats, recapData, activeServices, onRestart }) {
+export default function FinaleSlide({ accent, userName, year, globalStats, recapData, activeServices, onRestart, reactionSlot }) {
   const active = useActive()
   const L = useLabels()
   const posters = collectPosters(recapData, activeServices)
@@ -390,12 +390,13 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
           )}
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", position: "relative" }}>
+        {/* Buttons + Reaction */}
+        <div style={{ display: "flex", gap: 8, justifyContent: "center", alignItems: "center", position: "relative", flexWrap: "wrap" }}>
           <button onClick={handleShare} disabled={sharing} style={{ padding: "10px 24px", borderRadius: 40, border: "none", cursor: "pointer", background: "linear-gradient(135deg," + accent + ",#fb923c)", color: "#000", fontSize: 13, fontWeight: 800, boxShadow: "0 0 40px " + accent + "40", opacity: sharing ? 0.6 : 1 }}>
             {sharing ? "Capture..." : "Partager"}
           </button>
           {onRestart && <button onClick={onRestart} style={{ padding: "10px 24px", borderRadius: 40, cursor: "pointer", background: "transparent", color: "var(--th-text-muted, rgba(255,255,255,.35))", fontSize: 12, border: "1px solid rgba(255,255,255,.1)" }}>Rejouer</button>}
+          {reactionSlot}
 
           {/* Share menu fallback (desktop) */}
           {shareMenu && (
