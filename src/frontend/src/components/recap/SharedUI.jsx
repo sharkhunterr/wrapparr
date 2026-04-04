@@ -97,12 +97,19 @@ function CTip({ active, payload, label, unit = "h" }) {
 }
 
 // ── Charts ──
+function yAxisWidth(data, dataKey = "v") {
+  const max = Math.max(...(data || []).map(d => d?.[dataKey] || 0), 0)
+  if (max >= 1000) return 38
+  if (max >= 100) return 32
+  return 28
+}
+
 export function AreaG({ data, dataKey = "v", accent, height = 52, unit = "h", id, prevData, prevDataKey = "v" }) {
   const comp = useComparison()
-  // Merge previous year data if comparison active
   const showPrev = (comp.active && prevData && prevData.length > 0)
   const mergedData = showPrev ? data.map((d, i) => ({ ...d, _prev: prevData[i]?.[prevDataKey] || 0 })) : data
-  return <ResponsiveContainer width="100%" height={height}><AreaChart data={mergedData} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit} />} />{showPrev && <Area type="monotone" dataKey="_prev" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="4 3" fill="rgba(255,255,255,0.03)" dot={false} animationBegin={300} animationDuration={1000} />}<Area type="monotone" dataKey={dataKey} stroke={accent} strokeWidth={2} fill={"url(#" + id + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
+  const yw = yAxisWidth(mergedData, dataKey)
+  return <ResponsiveContainer width="100%" height={height}><AreaChart data={mergedData} margin={{ top: 2, right: 4, left: 0, bottom: 0 }}><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="m" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={yw} /><Tooltip content={<CTip unit={unit} />} />{showPrev && <Area type="monotone" dataKey="_prev" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="4 3" fill="rgba(255,255,255,0.03)" dot={false} animationBegin={300} animationDuration={1000} />}<Area type="monotone" dataKey={dataKey} stroke={accent} strokeWidth={2} fill={"url(#" + id + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
 }
 
 export function DayChart({ data, accent, height = 55, unit, prevData, prevDataKey = "v" }) {
@@ -110,7 +117,8 @@ export function DayChart({ data, accent, height = 55, unit, prevData, prevDataKe
   const showPrev = comp.active && prevData && prevData.length > 0
   const mergedData = showPrev ? data.map((d, i) => ({ ...d, _prev: prevData[i]?.[prevDataKey] || 0 })) : data
   const maxVal = Math.max(...mergedData.map((d) => d.v || 0))
-  return <ResponsiveContainer width="100%" height={height}><BarChart data={mergedData} margin={{ left: -10, right: 0, top: 0, bottom: 0 }} barGap={1} barCategoryGap="20%"><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,.4)", fontSize: 9 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} /><Bar dataKey="v" radius={[3, 3, 0, 0]} animationBegin={200} animationDuration={1200} animationEasing="ease-out">{mergedData.map((d, i) => <Cell key={i} fill={d.v === maxVal ? accent : accent + "55"} />)}</Bar>{showPrev && <Bar dataKey="_prev" radius={[3, 3, 0, 0]} animationBegin={300} animationDuration={1000}>{mergedData.map((d, i) => <Cell key={i} fill="rgba(255,255,255,0.12)" />)}</Bar>}</BarChart></ResponsiveContainer>
+  const yw = yAxisWidth(mergedData, "v")
+  return <ResponsiveContainer width="100%" height={height}><BarChart data={mergedData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }} barGap={1} barCategoryGap="20%"><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="d" tick={{ fill: "rgba(255,255,255,.4)", fontSize: 9 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={yw} /><Tooltip content={<CTip unit={unit || " items"} />} /><Bar dataKey="v" radius={[3, 3, 0, 0]} animationBegin={200} animationDuration={1200} animationEasing="ease-out">{mergedData.map((d, i) => <Cell key={i} fill={d.v === maxVal ? accent : accent + "55"} />)}</Bar>{showPrev && <Bar dataKey="_prev" radius={[3, 3, 0, 0]} animationBegin={300} animationDuration={1000}>{mergedData.map((d, i) => <Cell key={i} fill="rgba(255,255,255,0.12)" />)}</Bar>}</BarChart></ResponsiveContainer>
 }
 
 export function TimeChart({ data, accent, height = 50, unit, prevData, prevDataKey = "v" }) {
@@ -118,7 +126,8 @@ export function TimeChart({ data, accent, height = 50, unit, prevData, prevDataK
   const showPrev = comp.active && prevData && prevData.length > 0
   const mergedData = showPrev ? data.map((d, i) => ({ ...d, _prev: prevData[i]?.[prevDataKey] || 0 })) : data
   const gId = "tg" + accent.replace(/[^a-f0-9]/gi, "")
-  return <ResponsiveContainer width="100%" height={height}><AreaChart data={mergedData} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}><defs><linearGradient id={gId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="h" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={28} /><Tooltip content={<CTip unit={unit || " items"} />} />{showPrev && <Area type="monotone" dataKey="_prev" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="4 3" fill="rgba(255,255,255,0.03)" dot={false} animationBegin={300} animationDuration={1000} />}<Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill={"url(#" + gId + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
+  const yw = yAxisWidth(mergedData, "v")
+  return <ResponsiveContainer width="100%" height={height}><AreaChart data={mergedData} margin={{ top: 2, right: 4, left: 0, bottom: 0 }}><defs><linearGradient id={gId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity={0.5} /><stop offset="100%" stopColor={accent} stopOpacity={0.02} /></linearGradient></defs><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={true} vertical={false} /><XAxis dataKey="h" tick={{ fill: "rgba(255,255,255,.35)", fontSize: 8 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "rgba(255,255,255,.2)", fontSize: 7 }} axisLine={false} tickLine={false} width={yw} /><Tooltip content={<CTip unit={unit || " items"} />} />{showPrev && <Area type="monotone" dataKey="_prev" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="4 3" fill="rgba(255,255,255,0.03)" dot={false} animationBegin={300} animationDuration={1000} />}<Area type="monotone" dataKey="v" stroke={accent} strokeWidth={2} fill={"url(#" + gId + ")"} dot={false} animationBegin={200} animationDuration={1200} animationEasing="ease-out" /></AreaChart></ResponsiveContainer>
 }
 
 export function MiniRank({ data, accent, unit = "h", label = "Classement", me = "" }) {
