@@ -39,10 +39,13 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
 
   const avgYear = totalCount > 0 ? Math.round(totalWeighted / totalCount) : 2020
 
-  // Oldest and newest films
+  // Top 3 oldest and newest films
   const filmsWithYear = allFilms.filter((f) => (f.y || f.year) && (f.y || f.year) > 1890)
-  const oldestFilm = filmsWithYear.length > 0 ? filmsWithYear.reduce((a, b) => ((a.y || a.year) < (b.y || b.year) ? a : b)) : null
-  const newestFilm = filmsWithYear.length > 0 ? filmsWithYear.reduce((a, b) => ((a.y || a.year) > (b.y || b.year) ? a : b)) : null
+  const sortedByYear = [...filmsWithYear].sort((a, b) => (a.y || a.year) - (b.y || b.year))
+  const oldestFilms = sortedByYear.slice(0, 3)
+  const newestFilms = [...sortedByYear].reverse().slice(0, 3)
+  const oldestFilm = oldestFilms[0] || null
+  const newestFilm = newestFilms[0] || null
   const profile = getProfile(avgYear, profiles)
 
   // Auto-detect year range from data (oldest film year, floored to decade)
@@ -272,24 +275,28 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
 
       </div>
 
-      {/* Oldest vs Newest film */}
-      {done && oldestFilm && newestFilm && oldestFilm !== newestFilm && (
+      {/* Top 3 oldest vs Top 3 newest */}
+      {done && oldestFilms.length > 0 && newestFilms.length > 0 && (
         <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.5s both" }}>
-          {[{ film: oldestFilm, label: "Le plus ancien", icon: "🎞️" }, { film: newestFilm, label: "Le plus recent", icon: "🆕" }].map(({ film, label, icon }) => (
-            <div key={label} style={{ flex: 1, display: "flex", gap: 10, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: "var(--th-radius-sm)", background: "var(--th-surface)", border: "1px solid var(--th-border)", backdropFilter: "var(--th-glass-blur)" }}>
-              {film.thumb ? (
-                <img src={film.thumb} alt="" style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, objectFit: "cover", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }} onError={(e) => { e.target.style.display = "none" }} />
-              ) : (
-                <div style={{ width: "clamp(36px, 8vw, 48px)", height: "clamp(52px, 12vw, 70px)", borderRadius: 5, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{icon}</div>
-              )}
-              <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>{label}</div>
-                <div style={{ fontSize: "clamp(11px, 1.5vw, 14px)", fontWeight: 700, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2, marginTop: 2 }}>{film.t}</div>
-                <div style={{ display: "flex", gap: 5, marginTop: 3 }}>
-                  <span style={{ fontSize: "clamp(10px, 1.3vw, 12px)", fontWeight: 700, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{film.y || film.year}</span>
-                  {film.r > 0 && <span style={{ fontSize: "clamp(9px, 1.2vw, 11px)", color: "rgba(255,255,255,0.35)" }}>★ {film.r}</span>}
+          {[{ films: oldestFilms, label: "Les plus anciens", icon: "🎞️" }, { films: newestFilms, label: "Les plus recents", icon: "🆕" }].map(({ films, label, icon }) => (
+            <div key={label} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>{label}</div>
+              {films.map((film, i) => (
+                <div key={film.t + i} style={{ display: "flex", gap: 8, padding: "clamp(5px, 1vw, 8px)", borderRadius: "var(--th-radius-sm)", background: i === 0 ? accent + "0a" : "var(--th-surface)", border: "1px solid " + (i === 0 ? accent + "25" : "var(--th-border)"), animation: `slide-up .35s ease ${0.5 + i * 0.1}s both` }}>
+                  {film.thumb ? (
+                    <img src={film.thumb} alt="" style={{ width: 28, height: 40, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={(e) => { e.target.style.display = "none" }} />
+                  ) : (
+                    <div style={{ width: 28, height: 40, borderRadius: 4, background: "rgba(255,255,255,0.05)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>{icon}</div>
+                  )}
+                  <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <div style={{ fontSize: "clamp(10px, 1.3vw, 12px)", fontWeight: 700, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{film.t}</div>
+                    <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+                      <span style={{ fontSize: "clamp(9px, 1.1vw, 11px)", fontWeight: 700, color: accent, fontFamily: "var(--th-font-mono)" }}>{film.y || film.year}</span>
+                      {film.r > 0 && <span style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "rgba(255,255,255,0.3)" }}>★ {film.r}</span>}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           ))}
         </div>
