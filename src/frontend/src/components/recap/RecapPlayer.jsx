@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import { createPortal } from "react-dom"
 import { useParams } from "react-router-dom"
 import { api } from "../../services/api"
 import useAuthStore from "../../stores/authStore"
@@ -59,6 +60,38 @@ function extractUserData(fullData, userOrId) {
   }
 
   return { data: fullData, userId: null }
+}
+
+function AdminUserSelect({ recapUsers, currentUid, originalUid, impersonating, accent, onSelect }) {
+  const [el, setEl] = useState(null)
+  useEffect(() => {
+    const slot = document.getElementById("recap-topbar-extra")
+    if (slot) setEl(slot)
+  }, [])
+
+  const content = (
+    <select
+      value={currentUid || ""}
+      onChange={e => onSelect(e.target.value === originalUid ? null : e.target.value)}
+      style={{
+        padding: "3px 6px", borderRadius: 6, fontSize: 9,
+        background: impersonating ? accent + "20" : "rgba(255,255,255,0.06)",
+        color: impersonating ? accent : "rgba(255,255,255,0.4)",
+        border: "1px solid " + (impersonating ? accent + "40" : "rgba(255,255,255,0.1)"),
+        cursor: "pointer", outline: "none",
+        fontFamily: "JetBrains Mono,monospace",
+        transition: "all .2s ease",
+      }}
+    >
+      {recapUsers.map(u => (
+        <option key={u.uid} value={u.uid} style={{ background: "#111", color: "#ccc" }}>
+          {u.name}{u.uid === originalUid ? " (moi)" : ""}
+        </option>
+      ))}
+    </select>
+  )
+
+  return el ? createPortal(content, el) : null
 }
 
 export default function RecapPlayer() {
@@ -214,7 +247,11 @@ export default function RecapPlayer() {
   })
 
   // Build slide list from data + config
-  const slides = buildSlides(recapData, theme, slideConfigs, user, year, myRecapUserId, telemetry.onInteraction)
+  // When impersonating, override user display_name for slides
+  const effectiveUser = impersonateUserId && rawRecapData?.users?.[impersonateUserId]
+    ? { ...user, display_name: rawRecapData.users[impersonateUserId].name || user.display_name }
+    : user
+  const slides = buildSlides(recapData, theme, slideConfigs, effectiveUser, year, myRecapUserId, telemetry.onInteraction)
   telemetry.setTotalSlides(slides.length)
   const currSlideId = slides[slide]?.id
   useEffect(() => {
@@ -379,28 +416,15 @@ export default function RecapPlayer() {
       }} />}
       <FullscreenButton />
 
-      {/* Admin: impersonate user */}
-      {isAdmin && recapUsers.length > 1 && (
-        <div style={{ position: "fixed", top: R.counterTop, right: 140, zIndex: 100 }}>
-          <select
-            value={impersonateUserId || myRecapUserId || ""}
-            onChange={e => handleImpersonate(e.target.value)}
-            style={{
-              padding: "3px 6px", borderRadius: 6, fontSize: 9,
-              background: "rgba(0,0,0,0.5)", color: accent,
-              border: "1px solid " + accent + "40",
-              backdropFilter: "blur(8px)", cursor: "pointer",
-              fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)",
-            }}
-          >
-            {recapUsers.map(u => (
-              <option key={u.uid} value={u.uid} style={{ background: "#111", color: "#ccc" }}>
-                {u.name}{u.uid === myRecapUserId && !impersonateUserId ? " (moi)" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      {/* Admin: impersonate user (portal to topbar, left of music) */}
+      {isAdmin && recapUsers.length > 1 && <AdminUserSelect
+        recapUsers={recapUsers}
+        currentUid={impersonateUserId || myRecapUserId}
+        originalUid={myRecapUserId}
+        impersonating={!!impersonateUserId}
+        accent={accent}
+        onSelect={handleImpersonate}
+      />}
 
       {/* Slide content */}
       <ComparisonProvider value={comparisonCtx}>
