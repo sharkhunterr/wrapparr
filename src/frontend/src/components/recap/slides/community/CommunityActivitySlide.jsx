@@ -72,9 +72,9 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
-      <Lbl c={accent} size={9}>👥 Communaute · Habitudes</Lbl>
+      <Lbl c={accent} size={9}>👥 Communauté · Habitudes</Lbl>
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05, marginTop: 4 }}>
-        Quand la communaute <span style={{ color: accent }}>{isSeries ? "binge" : "regarde"}</span>
+        Quand la communauté <span style={{ color: accent }}>{isSeries ? "binge" : "regarde"}</span>
       </h2>
 
       {/* Badges totaux */}
@@ -94,9 +94,9 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
       </div>
     </div>
 
-    {/* Activite mensuelle superposee */}
+    {/* Activité mensuelle superposee */}
     <div className="s1" style={{ padding: "10px 10px 6px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)", marginBottom: 8 }}>
-      <Lbl c={accent} size={8}>Activite mensuelle par utilisateur</Lbl>
+      <Lbl c={accent} size={8}>Activité mensuelle par utilisateur</Lbl>
       <ResponsiveContainer width="100%" height={170}>
         <AreaChart data={multiMonthlyData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
           <defs>
@@ -141,8 +141,8 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
       </div>
     </div>
 
-    {/* Jour prefere (DayChart) */}
-    {dayData.length > 0 && <div className="glass s2" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Jour prefere</Lbl><DayChart data={dayData} accent={accent} height={100} /></div>}
+    {/* Jour préféré (DayChart) */}
+    {dayData.length > 0 && <div className="glass s2" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Jour préféré</Lbl><DayChart data={dayData} accent={accent} height={100} /></div>}
 
     {/* Heure de consommation (TimeChart) */}
     {timeData.length > 0 && <div className="glass s3" style={{ padding: "10px 12px", marginBottom: 8 }}><Lbl c={accent} size={8}>Heure de consommation</Lbl><TimeChart data={timeData} accent={accent} height={100} /></div>}
@@ -160,7 +160,7 @@ export function CommunityActivitySlide({ accent, allUsers, year, me, mediaType =
         )}
         {bestDayEntry && (
           <div style={{ flex: 1, padding: "clamp(8px, 1.5vw, 12px)", borderRadius: "var(--th-radius-sm)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
-            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journee record</div>
+            <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Journée record</div>
             <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.1 }}>
               {bestDayEntry.day_name} {bestDayEntry.day} {bestDayEntry.month}
             </div>

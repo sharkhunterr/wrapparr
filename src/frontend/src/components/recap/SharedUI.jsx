@@ -77,7 +77,7 @@ export function Tag({ accent, year = 2024 }) {
 export const Pill = ({ children, accent }) =>
   <span style={{ display: "inline-block", padding: "clamp(2px, 0.4vw, 4px) clamp(7px, 1.2vw, 12px)", borderRadius: 18, background: accent + "1e", border: "1px solid " + accent + "38", color: accent, fontSize: "clamp(9px, 1.1vw, 11px)" }}>{children}</span>
 
-export const VsB = ({ value, label = "vs annee prec." }) => {
+export const VsB = ({ value, label = "vs année préc." }) => {
   const p = value > 0
   return <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "clamp(3px, 0.5vw, 5px) clamp(8px, 1.2vw, 12px)", borderRadius: 18, background: p ? "#22c55e16" : "#ef444416", border: "1px solid " + (p ? "#22c55e" : "#ef4444") + "40", color: p ? "#4ade80" : "#f87171", fontSize: "clamp(9px, 1.2vw, 12px)", fontWeight: 600, animation: "badge-p .5s ease .6s both" }}>{p ? "↑" : "↓"} {p ? "+" : ""}{value}% {label}</span>
 }

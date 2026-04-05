@@ -114,7 +114,7 @@ export default function FavoriteActorsSlide({ accent, data, year, config = {}, s
           Tes acteurs <span style={{ color: accent }}>favoris</span>
         </h2>
         <p style={{ fontSize: 10, color: "var(--th-text-muted)", marginTop: 4 }}>
-          Les visages que tu as le plus {L.viewed} cette annee
+          Les visages que tu as le plus {L.viewed} cette année
         </p>
       </div>
 
@@ -134,7 +134,7 @@ export default function FavoriteActorsSlide({ accent, data, year, config = {}, s
 
       {done && (
         <div style={{ marginTop: 12, fontSize: 10, color: "var(--th-text-muted)", textAlign: "center", animation: "slide-up 0.4s ease both" }}>
-          {actors.length} acteurs presents dans plusieurs de tes films
+          {actors.length} acteurs présents dans plusieurs de tes films
         </div>
       )}
 

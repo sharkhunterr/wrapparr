@@ -24,7 +24,7 @@ export default function IntroSlide({ accent, userName, year, onStart, hasCompari
       WRAP<span style={{ color: accent }}>PARR</span>
     </h1>
     <p className="s2" style={{ fontSize: 16, color: "var(--th-text-secondary, rgba(255,255,255,.42))", margin: "14px 0 4px" }}>Bienvenue, <span style={{ color: "var(--th-text, white)", fontWeight: 600 }}>{userName}</span></p>
-    <p className="s3" style={{ fontSize: 12, color: "var(--th-text-faint, rgba(255,255,255,.2))", marginBottom: 34, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>Ton annee {year}<span style={{ animation: "blink-c 1s step-end infinite" }}>|</span></p>
-    <button className="s4" onClick={handleStart} style={{ padding: "14px 42px", borderRadius: 40, border: "none", cursor: "pointer", background: "linear-gradient(135deg," + accent + ",#fb923c)", color: "#000", fontSize: 15, fontWeight: 800, boxShadow: "0 0 70px " + accent + "55" }}>Decouvrir →</button>
+    <p className="s3" style={{ fontSize: 12, color: "var(--th-text-faint, rgba(255,255,255,.2))", marginBottom: 34, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>Ton année {year}<span style={{ animation: "blink-c 1s step-end infinite" }}>|</span></p>
+    <button className="s4" onClick={handleStart} style={{ padding: "14px 42px", borderRadius: 40, border: "none", cursor: "pointer", background: "linear-gradient(135deg," + accent + ",#fb923c)", color: "#000", fontSize: 15, fontWeight: 800, boxShadow: "0 0 70px " + accent + "55" }}>Découvrir →</button>
   </div>
 }

@@ -68,7 +68,7 @@ export const SLIDE_REGISTRY = [
     ],
   },
   {
-    id: "{service}-stats-enriched", label: "Bilan cinema", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
+    id: "{service}-stats-enriched", label: "Bilan cinéma", group: "service", onlyFor: ["tautulli", "plex", "jellyfin"],
     desc: "Bilan films : top films, donut genres, profil cinéphile, temps équivalent, affiches",
     params: [
       { key: "showStamp", label: "Afficher le tampon", type: "bool", default: true },
@@ -399,13 +399,13 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
   {
-    id: "community-activity-films", label: "Activite (films)", group: "global",
+    id: "community-activity-films", label: "Activité (films)", group: "global",
     desc: "Activité mensuelle de tous les utilisateurs superposée — films",
     params: [],
   },
   {
     id: "community-top-films", label: "Top populaires (films)", group: "global",
-    desc: "Films les plus vus par la communauté avec affiches et details",
+    desc: "Films les plus vus par la communauté avec affiches et détails",
     params: [],
   },
   {
@@ -424,13 +424,13 @@ export const SLIDE_REGISTRY = [
     params: [],
   },
   {
-    id: "community-activity-series", label: "Activite (series)", group: "global",
+    id: "community-activity-series", label: "Activité (séries)", group: "global",
     desc: "Activité mensuelle de tous les utilisateurs superposée — series",
     params: [],
   },
   {
     id: "community-top-series", label: "Top populaires (series)", group: "global",
-    desc: "Series les plus vues par la communauté avec affiches et details",
+    desc: "Series les plus vues par la communauté avec affiches et détails",
     params: [],
   },
   {

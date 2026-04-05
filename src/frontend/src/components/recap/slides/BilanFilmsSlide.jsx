@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react"
 
 const DEFAULT_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
-  { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
-  { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
+  { min: 20, max: 50, name: "Cinéphile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro du cinéma", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
+  { min: 100, max: 200, name: "Machine à films", desc: "Tu enchaînes les films sans relâche", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien suprême", desc: "Tu vis et respires cinéma", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
 ]
 
 function AnimNum({ target, suffix = "", duration = 1800, accent }) {
@@ -98,7 +98,7 @@ export default function BilanFilmsSlide({ accent, data, year, config = {} }) {
         <div className="s0" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
           <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-            Ton bilan <span style={{ color: accent }}>cinema</span>
+            Ton bilan <span style={{ color: accent }}>cinéma</span>
           </h2>
         </div>
 
@@ -137,7 +137,7 @@ export default function BilanFilmsSlide({ accent, data, year, config = {} }) {
             backdropFilter: "blur(8px)",
             animation: "slide-up 0.5s ease both",
           }}>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>C'est l'equivalent de</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>C'est l'équivalent de</div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <span style={{ fontSize: 28 }}>{equiv.icon}</span>
               <div>
@@ -146,7 +146,7 @@ export default function BilanFilmsSlide({ accent, data, year, config = {} }) {
               </div>
             </div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 4 }}>
-              passes devant un ecran, non-stop
+              passées devant un écran, non-stop
             </div>
           </div>
         )}
@@ -179,7 +179,7 @@ export default function BilanFilmsSlide({ accent, data, year, config = {} }) {
             </div>
             <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, textAlign: "center", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{avgDuration}min</div>
-              <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)" }}>duree moyenne</div>
+              <div style={{ fontSize: 8, color: "rgba(255,255,255,0.25)" }}>durée moyenne</div>
             </div>
             <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, textAlign: "center", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: "white", fontFamily: "JetBrains Mono,monospace" }}>{allFilms.filter((f) => (f.plays || 0) > 1).length}</div>

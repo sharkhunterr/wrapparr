@@ -25,10 +25,10 @@ export default function AudiobookFavoritesSlide({ accent, data, year, serviceTyp
       <div className="s0" style={{ marginBottom: 12 }}>
         <Tag accent={accent} year={year} />
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Tes voix <span style={{ color: accent }}>preferees</span>
+          Tes voix <span style={{ color: accent }}>préférées</span>
         </h2>
         <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>
-          Les auteurs et narrateurs que tu as le plus ecoutes
+          Les auteurs et narrateurs que tu as le plus écoutés
         </div>
       </div>
 

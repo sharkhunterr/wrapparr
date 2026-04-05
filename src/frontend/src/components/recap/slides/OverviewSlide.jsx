@@ -8,7 +8,7 @@ export default function OverviewSlide({ accent, globalStats, year }) {
   ]
   return <div style={{ maxWidth: "clamp(320px, 85vw, 540px)", width: "100%" }}>
     <div className="s0" style={{ marginBottom: 18 }}><Tag accent={accent} year={year} />
-      <h2 style={{ fontSize: "clamp(24px, 7vw, 38px)", fontWeight: 800, color: "white", lineHeight: 1 }}>Ton annee<br /><span style={{ color: accent }}>en chiffres</span></h2>
+      <h2 style={{ fontSize: "clamp(24px, 7vw, 38px)", fontWeight: 800, color: "white", lineHeight: 1 }}>Ton année<br /><span style={{ color: accent }}>en chiffres</span></h2>
     </div>
     <div className="s1" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
       {cards.map((c, i) => (

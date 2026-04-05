@@ -121,10 +121,10 @@ export default function FavoriteDirectorsSlide({ accent, data, year, config = {}
       <div className="s0" style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Tes realisateurs <span style={{ color: accent }}>favoris</span>
+          Tes réalisateurs <span style={{ color: accent }}>favoris</span>
         </h2>
         <p style={{ fontSize: 10, color: "var(--th-text-muted)", marginTop: 4 }}>
-          Les createurs derriere tes films preferes
+          Les créateurs derrière tes films préférés
         </p>
       </div>
 
@@ -143,7 +143,7 @@ export default function FavoriteDirectorsSlide({ accent, data, year, config = {}
 
       {done && (
         <div style={{ marginTop: 12, fontSize: 10, color: "var(--th-text-muted)", textAlign: "center", animation: "slide-up 0.4s ease both" }}>
-          {directors.length} realisateurs presents dans plusieurs de tes films
+          {directors.length} réalisateurs présents dans plusieurs de tes films
         </div>
       )}
 

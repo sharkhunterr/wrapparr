@@ -132,8 +132,8 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
   const category = categories.find((c) => totalHours >= c.min && totalHours < c.max) || categories[categories.length - 1]
 
   // Labels adaptes films vs series
-  const itemLabel = isSeries ? "episodes" : "films"
-  const bilanLabel = isSeries ? "series" : "cinema"
+  const itemLabel = isSeries ? "épisodes" : "films"
+  const bilanLabel = isSeries ? "séries" : "cinéma"
   const unitLabel = isSeries ? "ep." : L.viewed
   const perMonthLabel = isSeries ? "ep. / mois" : "films / mois"
 

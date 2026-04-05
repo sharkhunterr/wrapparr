@@ -72,19 +72,19 @@ function collectPosters(recapData, activeServices) {
 
 const FILM_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", emoji: "🍿" },
-  { min: 20, max: 50, name: "Cinephile du dimanche", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro du cinema", emoji: "🎬" },
-  { min: 100, max: 200, name: "Machine a films", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien supreme", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende vivante", emoji: "👑" },
+  { min: 20, max: 50, name: "Cinéphile du dimanche", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro du cinéma", emoji: "🎬" },
+  { min: 100, max: 200, name: "Machine à films", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien suprême", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende vivante", emoji: "👑" },
 ]
 const SERIES_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", emoji: "📺" },
-  { min: 20, max: 50, name: "Binge watcher debutant", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro aux series", emoji: "📺" },
-  { min: 100, max: 200, name: "Machine a episodes", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien des series", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende du binge", emoji: "👑" },
+  { min: 20, max: 50, name: "Binge watcher débutant", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro aux séries", emoji: "📺" },
+  { min: 100, max: 200, name: "Machine à épisodes", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien des séries", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende du binge", emoji: "👑" },
 ]
 function findCat(hours, cats) { return cats.find((c) => hours >= c.min && hours < c.max) || cats[cats.length - 1] }
 
@@ -135,7 +135,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: `Mon Wrapparr ${year}`,
-          text: `Mon recap ${year} sur Wrapparr !`,
+          text: `Mon récap ${year} sur Wrapparr !`,
           files: [file],
         })
         return
@@ -149,7 +149,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
       if (navigator.share) {
         await navigator.share({
           title: `Mon Wrapparr ${year}`,
-          text: `Mon recap ${year} sur Wrapparr !`,
+          text: `Mon récap ${year} sur Wrapparr !`,
         })
         return
       }
@@ -229,14 +229,14 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
           <div style={{ fontSize: 36, marginBottom: 6, animation: "float 2.5s ease-in-out infinite", filter: "drop-shadow(0 0 20px " + accent + "90)" }}>🏆</div>
           <div style={{ fontSize: 8, color: "var(--th-text-faint, rgba(255,255,255,.2))", letterSpacing: ".35em", textTransform: "uppercase", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", marginBottom: 4 }}>{L.brand} · {year}</div>
           <h1 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 800, color: "var(--th-text, white)", lineHeight: 1.0, marginBottom: 8 }}>
-            Ton recap <span style={{ backgroundImage: "linear-gradient(90deg,#E5A00D,#fb923c,#c084fc,#34d399,#60a5fa,#E5A00D)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", backgroundSize: "300% auto", animation: "shimmer-t 4s linear infinite" }}>{year}</span>
+            Ton récap <span style={{ backgroundImage: "linear-gradient(90deg,#E5A00D,#fb923c,#c084fc,#34d399,#60a5fa,#E5A00D)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", backgroundSize: "300% auto", animation: "shimmer-t 4s linear infinite" }}>{year}</span>
           </h1>
         </div>
 
         {/* Monthly activity — line chart films + series */}
         {combinedMonthly.some((m) => m.films + m.series > 0) && (
           <div style={{ padding: "8px 10px 4px", borderRadius: "var(--th-radius-sm, 12px)", background: "var(--th-surface, rgba(255,255,255,0.08))", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", marginBottom: 10 }}>
-            <div style={{ fontSize: 9, color: "var(--th-text-muted, rgba(255,255,255,0.3))", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 2 }}>Activite mensuelle</div>
+            <div style={{ fontSize: 9, color: "var(--th-text-muted, rgba(255,255,255,0.3))", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 2 }}>Activité mensuelle</div>
             <ResponsiveContainer width="100%" height={100}>
               <AreaChart data={combinedMonthly} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
                 <defs>
@@ -252,7 +252,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
             </ResponsiveContainer>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 2 }}>
               {totalFilms > 0 && <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: accent }}><span style={{ width: 10, height: 2.5, borderRadius: 2, background: accent }} />Films</span>}
-              {totalSeries > 0 && <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: seriesAccent }}><span style={{ width: 10, height: 2.5, borderRadius: 2, background: seriesAccent }} />Series</span>}
+              {totalSeries > 0 && <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: seriesAccent }}><span style={{ width: 10, height: 2.5, borderRadius: 2, background: seriesAccent }} />Séries</span>}
             </div>
           </div>
         )}
@@ -342,7 +342,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
               <div style={{ display: "flex", gap: 4 }}>
                 <div style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--th-radius-xs, 8px)", background: seriesAccent + "12", border: "1px solid " + seriesAccent + "25", backdropFilter: "blur(8px)", textAlign: "center" }}>
                   <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: seriesAccent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? <AN t={totalSeries} /> : 0}</div>
-                  <div style={{ fontSize: 9, color: "var(--th-text-muted, rgba(255,255,255,0.3))" }}>episodes</div>
+                  <div style={{ fontSize: 9, color: "var(--th-text-muted, rgba(255,255,255,0.3))" }}>épisodes</div>
                 </div>
                 <div style={{ flex: 1, padding: "6px 8px", borderRadius: "var(--th-radius-xs, 8px)", background: "var(--th-surface, rgba(255,255,255,0.08))", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)", textAlign: "center" }}>
                   <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "var(--th-text, white)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)" }}>{active ? <AN t={Math.round(seriesHours)} s="h" /> : "0h"}</div>
@@ -353,7 +353,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
               {/* Top 3 series */}
               {seriesTop.length > 0 && (
                 <div style={{ padding: "8px 8px", borderRadius: "var(--th-radius-sm, 10px)", background: "var(--th-surface, rgba(255,255,255,0.08))", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
-                  <div style={{ fontSize: 9, color: seriesAccent, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 5, fontWeight: 700 }}>Top series</div>
+                  <div style={{ fontSize: 9, color: seriesAccent, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 5, fontWeight: 700 }}>Top séries</div>
                   {seriesTop.map((s, i) => (
                     <div key={s.t + i} style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 5 }}>
                       <span style={{ width: 14, fontSize: 10, fontWeight: 800, color: i === 0 ? seriesAccent : "var(--th-text-faint, rgba(255,255,255,0.2))", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textAlign: "center", flexShrink: 0 }}>{i + 1}</span>
@@ -412,7 +412,7 @@ export default function FinaleSlide({ accent, userName, year, globalStats, recap
               </button>
               <button onClick={downloadImage} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: "var(--th-radius-xs, 8px)", border: "none", cursor: "pointer", background: "rgba(255,255,255,0.05)", color: "var(--th-text, white)", fontSize: 11, fontWeight: 500, textAlign: "left" }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
-                Telecharger
+                Télécharger
               </button>
               <button onClick={() => setShareMenu(false)} style={{ padding: "4px 12px", borderRadius: "var(--th-radius-xs, 8px)", border: "none", cursor: "pointer", background: "none", color: "var(--th-text-muted, rgba(255,255,255,0.3))", fontSize: 9 }}>
                 Fermer

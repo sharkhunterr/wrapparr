@@ -32,10 +32,10 @@ export default function OnboardingSlide({
       <div className="s0">
         <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: accent, letterSpacing: "0.3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 7, opacity: 0.8 }}>{L.brand} · {year}</div>
         <h2 style={{ fontSize: "clamp(20px, 5.5vw, 30px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.1, marginBottom: 6 }}>
-          Ton recap <span style={{ color: accent }}>{year}</span> est pret
+          Ton récap <span style={{ color: accent }}>{year}</span> est prêt
         </h2>
         <p style={{ fontSize: "clamp(11px, 1.4vw, 13px)", color: "var(--th-text-secondary)", lineHeight: 1.5, marginBottom: 16 }}>
-          Decouvre ton annee en images, stats et classements.
+          Découvre ton année en images, stats et classements.
         </p>
       </div>
 
@@ -67,9 +67,9 @@ export default function OnboardingSlide({
         </div>
       )}
 
-      {/* Parametres */}
+      {/* Paramètres */}
       <div className="s3" style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: "clamp(9px, 1.1vw, 11px)", color: "var(--th-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Parametres</div>
+        <div style={{ fontSize: "clamp(9px, 1.1vw, 11px)", color: "var(--th-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Paramètres</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {/* Comparison toggle */}
           {hasComparison && (
@@ -112,7 +112,7 @@ export default function OnboardingSlide({
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--th-text-muted)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: "var(--th-text)", fontWeight: 600 }}>Theme visuel</div>
+                <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: "var(--th-text)", fontWeight: 600 }}>Thème visuel</div>
               </div>
               <select value={currentThemeId || "glass-dark"} onChange={(e) => onSelectTheme && onSelectTheme(e.target.value)} style={{
                 padding: "4px 8px", borderRadius: 4, fontSize: 10,
@@ -134,7 +134,7 @@ export default function OnboardingSlide({
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--th-text-muted)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: "var(--th-text)", fontWeight: 600 }}>Annee</div>
+                <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: "var(--th-text)", fontWeight: 600 }}>Année</div>
               </div>
               <select value={year} onChange={(e) => onChangeYear && onChangeYear(parseInt(e.target.value))} style={{
                 padding: "4px 8px", borderRadius: 4, fontSize: 10,
@@ -155,7 +155,7 @@ export default function OnboardingSlide({
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--th-text-muted)" strokeWidth="2" strokeLinecap="round"><path d="M5 15l7-7 7 7" /></svg>
             <div style={{ fontSize: "clamp(10px, 1.2vw, 12px)", color: "var(--th-text)", fontWeight: 600 }}>Navigation</div>
-            <div style={{ fontSize: "clamp(8px, 1vw, 9px)", color: "var(--th-text-muted)", marginLeft: "auto" }}>Fleches ↑↓ ou swipe</div>
+            <div style={{ fontSize: "clamp(8px, 1vw, 9px)", color: "var(--th-text-muted)", marginLeft: "auto" }}>Flèches ↑↓ ou swipe</div>
           </div>
         </div>
       </div>

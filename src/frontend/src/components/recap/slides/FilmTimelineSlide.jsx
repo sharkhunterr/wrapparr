@@ -3,11 +3,11 @@ import { useComparison } from "../SharedUI"
 import { useLabels } from "../ThemeContext"
 
 const DEFAULT_PROFILES = [
-  { min: 1900, max: 1949, name: "Cinephile classique", desc: "Tes films datent de l'age d'or du cinema", emoji: "🎩" },
-  { min: 1950, max: 1979, name: "Nostalgique", desc: "Tu adores les grandes fresques et le cinema d'auteur", emoji: "📽️" },
-  { min: 1980, max: 1999, name: "Enfant des 80s-90s", desc: "Action, aventure, et blockbusters — ton epoque", emoji: "📼" },
-  { min: 2000, max: 2014, name: "Millenial", desc: "Tu as grandi avec les franchises et le cinema numerique", emoji: "🎬" },
-  { min: 2015, max: 2030, name: "Ultra-moderne", desc: "Toujours a la pointe, tu regardes les sorties recentes", emoji: "🚀" },
+  { min: 1900, max: 1949, name: "Cinéphile classique", desc: "Tes films datent de l'âge d'or du cinéma", emoji: "🎩" },
+  { min: 1950, max: 1979, name: "Nostalgique", desc: "Tu adores les grandes fresques et le cinéma d'auteur", emoji: "📽️" },
+  { min: 1980, max: 1999, name: "Enfant des 80s-90s", desc: "Action, aventure, et blockbusters — ton époque", emoji: "📼" },
+  { min: 2000, max: 2014, name: "Millénial", desc: "Tu as grandi avec les franchises et le cinéma numérique", emoji: "🎬" },
+  { min: 2015, max: 2030, name: "Ultra-moderne", desc: "Toujours à la pointe, tu regardes les sorties récentes", emoji: "🚀" },
 ]
 
 const ALL_DECADES = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
@@ -105,7 +105,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
       <div className="s0" style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Ton profil <span style={{ color: accent }}>{isSeries ? "seriephile" : "cinephile"}</span>
+          Ton profil <span style={{ color: accent }}>{isSeries ? "sériephile" : "cinéphile"}</span>
         </h2>
       </div>
 
@@ -124,7 +124,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
               <div style={{ fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", lineHeight: 1 }}>{avgYear}</div>
-              <div style={{ fontSize: 7, color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
+              <div style={{ fontSize: 7, color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>année moy.</div>
             </div>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
               <div style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800, color: "rgba(255,255,255,0.35)", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", lineHeight: 1 }}>{prevAvgYear}</div>
-              <div style={{ fontSize: 7, color: "var(--th-text-faint)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>annee moy.</div>
+              <div style={{ fontSize: 7, color: "var(--th-text-faint)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 2 }}>année moy.</div>
             </div>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
 
       {/* Timeline with vertical bars */}
       <div className="glass" style={{ padding: "10px 12px", marginBottom: 10 }}>
-        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.32)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>Films par annee de sortie</div>
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.32)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>Films par année de sortie</div>
 
         {/* Vertical bars area — one thin bar per year */}
         {/* Chart area with Y labels on left */}
@@ -278,7 +278,7 @@ export default function FilmTimelineSlide({ accent, data, year, config = {}, med
       {/* Top 3 oldest vs Top 3 newest */}
       {done && oldestFilms.length > 0 && newestFilms.length > 0 && (
         <div style={{ display: "flex", gap: 8, marginTop: 12, animation: "slide-up 0.4s ease 0.5s both" }}>
-          {[{ films: oldestFilms, label: "Les plus anciens", icon: "🎞️" }, { films: newestFilms, label: "Les plus recents", icon: "🆕" }].map(({ films, label, icon }) => (
+          {[{ films: oldestFilms, label: "Les plus anciens", icon: "🎞️" }, { films: newestFilms, label: "Les plus récents", icon: "🆕" }].map(({ films, label, icon }) => (
             <div key={label} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
               <div style={{ fontSize: "clamp(8px, 1vw, 10px)", color: "var(--th-text-muted)", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 2 }}>{label}</div>
               {films.map((film, i) => (

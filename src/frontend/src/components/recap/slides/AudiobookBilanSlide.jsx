@@ -3,12 +3,12 @@ import { useActive, AN, Tag, Lbl, Pill, AreaG, useComparison, CompBadge, CompLeg
 import { useLabels } from "../ThemeContext"
 
 const DEFAULT_CATEGORIES = [
-  { min: 0, max: 1, name: "Curieux debutant", desc: "Tu as effleure le monde des livres audio", emoji: "👂" },
-  { min: 1, max: 10, name: "Auditeur occasionnel", desc: "Tu ecoutes de temps en temps", emoji: "🎧" },
-  { min: 10, max: 30, name: "Lecteur regulier", desc: "Les livres audio font partie de ton quotidien", emoji: "📖" },
-  { min: 30, max: 80, name: "Devoeur de livres", desc: "Tu enchaines les chapitres sans relache", emoji: "📚" },
-  { min: 80, max: 200, name: "Marathonien litteraire", desc: "Tu vis et respires livres audio", emoji: "🏆" },
-  { min: 200, max: 99999, name: "Legende de l'ecoute", desc: "Tu as probablement ecoute plus que ton narrateur prefere", emoji: "👑" },
+  { min: 0, max: 1, name: "Curieux débutant", desc: "Tu as effleuré le monde des livres audio", emoji: "👂" },
+  { min: 1, max: 10, name: "Auditeur occasionnel", desc: "Tu écoutes de temps en temps", emoji: "🎧" },
+  { min: 10, max: 30, name: "Lecteur régulier", desc: "Les livres audio font partie de ton quotidien", emoji: "📖" },
+  { min: 30, max: 80, name: "Dévoreur de livres", desc: "Tu enchaînes les chapitres sans relâche", emoji: "📚" },
+  { min: 80, max: 200, name: "Marathonien littéraire", desc: "Tu vis et respires livres audio", emoji: "🏆" },
+  { min: 200, max: 99999, name: "Légende de l'écoute", desc: "Tu as probablement écouté plus que ton narrateur préféré", emoji: "👑" },
 ]
 
 function PosterImg({ src, size = 36 }) {
@@ -121,7 +121,7 @@ export default function AudiobookBilanSlide({ accent, data, year, config = {}, s
       <div className="s0" style={{ marginBottom: 8 }}>
         <Tag accent={accent} year={year} /><Lbl c={accent} size={9}>🎧 LIVRES AUDIO</Lbl>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05, marginTop: 4 }}>
-          Ton bilan <span style={{ color: accent }}>ecoute</span>
+          Ton bilan <span style={{ color: accent }}>écoute</span>
         </h2>
 
         {/* Stats */}
@@ -172,11 +172,11 @@ export default function AudiobookBilanSlide({ accent, data, year, config = {}, s
         )}
         <div style={{ flex: "1 1 100%", display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-            {totalSessions > 0 && <MiniStat iconKey="book" value={totalSessions} label="sessions d'ecoute" accent={accent} />}
-            {booksFinished > 0 && <MiniStat iconKey="check" value={booksFinished} label="livres termines" accent={accent} />}
+            {totalSessions > 0 && <MiniStat iconKey="book" value={totalSessions} label="sessions d'écoute" accent={accent} />}
+            {booksFinished > 0 && <MiniStat iconKey="check" value={booksFinished} label="livres terminés" accent={accent} />}
           </div>
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-            {topAuthors[0] && <MiniStat iconKey="pen" value={topAuthors[0].name} label={topAuthors[0].hours + (timeUnit === "min" ? " min" : "h") + " d'ecoute"} accent={accent} />}
+            {topAuthors[0] && <MiniStat iconKey="pen" value={topAuthors[0].name} label={topAuthors[0].hours + (timeUnit === "min" ? " min" : "h") + " d'écoute"} accent={accent} />}
             {topNarrators[0] && <MiniStat iconKey="mic" value={topNarrators[0].name} label={topNarrators[0].hours + (timeUnit === "min" ? " min" : "h") + " · narrateur"} accent={accent} />}
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function AudiobookBilanSlide({ accent, data, year, config = {}, s
         if (!hasData) return null
         return (
           <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: "var(--th-radius)", background: "var(--th-surface-hover)", border: "1px solid var(--th-border-strong)" }}>
-            <Lbl c={accent} size={8}>Ecoute mensuelle ({timeUnit})</Lbl>
+            <Lbl c={accent} size={8}>Écoute mensuelle ({timeUnit})</Lbl>
             <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit={" " + timeUnit} id="abs-bilan-monthly" prevData={prevMonthly} prevDataKey="previous" />
             <CompLegend accent={accent} year={year} />
           </div>
@@ -239,7 +239,7 @@ export default function AudiobookBilanSlide({ accent, data, year, config = {}, s
             background: accent + "0a", position: "relative", overflow: "hidden",
           }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}35 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
-            <span style={{ position: "relative" }}>{config.stampText || "Ecoute"}</span>
+            <span style={{ position: "relative" }}>{config.stampText || "Écouté"}</span>
           </div>
         </div>
       )}

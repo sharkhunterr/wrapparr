@@ -11,15 +11,15 @@ const CHALK_TEXTS = [
   // Notes & apreciations
   "BRAVO !!", "★★★★★", "100/100", "SUPER!", "EXCELLENT", "A+",
   "NOTE: 18/20", "★ TOP ★", "MERCI", "Tableau d'honneur",
-  "Tres bien, continue comme ca!", "Peut mieux faire...",
+  "Très bien, continue comme ça!", "Peut mieux faire...",
   "Bon travail mais attention aux fautes",
   // Phrases longues
   "La Terre tourne autour du Soleil\nen 365 jours et 6 heures",
-  "Les dinosaures ont disparu\nil y a 65 millions d'annees",
-  "Victor Hugo a ecrit\nLes Miserables en 1862",
-  "Le theoreme de Pythagore:\nDans un triangle rectangle,\nle carre de l'hypotenuse\nest egal a la somme\ndes carres des deux\nautres cotes.",
-  "ATTENTION:\nControle de maths\nvendredi prochain !!!",
-  "Il etait une fois,\ndans un pays lointain,\nun roi tres sage...",
+  "Les dinosaures ont disparu\nil y a 65 millions d'années",
+  "Victor Hugo a écrit\nLes Misérables en 1862",
+  "Le théorème de Pythagore:\nDans un triangle rectangle,\nle carré de l'hypoténuse\nest égal à la somme\ndes carrés des deux\nautres côtés.",
+  "ATTENTION:\nContrôle de maths\nvendredi prochain !!!",
+  "Il était une fois,\ndans un pays lointain,\nun roi très sage...",
   "Les 3 mousquetaires\netaient en fait 4:\nAthos, Porthos,\nAramis et d'Artagnan",
   "La photosynthese:\n6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂\n(lumiere necessaire)",
   // Listes

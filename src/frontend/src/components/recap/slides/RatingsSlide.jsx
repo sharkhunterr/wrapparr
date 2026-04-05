@@ -166,7 +166,7 @@ export default function RatingsSlide({ accent, data, year, config = {}, mediaTyp
       <div className="s0" style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "var(--th-font-mono, JetBrains Mono,monospace)", textTransform: "uppercase", marginBottom: 6 }}>{L.brand} · {year}</div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          {L.ratingsTitle} <span style={{ color: accent }}>{mediaType === "series" ? "series" : "cinema"}</span>
+          {L.ratingsTitle} <span style={{ color: accent }}>{mediaType === "series" ? "séries" : "cinéma"}</span>
         </h2>
       </div>
 

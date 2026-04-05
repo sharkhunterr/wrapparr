@@ -16,7 +16,7 @@ export default function GenresPodiumSlide({ accent, genres = [], year }) {
       <div className="s0" style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
         <h2 style={{ fontSize: "clamp(20px, 6vw, 32px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-          Tes genres <span style={{ color: accent }}>preferes</span>
+          Tes genres <span style={{ color: accent }}>préférés</span>
         </h2>
       </div>
 

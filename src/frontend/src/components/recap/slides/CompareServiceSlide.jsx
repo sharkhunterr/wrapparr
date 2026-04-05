@@ -30,20 +30,20 @@ const card = { padding: "10px 10px 8px", borderRadius: "var(--th-radius)", backg
 
 const DEFAULT_FILM_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", emoji: "🍿" },
-  { min: 20, max: 50, name: "Cinephile du dimanche", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro du cinema", emoji: "🎬" },
-  { min: 100, max: 200, name: "Machine a films", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien supreme", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende vivante", emoji: "👑" },
+  { min: 20, max: 50, name: "Cinéphile du dimanche", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro du cinéma", emoji: "🎬" },
+  { min: 100, max: 200, name: "Machine à films", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien suprême", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende vivante", emoji: "👑" },
 ]
 
 const DEFAULT_SERIES_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", emoji: "📺" },
-  { min: 20, max: 50, name: "Binge watcher debutant", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro aux series", emoji: "📺" },
-  { min: 100, max: 200, name: "Machine a episodes", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien des series", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende du binge", emoji: "👑" },
+  { min: 20, max: 50, name: "Binge watcher débutant", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro aux séries", emoji: "📺" },
+  { min: 100, max: 200, name: "Machine à épisodes", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien des séries", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende du binge", emoji: "👑" },
 ]
 
 export default function CompareServiceSlide({ accent, compareData, year, mediaType = "films", config = {}, bilanCategories }) {
@@ -120,7 +120,7 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       </div>
     </div>
 
-    {/* Legende */}
+    {/* Légende */}
     <div style={{ display: "flex", gap: 12, marginBottom: 8 }}>
       <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: accent }}>
         <span style={{ width: 14, height: 2.5, borderRadius: 2, background: accent }} />{year}
@@ -131,10 +131,10 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       </span>
     </div>
 
-    {/* Activite mensuelle */}
+    {/* Activité mensuelle */}
     {monthly.length > 0 && (
       <div className="s1" style={card}>
-        <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
+        <Lbl c={accent} size={8}>Activité mensuelle</Lbl>
         <ResponsiveContainer width="100%" height={90}>
           <AreaChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
@@ -157,7 +157,7 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       </div>
     )}
 
-    {/* Profil — categorie, #1 film/serie, notes, acteur, realisateur, genres, budget, pays */}
+    {/* Profil — catégorie, #1 film/série, notes, acteur, réalisateur, genres, budget, pays */}
     {(() => {
       const top1Film = { cur: curTop[0], prev: prevTop[0] }
       const top1Rated = { cur: (topRated.current || [])[0], prev: (topRated.previous || [])[0] }
@@ -165,11 +165,11 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
       const top1Actor = { cur: (actors.current || [])[0], prev: (actors.previous || [])[0] }
       const top1Director = { cur: (directors.current || [])[0], prev: (directors.previous || [])[0] }
       const rows = [
-        top1Film.cur || top1Film.prev ? { label: isSeriesSlide ? "Serie #1" : "Film #1", cur: top1Film.cur, prev: top1Film.prev, type: "media" } : null,
-        top1Rated.cur || top1Rated.prev ? { label: "Mieux note", cur: top1Rated.cur, prev: top1Rated.prev, type: "rated" } : null,
-        top1Worst.cur || top1Worst.prev ? { label: "Moins bien note", cur: top1Worst.cur, prev: top1Worst.prev, type: "rated" } : null,
+        top1Film.cur || top1Film.prev ? { label: isSeriesSlide ? "Série #1" : "Film #1", cur: top1Film.cur, prev: top1Film.prev, type: "media" } : null,
+        top1Rated.cur || top1Rated.prev ? { label: "Mieux noté", cur: top1Rated.cur, prev: top1Rated.prev, type: "rated" } : null,
+        top1Worst.cur || top1Worst.prev ? { label: "Moins bien noté", cur: top1Worst.cur, prev: top1Worst.prev, type: "rated" } : null,
         top1Actor.cur || top1Actor.prev ? { label: "Acteur #1", cur: top1Actor.cur, prev: top1Actor.prev, type: "person" } : null,
-        top1Director.cur || top1Director.prev ? { label: "Realisateur #1", cur: top1Director.cur, prev: top1Director.prev, type: "person" } : null,
+        top1Director.cur || top1Director.prev ? { label: "Réalisateur #1", cur: top1Director.cur, prev: top1Director.prev, type: "person" } : null,
         curGenres.length > 0 || prevGenres.length > 0 ? { label: "Genres", type: "genres" } : null,
       ].filter(Boolean)
       const fmtBudget = (v) => { if (!v) return "—"; if (v >= 1e9) return (v / 1e9).toFixed(1) + "Md$"; if (v >= 1e6) return Math.round(v / 1e6) + "M$"; if (v >= 1e3) return Math.round(v / 1e3) + "k$"; return v + "$" }
@@ -182,7 +182,7 @@ export default function CompareServiceSlide({ accent, compareData, year, mediaTy
 
       // Add category row at top if available
       const allRows = [
-        category.current || category.previous ? { label: "Categorie", type: "category" } : null,
+        category.current || category.previous ? { label: "Catégorie", type: "category" } : null,
         ...rows,
         !isSeriesSlide && (budgets.current?.average || budgets.previous?.average) ? { label: "Budget moy.", type: "budget" } : null,
       ].filter(Boolean)

@@ -18,7 +18,7 @@ export default function GrimmoryStreakSlide({ accent, data, year }) {
       <div className="s0" style={{ marginBottom: 12 }}>
         <Tag accent={accent} year={year} />
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Ta <span style={{ color: accent }}>regularite</span>
+          Ta <span style={{ color: accent }}>régularité</span>
         </h2>
       </div>
 
@@ -53,7 +53,7 @@ export default function GrimmoryStreakSlide({ accent, data, year }) {
             {active ? <AN t={streak.total_days} /> : 0} <span style={{ fontSize: 12, color: "var(--th-text-secondary)" }}>jours de lecture</span>
           </div>
           <div style={{ fontSize: 10, color: "var(--th-text-dim)", marginTop: 2 }}>
-            {streak.total_days > 0 ? Math.round(streak.total_days / 365 * 100) + "% de l'annee" : ""}
+            {streak.total_days > 0 ? Math.round(streak.total_days / 365 * 100) + "% de l'année" : ""}
           </div>
         </div>
       </div>

@@ -9,14 +9,14 @@ import { DayChart, TimeChart } from "../SharedUI"
 
 const DEFAULT_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
-  { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
-  { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
+  { min: 20, max: 50, name: "Cinéphile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro du cinéma", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
+  { min: 100, max: 200, name: "Machine à films", desc: "Tu enchaînes les films sans relâche", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien suprême", desc: "Tu vis et respires cinéma", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
 ]
 
-function formatEquivalent(hours) {
+function formatÉquivalent(hours) {
   if (hours >= 720) return { value: (hours / 720).toFixed(1), unit: "mois", icon: "📅" }
   if (hours >= 168) return { value: (hours / 168).toFixed(1), unit: "semaines", icon: "🗓️" }
   if (hours >= 24) return { value: (hours / 24).toFixed(1), unit: "jours", icon: "☀️" }
@@ -85,7 +85,7 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
 
   if (!totalFilms) return null
 
-  const equiv = formatEquivalent(totalHours)
+  const equiv = formatÉquivalent(totalHours)
   const category = categories.find((c) => totalHours >= c.min && totalHours < c.max) || categories[categories.length - 1]
 
   return (
@@ -96,7 +96,7 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
         <div className="s0" style={{ marginBottom: 10 }}>
           <div style={{ fontSize: 9, color: accent, letterSpacing: ".3em", fontFamily: "JetBrains Mono,monospace", textTransform: "uppercase", marginBottom: 6 }}>WRAPPARR · {year}</div>
           <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "white", lineHeight: 1.05 }}>
-            Ton digest <span style={{ color: accent }}>cinema</span>
+            Ton digest <span style={{ color: accent }}>cinéma</span>
           </h2>
         </div>
 
@@ -108,14 +108,14 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
           </div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(8px)" }}>
             <span style={{ fontSize: "clamp(14px, 3.5vw, 18px)", fontWeight: 800 }}><AnimNum target={Math.round(totalHours)} suffix="h" color="white" delay={300} /></span>
-            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>passees</span>
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>passées</span>
           </div>
         </div>
 
         {/* Day + Time charts */}
         {phase >= 1 && (
           <>
-            {dayData.length > 0 && <div className="glass" style={{ padding: "8px 10px", marginBottom: 6, backdropFilter: "blur(8px)" }}><div style={{ fontSize: 8, color: accent, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Jour prefere</div><DayChart data={dayData} accent={accent} height={80} /></div>}
+            {dayData.length > 0 && <div className="glass" style={{ padding: "8px 10px", marginBottom: 6, backdropFilter: "blur(8px)" }}><div style={{ fontSize: 8, color: accent, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Jour préféré</div><DayChart data={dayData} accent={accent} height={80} /></div>}
             {timeData.length > 0 && <div className="glass" style={{ padding: "8px 10px", marginBottom: 6, backdropFilter: "blur(8px)" }}><div style={{ fontSize: 8, color: accent, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Heure de consommation</div><TimeChart data={timeData} accent={accent} height={80} /></div>}
           </>
         )}
@@ -132,13 +132,13 @@ export default function FilmDigestSlide({ accent, data, year, config = {} }) {
             )}
             {bestDay && (
               <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(8px)" }}>
-                <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em" }}>Journee record</div>
+                <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em" }}>Journée record</div>
                 <div style={{ fontSize: 11, fontWeight: 800, color: "white", lineHeight: 1.1 }}>{bestDay.day_name} {bestDay.day} {bestDay.month}</div>
                 <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{bestDay.views} vues · {bestDay.hours}h</div>
               </div>
             )}
             <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: accent + "15", border: "1px solid " + accent + "25", backdropFilter: "blur(8px)", textAlign: "center" }}>
-              <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em" }}>Equivalent</div>
+              <div style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: ".1em" }}>Équivalent</div>
               <div style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 800, color: accent, fontFamily: "JetBrains Mono,monospace" }}>{equiv.value}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{equiv.unit} {equiv.icon}</div>
             </div>

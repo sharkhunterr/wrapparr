@@ -40,7 +40,7 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
     <div className="s0" style={{ marginBottom: 12 }}>
       <Tag accent={accent} year={year} />
       <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-        Genres preferes <span style={{ color: accent }}>{label}</span>
+        Genres préférés <span style={{ color: accent }}>{label}</span>
       </h2>
       <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{allUsers.length} utilisateurs</div>
     </div>
@@ -69,7 +69,7 @@ export function CommunityGenresSlide({ accent, allUsers, year, me, mediaType = "
     {/* Genre favori par utilisateur */}
     {userTopGenre.length > 0 && (
       <div className="s2" style={{ marginTop: 12, padding: "10px 12px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
-        <Lbl c={accent} size={8}>Genre prefere par utilisateur</Lbl>
+        <Lbl c={accent} size={8}>Genre préféré par utilisateur</Lbl>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 6 }}>
           {userTopGenre.map((u) => {
             return <div key={u.name} style={{
