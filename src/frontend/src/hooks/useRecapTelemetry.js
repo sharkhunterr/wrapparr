@@ -161,43 +161,26 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
     return () => window.removeEventListener("beforeunload", handleUnload)
   }, [flushBeacon])
 
-  // Unmount (SPA navigation)
+  // Unmount (SPA navigation) — use fetch with Auth header (not beacon)
   useEffect(() => {
     return () => {
-      if (!sent.current && started.current && enabled && Object.keys(slideEntries.current).length > 0) {
+      if (!sent.current && started.current && Object.keys(slideEntries.current).length > 0) {
         sent.current = true
+        const payload = buildPayload()
         const token = localStorage.getItem("wrapparr_token")
-        // Close current slide time
-        const now = Date.now()
-        if (currentSlide.current && slideEntries.current[currentSlide.current]) {
-          const entry = slideEntries.current[currentSlide.current]
-          const idleDuration = now - lastActivity.current
-          if (idleDuration > IDLE_TIMEOUT) {
-            entry.totalTime += Math.max(0, lastActivity.current - slideEnterTime.current)
-          } else {
-            entry.totalTime += now - slideEnterTime.current
-          }
+        // Use fetch (SPA navigation keeps JS alive long enough)
+        if (token) {
+          fetch("/api/v1/analytics/sessions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(payload),
+            keepalive: true, // Ensures request completes even during navigation
+          }).catch(() => {})
+        } else {
+          // Fallback to beacon if no token in header format
+          const blob = new Blob([JSON.stringify(payload)], { type: "application/json" })
+          navigator.sendBeacon?.("/api/v1/analytics/sessions/beacon?_token=", blob)
         }
-        const vals = latestRef.current
-        const slideData = Object.entries(slideEntries.current).map(([slideId, entry]) => ({
-          slideId, timeSpent: Math.round(entry.totalTime / 100) / 10, interacted: entry.interacted,
-        }))
-        const payload = {
-          year: vals.year,
-          duration_seconds: Math.round((now - startTime.current) / 100) / 10,
-          total_slides: vals.totalSlides,
-          slides_viewed: slideData.length,
-          theme_id: vals.themeId,
-          palette_slug: vals.paletteSlug,
-          music_enabled: vals.musicEnabled,
-          comparison_enabled: vals.comparisonEnabled,
-          slide_data: slideData,
-          interactions: interactions.current,
-          reaction: vals.reaction || null,
-          device: navigator.userAgent.substring(0, 200),
-        }
-        const blob = new Blob([JSON.stringify(payload)], { type: "application/json" })
-        navigator.sendBeacon?.("/api/v1/analytics/sessions/beacon?_token=" + encodeURIComponent(token || ""), blob)
       }
     }
   }, [])
