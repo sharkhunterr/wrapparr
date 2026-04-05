@@ -173,9 +173,6 @@ class RecapPipeline:
             await self._update_progress(recap, "fetching_posters", 70, "Recuperation des affiches...")
 
             recap.data = recap_data
-            recap.status = "completed"
-            recap.progress = 100
-            recap.progress_msg = "Recap terminé"
             recap.completed_at = datetime.now(timezone.utc)
 
             # Create immutable snapshot
@@ -184,12 +181,12 @@ class RecapPipeline:
                 user_id=user_id,
                 year=year,
                 recap_data=recap_data,
-                slide_config={},  # Will be populated once SlideConfig exists
-                theme_pack={},    # Will be populated once ThemePack is selected
+                slide_config={},
+                theme_pack={},
             )
             self.db.add(snapshot)
-            await self.db.commit()
 
+            # Single commit for data + snapshot + completed status
             await self._update_progress(recap, "completed", 100, "Recap terminé")
             logger.info("Recap %d terminé pour user %s", year, user_id)
 
