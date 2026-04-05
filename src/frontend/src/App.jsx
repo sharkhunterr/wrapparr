@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Link2, Users2, Film, Palette, UserCog, Shield,
   KeyRound, Settings, Menu, X, LogOut, ChevronRight, Clapperboard, Music, ScrollText, BarChart2,
 } from "lucide-react"
+import { I18nProvider } from "./i18n/index.jsx"
 import LoginPage from "./components/auth/LoginPage"
 import SetupWizard from "./components/setup/SetupWizard"
 import RecapPlayer from "./components/recap/RecapPlayer"
@@ -318,6 +319,7 @@ export default function App() {
   if (setupNeeded) return <SetupWizard onComplete={() => setSetupNeeded(false)} />
 
   return (
+    <I18nProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginRedirect />} />
@@ -341,5 +343,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </I18nProvider>
   )
 }

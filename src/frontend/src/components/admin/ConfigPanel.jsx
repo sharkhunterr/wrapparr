@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react"
-import { Settings, ToggleLeft, ToggleRight } from "lucide-react"
+import { Settings, ToggleLeft, ToggleRight, Globe } from "lucide-react"
 import { api } from "../../services/api"
+import { useI18n, LANG_OPTIONS } from "../../i18n/index.jsx"
 
 const CONFIG_FIELDS = [
-  { key: "allow_registration", label: "Inscription ouverte", type: "bool" },
-  { key: "allow_user_themes", label: "Themes personnels", type: "bool" },
-  { key: "allow_user_comparison", label: "Comparaison inter-utilisateurs", type: "bool" },
-  { key: "comparison_default_on", label: "Comparaison activee par defaut", type: "bool" },
-  { key: "recap_schedule", label: "Planification recap (cron)", type: "text" },
-  { key: "max_history_years", label: "Historique max (annees)", type: "number" },
-  { key: "public_share_expiry_days", label: "Expiration partage (jours)", type: "number" },
-  { key: "telemetry_enabled", label: "Telemetrie des visionnages", type: "bool" },
-  { key: "telemetry_idle_timeout_min", label: "Timeout inactivite telemetrie (min)", type: "number" },
+  { key: "allow_registration", label: "config.openRegistration", type: "bool" },
+  { key: "allow_user_themes", label: "config.userThemes", type: "bool" },
+  { key: "allow_user_comparison", label: "config.userComparison", type: "bool" },
+  { key: "comparison_default_on", label: "config.comparisonDefault", type: "bool" },
+  { key: "recap_schedule", label: "config.recapSchedule", type: "text" },
+  { key: "max_history_years", label: "config.maxHistory", type: "number" },
+  { key: "public_share_expiry_days", label: "config.shareExpiry", type: "number" },
+  { key: "telemetry_enabled", label: "config.telemetryEnabled", type: "bool" },
+  { key: "telemetry_idle_timeout_min", label: "config.telemetryTimeout", type: "number" },
 ]
 
 export default function ConfigPanel() {
   const [config, setConfig] = useState({})
   const [saving, setSaving] = useState(false)
+  const { t, lang, setLang } = useI18n()
 
   useEffect(() => {
     api("/admin/config").then(setConfig).catch(() => {})
@@ -33,7 +35,30 @@ export default function ConfigPanel() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
         <Settings size={22} color="#E5A00D" strokeWidth={1.5} />
-        <h2 style={{ color: "white", fontFamily: "Nunito,sans-serif", fontSize: 17, fontWeight: 700, margin: 0 }}>Configuration</h2>
+        <h2 style={{ color: "white", fontFamily: "Nunito,sans-serif", fontSize: 17, fontWeight: 700, margin: 0 }}>{t("config.title")}</h2>
+      </div>
+
+      {/* Language selector */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 16px", borderRadius: 10, marginBottom: 16,
+        background: "rgba(96,165,250,0.06)", border: "1px solid rgba(96,165,250,0.15)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Globe size={15} color="#60a5fa" />
+          <span style={{ fontSize: 12, color: "white", fontWeight: 600 }}>Langue / Language</span>
+        </div>
+        <div style={{ display: "flex", gap: 4 }}>
+          {LANG_OPTIONS.map(l => (
+            <button key={l.code} onClick={() => setLang(l.code)} style={{
+              padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer",
+              background: lang === l.code ? "rgba(96,165,250,0.2)" : "rgba(255,255,255,0.03)",
+              border: "1px solid " + (lang === l.code ? "rgba(96,165,250,0.4)" : "rgba(255,255,255,0.06)"),
+              color: lang === l.code ? "#60a5fa" : "rgba(255,255,255,0.35)",
+              transition: "all .15s",
+            }}>{l.label}</button>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -43,7 +68,7 @@ export default function ConfigPanel() {
             background: "rgba(255,255,255,0.02)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)",
             gap: 12, flexWrap: "wrap",
           }}>
-            <span style={{ color: "white", fontSize: 13, fontFamily: "Nunito,sans-serif", fontWeight: 500 }}>{f.label}</span>
+            <span style={{ color: "white", fontSize: 13, fontFamily: "Nunito,sans-serif", fontWeight: 500 }}>{t(f.label)}</span>
             {f.type === "bool" ? (
               <button onClick={() => update(f.key, !config[f.key])} style={{
                 padding: "5px 14px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12,
@@ -52,7 +77,7 @@ export default function ConfigPanel() {
                 color: config[f.key] ? "#4ade80" : "#f87171",
               }}>
                 {config[f.key] ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                {config[f.key] ? "Active" : "Desactive"}
+                {config[f.key] ? t("common.enabled") : t("common.disabled")}
               </button>
             ) : (
               <input value={config[f.key] ?? ""} onChange={(e) => update(f.key, f.type === "number" ? parseInt(e.target.value) || 0 : e.target.value)}
