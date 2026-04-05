@@ -13,10 +13,15 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
   const startTime = useRef(0)
   const lastActivity = useRef(Date.now())
   const slideEnterTime = useRef(0)
+  // Capture token at mount — survives logout clearing localStorage
+  const tokenRef = useRef(localStorage.getItem("wrapparr_token"))
 
   // Store latest values in refs (preserve manually set fields like totalSlides, reaction)
   const latestRef = useRef({ year, totalSlides, themeId, paletteSlug, musicEnabled, comparisonEnabled, reaction: null })
   useEffect(() => {
+    // Keep token ref fresh
+    const t = localStorage.getItem("wrapparr_token")
+    if (t) tokenRef.current = t
     const prev = latestRef.current
     latestRef.current = {
       ...prev,
@@ -149,9 +154,8 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
     if (sent.current || !started.current || !enabled) return
     if (Object.keys(slideEntries.current).length === 0) return
     sent.current = true
-    const token = localStorage.getItem("wrapparr_token")
     const blob = new Blob([JSON.stringify(buildPayload())], { type: "application/json" })
-    navigator.sendBeacon?.("/api/v1/analytics/sessions/beacon?_token=" + encodeURIComponent(token || ""), blob)
+    navigator.sendBeacon?.("/api/v1/analytics/sessions/beacon?_token=" + encodeURIComponent(tokenRef.current || ""), blob)
   }, [buildPayload])
 
   // beforeunload
@@ -167,7 +171,7 @@ export default function useRecapTelemetry({ year, totalSlides, themeId, paletteS
       if (!sent.current && started.current && Object.keys(slideEntries.current).length > 0) {
         sent.current = true
         const payload = buildPayload()
-        const token = localStorage.getItem("wrapparr_token")
+        const token = tokenRef.current
         // Use fetch (SPA navigation keeps JS alive long enough)
         if (token) {
           fetch("/api/v1/analytics/sessions", {
