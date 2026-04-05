@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Users, Link2, Activity, Play, CheckCircle2, XCircle, Clock, RefreshCw, Eye, BarChart2, Music, GitCompare, Film, Palette, ArrowRight } from "lucide-react"
+import { Users, Link2, CheckCircle2, XCircle, Clock, RefreshCw, Eye, BarChart2, Music, GitCompare, Film, Palette, ArrowRight } from "lucide-react"
 import { api } from "../../services/api"
 
 const accent = "#E5A00D"
@@ -63,33 +63,12 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null)
   const [recaps, setRecaps] = useState([])
   const [analytics, setAnalytics] = useState(null)
-  const [generating, setGenerating] = useState(false)
-  const [genYear, setGenYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     api("/admin/dashboard").then(setStats).catch(() => {})
     api("/recaps").then(setRecaps).catch(() => {})
     api("/analytics/admin/summary").then(setAnalytics).catch(() => {})
   }, [])
-
-  const generate = async () => {
-    setGenerating(true)
-    try {
-      await api("/recaps/generate", { method: "POST", body: { year: genYear } })
-      const poll = setInterval(async () => {
-        const all = await api("/recaps")
-        setRecaps(all)
-        const target = all.find(r => r.year === genYear)
-        if (target && (target.status === "completed" || target.status === "failed")) {
-          clearInterval(poll)
-          setGenerating(false)
-        }
-      }, 2000)
-    } catch (e) {
-      alert(e.message)
-      setGenerating(false)
-    }
-  }
 
   const completedRecaps = recaps.filter(r => r.status === "completed")
 
@@ -108,24 +87,6 @@ export default function Dashboard() {
           <KPI icon={Music} label="Musique" value={analytics.music_usage} color="#34d399" sub={`/ ${analytics.total_sessions}`} />
           <KPI icon={GitCompare} label="Comparaison" value={analytics.comparison_usage} color="#60a5fa" sub={`/ ${analytics.total_sessions}`} />
         </>}
-      </div>
-
-      {/* ── Generate recap ── */}
-      <div style={{
-        padding: "14px 16px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-        display: "flex", alignItems: "center", gap: 10, marginBottom: 20, flexWrap: "wrap",
-      }}>
-        <Film size={16} color={accent} />
-        <span style={{ fontSize: 12, fontWeight: 600, color: "white" }}>Generer un recap</span>
-        <input type="number" value={genYear} onChange={e => setGenYear(parseInt(e.target.value) || 2024)}
-          style={{ width: 70, padding: "5px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "white", fontSize: 12, ...mono, textAlign: "center", outline: "none" }} />
-        <button onClick={generate} disabled={generating} style={{
-          display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", borderRadius: 7, border: "none",
-          background: generating ? "rgba(229,160,13,0.15)" : accent, color: generating ? accent : "#05050e",
-          fontSize: 11, fontWeight: 700, cursor: generating ? "wait" : "pointer",
-        }}>
-          {generating ? <><RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} /> En cours...</> : <><Play size={12} /> Lancer</>}
-        </button>
       </div>
 
       {/* ── Recaps list ── */}
@@ -192,7 +153,6 @@ export default function Dashboard() {
         <NavCard icon={BarChart2} label="Statistiques" desc="Visionnages detailles" color="#60a5fa" to="/admin/analytics" />
       </div>
 
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
