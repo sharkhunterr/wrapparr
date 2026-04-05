@@ -273,7 +273,6 @@ export default function RecapPlayer() {
       setRecapData(null)
     }
   }, [paramYear])
-  const [generating, setGenerating] = useState(false)
   const [error, setError] = useState(null)
   const [slide, setSlide] = useState(0)
   const [fade, setFade] = useState(false)
@@ -361,34 +360,6 @@ export default function RecapPlayer() {
     load()
   }, [year])
 
-  const handleGenerate = async () => {
-    setGenerating(true)
-    try {
-      const targetYear = year || new Date().getFullYear()
-      await api("/recaps/generate", { method: "POST", body: { year: targetYear } })
-      setYear(targetYear)
-      // Poll for completion
-      const poll = setInterval(async () => {
-        try {
-          const progress = await api(`/recaps/${targetYear}/progress`)
-          if (progress.status === "completed") {
-            clearInterval(poll)
-            const recap = await api(`/recaps/${targetYear}`)
-            setRecapData(recap.data)
-            setGenerating(false)
-          } else if (progress.status === "failed") {
-            clearInterval(poll)
-            setError(progress.progress_msg || "Erreur de generation")
-            setGenerating(false)
-          }
-        } catch { /* continue polling */ }
-      }, 2000)
-    } catch (e) {
-      setError(e.message)
-      setGenerating(false)
-    }
-  }
-
   const R = useResponsive()
 
   // Telemetry (must be before buildSlides so onInteraction is available)
@@ -463,18 +434,6 @@ export default function RecapPlayer() {
     </div>
   )
 
-  if (generating) return (
-    <div style={{ width: "100%", height: "100vh", background: "#05050e", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ position: "relative", width: 80, height: 80, margin: "0 auto 20px" }}>
-          {[0, 1, 2].map((i) => <div key={i} style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2px solid #E5A00D", animation: `pulse-ring 1.8s ease-out ${i * 0.6}s infinite` }} />)}
-        </div>
-        <div style={{ color: "#E5A00D", fontSize: 15, fontWeight: 600 }}>Generation en cours...</div>
-        <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 6 }}>Collecte des donnees depuis tes services</div>
-      </div>
-    </div>
-  )
-
   if (error || !recapData) return (
     <div style={{ width: "100%", height: "100vh", background: "#05050e", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center", maxWidth: 340, padding: "0 20px" }}>
@@ -485,16 +444,9 @@ export default function RecapPlayer() {
         <div style={{ color: "white", fontSize: 18, fontWeight: 700, marginBottom: 6 }}>
           {error ? "Erreur" : "Pas encore de recap"}
         </div>
-        <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 24 }}>
-          {error || "Lance la generation pour decouvrir ton annee en recap."}
+        <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13 }}>
+          {error || "Aucun recap disponible pour le moment. Revenez plus tard !"}
         </div>
-        <button onClick={handleGenerate} style={{
-          padding: "12px 32px", borderRadius: 40, border: "none", cursor: "pointer",
-          background: "linear-gradient(135deg, #E5A00D, #fb923c)", color: "#000",
-          fontSize: 14, fontWeight: 700, boxShadow: "0 0 40px #E5A00D40",
-        }}>
-          Generer mon recap {year || new Date().getFullYear()}
-        </button>
       </div>
     </div>
   )
