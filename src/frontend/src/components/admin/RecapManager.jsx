@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Play, Eye, Trash2, ToggleLeft, ToggleRight, RefreshCw, Calendar, Clock, CheckCircle2, XCircle, AlertCircle, Clapperboard } from "lucide-react"
+import { Play, Eye, Trash2, ToggleLeft, ToggleRight, RefreshCw, Calendar, Clock, CheckCircle2, XCircle, AlertCircle, Clapperboard, Timer } from "lucide-react"
 import { api } from "../../services/api"
 
 const STATUS = {
@@ -11,14 +11,47 @@ const STATUS = {
   fetching_posters: { label: "Affiches...", color: "#60a5fa", Icon: RefreshCw },
 }
 
+const MONTHS = ["Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"]
+
 export default function RecapManager() {
   const [recaps, setRecaps] = useState([])
   const [generating, setGenerating] = useState(false)
   const [genYear, setGenYear] = useState(new Date().getFullYear())
-  const [editing, setEditing] = useState(null) // recap id being edited
+  const [editing, setEditing] = useState(null)
+  const [schedule, setSchedule] = useState(null) // { enabled, mode, month, day, hour, cron }
+  const [scheduleSaving, setScheduleSaving] = useState(false)
 
   const load = () => api("/admin/recaps").then(setRecaps).catch(() => {})
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    api("/admin/config").then(cfg => {
+      setSchedule({
+        enabled: cfg.recap_schedule_enabled || false,
+        mode: cfg.recap_schedule_mode || "simple",
+        month: cfg.recap_schedule_month ?? 12,
+        day: cfg.recap_schedule_day ?? 1,
+        hour: cfg.recap_schedule_hour ?? 9,
+        cron: cfg.recap_schedule_cron || "0 9 1 12 *",
+      })
+    }).catch(() => {})
+  }, [])
+
+  const saveSchedule = async (s) => {
+    setScheduleSaving(true)
+    const cron = s.mode === "simple" ? `0 ${s.hour} ${s.day} ${s.month} *` : s.cron
+    try {
+      await api("/admin/config", { method: "PATCH", body: {
+        recap_schedule_enabled: s.enabled,
+        recap_schedule_mode: s.mode,
+        recap_schedule_month: s.month,
+        recap_schedule_day: s.day,
+        recap_schedule_hour: s.hour,
+        recap_schedule_cron: cron,
+        recap_schedule: cron,
+      }})
+    } catch {}
+    setScheduleSaving(false)
+  }
 
   const generate = async () => {
     setGenerating(true)
@@ -79,6 +112,91 @@ export default function RecapManager() {
           {generating ? <><RefreshCw size={13} className="spin" /> Generation...</> : <><Play size={13} /> Generer</>}
         </button>
       </div>
+
+      {/* ── Schedule ── */}
+      {schedule && (
+        <div style={{ ...card, marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: schedule.enabled ? 14 : 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Timer size={15} color="#60a5fa" />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "white" }}>Planification automatique</span>
+            </div>
+            <button onClick={() => {
+              const next = { ...schedule, enabled: !schedule.enabled }
+              setSchedule(next)
+              saveSchedule(next)
+            }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              {schedule.enabled ? <ToggleRight size={20} color="#4ade80" /> : <ToggleLeft size={20} color="rgba(255,255,255,0.25)" />}
+            </button>
+          </div>
+
+          {schedule.enabled && (
+            <div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>
+                Le recap sera genere automatiquement pour l'annee en cours au moment de l'execution.
+              </div>
+
+              {/* Mode toggle */}
+              <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+                {[{ v: "simple", l: "Simple" }, { v: "cron", l: "Expert (cron)" }].map(m => (
+                  <button key={m.v} onClick={() => setSchedule({ ...schedule, mode: m.v })} style={{
+                    padding: "5px 12px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer",
+                    background: schedule.mode === m.v ? "rgba(96,165,250,0.12)" : "rgba(255,255,255,0.02)",
+                    border: "1px solid " + (schedule.mode === m.v ? "rgba(96,165,250,0.3)" : "rgba(255,255,255,0.06)"),
+                    color: schedule.mode === m.v ? "#60a5fa" : "rgba(255,255,255,0.35)",
+                  }}>{m.l}</button>
+                ))}
+              </div>
+
+              {schedule.mode === "simple" ? (
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+                  <div>
+                    <div style={inputLabel}>Mois</div>
+                    <select value={schedule.month} onChange={e => setSchedule({ ...schedule, month: parseInt(e.target.value) })}
+                      style={{ ...input, minWidth: 110 }}>
+                      {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <div style={inputLabel}>Jour</div>
+                    <input type="number" min={1} max={31} value={schedule.day}
+                      onChange={e => setSchedule({ ...schedule, day: parseInt(e.target.value) || 1 })}
+                      style={{ ...input, width: 50, textAlign: "center" }} />
+                  </div>
+                  <div>
+                    <div style={inputLabel}>Heure</div>
+                    <input type="number" min={0} max={23} value={schedule.hour}
+                      onChange={e => setSchedule({ ...schedule, hour: parseInt(e.target.value) || 0 })}
+                      style={{ ...input, width: 50, textAlign: "center" }} />
+                  </div>
+                  <button onClick={() => saveSchedule(schedule)} disabled={scheduleSaving} style={{ ...btn, fontSize: 11, padding: "7px 14px" }}>
+                    {scheduleSaving ? "..." : "Enregistrer"}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+                  <div style={{ flex: 1, minWidth: 150 }}>
+                    <div style={inputLabel}>Expression cron (min h jour mois dow)</div>
+                    <input value={schedule.cron} onChange={e => setSchedule({ ...schedule, cron: e.target.value })}
+                      placeholder="0 9 1 12 *" style={{ ...input, width: "100%", fontFamily: "JetBrains Mono,monospace" }} />
+                  </div>
+                  <button onClick={() => saveSchedule(schedule)} disabled={scheduleSaving} style={{ ...btn, fontSize: 11, padding: "7px 14px" }}>
+                    {scheduleSaving ? "..." : "Enregistrer"}
+                  </button>
+                </div>
+              )}
+
+              {/* Preview */}
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 8, fontFamily: "JetBrains Mono,monospace" }}>
+                {schedule.mode === "simple"
+                  ? `Prochain : ${schedule.day} ${MONTHS[schedule.month - 1]} ${new Date().getFullYear()} a ${String(schedule.hour).padStart(2, "0")}:00 → recap ${new Date().getFullYear()}`
+                  : `Cron : ${schedule.cron}`
+                }
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Recap list */}
       {recaps.length === 0 && (
