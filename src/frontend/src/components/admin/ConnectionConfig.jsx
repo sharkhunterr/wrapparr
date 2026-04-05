@@ -102,7 +102,7 @@ export default function ConnectionConfig() {
   return (
     <div>
       <h2 style={h2}>Connexions & SSO</h2>
-      <p style={desc}>Configurez les methodes d'authentification disponibles pour vos utilisateurs.</p>
+      <p style={desc}>Configurez les méthodes d'authentification disponibles pour vos utilisateurs.</p>
 
       <div style={section}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
@@ -112,7 +112,7 @@ export default function ConnectionConfig() {
         <div style={row}>
           <div style={{ flex: 1 }}>
             <div style={label}>Inscription ouverte</div>
-            <div style={hint}>Permettre aux utilisateurs de creer leur propre compte</div>
+            <div style={hint}>Permettre aux utilisateurs de créer leur propre compte</div>
           </div>
           <button onClick={() => save("allow_registration", !config.allow_registration)} style={{
             ...toggle, background: config.allow_registration ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.08)",
@@ -120,7 +120,7 @@ export default function ConnectionConfig() {
             display: "flex", alignItems: "center", gap: 6,
           }}>
             {config.allow_registration ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-            {config.allow_registration ? "Active" : "Desactive"}
+            {config.allow_registration ? "Activé" : "Désactivé"}
           </button>
         </div>
       </div>
@@ -180,7 +180,7 @@ export default function ConnectionConfig() {
                         : <XCircle size={14} color="#f87171" />}
                       <span style={{ color: testResult.status === "ok" ? "#4ade80" : "#f87171", fontSize: 12, fontFamily: "Nunito,sans-serif" }}>
                         {testResult.status === "ok"
-                          ? <>Connexion reussie — issuer: {testResult.issuer}{!testResult.ssl_verified && <span style={{ color: "#fbbf24" }}> (SSL non verifie)</span>}</>
+                          ? <>Connexion réussie — issuer: {testResult.issuer}{!testResult.ssl_verified && <span style={{ color: "#fbbf24" }}> (SSL non vérifié)</span>}</>
                           : testResult.detail}
                       </span>
                     </div>
@@ -210,7 +210,7 @@ export default function ConnectionConfig() {
             </div>
           )}
           <div style={inputGroup}>
-            <label style={inputLabel}>Nom du provider (affiche sur le bouton de connexion)</label>
+            <label style={inputLabel}>Nom du provider (affiché sur le bouton de connexion)</label>
             <input
               placeholder="Authentik, Keycloak, Authelia..."
               value={providerForm.name}
@@ -219,7 +219,7 @@ export default function ConnectionConfig() {
             />
           </div>
           <div style={inputGroup}>
-            <label style={inputLabel}>URL de l'emetteur (Issuer URL)</label>
+            <label style={inputLabel}>URL de l'émetteur (Issuer URL)</label>
             <input
               placeholder="https://auth.example.com/application/o/wrapparr/"
               value={providerForm.issuer_url}
@@ -241,7 +241,7 @@ export default function ConnectionConfig() {
               <label style={inputLabel}>Client Secret</label>
               <input
                 type="password"
-                placeholder={editingProvider ? "(inchange si vide)" : "............"}
+                placeholder={editingProvider ? "(inchangé si vide)" : "............"}
                 value={providerForm.client_secret}
                 onChange={e => setProviderForm({ ...providerForm, client_secret: e.target.value })}
                 style={input}
@@ -261,7 +261,7 @@ export default function ConnectionConfig() {
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={saveProvider} disabled={saving} style={{ ...btnAccent, display: "flex", alignItems: "center", gap: 8, width: "fit-content" }}>
               {editingProvider ? <Save size={14} strokeWidth={2} /> : <Plus size={14} strokeWidth={2} />}
-              {editingProvider ? "Mettre a jour" : "Ajouter le provider SSO"}
+              {editingProvider ? "Mettre à jour" : "Ajouter le provider SSO"}
             </button>
             {editingProvider && (
               <button onClick={resetForm} style={{ ...btnSecondary, width: "fit-content" }}>Annuler</button>
@@ -279,7 +279,7 @@ export default function ConnectionConfig() {
         <div style={{ ...row, marginTop: 12 }}>
           <div style={{ flex: 1 }}><div style={label}>Auth Plex</div></div>
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", padding: "5px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.06)" }}>
-            bientot
+            bientôt
           </span>
         </div>
       </div>
@@ -315,7 +315,7 @@ function CallbackUrl({ providerId }) {
       <button onClick={copy} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0, display: "flex", alignItems: "center" }} title="Copier l'URL">
         <Copy size={11} color={copied ? "#4ade80" : "rgba(255,255,255,0.3)"} />
       </button>
-      {copied && <span style={{ color: "#4ade80", fontSize: 10, fontFamily: "Nunito,sans-serif" }}>copie !</span>}
+      {copied && <span style={{ color: "#4ade80", fontSize: 10, fontFamily: "Nunito,sans-serif" }}>copié !</span>}
     </div>
   )
 }

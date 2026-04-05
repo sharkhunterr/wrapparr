@@ -67,7 +67,7 @@ export default function UserManagement() {
   }
 
   const resetPassword = async (u) => {
-    if (!confirm(`Reinitialiser le mot de passe de ${u.display_name} ?`)) return
+    if (!confirm(`Réinitialiser le mot de passe de ${u.display_name} ?`)) return
     try {
       const res = await api(`/admin/users/${u.id}`, { method: "PATCH", body: { reset_password: true } })
       if (res.temp_password) setTempPassword({ userId: u.id, password: res.temp_password })
@@ -121,7 +121,7 @@ export default function UserManagement() {
         <UserCog size={22} color="#E5A00D" strokeWidth={1.5} />
         <h2 style={{ color: "white", fontSize: 17, fontWeight: 700, margin: 0 }}>Utilisateurs</h2>
       </div>
-      <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginBottom: 16 }}>Gerez les comptes et les liens avec les services.</p>
+      <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginBottom: 16 }}>Gérez les comptes et les liens avec les services.</p>
 
       {/* Create form */}
       {showForm ? (
@@ -141,7 +141,7 @@ export default function UserManagement() {
             </select>
           </div>
           <button onClick={createUser} disabled={creating || !form.email || !form.password} style={{ ...btnPrimary, opacity: (!form.email || !form.password) ? 0.4 : 1 }}>
-            {creating ? "Creation..." : "Creer"}
+            {creating ? "Création..." : "Créer"}
           </button>
         </div>
       ) : (
@@ -194,7 +194,7 @@ export default function UserManagement() {
                 ) : (
                   <button onClick={() => startEdit(u)} style={actionBtn}><Pencil size={12} /></button>
                 )}
-                <button onClick={() => resetPassword(u)} title="Reinitialiser le mot de passe" style={actionBtn}><KeyRound size={12} /></button>
+                <button onClick={() => resetPassword(u)} title="Réinitialiser le mot de passe" style={actionBtn}><KeyRound size={12} /></button>
               </div>
 
               {/* Service mappings */}
@@ -245,14 +245,14 @@ export default function UserManagement() {
                 <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(229,160,13,0.08)", border: "1px solid rgba(229,160,13,0.2)" }}>
                   <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginBottom: 2 }}>Mot de passe temporaire :</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: "#E5A00D", fontFamily: "JetBrains Mono,monospace", userSelect: "all" }}>{tempPassword.password}</div>
-                  <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", marginTop: 2 }}>Ce mot de passe ne sera plus affiche.</div>
+                  <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", marginTop: 2 }}>Ce mot de passe ne sera plus affiché.</div>
                 </div>
               )}
 
               {/* No mapping warning */}
               {(!u.mappings || u.mappings.length === 0) && !isAddingMap && (
                 <div style={{ marginTop: 6, fontSize: 9, color: "rgba(255,200,50,0.4)", display: "flex", alignItems: "center", gap: 4 }}>
-                  ⚠ Aucun service lie — les recaps ne seront pas generes pour cet utilisateur
+                  ⚠ Aucun service lié — les recaps ne seront pas générés pour cet utilisateur
                 </div>
               )}
             </div>

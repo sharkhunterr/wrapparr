@@ -20,10 +20,10 @@ import ComparisonButton from "./player/ComparisonButton"
 import NavChevron from "./player/NavChevron"
 
 const SERVICE_META = {
-  tautulli: { key: "plex", icon: "🎬", label: "FILMS & SERIES", sub: "Cinema · Series TV" },
-  plex: { key: "plex", icon: "🎬", label: "FILMS & SERIES", sub: "Cinema · Series TV" },
-  jellyfin: { key: "jellyfin", icon: "📺", label: "JELLYFIN", sub: "Films · Series" },
-  romm: { key: "romm", icon: "🎮", label: "JEUX VIDEO", sub: "Switch · PC · Retrogaming" },
+  tautulli: { key: "plex", icon: "🎬", label: "FILMS & SÉRIES", sub: "Cinéma · Séries TV" },
+  plex: { key: "plex", icon: "🎬", label: "FILMS & SÉRIES", sub: "Cinéma · Séries TV" },
+  jellyfin: { key: "jellyfin", icon: "📺", label: "JELLYFIN", sub: "Films · Séries" },
+  romm: { key: "romm", icon: "🎮", label: "JEUX VIDÉO", sub: "Switch · PC · Retrogaming" },
   audiobookshelf: { key: "audiobookshelf", icon: "🎧", label: "LIVRES AUDIO", sub: "Sci-Fi · Thriller · Fantasy" },
   komga: { key: "komga", icon: "📚", label: "MANGA", sub: "Shonen · Seinen · Dark Fantasy" },
   booklore: { key: "booklore", icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD" },

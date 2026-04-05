@@ -7,8 +7,8 @@ const accent = "#E5A00D"
 const mono = { fontFamily: "JetBrains Mono,monospace" }
 
 const STATUS_MAP = {
-  completed: { label: "Termine", color: "#4ade80", Icon: CheckCircle2 },
-  failed: { label: "Echoue", color: "#f87171", Icon: XCircle },
+  completed: { label: "Terminé", color: "#4ade80", Icon: CheckCircle2 },
+  failed: { label: "Échoué", color: "#f87171", Icon: XCircle },
   pending: { label: "En attente", color: "#fbbf24", Icon: Clock },
   collecting: { label: "Collecte...", color: "#60a5fa", Icon: RefreshCw },
   processing: { label: "Traitement...", color: "#60a5fa", Icon: RefreshCw },
@@ -80,10 +80,10 @@ export default function Dashboard() {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
         <KPI icon={Users} label="Utilisateurs" value={stats?.user_count ?? "–"} color="#E5A00D" />
         <KPI icon={Link2} label="Services actifs" value={stats?.active_services ?? "–"} color="#34d399" />
-        <KPI icon={Film} label="Recaps" value={completedRecaps.length} color="#c084fc" sub={recaps.length > completedRecaps.length ? `${recaps.length - completedRecaps.length} en cours/echec` : undefined} />
+        <KPI icon={Film} label="Recaps" value={completedRecaps.length} color="#c084fc" sub={recaps.length > completedRecaps.length ? `${recaps.length - completedRecaps.length} en cours/échec` : undefined} />
         {analytics && <>
           <KPI icon={Eye} label="Visionnages" value={analytics.total_sessions} color="#60a5fa" sub={`${analytics.unique_viewers} spectateur${analytics.unique_viewers > 1 ? "s" : ""}`} />
-          <KPI icon={Clock} label="Duree moy." value={formatTime(analytics.avg_duration)} color="#fb923c" />
+          <KPI icon={Clock} label="Durée moy." value={formatTime(analytics.avg_duration)} color="#fb923c" />
           <KPI icon={Music} label="Musique" value={analytics.music_usage} color="#34d399" sub={`/ ${analytics.total_sessions}`} />
           <KPI icon={GitCompare} label="Comparaison" value={analytics.comparison_usage} color="#60a5fa" sub={`/ ${analytics.total_sessions}`} />
         </>}
@@ -92,7 +92,7 @@ export default function Dashboard() {
       {/* ── Recaps list ── */}
       {recaps.length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Recaps generes</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Recaps générés</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {recaps.map(r => {
               const st = STATUS_MAP[r.status] || STATUS_MAP.pending
@@ -145,12 +145,12 @@ export default function Dashboard() {
       )}
 
       {/* ── Quick links ── */}
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Acces rapide</div>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Accès rapide</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <NavCard icon={Link2} label="Services" desc="Configurer les connexions" color="#34d399" to="/admin/services" />
         <NavCard icon={Film} label="Slides" desc="Organiser les slides" color="#E5A00D" to="/admin/slides" />
         <NavCard icon={Palette} label="Themes" desc="Apparence du recap" color="#a78bfa" to="/admin/themes" />
-        <NavCard icon={BarChart2} label="Statistiques" desc="Visionnages detailles" color="#60a5fa" to="/admin/analytics" />
+        <NavCard icon={BarChart2} label="Statistiques" desc="Visionnages détaillés" color="#60a5fa" to="/admin/analytics" />
       </div>
 
     </div>

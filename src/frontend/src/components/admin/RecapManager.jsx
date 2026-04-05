@@ -3,15 +3,15 @@ import { Play, Eye, Trash2, ToggleLeft, ToggleRight, RefreshCw, Calendar, Clock,
 import { api } from "../../services/api"
 
 const STATUS = {
-  completed: { label: "Termine", color: "#4ade80", Icon: CheckCircle2 },
-  failed: { label: "Echoue", color: "#f87171", Icon: XCircle },
+  completed: { label: "Terminé", color: "#4ade80", Icon: CheckCircle2 },
+  failed: { label: "Échoué", color: "#f87171", Icon: XCircle },
   pending: { label: "En attente", color: "#fbbf24", Icon: Clock },
   collecting: { label: "Collecte...", color: "#60a5fa", Icon: RefreshCw },
   processing: { label: "Traitement...", color: "#60a5fa", Icon: RefreshCw },
   fetching_posters: { label: "Affiches...", color: "#60a5fa", Icon: RefreshCw },
 }
 
-const MONTHS = ["Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"]
+const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
 
 export default function RecapManager() {
   const [recaps, setRecaps] = useState([])
@@ -84,7 +84,7 @@ export default function RecapManager() {
   }
 
   const deleteRecap = async (id) => {
-    if (!confirm("Supprimer ce recap definitivement ?")) return
+    if (!confirm("Supprimer ce recap définitivement ?")) return
     await api(`/admin/recaps/${id}`, { method: "DELETE" })
     load()
   }
@@ -95,13 +95,13 @@ export default function RecapManager() {
         <Clapperboard size={20} color="#E5A00D" strokeWidth={1.5} />
         <h2 style={h2}>Gestion des recaps</h2>
       </div>
-      <p style={desc}>Creez, configurez et diffusez les recaps annuels a vos utilisateurs.</p>
+      <p style={desc}>Créez, configurez et diffusez les recaps annuels à vos utilisateurs.</p>
 
       {/* Generate */}
       <div style={{ ...card, marginBottom: 20, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 150 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 4 }}>Nouveau recap</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Genere les donnees depuis tous les services connectes</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Génère les données depuis tous les services connectés</div>
         </div>
         <input type="number" value={genYear} onChange={(e) => setGenYear(parseInt(e.target.value) || 2024)}
           style={yearInput} />
@@ -109,7 +109,7 @@ export default function RecapManager() {
           ...btn, background: generating ? "rgba(229,160,13,0.15)" : "#E5A00D",
           color: generating ? "#E5A00D" : "#05050e",
         }}>
-          {generating ? <><RefreshCw size={13} className="spin" /> Generation...</> : <><Play size={13} /> Generer</>}
+          {generating ? <><RefreshCw size={13} className="spin" /> Génération...</> : <><Play size={13} /> Générer</>}
         </button>
       </div>
 
@@ -133,7 +133,7 @@ export default function RecapManager() {
           {schedule.enabled && (
             <div>
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>
-                Le recap sera genere automatiquement pour l'annee en cours au moment de l'execution.
+                Le recap sera généré automatiquement pour l'année en cours au moment de l'exécution.
               </div>
 
               {/* Mode toggle */}
@@ -189,7 +189,7 @@ export default function RecapManager() {
               {/* Preview */}
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 8, fontFamily: "JetBrains Mono,monospace" }}>
                 {schedule.mode === "simple"
-                  ? `Prochain : ${schedule.day} ${MONTHS[schedule.month - 1]} ${new Date().getFullYear()} a ${String(schedule.hour).padStart(2, "0")}:00 → recap ${new Date().getFullYear()}`
+                  ? `Prochain : ${schedule.day} ${MONTHS[schedule.month - 1]} ${new Date().getFullYear()} à ${String(schedule.hour).padStart(2, "0")}:00 → recap ${new Date().getFullYear()}`
                   : `Cron : ${schedule.cron}`
                 }
               </div>
@@ -201,7 +201,7 @@ export default function RecapManager() {
       {/* Recap list */}
       {recaps.length === 0 && (
         <div style={{ textAlign: "center", padding: 40, color: "rgba(255,255,255,0.2)", borderRadius: 12, border: "1px dashed rgba(255,255,255,0.08)" }}>
-          Aucun recap. Generez-en un ci-dessus.
+          Aucun recap. Générez-en un ci-dessus.
         </div>
       )}
 
@@ -227,7 +227,7 @@ export default function RecapManager() {
 
                 {/* Actions */}
                 <div style={{ display: "flex", gap: 4 }}>
-                  <button onClick={() => toggleActive(r)} style={btnSmall} title={r.is_active ? "Desactiver" : "Activer"}>
+                  <button onClick={() => toggleActive(r)} style={btnSmall} title={r.is_active ? "Désactiver" : "Activer"}>
                     {r.is_active ? <ToggleRight size={14} color="#4ade80" /> : <ToggleLeft size={14} />}
                   </button>
                   {r.status === "completed" && (
@@ -249,10 +249,10 @@ export default function RecapManager() {
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
                   {/* Diffusion */}
                   <div>
-                    <div style={label}>Periode de diffusion</div>
+                    <div style={label}>Période de diffusion</div>
                     <div style={{ display: "flex", gap: 10, marginTop: 6, flexWrap: "wrap" }}>
                       <div>
-                        <div style={inputLabel}>Debut</div>
+                        <div style={inputLabel}>Début</div>
                         <input type="datetime-local"
                           value={r.available_from ? r.available_from.slice(0, 16) : ""}
                           onChange={(e) => updateRecap(r.id, { available_from: e.target.value ? new Date(e.target.value).toISOString() : null })}
@@ -278,7 +278,7 @@ export default function RecapManager() {
 
                   {/* Regenerate */}
                   <button onClick={() => { generate(); setEditing(null) }} style={{ ...btn, width: "fit-content" }}>
-                    <RefreshCw size={13} /> Regenerer les donnees
+                    <RefreshCw size={13} /> Régénérer les données
                   </button>
                 </div>
               )}

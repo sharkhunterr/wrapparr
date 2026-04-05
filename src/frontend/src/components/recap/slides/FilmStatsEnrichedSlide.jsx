@@ -4,20 +4,20 @@ import { useLabels } from "../ThemeContext"
 
 const DEFAULT_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "🍿" },
-  { min: 20, max: 50, name: "Cinephile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro du cinema", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
-  { min: 100, max: 200, name: "Machine a films", desc: "Tu enchaines les films sans relache", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien supreme", desc: "Tu vis et respires cinema", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
+  { min: 20, max: 50, name: "Cinéphile du dimanche", desc: "Tu aimes bien te poser devant un film", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro du cinéma", desc: "Les salles obscures n'ont plus de secrets", emoji: "🎬" },
+  { min: 100, max: 200, name: "Machine à films", desc: "Tu enchaînes les films sans relâche", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien suprême", desc: "Tu vis et respires cinéma", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende vivante", desc: "Tu as probablement vu plus de films que Spielberg", emoji: "👑" },
 ]
 
 const DEFAULT_SERIES_CATEGORIES = [
   { min: 0, max: 20, name: "Spectateur occasionnel", desc: "Tu regardes de temps en temps", emoji: "📺" },
-  { min: 20, max: 50, name: "Binge watcher debutant", desc: "Tu enchaines quelques episodes", emoji: "🛋️" },
-  { min: 50, max: 100, name: "Accro aux series", desc: "Tu ne peux plus t'arreter", emoji: "📺" },
-  { min: 100, max: 200, name: "Machine a episodes", desc: "Les saisons defilent sous tes yeux", emoji: "🤖" },
-  { min: 200, max: 500, name: "Marathonien des series", desc: "Tu vis et respires series", emoji: "🏆" },
-  { min: 500, max: 99999, name: "Legende du binge", desc: "Tu as probablement vu plus de series que Netflix", emoji: "👑" },
+  { min: 20, max: 50, name: "Binge watcher débutant", desc: "Tu enchaînes quelques épisodes", emoji: "🛋️" },
+  { min: 50, max: 100, name: "Accro aux séries", desc: "Tu ne peux plus t'arrêter", emoji: "📺" },
+  { min: 100, max: 200, name: "Machine à épisodes", desc: "Les saisons défilent sous tes yeux", emoji: "🤖" },
+  { min: 200, max: 500, name: "Marathonien des séries", desc: "Tu vis et respires séries", emoji: "🏆" },
+  { min: 500, max: 99999, name: "Légende du binge", desc: "Tu as probablement vu plus de séries que Netflix", emoji: "👑" },
 ]
 
 function formatEquiv(hours) {
@@ -220,7 +220,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             {avgPerMonth > 0 && <MiniStat iconKey="chart" value={avgPerMonth} label={perMonthLabel} accent={accent} />}
             {ratings.length > 0 && <MiniStat iconKey="star" value={avgRating + "/10"} label="note moyenne" accent={accent} />}
-            {avgYear && <MiniStat iconKey="film" value={avgYear} label="annee moyenne" accent={accent} />}
+            {avgYear && <MiniStat iconKey="film" value={avgYear} label="année moyenne" accent={accent} />}
           </div>
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             {topActor && <MiniStat iconKey="user" value={topActor.name} label={topActor.count + " " + itemLabel} accent={accent} />}
@@ -238,13 +238,13 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
         </div>
       </div>
 
-      {/* Activite mensuelle */}
+      {/* Activité mensuelle */}
       {(() => {
         const monthly = data.extra?.films?.monthly || data.monthly || []
         if (monthly.length < 3) return null
         return (
           <div style={{ padding: "clamp(6px, 1.2vw, 10px)", marginBottom: 6, borderRadius: "var(--th-radius)", background: "var(--th-surface-hover)", border: "1px solid var(--th-border-strong)", backdropFilter: "var(--th-glass-blur)" }}>
-            <Lbl c={accent} size={8}>Activite mensuelle</Lbl>
+            <Lbl c={accent} size={8}>Activité mensuelle</Lbl>
             <AreaG data={monthly} dataKey="v" accent={accent} height={80} unit={" " + L.viewsUnit} id={"stats-enriched-" + label} prevData={prevMonthly} prevDataKey="previous" />
             <CompLegend accent={accent} year={year} />
           </div>
@@ -298,7 +298,7 @@ export default function FilmStatsEnrichedSlide({ accent, label, icon, data, year
             position: "relative", overflow: "hidden",
           }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}35 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out 1.5s infinite", pointerEvents: "none" }} />
-            <span style={{ position: "relative" }}>{config.stampText || "Approuve"}</span>
+            <span style={{ position: "relative" }}>{config.stampText || "Approuvé"}</span>
           </div>
         </div>
       )}

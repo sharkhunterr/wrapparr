@@ -65,11 +65,11 @@ function OverviewSection({ summary }) {
     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
       <StatCard icon={Eye} label="Sessions" value={summary.total_sessions} />
       <StatCard icon={Users} label="Spectateurs" value={summary.unique_viewers} />
-      <StatCard icon={Clock} label="Duree moy." value={formatTime(summary.avg_duration)} />
+      <StatCard icon={Clock} label="Durée moy." value={formatTime(summary.avg_duration)} />
       <StatCard icon={BarChart2} label="Slides moy." value={Math.round(summary.avg_slides_viewed)} />
       <StatCard icon={Music} label="Musique" value={summary.music_usage} color="#34d399" sub={`/ ${summary.total_sessions}`} />
       <StatCard icon={GitCompare} label="Comparaison" value={summary.comparison_usage} color="#60a5fa" sub={`/ ${summary.total_sessions}`} />
-      {summary.themes?.[0] && <StatCard icon={Palette} label="Theme favori" value={summary.themes[0].theme} color="#a78bfa" sub={`${summary.themes[0].count}x`} />}
+      {summary.themes?.[0] && <StatCard icon={Palette} label="Thème favori" value={summary.themes[0].theme} color="#a78bfa" sub={`${summary.themes[0].count}x`} />}
     </div>
   )
 }
@@ -169,13 +169,13 @@ function SessionsTable({ sessions, slideStats }) {
           {userNames.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
         <select value={filterYear} onChange={e => setFilterYear(e.target.value)} style={{ padding: "3px 6px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)", fontSize: 9 }}>
-          <option value="">Annees</option>
+          <option value="">Années</option>
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
         <select value={filterCompleted} onChange={e => setFilterCompleted(e.target.value)} style={{ padding: "3px 6px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)", fontSize: 9 }}>
           <option value="all">Tous</option>
-          <option value="completed">Termines</option>
-          <option value="incomplete">Non termines</option>
+          <option value="completed">Terminés</option>
+          <option value="incomplete">Non terminés</option>
         </select>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.15)", ...mono }}>{sorted.length}</span>
         {selectedIds.size > 0 && (
@@ -198,7 +198,7 @@ function SessionsTable({ sessions, slideStats }) {
             <SortTh col="started_at" label="Date" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
             <SortTh col="user_name" label="Utilisateur" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} pad={8} />
             <SortTh col="year" label="Recap" align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
-            <SortTh col="duration" label="Duree" align="right" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+            <SortTh col="duration" label="Durée" align="right" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
             <SortTh col="progress" label="Progr." align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
             <th style={{ padding: "6px", fontSize: 8, color: "rgba(255,255,255,0.2)", textAlign: "center" }}>Options</th>
             <th style={{ width: 24 }} />
@@ -294,9 +294,9 @@ function SessionDetail({ session }) {
         )}
 
         {/* Params */}
-        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Parametres</div>
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Paramètres</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 1, fontSize: 9, color: "rgba(255,255,255,0.3)" }}>
-          {session.theme_id && <div>Theme: <span style={{ color: "#a78bfa" }}>{session.theme_id}</span></div>}
+          {session.theme_id && <div>Thème: <span style={{ color: "#a78bfa" }}>{session.theme_id}</span></div>}
           {session.palette_slug && <div>Palette: <span style={{ color: accent }}>{session.palette_slug}</span></div>}
           <div>Musique: {session.music_enabled ? <span style={{ color: "#34d399" }}>Oui</span> : "Non"}</div>
           <div>Comparaison: {session.comparison_enabled ? <span style={{ color: "#60a5fa" }}>Oui</span> : "Non"}</div>
@@ -361,7 +361,7 @@ export default function AnalyticsDashboard() {
   }, [])
 
   if (loading) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Chargement...</div>
-  if (!summary) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Aucune donnee</div>
+  if (!summary) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Aucune donnée</div>
 
   return (
     <div>

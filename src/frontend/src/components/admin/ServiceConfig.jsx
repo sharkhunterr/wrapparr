@@ -3,15 +3,15 @@ import { Clapperboard, MonitorPlay, Gamepad2, Headphones, BookOpen, Library, Cir
 import { api } from "../../services/api"
 
 const SERVICE_TYPES = [
-  { type: "tautulli", label: "Tautulli (Plex)", Icon: Clapperboard, color: "#E5A00D", placeholder_url: "http://tautulli:8181", authMode: "apikey", placeholder_key: "Cle API Tautulli" },
-  { type: "jellyfin", label: "Jellyfin", Icon: MonitorPlay, color: "#00a4dc", placeholder_url: "http://jellyfin:8096", authMode: "apikey", placeholder_key: "Cle API Jellyfin" },
+  { type: "tautulli", label: "Tautulli (Plex)", Icon: Clapperboard, color: "#E5A00D", placeholder_url: "http://tautulli:8181", authMode: "apikey", placeholder_key: "Clé API Tautulli" },
+  { type: "jellyfin", label: "Jellyfin", Icon: MonitorPlay, color: "#00a4dc", placeholder_url: "http://jellyfin:8096", authMode: "apikey", placeholder_key: "Clé API Jellyfin" },
   { type: "romm", label: "ROMM", Icon: Gamepad2, color: "#34d399", placeholder_url: "http://romm:8080", authMode: "login", placeholder_user: "admin", placeholder_pass: "Mot de passe" },
   { type: "audiobookshelf", label: "Audiobookshelf", Icon: Headphones, color: "#fb923c", placeholder_url: "http://audiobookshelf:13378", authMode: "apikey", placeholder_key: "Token API" },
   { type: "komga", label: "Komga", Icon: Library, color: "#c084fc", placeholder_url: "http://komga:25600", authMode: "login", placeholder_user: "email", placeholder_pass: "Mot de passe" },
   { type: "booklore", label: "Booklore", Icon: BookOpen, color: "#a78bfa", placeholder_url: "http://booklore:8080", authMode: "apikey", placeholder_key: "Token API" },
   { type: "grimmory", label: "Grimmory", Icon: BookOpen, color: "#10b981", placeholder_url: "http://grimmory:6060", authMode: "apikey", placeholder_key: "Token API Grimmory" },
-  { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", authMode: "apikey", placeholder_key: "Cle API TMDB (v3)" },
-  { type: "overseerr", label: "Overseerr", Icon: Bell, color: "#6366f1", placeholder_url: "http://overseerr:5055", authMode: "apikey", placeholder_key: "Cle API Overseerr" },
+  { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", authMode: "apikey", placeholder_key: "Clé API TMDB (v3)" },
+  { type: "overseerr", label: "Overseerr", Icon: Bell, color: "#6366f1", placeholder_url: "http://overseerr:5055", authMode: "apikey", placeholder_key: "Clé API Overseerr" },
 ]
 
 function getMeta(type) {
@@ -47,7 +47,7 @@ function ServiceForm({ meta, initial, onSubmit, onCancel, submitLabel }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-        placeholder="Nom affiche (optionnel)" style={input} />
+        placeholder="Nom affiché (optionnel)" style={input} />
       <input value={form.base_url} onChange={(e) => setForm({ ...form, base_url: e.target.value })}
         placeholder={meta.placeholder_url} style={input} />
 
@@ -129,7 +129,7 @@ export default function ServiceConfig() {
   return (
     <div>
       <h2 style={h2}>Connecteurs de services</h2>
-      <p style={desc}>Configurez les services de votre homelab pour collecter les donnees du recap annuel.</p>
+      <p style={desc}>Configurez les services de votre homelab pour collecter les données du recap annuel.</p>
 
       {/* Existing services */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
@@ -175,7 +175,7 @@ export default function ServiceConfig() {
               {isEditing && (
                 <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>
-                    {meta.authMode === "login" ? "Laissez identifiant/mot de passe vides pour ne pas les modifier" : "Laissez la cle API vide pour ne pas la modifier"}
+                    {meta.authMode === "login" ? "Laissez identifiant/mot de passe vides pour ne pas les modifier" : "Laissez la clé API vide pour ne pas la modifier"}
                   </div>
                   <ServiceForm
                     meta={meta}

@@ -29,49 +29,49 @@ import { CommunityActivitySlide, CommunityTopSlide, CommunityMostViewedSlide, Co
 
 const JOKES = {
   tautulli: [
-    "Voyons combien de films et series cette annee...",
-    "Les popcorns etaient au rendez-vous.",
-    "Il a ri, pleure, et probablement mange des chips.",
+    "Voyons combien de films et séries cette année...",
+    "Les popcorns étaient au rendez-vous.",
+    "Il a ri, pleuré, et probablement mangé des chips.",
     "Voici le podium officiel",
   ],
   jellyfin: [
-    "Jellyfin a tourne a plein regime cette annee...",
+    "Jellyfin a tourné à plein régime cette année...",
     "Des heures de streaming en continu.",
-    "Le serveur n'a pas chome.",
+    "Le serveur n'a pas chômé.",
     "Le verdict tombe",
   ],
   romm: [
-    "Les manettes ont chauffees cette annee...",
-    "Des sessions epiques en perspective.",
+    "Les manettes ont chauffé cette année...",
+    "Des sessions épiques en perspective.",
     "Les voisins ont entendu les victoires.",
     "Voici le top du gamepad",
   ],
   audiobookshelf: [
-    "Des heures d'ecoute cette annee...",
+    "Des heures d'écoute cette année...",
     "Principalement en mode concentration.",
-    "Le cerveau a voyage dans des univers differents.",
-    "Le palmares s'affiche",
+    "Le cerveau a voyagé dans des univers différents.",
+    "Le palmarès s'affiche",
   ],
   komga: [
-    "Des volumes de manga lus cette annee.",
+    "Des volumes de manga lus cette année.",
     "Plusieurs volumes par mois. Respect.",
     "Au moins 4 arcs qui font pleurer.",
     "Le podium des cases s'illumine",
   ],
   booklore: [
-    "Des livres devores cette annee...",
-    "La bibliotheque s'agrandit.",
+    "Des livres dévorés cette année...",
+    "La bibliothèque s'agrandit.",
     "Des histoires qui marquent.",
-    "Le palmares litteraire",
+    "Le palmarès littéraire",
   ],
 }
 
 // Service config for slide generation (matches prototype SLIDES_DEF colors)
 const SERVICE_SLIDE_CONFIG = {
-  tautulli: { icon: "🎬", label: "FILMS", sub: "Cinema · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SERIES", seriesSub: "Series TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
-  plex: { icon: "🎬", label: "FILMS", sub: "Cinema · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SERIES", seriesSub: "Series TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
-  jellyfin: { icon: "📺", label: "JELLYFIN", sub: "Films · Series", accent: "#00a4dc", bgCat: "#000a14", bgPod: "#000812", bgStats: "#000d18", statKey: "plays", statLabel: "vues", statSuffix: "" },
-  romm: { icon: "🎮", label: "JEUX VIDEO", sub: "Switch · PC · Retrogaming", accent: "#34d399", bgCat: "#010a05", bgPod: "#010806", bgStats: "#020f08", statKey: "g", statLabel: "plateforme", statSuffix: "" },
+  tautulli: { icon: "🎬", label: "FILMS", sub: "Cinéma · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SÉRIES", seriesSub: "Séries TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
+  plex: { icon: "🎬", label: "FILMS", sub: "Cinéma · Documentaires", accent: "#E5A00D", bgCat: "#0c0600", bgPod: "#070400", bgStats: "#100900", statKey: "plays", statLabel: "vues", statSuffix: "", hasSeries: true, seriesIcon: "📺", seriesLabel: "SÉRIES", seriesSub: "Séries TV · Sagas", seriesAccent: "#fb923c", seriesBgCat: "#0a0200", seriesBgPod: "#080200", seriesBgStats: "#120600" },
+  jellyfin: { icon: "📺", label: "JELLYFIN", sub: "Films · Séries", accent: "#00a4dc", bgCat: "#000a14", bgPod: "#000812", bgStats: "#000d18", statKey: "plays", statLabel: "vues", statSuffix: "" },
+  romm: { icon: "🎮", label: "JEUX VIDÉO", sub: "Switch · PC · Retrogaming", accent: "#34d399", bgCat: "#010a05", bgPod: "#010806", bgStats: "#020f08", statKey: "g", statLabel: "plateforme", statSuffix: "" },
   audiobookshelf: { icon: "🎧", label: "LIVRES AUDIO", sub: "Sci-Fi · Thriller · Post-Apo", accent: "#fb923c", bgCat: "#0a0300", bgPod: "#080300", bgStats: "#110500", statKey: "h", statLabel: "heures", statSuffix: "h" },
   komga: { icon: "📚", label: "MANGA", sub: "Shonen · Seinen · Dark Fantasy", accent: "#c084fc", bgCat: "#060012", bgPod: "#050010", bgStats: "#0a0018", statKey: "vols", statLabel: "volumes", statSuffix: "" },
   booklore: { icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD", accent: "#a78bfa", bgCat: "#050010", bgPod: "#040008", bgStats: "#060012", statKey: "pages", statLabel: "pages", statSuffix: "" },
@@ -317,7 +317,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInt
         const seriesCat = catProps("cat-" + svc + "-series", { icon: cfg.seriesIcon, label: cfg.seriesLabel, sub: cfg.seriesSub })
         if (seriesTop.length >= 2) {
           const seriesBackdrop = (seriesTop[0]?.art) || ""
-          const defaultSeriesJokes = ["Voyons quelles series t'ont accroche...", "Des episodes enchaines sans fin.", "Le binge-watching, un art de vivre.", "Voici ton podium series"]
+          const defaultSeriesJokes = ["Voyons quelles séries t'ont accroché...", "Des épisodes enchaînés sans fin.", "Le binge-watching, un art de vivre.", "Voici ton podium séries"]
           pushSlide({
             id: svc + "-series-pod", accent: seriesAccent, bg: cfg.seriesBgPod || baseBg, pod: true, fullscreen: true,
             component: <PodiumSlide accent={seriesAccent} bg={cfg.seriesBgPod || baseBg} data={seriesTop} title={"Top " + seriesCat.label + " " + year} icon={seriesCat.icon} jokes={podJokes(svc + "-series-pod", defaultSeriesJokes)} statLabel="episodes" statKey="ep" statSuffix="" backdrop={seriesBackdrop} config={getSlideConfig(sc, svc + "-series-pod")} serviceType={svc} mediaType="series" />,
@@ -532,7 +532,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInt
       if (match) { foundMyUid = uid; break }
     }
     if (!foundMyUid) {
-      console.warn("[Community] Utilisateur non trouve dans le recap. Verifiez le mapping admin.", { uid: _uid, name: _name, email: _email, recapUsers: Object.keys(data.users) })
+      console.warn("[Community] Utilisateur non trouvé dans le recap. Vérifiez le mapping admin.", { uid: _uid, name: _name, email: _email, recapUsers: Object.keys(data.users) })
     }
   }
 
@@ -546,7 +546,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInt
     // Category slide for community section
     pushSlide({
       id: "cat-community", accent: communityAccent, bg: baseBg, cat: true, fullscreen: true,
-      component: <CategorySlide accent={communityAccent} icon="👥" label="COMMUNAUTE" sub="Comparaison entre utilisateurs" />,
+      component: <CategorySlide accent={communityAccent} icon="👥" label="COMMUNAUTÉ" sub="Comparaison entre utilisateurs" />,
     })
 
     // Films community slides
@@ -640,7 +640,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInt
     if (isSlideEnabled(sc, "cat-overseerr")) {
       pushSlide({
         id: "cat-overseerr", accent: overseerrAccent, bg: baseBg, cat: true, fullscreen: true,
-        component: <CategorySlide accent={overseerrAccent} {...catProps("cat-overseerr", { icon: "📋", label: "DEMANDES", sub: "Overseerr · Requetes media" })} />,
+        component: <CategorySlide accent={overseerrAccent} {...catProps("cat-overseerr", { icon: "📋", label: "DEMANDES", sub: "Overseerr · Requêtes media" })} />,
       })
     }
     if (isSlideEnabled(sc, "overseerr-requests")) {
@@ -725,7 +725,7 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInt
   }
 
   // Inject OnboardingSlide with dynamic data
-  const SERVICE_CFG = { tautulli: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, plex: { icon: "🎬", label: "Films & Series", sub: "Cinema · Series TV" }, jellyfin: { icon: "📺", label: "Jellyfin", sub: "Films · Series" }, romm: { icon: "🎮", label: "Jeux Video", sub: "Switch · PC" }, audiobookshelf: { icon: "🎧", label: "Livres Audio", sub: "Podcasts" }, grimmory: { icon: "📖", label: "Lecture", sub: "Livres · Audiobooks" }, komga: { icon: "📚", label: "Manga", sub: "BD · Comics" }, booklore: { icon: "📖", label: "Livres", sub: "Romans · Essais" } }
+  const SERVICE_CFG = { tautulli: { icon: "🎬", label: "Films & Séries", sub: "Cinéma · Séries TV" }, plex: { icon: "🎬", label: "Films & Séries", sub: "Cinéma · Séries TV" }, jellyfin: { icon: "📺", label: "Jellyfin", sub: "Films · Séries" }, romm: { icon: "🎮", label: "Jeux Vidéo", sub: "Switch · PC" }, audiobookshelf: { icon: "🎧", label: "Livres Audio", sub: "Podcasts" }, grimmory: { icon: "📖", label: "Lecture", sub: "Livres · Audiobooks" }, komga: { icon: "📚", label: "Manga", sub: "BD · Comics" }, booklore: { icon: "📖", label: "Livres", sub: "Romans · Essais" } }
   const svcList = detectedServices.map((s) => ({ key: s, ...(SERVICE_CFG[s] || { icon: "📦", label: s, sub: "" }) }))
   for (const s of enabledSlides) {
     if (s.id === "onboarding" && s._onboardingProps) {
@@ -783,14 +783,14 @@ function buildSlides(data, theme, slideConfigs, user, year, myRecapUserId, onInt
 
 const SECTION_INFO = {
   films: { icon: "🎬", label: "Recap Films", desc: "Podium, stats, genres, notes..." },
-  series: { icon: "📺", label: "Recap Series", desc: "Top series, habitudes, acteurs..." },
-  audiobookshelf: { icon: "🎧", label: "Livres Audio", desc: "Ecoute, auteurs, narrateurs..." },
+  series: { icon: "📺", label: "Recap Séries", desc: "Top séries, habitudes, acteurs..." },
+  audiobookshelf: { icon: "🎧", label: "Livres Audio", desc: "Écoute, auteurs, narrateurs..." },
   grimmory: { icon: "📖", label: "Lecture", desc: "Livres, streak, page-turners..." },
-  romm: { icon: "🎮", label: "Jeux Video", desc: "Top jeux, plateformes, genres..." },
+  romm: { icon: "🎮", label: "Jeux Vidéo", desc: "Top jeux, plateformes, genres..." },
   komga: { icon: "📚", label: "Manga", desc: "Volumes lus, genres, auteurs..." },
   booklore: { icon: "📖", label: "Livres", desc: "Lectures, genres, auteurs..." },
-  overseerr: { icon: "📋", label: "Demandes", desc: "Bilan, match, popularite..." },
-  community: { icon: "👥", label: "Communaute", desc: "Classements, tendances..." },
+  overseerr: { icon: "📋", label: "Demandes", desc: "Bilan, match, popularité..." },
+  community: { icon: "👥", label: "Communauté", desc: "Classements, tendances..." },
 }
 
 function _injectOnboardingSections(slides) {

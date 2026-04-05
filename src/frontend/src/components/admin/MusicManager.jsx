@@ -11,11 +11,11 @@ const SECTION_LABELS = {
   _background: "Musique de fond (toutes les slides)",
   intro: "Intro",
   films: "Films",
-  series: "Series",
+  series: "Séries",
   audiobook: "Livres Audio",
   grimmory: "Lecture (Grimmory)",
   demandes: "Demandes (Overseerr)",
-  community: "Communaute",
+  community: "Communauté",
   finale: "Finale",
 }
 
@@ -70,7 +70,7 @@ export default function MusicManager() {
       await save({ ...config, pool: [...config.pool, { url: newUrl, audioPath, name, duration, id: Date.now().toString() }] })
       setNewUrl("")
     } catch (e) {
-      alert("Erreur de telechargement : " + (e.message || e))
+      alert("Erreur de téléchargement : " + (e.message || e))
     }
     setDownloading(false)
   }
@@ -120,7 +120,7 @@ export default function MusicManager() {
       </div>
 
       <div style={{ marginBottom: 16, fontSize: 12, color: "rgba(255,255,255,0.35)", lineHeight: 1.5 }}>
-        Ajoute des musiques YouTube a ta bibliotheque, puis assigne-les aux sections du recap. Le son demarre mute, l'utilisateur peut l'activer.
+        Ajoute des musiques YouTube à ta bibliothèque, puis assigne-les aux sections du recap. Le son démarre mute, l'utilisateur peut l'activer.
       </div>
 
       {/* Mode selector */}
@@ -143,7 +143,7 @@ export default function MusicManager() {
 
       {/* Pool — music library */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 8, fontWeight: 600 }}>Bibliotheque musicale</div>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 8, fontWeight: 600 }}>Bibliothèque musicale</div>
 
         {/* Add new */}
         <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
@@ -165,7 +165,7 @@ export default function MusicManager() {
             fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 4,
             border: "1px solid " + (extractYouTubeId(newUrl) ? "rgba(229,160,13,0.3)" : "rgba(255,255,255,0.06)"),
           }}>
-            <Plus size={12} /> {downloading ? "Telechargement..." : "Ajouter"}
+            <Plus size={12} /> {downloading ? "Téléchargement..." : "Ajouter"}
           </button>
         </div>
 
@@ -173,7 +173,7 @@ export default function MusicManager() {
         {config.pool.length === 0 ? (
           <div style={{ padding: "20px 16px", borderRadius: 10, background: "rgba(255,255,255,0.015)", border: "1px dashed rgba(255,255,255,0.06)", textAlign: "center" }}>
             <Music size={20} color="rgba(255,255,255,0.1)" style={{ marginBottom: 6 }} />
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)" }}>Aucune musique ajoutee</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)" }}>Aucune musique ajoutée</div>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -214,7 +214,7 @@ export default function MusicManager() {
             /* ── Single mode: playlist builder ── */
             <div>
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 8 }}>
-                Les musiques s'enchainent dans l'ordre. Si une seule, elle boucle en repeat.
+                Les musiques s'enchaînent dans l'ordre. Si une seule, elle boucle en repeat.
               </div>
               {/* Current playlist */}
               <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
@@ -252,7 +252,7 @@ export default function MusicManager() {
                 width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)",
                 background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)", fontSize: 10, outline: "none",
               }}>
-                <option value="">+ Ajouter une musique a la playlist...</option>
+                <option value="">+ Ajouter une musique à la playlist...</option>
                 {config.pool.map((p, i) => (
                   <option key={i} value={i} style={{ background: "#15151e", color: "white" }}>{p.name || extractYouTubeId(p.url) || p.url}{p.duration ? ` (${formatDuration(p.duration)})` : ""}</option>
                 ))}
