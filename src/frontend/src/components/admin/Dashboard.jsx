@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react"
-import { Users, Link2, Activity, TrendingUp, Play, CheckCircle2, XCircle, Clock, RefreshCw, Eye } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { Users, Link2, Activity, Play, CheckCircle2, XCircle, Clock, RefreshCw, Eye, BarChart2, Music, GitCompare, Film, Palette, ArrowRight } from "lucide-react"
 import { api } from "../../services/api"
+
+const accent = "#E5A00D"
+const mono = { fontFamily: "JetBrains Mono,monospace" }
 
 const STATUS_MAP = {
   completed: { label: "Termine", color: "#4ade80", Icon: CheckCircle2 },
@@ -11,26 +15,71 @@ const STATUS_MAP = {
   fetching_posters: { label: "Affiches...", color: "#60a5fa", Icon: RefreshCw },
 }
 
+function formatTime(s) {
+  if (!s || s < 0) return "0s"
+  if (s < 60) return Math.round(s) + "s"
+  const m = Math.floor(s / 60), sec = Math.round(s % 60)
+  if (m < 60) return m + "m" + (sec > 0 ? sec + "s" : "")
+  return Math.floor(m / 60) + "h" + (m % 60) + "m"
+}
+
+function KPI({ icon: Icon, label, value, sub, color = accent }) {
+  return (
+    <div style={{ padding: "14px 12px", borderRadius: 10, background: color + "08", border: "1px solid " + color + "15", flex: "1 1 120px", minWidth: 120 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <Icon size={14} color={color} strokeWidth={1.5} />
+        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>{label}</span>
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 700, color, lineHeight: 1, ...mono }}>{value}</div>
+      {sub && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 3 }}>{sub}</div>}
+    </div>
+  )
+}
+
+function NavCard({ icon: Icon, label, desc, color, to }) {
+  const navigate = useNavigate()
+  return (
+    <div onClick={() => navigate(to)} style={{
+      padding: "12px 14px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+      cursor: "pointer", transition: "border-color .2s, background .2s", flex: "1 1 160px", minWidth: 160,
+      display: "flex", alignItems: "center", gap: 10,
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = color + "30"; e.currentTarget.style.background = color + "06" }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)" }}
+    >
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: color + "15", border: "1px solid " + color + "20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon size={14} color={color} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "white" }}>{label}</div>
+        <div style={{ fontSize: 9, color: "rgba(255,255,255,0.25)" }}>{desc}</div>
+      </div>
+      <ArrowRight size={12} color="rgba(255,255,255,0.1)" />
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null)
   const [recaps, setRecaps] = useState([])
+  const [analytics, setAnalytics] = useState(null)
   const [generating, setGenerating] = useState(false)
   const [genYear, setGenYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     api("/admin/dashboard").then(setStats).catch(() => {})
     api("/recaps").then(setRecaps).catch(() => {})
+    api("/analytics/admin/summary").then(setAnalytics).catch(() => {})
   }, [])
 
   const generate = async () => {
     setGenerating(true)
     try {
       await api("/recaps/generate", { method: "POST", body: { year: genYear } })
-      // Poll
       const poll = setInterval(async () => {
         const all = await api("/recaps")
         setRecaps(all)
-        const target = all.find((r) => r.year === genYear)
+        const target = all.find(r => r.year === genYear)
         if (target && (target.status === "completed" || target.status === "failed")) {
           clearInterval(poll)
           setGenerating(false)
@@ -42,90 +91,108 @@ export default function Dashboard() {
     }
   }
 
-  const cards = stats ? [
-    { label: "Utilisateurs", value: stats.user_count, color: "#E5A00D", Icon: Users },
-    { label: "Services actifs", value: stats.active_services, color: "#34d399", Icon: Link2 },
-    { label: "Jobs en cours", value: stats.running_jobs, color: "#60a5fa", Icon: Activity },
-    { label: "Recaps generes", value: recaps.filter((r) => r.status === "completed").length, color: "#c084fc", Icon: CheckCircle2 },
-  ] : []
+  const completedRecaps = recaps.filter(r => r.status === "completed")
 
   return (
     <div>
-      <h2 style={h2}>Tableau de bord</h2>
+      <h2 style={{ color: "white", fontSize: 17, fontWeight: 700, marginBottom: 16 }}>Tableau de bord</h2>
 
-      {/* Metrics */}
-      {stats && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 28 }}>
-          {cards.map((c) => (
-            <div key={c.label} style={{ padding: "16px 14px", borderRadius: 12, background: `${c.color}08`, border: `1px solid ${c.color}15` }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <c.Icon size={16} color={c.color} strokeWidth={1.5} />
-              </div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: c.color, lineHeight: 1 }}>{c.value}</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>{c.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ── KPIs ── */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+        <KPI icon={Users} label="Utilisateurs" value={stats?.user_count ?? "–"} color="#E5A00D" />
+        <KPI icon={Link2} label="Services actifs" value={stats?.active_services ?? "–"} color="#34d399" />
+        <KPI icon={Film} label="Recaps" value={completedRecaps.length} color="#c084fc" sub={recaps.length > completedRecaps.length ? `${recaps.length - completedRecaps.length} en cours/echec` : undefined} />
+        {analytics && <>
+          <KPI icon={Eye} label="Visionnages" value={analytics.total_sessions} color="#60a5fa" sub={`${analytics.unique_viewers} spectateur${analytics.unique_viewers > 1 ? "s" : ""}`} />
+          <KPI icon={Clock} label="Duree moy." value={formatTime(analytics.avg_duration)} color="#fb923c" />
+          <KPI icon={Music} label="Musique" value={analytics.music_usage} color="#34d399" sub={`/ ${analytics.total_sessions}`} />
+          <KPI icon={GitCompare} label="Comparaison" value={analytics.comparison_usage} color="#60a5fa" sub={`/ ${analytics.total_sessions}`} />
+        </>}
+      </div>
 
-      {/* Generate recap */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
-        <h3 style={{ color: "white", fontSize: 14, fontWeight: 600, margin: 0 }}>Generer un recap</h3>
-        <input type="number" value={genYear} onChange={(e) => setGenYear(parseInt(e.target.value) || 2024)}
-          style={{ width: 80, padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", color: "white", fontSize: 13, fontFamily: "JetBrains Mono,monospace", textAlign: "center", outline: "none" }} />
+      {/* ── Generate recap ── */}
+      <div style={{
+        padding: "14px 16px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", alignItems: "center", gap: 10, marginBottom: 20, flexWrap: "wrap",
+      }}>
+        <Film size={16} color={accent} />
+        <span style={{ fontSize: 12, fontWeight: 600, color: "white" }}>Generer un recap</span>
+        <input type="number" value={genYear} onChange={e => setGenYear(parseInt(e.target.value) || 2024)}
+          style={{ width: 70, padding: "5px 8px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "white", fontSize: 12, ...mono, textAlign: "center", outline: "none" }} />
         <button onClick={generate} disabled={generating} style={{
-          display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "none",
-          background: generating ? "rgba(229,160,13,0.2)" : "#E5A00D", color: generating ? "#E5A00D" : "#05050e",
-          fontSize: 12, fontWeight: 700, cursor: generating ? "wait" : "pointer",
+          display: "flex", alignItems: "center", gap: 5, padding: "6px 14px", borderRadius: 7, border: "none",
+          background: generating ? "rgba(229,160,13,0.15)" : accent, color: generating ? accent : "#05050e",
+          fontSize: 11, fontWeight: 700, cursor: generating ? "wait" : "pointer",
         }}>
-          {generating ? <><RefreshCw size={13} style={{ animation: "spin 1s linear infinite" }} /> Generation...</> : <><Play size={13} /> Lancer</>}
+          {generating ? <><RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} /> En cours...</> : <><Play size={12} /> Lancer</>}
         </button>
       </div>
 
-      {/* Recap list */}
-      <h3 style={{ color: "white", fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Recaps generes</h3>
-      {recaps.length === 0 && (
-        <div style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, padding: 24, textAlign: "center", borderRadius: 12, border: "1px dashed rgba(255,255,255,0.08)" }}>
-          Aucun recap. Configurez vos services puis lancez la generation.
+      {/* ── Recaps list ── */}
+      {recaps.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Recaps generes</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {recaps.map(r => {
+              const st = STATUS_MAP[r.status] || STATUS_MAP.pending
+              return (
+                <div key={r.id} style={{
+                  display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                  borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)",
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: accent, ...mono, width: 44 }}>{r.year}</span>
+                  <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 5 }}>
+                    <st.Icon size={12} color={st.color} strokeWidth={1.5} />
+                    <span style={{ fontSize: 10, color: st.color }}>{st.label}</span>
+                    {r.completed_at && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.15)", ...mono, marginLeft: 4 }}>
+                      {new Date(r.completed_at).toLocaleDateString("fr-FR")}
+                    </span>}
+                  </div>
+                  {r.status === "completed" && (
+                    <a href={`/recap/${r.year}`} style={{
+                      display: "flex", alignItems: "center", gap: 3, padding: "4px 10px", borderRadius: 5,
+                      border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", fontSize: 10, textDecoration: "none",
+                    }}>
+                      <Eye size={11} /> Voir
+                    </a>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {recaps.map((r) => {
-          const st = STATUS_MAP[r.status] || STATUS_MAP.pending
-          return (
-            <div key={r.id} style={{
-              display: "flex", alignItems: "center", gap: 12, padding: "12px 14px",
-              borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)",
-            }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#E5A00D", fontFamily: "JetBrains Mono,monospace", width: 50 }}>{r.year}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <st.Icon size={13} color={st.color} strokeWidth={1.5} />
-                  <span style={{ fontSize: 12, color: st.color }}>{st.label}</span>
-                </div>
-                {r.completed_at && (
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", marginTop: 2 }}>
-                    {new Date(r.completed_at).toLocaleDateString("fr-FR")} {new Date(r.completed_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                )}
+
+      {/* ── Viewers (top 5) ── */}
+      {analytics?.users?.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Derniers spectateurs</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {analytics.users.slice(0, 5).map(u => (
+              <div key={u.user_id} style={{
+                display: "flex", alignItems: "center", gap: 8, padding: "8px 10px",
+                borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)",
+              }}>
+                <div style={{ width: 22, height: 22, borderRadius: "50%", background: accent + "15", border: "1px solid " + accent + "20", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: accent, flexShrink: 0 }}>{u.name?.[0]?.toUpperCase() || "?"}</div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "white", flex: 1 }}>{u.name}</span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", ...mono }}>{u.sessions}x</span>
+                <span style={{ fontSize: 10, color: accent, ...mono }}>{formatTime(u.total_time)}</span>
               </div>
-              {r.status === "completed" && (
-                <a href={`/recap/${r.year}`} style={{
-                  display: "flex", alignItems: "center", gap: 4, padding: "5px 12px",
-                  borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(255,255,255,0.5)", fontSize: 11, textDecoration: "none",
-                }}>
-                  <Eye size={12} /> Voir
-                </a>
-              )}
-            </div>
-          )
-        })}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Quick links ── */}
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Acces rapide</div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <NavCard icon={Link2} label="Services" desc="Configurer les connexions" color="#34d399" to="/admin/services" />
+        <NavCard icon={Film} label="Slides" desc="Organiser les slides" color="#E5A00D" to="/admin/slides" />
+        <NavCard icon={Palette} label="Themes" desc="Apparence du recap" color="#a78bfa" to="/admin/themes" />
+        <NavCard icon={BarChart2} label="Statistiques" desc="Visionnages detailles" color="#60a5fa" to="/admin/analytics" />
       </div>
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
-
-const h2 = { color: "white", fontSize: 17, fontWeight: 700, marginBottom: 20 }
