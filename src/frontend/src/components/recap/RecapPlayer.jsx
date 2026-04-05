@@ -410,7 +410,8 @@ export default function RecapPlayer() {
   const currSlideId = slides[slide]?.id
   useEffect(() => {
     if (currSlideId) telemetry.onSlideChange(currSlideId)
-    if (currSlideId === "finale") telemetry.flush()
+    // Don't flush on finale — let unmount/beforeunload handle it
+    // so the user has time to react (emoji) and the finale slide time is counted
   }, [currSlideId])
 
   // Slide ready hint (replaces bottom chevron when animations finish)
