@@ -61,9 +61,11 @@ async def list_recaps(user: User = Depends(get_current_user), db: AsyncSession =
     # Show user's own recaps + any active/completed recaps
     own = await get_recaps(db, user.id)
     own_ids = {r.id for r in own}
-    result = await db.execute(
-        select(YearlyRecap).where(YearlyRecap.status == "completed").order_by(YearlyRecap.year.desc())
-    )
+    q = select(YearlyRecap).where(YearlyRecap.status == "completed").order_by(YearlyRecap.year.desc())
+    # Non-admin users only see active recaps
+    if user.role != "admin":
+        q = q.where(YearlyRecap.is_active.is_(True))
+    result = await db.execute(q)
     all_recaps = list(own)
     for r in result.scalars().all():
         if r.id not in own_ids:
@@ -114,9 +116,11 @@ async def get_recap_detail(year: int, user: User = Depends(get_current_user), db
     # Try user's own recap first, then any active recap for that year
     recap = await get_recap(db, user.id, year)
     if not recap:
-        result = await db.execute(
-            select(YearlyRecap).where(YearlyRecap.year == year, YearlyRecap.status == "completed")
-        )
+        q = select(YearlyRecap).where(YearlyRecap.year == year, YearlyRecap.status == "completed")
+        # Non-admin users can only see active recaps
+        if user.role != "admin":
+            q = q.where(YearlyRecap.is_active.is_(True))
+        result = await db.execute(q)
         recap = result.scalar_one_or_none()
     if not recap:
         raise HTTPException(status_code=404, detail="Aucun recap pour cette année")

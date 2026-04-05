@@ -304,6 +304,21 @@ app.add_middleware(
     allow_headers=["*", "Authorization"],
 )
 
+# Filter uvicorn access logs: only log errors (4xx/5xx), skip 200/304
+import logging
+
+class AccessLogFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        # Keep errors and non-HTTP messages
+        if "HTTP" not in msg:
+            return True
+        if " 2" in msg or " 304 " in msg:
+            return False
+        return True
+
+logging.getLogger("uvicorn.access").addFilter(AccessLogFilter())
+
 # API routers
 from app.api.v1 import admin as admin_router
 from app.api.v1 import auth as auth_router
