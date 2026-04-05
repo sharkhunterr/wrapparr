@@ -132,13 +132,13 @@ const NAV_ITEMS = [
     { to: "/admin/slides", icon: Film, label: "Slides & paramètres", short: "Slides" },
     { to: "/admin/themes", icon: Palette, label: "Thèmes", short: "Thèmes" },
     { to: "/admin/music", icon: Music, label: "Musique", short: "Musique" },
+    { to: "/admin/analytics", icon: BarChart2, label: "Statistiques", short: "Stats" },
   ]},
   { section: "Système", items: [
     { to: "/admin/users", icon: UserCog, label: "Utilisateurs", short: "Users" },
     { to: "/admin/connections", icon: KeyRound, label: "Connexions & SSO", short: "SSO" },
     { to: "/admin/config", icon: Settings, label: "Configuration", short: "Config" },
     { to: "/admin/backup", icon: Shield, label: "Sauvegarde", short: "Backup" },
-    { to: "/admin/analytics", icon: BarChart2, label: "Statistiques", short: "Stats" },
     { to: "/admin/logs", icon: ScrollText, label: "Logs", short: "Logs" },
   ]},
 ]
