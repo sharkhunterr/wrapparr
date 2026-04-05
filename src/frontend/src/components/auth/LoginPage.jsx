@@ -5,14 +5,12 @@ import useAuthStore from "../../stores/authStore"
 import { api, setAccessToken } from "../../services/api"
 
 export default function LoginPage() {
-  const [mode, setMode] = useState("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [displayName, setDisplayName] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [ssoProviders, setSsoProviders] = useState([])
-  const { login, register, fetchMe } = useAuthStore()
+  const { login, fetchMe } = useAuthStore()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -23,13 +21,11 @@ export default function LoginPage() {
       .catch(() => {})
   }, [])
 
-  // Handle SSO callback — exchange ephemeral code for tokens
+  // Handle SSO callback
   useEffect(() => {
     const ssoCode = searchParams.get("sso_code")
     if (ssoCode) {
-      // Remove code from URL immediately
       window.history.replaceState({}, "", "/login")
-      // Exchange code for real tokens
       fetch("/api/v1/auth/sso/exchange", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,11 +50,7 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
     try {
-      if (mode === "login") {
-        await login(email, password)
-      } else {
-        await register(email, password, displayName)
-      }
+      await login(email, password)
       navigate("/")
     } catch (err) {
       setError(err.message)
@@ -89,7 +81,7 @@ export default function LoginPage() {
           </span>
         </div>
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center", marginBottom: 28 }}>
-          {mode === "login" ? "Connectez-vous pour voir votre recap" : "Créez votre compte"}
+          Connectez-vous pour voir votre recap
         </p>
 
         {error && (
@@ -127,9 +119,7 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
-            <div style={{
-              display: "flex", alignItems: "center", gap: 12, marginBottom: 20,
-            }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
               <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: "JetBrains Mono,monospace" }}>ou</span>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
@@ -137,22 +127,15 @@ export default function LoginPage() {
           </>
         )}
 
-        {mode === "register" && (
-          <input
-            type="text" placeholder="Nom affiché" value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)} required
-            style={inputStyle(accent)}
-          />
-        )}
         <input
           type="email" placeholder="Email" value={email}
           onChange={(e) => setEmail(e.target.value)} required
-          style={inputStyle(accent)}
+          style={inputStyle()}
         />
         <input
           type="password" placeholder="Mot de passe" value={password}
           onChange={(e) => setPassword(e.target.value)} required
-          style={inputStyle(accent)}
+          style={inputStyle()}
         />
 
         <button type="submit" disabled={loading} style={{
@@ -161,30 +144,14 @@ export default function LoginPage() {
           fontFamily: "Nunito, sans-serif", cursor: loading ? "wait" : "pointer",
           opacity: loading ? 0.6 : 1, marginTop: 8,
         }}>
-          {loading ? "..." : mode === "login" ? "Se connecter" : "Créer le compte"}
+          {loading ? "..." : "Se connecter"}
         </button>
-
-        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, textAlign: "center", marginTop: 18 }}>
-          {mode === "login" ? (
-            <>Pas encore de compte ?{" "}
-              <span onClick={() => setMode("register")} style={{ color: accent, cursor: "pointer" }}>
-                S'inscrire
-              </span>
-            </>
-          ) : (
-            <>Déjà un compte ?{" "}
-              <span onClick={() => setMode("login")} style={{ color: accent, cursor: "pointer" }}>
-                Se connecter
-              </span>
-            </>
-          )}
-        </p>
       </form>
     </div>
   )
 }
 
-function inputStyle(accent) {
+function inputStyle() {
   return {
     width: "100%", padding: "11px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)",
     background: "rgba(255,255,255,0.04)", color: "white", fontSize: 14,
