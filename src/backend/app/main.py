@@ -283,7 +283,14 @@ async def lifespan(app: FastAPI):
 
         await db.commit()
 
+    # Start scheduler
+    from app.worker.scheduler import start_scheduler, stop_scheduler
+    await start_scheduler()
+
     yield
+
+    # Stop scheduler
+    await stop_scheduler()
 
     if app.state.redis:
         await app.state.redis.close()

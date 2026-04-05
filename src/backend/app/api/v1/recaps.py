@@ -27,6 +27,14 @@ async def _run_pipeline(user_id, year: int):
     async with async_session() as db:
         pipeline = RecapPipeline(db)
         await pipeline.run(user_id, year)
+        # Auto-activate the recap after successful generation
+        result = await db.execute(
+            select(YearlyRecap).where(YearlyRecap.year == year, YearlyRecap.status == "completed")
+        )
+        for recap in result.scalars().all():
+            if not recap.is_active:
+                recap.is_active = True
+        await db.commit()
 
 
 @router.get("/slide-config")
