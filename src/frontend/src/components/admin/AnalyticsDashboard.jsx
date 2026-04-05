@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { api } from "../../services/api"
-import { BarChart2, Users, Clock, Eye, Music, GitCompare, Palette, ChevronDown, ChevronUp, Filter, CheckCircle, XCircle } from "lucide-react"
+import { BarChart2, Users, Clock, Eye, Music, GitCompare, Palette, ChevronDown, ChevronUp, Filter, CheckCircle, Trash2 } from "lucide-react"
 
 const card = { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, padding: "14px 16px" }
 const mono = { fontFamily: "JetBrains Mono,monospace" }
@@ -42,13 +42,18 @@ function Tag({ label, color = accent }) {
   return <span style={{ fontSize: 8, padding: "2px 6px", borderRadius: 4, background: color + "15", border: "1px solid " + color + "25", color, whiteSpace: "nowrap" }}>{label}</span>
 }
 
-function SessionRow({ session, expanded, onToggle }) {
+function SessionRow({ session, expanded, onToggle, selected, onSelect }) {
   const completed = session.slides_viewed >= session.total_slides && session.total_slides > 0
   const pct = session.total_slides > 0 ? Math.round(session.slides_viewed / session.total_slides * 100) : 0
 
   return (
     <>
-      <tr onClick={onToggle} style={{ cursor: "pointer", background: expanded ? "rgba(255,255,255,0.02)" : "transparent", transition: "background .15s" }}>
+      <tr onClick={onToggle} style={{ cursor: "pointer", background: expanded ? "rgba(255,255,255,0.02)" : selected ? "rgba(229,160,13,0.03)" : "transparent", transition: "background .15s" }}>
+        <td style={{ padding: "8px 4px", textAlign: "center", width: 28 }}>
+          <input type="checkbox" checked={selected} onChange={e => { e.stopPropagation(); onSelect(session.id) }}
+            onClick={e => e.stopPropagation()}
+            style={{ cursor: "pointer", accentColor: accent }} />
+        </td>
         <td style={{ padding: "8px 6px", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{formatDate(session.started_at)}</td>
         <td style={{ padding: "8px 10px", fontSize: 11, color: "white", fontWeight: 600 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -81,7 +86,7 @@ function SessionRow({ session, expanded, onToggle }) {
       </tr>
       {expanded && (
         <tr>
-          <td colSpan={7} style={{ padding: "0 10px 10px 40px", background: "rgba(255,255,255,0.01)" }}>
+          <td colSpan={8} style={{ padding: "0 10px 10px 40px", background: "rgba(255,255,255,0.01)" }}>
             <SessionExpandedDetail session={session} />
           </td>
         </tr>
@@ -197,6 +202,9 @@ export default function AnalyticsDashboard() {
   // Sort
   const [sortCol, setSortCol] = useState("started_at")
   const [sortDir, setSortDir] = useState("desc")
+  // Selection
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -210,6 +218,27 @@ export default function AnalyticsDashboard() {
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  const toggleSelectAll = () => {
+    if (selectedIds.size === sorted.length) setSelectedIds(new Set())
+    else setSelectedIds(new Set(sorted.map(s => s.id)))
+  }
+  const deleteSelected = async () => {
+    if (!selectedIds.size || !confirm(`Supprimer ${selectedIds.size} session(s) ?`)) return
+    setDeleting(true)
+    try {
+      await api("/analytics/admin/sessions", { method: "DELETE", body: { ids: [...selectedIds] } })
+      setAllSessions(prev => prev.filter(s => !selectedIds.has(s.id)))
+      setSelectedIds(new Set())
+      // Refresh summary
+      const sum = await api("/analytics/admin/summary")
+      setSummary(sum)
+    } catch {}
+    setDeleting(false)
+  }
 
   if (loading) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Chargement...</div>
   if (!summary) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Aucune donnee</div>
@@ -287,6 +316,15 @@ export default function AnalyticsDashboard() {
           <option value="incomplete">Non termines</option>
         </select>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", ...mono }}>{sorted.length} session{sorted.length > 1 ? "s" : ""}</span>
+        {selectedIds.size > 0 && (
+          <button onClick={deleteSelected} disabled={deleting} style={{
+            display: "flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 6,
+            border: "1px solid rgba(248,113,113,0.3)", background: "rgba(248,113,113,0.08)",
+            color: "#f87171", fontSize: 10, fontWeight: 600, cursor: "pointer",
+          }}>
+            <Trash2 size={11} /> {deleting ? "..." : `Supprimer (${selectedIds.size})`}
+          </button>
+        )}
       </div>
 
       {/* Sessions table */}
@@ -294,6 +332,9 @@ export default function AnalyticsDashboard() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <th style={{ padding: "8px 4px", width: 28, textAlign: "center" }}>
+                <input type="checkbox" checked={sorted.length > 0 && selectedIds.size === sorted.length} onChange={toggleSelectAll} style={{ cursor: "pointer", accentColor: accent }} />
+              </th>
               <SortTh col="started_at" label="Date" align="left" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
               <SortTh col="user_name" label="Utilisateur" align="left" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} pad={10} />
               <SortTh col="year" label="Annee" align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
@@ -305,10 +346,10 @@ export default function AnalyticsDashboard() {
           </thead>
           <tbody>
             {sorted.map((s) => (
-              <SessionRow key={s.id} session={s} expanded={expandedId === s.id} onToggle={() => setExpandedId(expandedId === s.id ? null : s.id)} />
+              <SessionRow key={s.id} session={s} expanded={expandedId === s.id} onToggle={() => setExpandedId(expandedId === s.id ? null : s.id)} selected={selectedIds.has(s.id)} onSelect={toggleSelect} />
             ))}
             {sorted.length === 0 && (
-              <tr><td colSpan={7} style={{ padding: 20, textAlign: "center", ...dim }}>Aucune session</td></tr>
+              <tr><td colSpan={8} style={{ padding: 20, textAlign: "center", ...dim }}>Aucune session</td></tr>
             )}
           </tbody>
         </table>

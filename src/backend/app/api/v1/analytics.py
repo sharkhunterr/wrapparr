@@ -242,6 +242,24 @@ async def get_summary(_admin=Depends(require_admin), db: AsyncSession = Depends(
     }
 
 
+class DeleteSessionsRequest(BaseModel):
+    ids: list[str]
+
+
+@router.delete("/admin/sessions")
+async def delete_sessions(data: DeleteSessionsRequest, _admin=Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    """Delete one or more viewing sessions."""
+    if not data.ids:
+        return {"deleted": 0}
+    for sid in data.ids:
+        result = await db.execute(select(RecapViewSession).where(RecapViewSession.id == to_uuid(sid)))
+        session = result.scalar_one_or_none()
+        if session:
+            await db.delete(session)
+    await db.commit()
+    return {"deleted": len(data.ids)}
+
+
 @router.get("/admin/sessions")
 async def get_sessions(
     user_id: str | None = None,
