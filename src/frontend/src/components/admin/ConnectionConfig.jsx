@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
 import { KeyRound, ShieldCheck, Clapperboard, ToggleLeft, ToggleRight, Save, Trash2, Plus, Pencil, Plug, CheckCircle, XCircle, Copy } from "lucide-react"
 import { api } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
 export default function ConnectionConfig() {
+  const { t } = useI18n()
   const [config, setConfig] = useState({})
   const [saving, setSaving] = useState(false)
   const [providers, setProviders] = useState([])
@@ -40,7 +42,7 @@ export default function ConnectionConfig() {
     setProviderError("")
     setTestResult(null)
     if (!providerForm.name || !providerForm.issuer_url || !providerForm.client_id) {
-      setProviderError("Nom, Issuer URL et Client ID sont requis")
+      setProviderError(t("connections.nameIssuerRequired"))
       return
     }
     setSaving(true)
@@ -51,7 +53,7 @@ export default function ConnectionConfig() {
         await api(`/admin/oidc-providers/${editingProvider}`, { method: "PATCH", body })
       } else {
         if (!providerForm.client_secret) {
-          setProviderError("Client Secret est requis pour un nouveau provider")
+          setProviderError(t("connections.secretRequired"))
           setSaving(false)
           return
         }
@@ -67,7 +69,7 @@ export default function ConnectionConfig() {
   }
 
   const deleteProvider = async (id) => {
-    if (!confirm("Supprimer ce provider SSO ?")) return
+    if (!confirm(t("connections.deleteProvider"))) return
     await api(`/admin/oidc-providers/${id}`, { method: "DELETE" })
     if (editingProvider === id) resetForm()
     loadProviders()
@@ -101,18 +103,18 @@ export default function ConnectionConfig() {
 
   return (
     <div>
-      <h2 style={h2}>Connexions & SSO</h2>
-      <p style={desc}>Configurez les méthodes d'authentification disponibles pour vos utilisateurs.</p>
+      <h2 style={h2}>{t("connections.title")}</h2>
+      <p style={desc}>{t("connections.desc")}</p>
 
       <div style={section}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <KeyRound size={18} color="#E5A00D" strokeWidth={1.5} />
-          <h3 style={h3}>Authentification locale</h3>
+          <h3 style={h3}>{t("connections.localAuth")}</h3>
         </div>
         <div style={row}>
           <div style={{ flex: 1 }}>
-            <div style={label}>Inscription ouverte</div>
-            <div style={hint}>Permettre aux utilisateurs de créer leur propre compte</div>
+            <div style={label}>{t("connections.openRegistration")}</div>
+            <div style={hint}>{t("connections.openRegistrationDesc")}</div>
           </div>
           <button onClick={() => save("allow_registration", !config.allow_registration)} style={{
             ...toggle, background: config.allow_registration ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.08)",
@@ -120,7 +122,7 @@ export default function ConnectionConfig() {
             display: "flex", alignItems: "center", gap: 6,
           }}>
             {config.allow_registration ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-            {config.allow_registration ? "Activé" : "Désactivé"}
+            {config.allow_registration ? t("common.enabled") : t("common.disabled")}
           </button>
         </div>
       </div>
@@ -128,9 +130,9 @@ export default function ConnectionConfig() {
       <div style={section}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <ShieldCheck size={18} color="#60a5fa" strokeWidth={1.5} />
-          <h3 style={h3}>SSO / OIDC</h3>
+          <h3 style={h3}>{t("connections.ssoTitle")}</h3>
         </div>
-        <p style={{ ...hint, marginBottom: 16 }}>Connectez un provider OIDC (Authentik, Keycloak, Authelia) pour le SSO.</p>
+        <p style={{ ...hint, marginBottom: 16 }}>{t("connections.ssoDesc")}</p>
 
         {/* Existing providers */}
         {providers.length > 0 && (
@@ -152,18 +154,18 @@ export default function ConnectionConfig() {
                     background: p.is_active ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.08)",
                     color: p.is_active ? "#4ade80" : "#f87171",
                   }}>
-                    {p.is_active ? "Actif" : "Inactif"}
+                    {p.is_active ? t("common.active") : t("common.inactive")}
                   </button>
                 </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  <button onClick={() => testProvider(p.id)} disabled={testing} style={{ ...miniBtn, background: "rgba(96,165,250,0.1)", color: "#60a5fa" }} title="Tester la connexion">
-                    <Plug size={12} /> Tester
+                  <button onClick={() => testProvider(p.id)} disabled={testing} style={{ ...miniBtn, background: "rgba(96,165,250,0.1)", color: "#60a5fa" }} title={t("common.test")}>
+                    <Plug size={12} /> {t("common.test")}
                   </button>
-                  <button onClick={() => startEdit(p)} style={{ ...miniBtn, background: "rgba(229,160,13,0.1)", color: "#E5A00D" }} title="Modifier">
-                    <Pencil size={12} /> Modifier
+                  <button onClick={() => startEdit(p)} style={{ ...miniBtn, background: "rgba(229,160,13,0.1)", color: "#E5A00D" }} title={t("common.edit")}>
+                    <Pencil size={12} /> {t("common.edit")}
                   </button>
-                  <button onClick={() => deleteProvider(p.id)} style={{ ...miniBtn, background: "rgba(239,68,68,0.08)", color: "#f87171" }} title="Supprimer">
-                    <Trash2 size={12} /> Supprimer
+                  <button onClick={() => deleteProvider(p.id)} style={{ ...miniBtn, background: "rgba(239,68,68,0.08)", color: "#f87171" }} title={t("common.delete")}>
+                    <Trash2 size={12} /> {t("common.delete")}
                   </button>
                 </div>
 
@@ -180,7 +182,7 @@ export default function ConnectionConfig() {
                         : <XCircle size={14} color="#f87171" />}
                       <span style={{ color: testResult.status === "ok" ? "#4ade80" : "#f87171", fontSize: 12, fontFamily: "Nunito,sans-serif" }}>
                         {testResult.status === "ok"
-                          ? <>Connexion réussie — issuer: {testResult.issuer}{!testResult.ssl_verified && <span style={{ color: "#fbbf24" }}> (SSL non vérifié)</span>}</>
+                          ? <>{t("connections.connectionSuccess")} {testResult.issuer}{!testResult.ssl_verified && <span style={{ color: "#fbbf24" }}> {t("connections.sslNotVerified")}</span>}</>
                           : testResult.detail}
                       </span>
                     </div>
@@ -206,11 +208,11 @@ export default function ConnectionConfig() {
         }}>
           {editingProvider && (
             <div style={{ color: "#60a5fa", fontSize: 12, fontWeight: 700, fontFamily: "Nunito,sans-serif", marginBottom: 4 }}>
-              Modification du provider
+              {t("connections.editProvider")}
             </div>
           )}
           <div style={inputGroup}>
-            <label style={inputLabel}>Nom du provider (affiché sur le bouton de connexion)</label>
+            <label style={inputLabel}>{t("connections.providerNameLabel")}</label>
             <input
               placeholder="Authentik, Keycloak, Authelia..."
               value={providerForm.name}
@@ -219,7 +221,7 @@ export default function ConnectionConfig() {
             />
           </div>
           <div style={inputGroup}>
-            <label style={inputLabel}>URL de l'émetteur (Issuer URL)</label>
+            <label style={inputLabel}>{t("connections.issuerUrlLabel")}</label>
             <input
               placeholder="https://auth.example.com/application/o/wrapparr/"
               value={providerForm.issuer_url}
@@ -241,7 +243,7 @@ export default function ConnectionConfig() {
               <label style={inputLabel}>Client Secret</label>
               <input
                 type="password"
-                placeholder={editingProvider ? "(inchangé si vide)" : "............"}
+                placeholder={editingProvider ? t("connections.secretUnchanged") : "............"}
                 value={providerForm.client_secret}
                 onChange={e => setProviderForm({ ...providerForm, client_secret: e.target.value })}
                 style={input}
@@ -261,10 +263,10 @@ export default function ConnectionConfig() {
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={saveProvider} disabled={saving} style={{ ...btnAccent, display: "flex", alignItems: "center", gap: 8, width: "fit-content" }}>
               {editingProvider ? <Save size={14} strokeWidth={2} /> : <Plus size={14} strokeWidth={2} />}
-              {editingProvider ? "Mettre à jour" : "Ajouter le provider SSO"}
+              {editingProvider ? t("connections.updateProvider") : t("connections.addProvider")}
             </button>
             {editingProvider && (
-              <button onClick={resetForm} style={{ ...btnSecondary, width: "fit-content" }}>Annuler</button>
+              <button onClick={resetForm} style={{ ...btnSecondary, width: "fit-content" }}>{t("common.cancel")}</button>
             )}
           </div>
         </div>
@@ -273,23 +275,24 @@ export default function ConnectionConfig() {
       <div style={section}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Clapperboard size={18} color="#E5A00D" strokeWidth={1.5} />
-          <h3 style={h3}>Connexion Plex</h3>
+          <h3 style={h3}>{t("connections.plexLogin")}</h3>
         </div>
-        <p style={hint}>Les utilisateurs pourront se connecter avec leur compte Plex.</p>
+        <p style={hint}>{t("connections.plexLoginDesc")}</p>
         <div style={{ ...row, marginTop: 12 }}>
-          <div style={{ flex: 1 }}><div style={label}>Auth Plex</div></div>
+          <div style={{ flex: 1 }}><div style={label}>{t("connections.plexAuth")}</div></div>
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", padding: "5px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.06)" }}>
-            bientôt
+            {t("connections.comingSoon")}
           </span>
         </div>
       </div>
 
-      {saving && <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 8, fontFamily: "JetBrains Mono,monospace" }}>sauvegarde...</div>}
+      {saving && <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 8, fontFamily: "JetBrains Mono,monospace" }}>{t("common.saving")}</div>}
     </div>
   )
 }
 
 function CallbackUrl({ providerId }) {
+  const { t } = useI18n()
   const [copied, setCopied] = useState(false)
   const url = `${window.location.origin}/api/v1/auth/sso/${providerId}/callback`
 
@@ -310,12 +313,12 @@ function CallbackUrl({ providerId }) {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-      <span style={{ color: "rgba(255,255,255,0.15)", fontSize: 10, fontFamily: "JetBrains Mono,monospace" }}>Redirect URI :</span>
+      <span style={{ color: "rgba(255,255,255,0.15)", fontSize: 10, fontFamily: "JetBrains Mono,monospace" }}>{t("connections.redirectUri")}</span>
       <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 10, fontFamily: "JetBrains Mono,monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{url}</span>
-      <button onClick={copy} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0, display: "flex", alignItems: "center" }} title="Copier l'URL">
+      <button onClick={copy} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0, display: "flex", alignItems: "center" }} title={t("connections.copyUrl")}>
         <Copy size={11} color={copied ? "#4ade80" : "rgba(255,255,255,0.3)"} />
       </button>
-      {copied && <span style={{ color: "#4ade80", fontSize: 10, fontFamily: "Nunito,sans-serif" }}>copié !</span>}
+      {copied && <span style={{ color: "#4ade80", fontSize: 10, fontFamily: "Nunito,sans-serif" }}>{t("connections.copied")}</span>}
     </div>
   )
 }

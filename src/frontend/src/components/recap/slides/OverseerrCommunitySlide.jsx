@@ -1,7 +1,9 @@
 import { useLabels } from "../ThemeContext"
 import { useActive, AN, Tag, Lbl } from "../SharedUI"
+import useI18n from "../../../i18n/index.jsx"
 
 export default function OverseerrCommunitySlide({ accent, data, year, userName }) {
+  const { t } = useI18n()
   const L = useLabels()
   const active = useActive()
   const ov = data?.overseerr
@@ -26,10 +28,10 @@ export default function OverseerrCommunitySlide({ accent, data, year, userName }
           📋 OVERSEERR · COMMUNAUTE
         </div>
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Les plus gros <span style={{ color: accent }}>demandeurs</span>
+          {t("overseerr.topRequestersTitle")} <span style={{ color: accent }}>{t("overseerr.requesters")}</span>
         </h2>
         <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>
-          {comm.total} demande{comm.total > 1 ? "s" : ""} au total · {requesters.length} utilisateur{requesters.length > 1 ? "s" : ""}
+          {comm.total} {t("overseerr.requests")} {t("recap.total")} · {requesters.length} {t("overseerr.users")}
         </div>
       </div>
 
@@ -39,7 +41,7 @@ export default function OverseerrCommunitySlide({ accent, data, year, userName }
           <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 4, padding: "5px 12px", borderRadius: "var(--th-radius-pill)", background: accent + "15", border: "1px solid " + accent + "30", overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(105deg, transparent 40%, ${accent}25 50%, transparent 60%)`, animation: "badge-shine 3s ease-in-out infinite", pointerEvents: "none" }} />
             <span style={{ fontSize: 14, fontWeight: 900, color: accent, fontFamily: "var(--th-font-mono)", position: "relative" }}>#{myRank}</span>
-            <span style={{ fontSize: 9, fontWeight: 600, color: accent, position: "relative" }}>en demandes</span>
+            <span style={{ fontSize: 9, fontWeight: 600, color: accent, position: "relative" }}>{t("overseerr.inRequests")}</span>
           </div>
         </div>
       )}
@@ -47,7 +49,7 @@ export default function OverseerrCommunitySlide({ accent, data, year, userName }
       {/* Top requesters ranking */}
       {requesters.length > 0 && (
         <div className="s1" style={{ marginBottom: 14 }}>
-          <Lbl c={accent} size={8}>Classement des demandeurs</Lbl>
+          <Lbl c={accent} size={8}>{t("overseerr.requesterRanking")}</Lbl>
           <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 6 }}>
             {requesters.map((r, i) => {
               const isMe = r.name === userName
@@ -65,7 +67,7 @@ export default function OverseerrCommunitySlide({ accent, data, year, userName }
                       fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       fontWeight: isMe ? 800 : 500, color: isMe ? accent : (i === 0 ? accent : "var(--th-text-secondary)"),
                     }}>
-                      {r.name}{isMe && <span style={{ fontSize: 8, color: accent, marginLeft: 4, opacity: 0.7 }}>· moi</span>}
+                      {r.name}{isMe && <span style={{ fontSize: 8, color: accent, marginLeft: 4, opacity: 0.7 }}>· {t("recap.me")}</span>}
                     </span>
                     <span style={{ fontSize: 11, fontWeight: 700, color: isMe ? accent : "var(--th-text-tertiary)", fontFamily: "var(--th-font-mono)" }}>
                       {r.count}
@@ -89,8 +91,8 @@ export default function OverseerrCommunitySlide({ accent, data, year, userName }
       {/* Most popular requests (watched by most users) */}
       {popularRequests.length > 0 && (
         <div className="s2">
-          <Lbl c={accent} size={8}>Demandes les plus populaires</Lbl>
-          <div style={{ fontSize: 9, color: "var(--th-text-dim)", marginBottom: 6 }}>Demandes qui ont eu le plus de succes aupres des utilisateurs</div>
+          <Lbl c={accent} size={8}>{t("overseerr.mostPopularRequests")}</Lbl>
+          <div style={{ fontSize: 9, color: "var(--th-text-dim)", marginBottom: 6 }}>{t("overseerr.mostPopularDesc")}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             {popularRequests.map((item, i) => (
               <div key={item.title + i} style={{
@@ -102,11 +104,11 @@ export default function OverseerrCommunitySlide({ accent, data, year, userName }
                 {item.poster && <img src={item.poster} alt="" style={{ width: 28, height: 40, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={e => { e.target.style.display = "none" }} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</div>
-                  <div style={{ fontSize: 9, color: accent + "80" }}>{item.type === "movie" ? "Film" : "Serie"} · demande par {item.requested_by}</div>
+                  <div style={{ fontSize: 9, color: accent + "80" }}>{item.type === "movie" ? t("overseerr.movie") : t("overseerr.serie")} · {t("overseerr.requestedBy")} {item.requested_by}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono)" }}>{item.viewers}</span>
-                  <span style={{ fontSize: 7, color: "var(--th-text-dim)" }}>ont vu</span>
+                  <span style={{ fontSize: 7, color: "var(--th-text-dim)" }}>{t("overseerr.haveWatched")}</span>
                 </div>
               </div>
             ))}

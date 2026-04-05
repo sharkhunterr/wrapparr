@@ -2,17 +2,18 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Users, Link2, CheckCircle2, XCircle, Clock, RefreshCw, Eye, BarChart2, Music, GitCompare, Film, Palette, ArrowRight } from "lucide-react"
 import { api } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
 const accent = "#E5A00D"
 const mono = { fontFamily: "JetBrains Mono,monospace" }
 
-const STATUS_MAP = {
-  completed: { label: "Terminé", color: "#4ade80", Icon: CheckCircle2 },
-  failed: { label: "Échoué", color: "#f87171", Icon: XCircle },
-  pending: { label: "En attente", color: "#fbbf24", Icon: Clock },
-  collecting: { label: "Collecte...", color: "#60a5fa", Icon: RefreshCw },
-  processing: { label: "Traitement...", color: "#60a5fa", Icon: RefreshCw },
-  fetching_posters: { label: "Affiches...", color: "#60a5fa", Icon: RefreshCw },
+const STATUS_COLORS = {
+  completed: { color: "#4ade80", Icon: CheckCircle2 },
+  failed: { color: "#f87171", Icon: XCircle },
+  pending: { color: "#fbbf24", Icon: Clock },
+  collecting: { color: "#60a5fa", Icon: RefreshCw },
+  processing: { color: "#60a5fa", Icon: RefreshCw },
+  fetching_posters: { color: "#60a5fa", Icon: RefreshCw },
 }
 
 function formatTime(s) {
@@ -60,6 +61,7 @@ function NavCard({ icon: Icon, label, desc, color, to }) {
 }
 
 export default function Dashboard() {
+  const { t } = useI18n()
   const [stats, setStats] = useState(null)
   const [recaps, setRecaps] = useState([])
   const [analytics, setAnalytics] = useState(null)
@@ -74,28 +76,28 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h2 style={{ color: "white", fontSize: 17, fontWeight: 700, marginBottom: 16 }}>Tableau de bord</h2>
+      <h2 style={{ color: "white", fontSize: 17, fontWeight: 700, marginBottom: 16 }}>{t("dashboard.title")}</h2>
 
       {/* ── KPIs ── */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-        <KPI icon={Users} label="Utilisateurs" value={stats?.user_count ?? "–"} color="#E5A00D" />
-        <KPI icon={Link2} label="Services actifs" value={stats?.active_services ?? "–"} color="#34d399" />
-        <KPI icon={Film} label="Recaps" value={completedRecaps.length} color="#c084fc" sub={recaps.length > completedRecaps.length ? `${recaps.length - completedRecaps.length} en cours/échec` : undefined} />
+        <KPI icon={Users} label={t("dashboard.users")} value={stats?.user_count ?? "–"} color="#E5A00D" />
+        <KPI icon={Link2} label={t("dashboard.activeServices")} value={stats?.active_services ?? "–"} color="#34d399" />
+        <KPI icon={Film} label={t("dashboard.recaps")} value={completedRecaps.length} color="#c084fc" sub={recaps.length > completedRecaps.length ? `${recaps.length - completedRecaps.length} ${t("dashboard.inProgressOrFailed")}` : undefined} />
         {analytics && <>
-          <KPI icon={Eye} label="Visionnages" value={analytics.total_sessions} color="#60a5fa" sub={`${analytics.unique_viewers} spectateur${analytics.unique_viewers > 1 ? "s" : ""}`} />
-          <KPI icon={Clock} label="Durée moy." value={formatTime(analytics.avg_duration)} color="#fb923c" />
-          <KPI icon={Music} label="Musique" value={analytics.music_usage} color="#34d399" sub={`/ ${analytics.total_sessions}`} />
-          <KPI icon={GitCompare} label="Comparaison" value={analytics.comparison_usage} color="#60a5fa" sub={`/ ${analytics.total_sessions}`} />
+          <KPI icon={Eye} label={t("dashboard.views")} value={analytics.total_sessions} color="#60a5fa" sub={`${analytics.unique_viewers} ${t("analytics.viewers").toLowerCase()}`} />
+          <KPI icon={Clock} label={t("dashboard.avgDuration")} value={formatTime(analytics.avg_duration)} color="#fb923c" />
+          <KPI icon={Music} label={t("dashboard.musicUsage")} value={analytics.music_usage} color="#34d399" sub={`/ ${analytics.total_sessions}`} />
+          <KPI icon={GitCompare} label={t("dashboard.comparisonUsage")} value={analytics.comparison_usage} color="#60a5fa" sub={`/ ${analytics.total_sessions}`} />
         </>}
       </div>
 
       {/* ── Recaps list ── */}
       {recaps.length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Recaps générés</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>{t("dashboard.recapsList")}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {recaps.map(r => {
-              const st = STATUS_MAP[r.status] || STATUS_MAP.pending
+              const st = STATUS_COLORS[r.status] || STATUS_COLORS.pending
               return (
                 <div key={r.id} style={{
                   display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
@@ -104,7 +106,7 @@ export default function Dashboard() {
                   <span style={{ fontSize: 16, fontWeight: 700, color: accent, ...mono, width: 44 }}>{r.year}</span>
                   <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 5 }}>
                     <st.Icon size={12} color={st.color} strokeWidth={1.5} />
-                    <span style={{ fontSize: 10, color: st.color }}>{st.label}</span>
+                    <span style={{ fontSize: 10, color: st.color }}>{t(`recaps.status.${r.status}`)}</span>
                     {r.completed_at && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.15)", ...mono, marginLeft: 4 }}>
                       {new Date(r.completed_at).toLocaleDateString("fr-FR")}
                     </span>}
@@ -114,7 +116,7 @@ export default function Dashboard() {
                       display: "flex", alignItems: "center", gap: 3, padding: "4px 10px", borderRadius: 5,
                       border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", fontSize: 10, textDecoration: "none",
                     }}>
-                      <Eye size={11} /> Voir
+                      <Eye size={11} /> {t("dashboard.view")}
                     </a>
                   )}
                 </div>
@@ -127,7 +129,7 @@ export default function Dashboard() {
       {/* ── Viewers (top 5) ── */}
       {analytics?.users?.length > 0 && (
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Derniers spectateurs</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>{t("dashboard.recentViewers")}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {analytics.users.slice(0, 5).map(u => (
               <div key={u.user_id} style={{
@@ -145,12 +147,12 @@ export default function Dashboard() {
       )}
 
       {/* ── Quick links ── */}
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>Accès rapide</div>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 8 }}>{t("dashboard.quickAccess")}</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        <NavCard icon={Link2} label="Services" desc="Configurer les connexions" color="#34d399" to="/admin/services" />
-        <NavCard icon={Film} label="Slides" desc="Organiser les slides" color="#E5A00D" to="/admin/slides" />
-        <NavCard icon={Palette} label="Themes" desc="Apparence du recap" color="#a78bfa" to="/admin/themes" />
-        <NavCard icon={BarChart2} label="Statistiques" desc="Visionnages détaillés" color="#60a5fa" to="/admin/analytics" />
+        <NavCard icon={Link2} label={t("admin.services")} desc={t("dashboard.configureServices")} color="#34d399" to="/admin/services" />
+        <NavCard icon={Film} label={t("admin.slides")} desc={t("dashboard.organizeSlides")} color="#E5A00D" to="/admin/slides" />
+        <NavCard icon={Palette} label={t("admin.themes")} desc={t("dashboard.recapAppearance")} color="#a78bfa" to="/admin/themes" />
+        <NavCard icon={BarChart2} label={t("admin.analytics")} desc={t("dashboard.detailedStats")} color="#60a5fa" to="/admin/analytics" />
       </div>
 
     </div>

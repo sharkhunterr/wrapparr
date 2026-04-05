@@ -1,24 +1,25 @@
 import { useState, useEffect } from "react"
 import { Clapperboard, MonitorPlay, Gamepad2, Headphones, BookOpen, Library, CircleCheck, CircleX, Trash2, Plug, Film, Pencil, X, Bell } from "lucide-react"
 import { api } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
 const SERVICE_TYPES = [
-  { type: "tautulli", label: "Tautulli (Plex)", Icon: Clapperboard, color: "#E5A00D", placeholder_url: "http://tautulli:8181", authMode: "apikey", placeholder_key: "Clé API Tautulli" },
-  { type: "jellyfin", label: "Jellyfin", Icon: MonitorPlay, color: "#00a4dc", placeholder_url: "http://jellyfin:8096", authMode: "apikey", placeholder_key: "Clé API Jellyfin" },
-  { type: "romm", label: "ROMM", Icon: Gamepad2, color: "#34d399", placeholder_url: "http://romm:8080", authMode: "login", placeholder_user: "admin", placeholder_pass: "Mot de passe" },
-  { type: "audiobookshelf", label: "Audiobookshelf", Icon: Headphones, color: "#fb923c", placeholder_url: "http://audiobookshelf:13378", authMode: "apikey", placeholder_key: "Token API" },
-  { type: "komga", label: "Komga", Icon: Library, color: "#c084fc", placeholder_url: "http://komga:25600", authMode: "login", placeholder_user: "email", placeholder_pass: "Mot de passe" },
-  { type: "booklore", label: "Booklore", Icon: BookOpen, color: "#a78bfa", placeholder_url: "http://booklore:8080", authMode: "apikey", placeholder_key: "Token API" },
-  { type: "grimmory", label: "Grimmory", Icon: BookOpen, color: "#10b981", placeholder_url: "http://grimmory:6060", authMode: "apikey", placeholder_key: "Token API Grimmory" },
-  { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", authMode: "apikey", placeholder_key: "Clé API TMDB (v3)" },
-  { type: "overseerr", label: "Overseerr", Icon: Bell, color: "#6366f1", placeholder_url: "http://overseerr:5055", authMode: "apikey", placeholder_key: "Clé API Overseerr" },
+  { type: "tautulli", label: "Tautulli (Plex)", Icon: Clapperboard, color: "#E5A00D", placeholder_url: "http://tautulli:8181", authMode: "apikey", placeholder_key: "services.apiKeys.tautulli" },
+  { type: "jellyfin", label: "Jellyfin", Icon: MonitorPlay, color: "#00a4dc", placeholder_url: "http://jellyfin:8096", authMode: "apikey", placeholder_key: "services.apiKeys.jellyfin" },
+  { type: "romm", label: "ROMM", Icon: Gamepad2, color: "#34d399", placeholder_url: "http://romm:8080", authMode: "login", placeholder_user: "admin", placeholder_pass: "common.password" },
+  { type: "audiobookshelf", label: "Audiobookshelf", Icon: Headphones, color: "#fb923c", placeholder_url: "http://audiobookshelf:13378", authMode: "apikey", placeholder_key: "services.apiKeys.tautulli" },
+  { type: "komga", label: "Komga", Icon: Library, color: "#c084fc", placeholder_url: "http://komga:25600", authMode: "login", placeholder_user: "email", placeholder_pass: "common.password" },
+  { type: "booklore", label: "Booklore", Icon: BookOpen, color: "#a78bfa", placeholder_url: "http://booklore:8080", authMode: "apikey", placeholder_key: "services.apiKeys.tautulli" },
+  { type: "grimmory", label: "Grimmory", Icon: BookOpen, color: "#10b981", placeholder_url: "http://grimmory:6060", authMode: "apikey", placeholder_key: "services.apiKeys.tautulli" },
+  { type: "tmdb", label: "TMDB", Icon: Film, color: "#01b4e4", placeholder_url: "https://api.themoviedb.org/3", authMode: "apikey", placeholder_key: "services.apiKeys.tmdb" },
+  { type: "overseerr", label: "Overseerr", Icon: Bell, color: "#6366f1", placeholder_url: "http://overseerr:5055", authMode: "apikey", placeholder_key: "services.apiKeys.overseerr" },
 ]
 
 function getMeta(type) {
   return SERVICE_TYPES.find((s) => s.type === type) || {}
 }
 
-function ServiceForm({ meta, initial, onSubmit, onCancel, submitLabel }) {
+function ServiceForm({ meta, initial, onSubmit, onCancel, submitLabel, t }) {
   const isLogin = meta.authMode === "login"
 
   // Parse existing credentials for login-type services
@@ -47,31 +48,32 @@ function ServiceForm({ meta, initial, onSubmit, onCancel, submitLabel }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-        placeholder="Nom affiché (optionnel)" style={input} />
+        placeholder={t("services.displayName")} style={input} />
       <input value={form.base_url} onChange={(e) => setForm({ ...form, base_url: e.target.value })}
         placeholder={meta.placeholder_url} style={input} />
 
       {isLogin ? (
         <div style={{ display: "flex", gap: 8 }}>
           <input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })}
-            placeholder={meta.placeholder_user || "Identifiant"} style={{ ...input, flex: 1 }} />
+            placeholder={meta.placeholder_user || t("services.identifier")} style={{ ...input, flex: 1 }} />
           <input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-            type="password" placeholder={meta.placeholder_pass || "Mot de passe"} style={{ ...input, flex: 1 }} />
+            type="password" placeholder={t(meta.placeholder_pass || "common.password")} style={{ ...input, flex: 1 }} />
         </div>
       ) : (
         <input value={form.api_key} onChange={(e) => setForm({ ...form, api_key: e.target.value })}
-          type="password" placeholder={meta.placeholder_key} style={input} />
+          type="password" placeholder={t(meta.placeholder_key)} style={input} />
       )}
 
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={handleSubmit} style={btnAccent}>{submitLabel}</button>
-        <button onClick={onCancel} style={btnSmall}>Annuler</button>
+        <button onClick={onCancel} style={btnSmall}>{t("common.cancel")}</button>
       </div>
     </div>
   )
 }
 
 export default function ServiceConfig() {
+  const { t } = useI18n()
   const [services, setServices] = useState([])
   const [testing, setTesting] = useState(null)
   const [testResult, setTestResult] = useState({})
@@ -128,8 +130,8 @@ export default function ServiceConfig() {
 
   return (
     <div>
-      <h2 style={h2}>Connecteurs de services</h2>
-      <p style={desc}>Configurez les services de votre homelab pour collecter les données du recap annuel.</p>
+      <h2 style={h2}>{t("services.title")}</h2>
+      <p style={desc}>{t("services.desc")}</p>
 
       {/* Existing services */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
@@ -151,9 +153,9 @@ export default function ServiceConfig() {
                 </div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   {svc.last_test_ok === true && <span style={{ color: "#4ade80", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><CircleCheck size={13} /> OK</span>}
-                  {svc.last_test_ok === false && <span style={{ color: "#f87171", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><CircleX size={13} /> Erreur</span>}
+                  {svc.last_test_ok === false && <span style={{ color: "#f87171", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><CircleX size={13} /> {t("common.error")}</span>}
                   <button onClick={() => testConnection(svc.id)} disabled={testing === svc.id} style={btnSmall}>
-                    {testing === svc.id ? "..." : "Tester"}
+                    {testing === svc.id ? "..." : t("common.test")}
                   </button>
                   <button onClick={() => setEditing(isEditing ? null : svc.id)} style={{ ...btnSmall, color: isEditing ? "#E5A00D" : "rgba(255,255,255,0.5)", display: "flex", alignItems: "center" }}>
                     {isEditing ? <X size={13} /> : <Pencil size={13} />}
@@ -175,14 +177,15 @@ export default function ServiceConfig() {
               {isEditing && (
                 <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>
-                    {meta.authMode === "login" ? "Laissez identifiant/mot de passe vides pour ne pas les modifier" : "Laissez la clé API vide pour ne pas la modifier"}
+                    {meta.authMode === "login" ? t("services.leaveEmptyAuth") : t("services.leaveEmpty")}
                   </div>
                   <ServiceForm
                     meta={meta}
                     initial={svc}
                     onSubmit={(formData) => updateService(svc.id, formData)}
                     onCancel={() => setEditing(null)}
-                    submitLabel="Modifier"
+                    submitLabel={t("common.edit")}
+                    t={t}
                   />
                 </div>
               )}
@@ -192,7 +195,7 @@ export default function ServiceConfig() {
       </div>
 
       {/* Add new service */}
-      <h3 style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 12 }}>Ajouter un service</h3>
+      <h3 style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 12 }}>{t("services.addService")}</h3>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 10 }}>
         {SERVICE_TYPES.filter((s) => !configured.includes(s.type)).map((s) => (
           <div key={s.type} onClick={() => setAdding(s.type)} style={{
@@ -219,7 +222,8 @@ export default function ServiceConfig() {
             initial={{}}
             onSubmit={(formData) => addService(adding, formData)}
             onCancel={() => setAdding(null)}
-            submitLabel="Ajouter"
+            submitLabel={t("common.add")}
+            t={t}
           />
         </div>
       )}

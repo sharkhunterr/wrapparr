@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { setAccessToken } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
 const API = "/api/v1/setup"
 
@@ -15,14 +16,15 @@ async function post(path, body) {
   return res.json()
 }
 
-const STEPS = ["Bienvenue", "Service media", "Utilisateurs", "Compte admin", "Services optionnels", "Authentification", "Terminé"]
-
-const OPTIONAL_SERVICES = [
-  { type: "tmdb", label: "TMDB", icon: "🎬", color: "#01b4e4", desc: "Enrichit les films avec affiches, budgets, notes, acteurs, réalisateurs, pays", placeholder_url: "https://api.themoviedb.org/3", placeholder_key: "Clé API TMDB (v3)", fixedUrl: true },
-  { type: "overseerr", label: "Overseerr", icon: "📋", color: "#6366f1", desc: "Ajoute les demandes media au recap : ce que tu as demandé, regardé ou non", placeholder_url: "http://overseerr:5055", placeholder_key: "Clé API Overseerr" },
-]
-
 export default function SetupWizard({ onComplete }) {
+  const { t } = useI18n()
+
+  const STEPS = [t("setup.welcome"), t("setup.steps.service"), t("setup.steps.users"), t("setup.steps.admin"), t("setup.steps.optional"), t("setup.steps.auth"), t("setup.steps.done")]
+
+  const OPTIONAL_SERVICES = [
+    { type: "tmdb", label: "TMDB", icon: "🎬", color: "#01b4e4", desc: t("setup.tmdbDesc"), placeholder_url: "https://api.themoviedb.org/3", placeholder_key: t("services.apiKeys.tmdb"), fixedUrl: true },
+    { type: "overseerr", label: "Overseerr", icon: "📋", color: "#6366f1", desc: t("setup.overseerrDesc"), placeholder_url: "http://overseerr:5055", placeholder_key: t("services.apiKeys.overseerr") },
+  ]
   const [step, setStep] = useState(0)
   const [error, setError] = useState("")
 
@@ -64,7 +66,7 @@ export default function SetupWizard({ onComplete }) {
     try {
       const res = await post("/test-service", { service_type: serviceType, base_url: baseUrl, api_key: apiKey })
       if (res.ok) { setTested(true); setError("") }
-      else setError(res.error || "Connexion échouée")
+      else setError(res.error || t("setup.connectionFailed"))
     } catch (e) { setError(e.message) }
     setTesting(false)
   }
@@ -89,7 +91,7 @@ export default function SetupWizard({ onComplete }) {
         base_url: svc.fixedUrl ? svc.placeholder_url : (cfg.base_url || svc.placeholder_url),
         api_key: cfg.api_key,
       })
-      setOptTested(p => ({ ...p, [svc.type]: res.ok ? "ok" : res.error || "Erreur" }))
+      setOptTested(p => ({ ...p, [svc.type]: res.ok ? "ok" : res.error || t("common.error") }))
     } catch (e) {
       setOptTested(p => ({ ...p, [svc.type]: e.message }))
     }
@@ -97,9 +99,9 @@ export default function SetupWizard({ onComplete }) {
   }
 
   const finish = async () => {
-    if (adminPassword !== adminPassword2) { setError("Les mots de passe ne correspondent pas"); return }
-    if (!adminPassword || adminPassword.length < 4) { setError("Le mot de passe doit faire au moins 4 caractères"); return }
-    if (!adminEmail) { setError("Email requis pour le compte admin"); return }
+    if (adminPassword !== adminPassword2) { setError(t("setup.passwordMismatch")); return }
+    if (!adminPassword || adminPassword.length < 4) { setError(t("setup.passwordTooShort")); return }
+    if (!adminEmail) { setError(t("setup.emailRequired")); return }
 
     setFinishing(true); setError("")
     try {
@@ -114,13 +116,13 @@ export default function SetupWizard({ onComplete }) {
           body: formData,
         })
         const data = await resp.json()
-        if (!resp.ok) throw new Error(data.detail || "Erreur import")
+        if (!resp.ok) throw new Error(data.detail || t("setup.importError"))
         setAccessToken(data.access_token)
         setStep(6)
         setTimeout(() => onComplete(), 2500)
       } else {
         // ── Normal wizard mode ──
-        if (!hasAdmin) { setError("Sélectionnez au moins un administrateur"); setFinishing(false); return }
+        if (!hasAdmin) { setError(t("setup.selectAdmin")); setFinishing(false); return }
 
         const optional_services = []
         for (const svc of OPTIONAL_SERVICES) {
@@ -154,11 +156,11 @@ export default function SetupWizard({ onComplete }) {
 
   const goNext = () => {
     if (step === 1 && !tested) return
-    if (step === 2 && !hasAdmin) { setError("Définissez au moins un utilisateur comme admin"); return }
+    if (step === 2 && !hasAdmin) { setError(t("setup.selectAdmin")); return }
     if (step === 3) {
-      if (!adminEmail) { setError("Email requis"); return }
-      if (!adminPassword || adminPassword.length < 4) { setError("Le mot de passe doit faire au moins 4 caractères"); return }
-      if (adminPassword !== adminPassword2) { setError("Les mots de passe ne correspondent pas"); return }
+      if (!adminEmail) { setError(t("setup.emailRequired")); return }
+      if (!adminPassword || adminPassword.length < 4) { setError(t("setup.passwordTooShort")); return }
+      if (adminPassword !== adminPassword2) { setError(t("setup.passwordMismatch")); return }
     }
     if (step === 1) fetchUsers()
     setStep(s => s + 1); setError("")
@@ -172,7 +174,7 @@ export default function SetupWizard({ onComplete }) {
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <div style={{ fontSize: 28, fontWeight: 800, color: "white" }}>WRAP<span style={{ color: "#E5A00D" }}>PARR</span></div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginTop: 4 }}>CONFIGURATION INITIALE</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginTop: 4, textTransform: "uppercase" }}>{t("setup.initialConfig")}</div>
         </div>
 
         {/* Step indicator */}
@@ -190,11 +192,11 @@ export default function SetupWizard({ onComplete }) {
         {step > 0 && step < 6 && <>
           <div style={{ fontSize: 16, fontWeight: 700, color: "white", marginBottom: 4 }}>{STEPS[step]}</div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 16 }}>
-            {step === 1 && "Connectez votre serveur media principal"}
-            {step === 2 && "Sélectionnez les utilisateurs et définissez l'admin"}
-            {step === 3 && "Définissez les identifiants de l'admin"}
-            {step === 4 && "Enrichissez votre recap avec des services additionnels"}
-            {step === 5 && "Comment les utilisateurs se connecteront-ils ?"}
+            {step === 1 && t("setup.connectServer")}
+            {step === 2 && t("setup.selectUsers")}
+            {step === 3 && t("setup.setAdminCreds")}
+            {step === 4 && t("setup.optionalServices")}
+            {step === 5 && t("setup.authMethod")}
           </div>
         </>}
 
@@ -205,16 +207,16 @@ export default function SetupWizard({ onComplete }) {
           <div style={{ textAlign: "center", padding: "10px 0 20px" }}>
             <div style={{ fontSize: 52, marginBottom: 16, filter: "drop-shadow(0 0 20px rgba(229,160,13,0.4))" }}>🎬</div>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "white", marginBottom: 8 }}>
-              Bienvenue sur <span style={{ color: "#E5A00D" }}>Wrapparr</span>
+              {t("setup.welcomePrefix")} <span style={{ color: "#E5A00D" }}>Wrapparr</span>
             </h2>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, maxWidth: 380, margin: "0 auto 20px" }}>
-              Wrapparr génère un recap annuel de vos habitudes media, inspiré de Spotify Wrapped. Films, series, jeux, livres — tout y passe.
+              {t("setup.welcomeDesc")}
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 380, margin: "0 auto" }}>
               {/* Option 1: Start wizard */}
               <button onClick={goNext} style={{ ...btn, width: "100%", padding: "14px 20px", fontSize: 14 }}>
-                Commencer la configuration
+                {t("setup.startConfig")}
               </button>
 
               {/* Option 2: Import backup */}
@@ -225,7 +227,7 @@ export default function SetupWizard({ onComplete }) {
                 color: "#60a5fa", fontSize: 12, fontWeight: 600,
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                Importer une sauvegarde
+                {t("setup.importBackup")}
                 <input type="file" accept=".json" style={{ display: "none" }} onChange={async (e) => {
                   const file = e.target.files?.[0]
                   if (!file) return
@@ -233,7 +235,7 @@ export default function SetupWizard({ onComplete }) {
                   try {
                     const text = await file.text()
                     const data = JSON.parse(text)
-                    if (!data._wrapparr_backup) throw new Error("Ce fichier n'est pas un backup Wrapparr")
+                    if (!data._wrapparr_backup) throw new Error(t("setup.invalidBackup"))
                     // Store backup data and pre-fill admin email from backup
                     setImportedBackup(data)
                     const adminUser = data.users?.find(u => u.role === "admin")
@@ -255,12 +257,12 @@ export default function SetupWizard({ onComplete }) {
                 borderRadius: 8, padding: "10px 20px", cursor: "pointer",
                 color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 500,
               }}>
-                Ignorer et configurer plus tard
+                {t("setup.skipConfig")}
               </button>
             </div>
 
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 16 }}>
-              La configuration complète prend environ 2 minutes
+              {t("setup.configTime")}
             </div>
           </div>
         )}
@@ -269,22 +271,22 @@ export default function SetupWizard({ onComplete }) {
         {step === 1 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div>
-              <label style={lbl}>Type de service</label>
+              <label style={lbl}>{t("setup.serviceType")}</label>
               <select value={serviceType} onChange={e => { setServiceType(e.target.value); setTested(false) }} style={inp}>
                 <option value="tautulli">Tautulli (Plex)</option>
                 <option value="jellyfin">Jellyfin</option>
               </select>
             </div>
             <div>
-              <label style={lbl}>URL du serveur</label>
+              <label style={lbl}>{t("setup.serverUrl")}</label>
               <input value={baseUrl} onChange={e => { setBaseUrl(e.target.value); setTested(false) }} placeholder="http://192.168.1.x:8181" style={inp} />
             </div>
             <div>
-              <label style={lbl}>Clé API</label>
-              <input value={apiKey} onChange={e => { setApiKey(e.target.value); setTested(false) }} placeholder="Votre clé API" style={inp} type="password" />
+              <label style={lbl}>{t("setup.apiKey")}</label>
+              <input value={apiKey} onChange={e => { setApiKey(e.target.value); setTested(false) }} placeholder={t("setup.apiKeyPlaceholder")} style={inp} type="password" />
             </div>
             <button onClick={testConnection} disabled={testing || !baseUrl || !apiKey} style={{ ...btn, background: tested ? "#22c55e" : "#E5A00D", opacity: testing ? 0.6 : 1 }}>
-              {testing ? "Test en cours..." : tested ? "✓ Connexion réussie" : "Tester la connexion"}
+              {testing ? t("setup.testingConnection") : tested ? "✓ " + t("setup.connectionSuccess") : t("setup.testConnection")}
             </button>
           </div>
         )}
@@ -293,15 +295,15 @@ export default function SetupWizard({ onComplete }) {
         {step === 2 && (
           <div>
             {fetching ? (
-              <div style={{ textAlign: "center", padding: 20, color: "rgba(255,255,255,0.4)" }}>Récupération des utilisateurs...</div>
+              <div style={{ textAlign: "center", padding: 20, color: "rgba(255,255,255,0.4)" }}>{t("setup.loadingUsers")}</div>
             ) : serviceUsers.length === 0 ? (
               <div style={{ textAlign: "center", padding: 20 }}>
-                <button onClick={fetchUsers} style={btn}>Charger les utilisateurs</button>
+                <button onClick={fetchUsers} style={btn}>{t("setup.loadUsers")}</button>
               </div>
             ) : (
               <>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>
-                  Cochez les utilisateurs à importer. L'utilisateur marqué "Admin" sera le compte administrateur.
+                  {t("setup.checkUsersToImport")}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 320, overflowY: "auto" }}>
                   {serviceUsers.map((u) => {
@@ -361,26 +363,26 @@ export default function SetupWizard({ onComplete }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {importedBackup && (
               <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.15)", marginBottom: 4 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>Backup chargé</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#4ade80" }}>{t("setup.backupLoaded")}</div>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
-                  {importedBackup.users?.length || 0} utilisateurs · {importedBackup.services?.length || 0} services · La configuration sera restaurée après la création du compte admin.
+                  {importedBackup.users?.length || 0} {t("admin.users").toLowerCase()} · {importedBackup.services?.length || 0} {t("admin.services").toLowerCase()} · {t("setup.backupRestore")}
                 </div>
               </div>
             )}
             <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(229,160,13,0.06)", border: "1px solid rgba(229,160,13,0.15)" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#E5A00D" }}>★ {importedBackup ? "Compte administrateur" : (admins[0]?.display_name || "Admin")}</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>Définissez les identifiants de connexion pour ce compte</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#E5A00D" }}>★ {importedBackup ? t("setup.adminAccount") : (admins[0]?.display_name || "Admin")}</div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{t("setup.adminAccountDesc")}</div>
             </div>
             <div>
               <label style={lbl}>Email</label>
               <input value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="admin@example.com" style={inp} type="email" />
             </div>
             <div>
-              <label style={lbl}>Mot de passe</label>
+              <label style={lbl}>{t("common.password")}</label>
               <input value={adminPassword} onChange={e => setAdminPassword(e.target.value)} style={inp} type="password" />
             </div>
             <div>
-              <label style={lbl}>Confirmer le mot de passe</label>
+              <label style={lbl}>{t("setup.confirmPassword")}</label>
               <input value={adminPassword2} onChange={e => setAdminPassword2(e.target.value)} style={inp} type="password" />
             </div>
           </div>
@@ -390,7 +392,7 @@ export default function SetupWizard({ onComplete }) {
         {step === 4 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>
-              Ces services sont optionnels mais enrichissent considérablement votre recap. Vous pourrez les configurer plus tard dans l'admin.
+              {t("setup.optionalDesc")}
             </div>
             {OPTIONAL_SERVICES.map(svc => {
               const cfg = optServices[svc.type] || {}
@@ -414,7 +416,7 @@ export default function SetupWizard({ onComplete }) {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: isOk ? svc.color : "white" }}>
                         {svc.label}
-                        {isOk && <span style={{ fontSize: 10, marginLeft: 6, color: "#22c55e" }}>✓ connecté</span>}
+                        {isOk && <span style={{ fontSize: 10, marginLeft: 6, color: "#22c55e" }}>✓ {t("setup.connected")}</span>}
                       </div>
                       <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{svc.desc}</div>
                     </div>
@@ -431,7 +433,7 @@ export default function SetupWizard({ onComplete }) {
                         </div>
                       )}
                       <div>
-                        <label style={lbl}>{svc.type === "tmdb" ? "Clé API" : "Clé API"}</label>
+                        <label style={lbl}>{t("setup.apiKey")}</label>
                         <input value={cfg.api_key || ""} onChange={e => {
                           setOptServices(p => ({ ...p, [svc.type]: { ...cfg, api_key: e.target.value, _expanded: true } }))
                           setOptTested(p => ({ ...p, [svc.type]: undefined }))
@@ -442,7 +444,7 @@ export default function SetupWizard({ onComplete }) {
                         background: isOk ? "#22c55e" : svc.color,
                         opacity: isTesting || !cfg.api_key ? 0.5 : 1,
                       }}>
-                        {isTesting ? "Test..." : isOk ? "✓ Connecté" : "Tester"}
+                        {isTesting ? t("setup.testingConnection") : isOk ? "✓ " + t("setup.connected") : t("common.test")}
                       </button>
                       {testResult && testResult !== "ok" && (
                         <div style={{ fontSize: 11, color: "#f87171" }}>{testResult}</div>
@@ -459,13 +461,13 @@ export default function SetupWizard({ onComplete }) {
         {step === 5 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>
-              Comment les autres utilisateurs se connecteront-ils à Wrapparr ?
+              {t("setup.authQuestion")}
             </div>
             {[
-              { value: "password", label: "Mot de passe", desc: "L'admin définit un mot de passe pour chaque utilisateur", icon: "🔑" },
-              { value: "sso", label: "SSO / OIDC", desc: "Connexion via un fournisseur externe (configurable dans l'admin)", icon: "🔗" },
-              { value: "plex", label: "Plex Auth", desc: "Les utilisateurs se connectent avec leur compte Plex", icon: "🎬" },
-              { value: "later", label: "Configurer plus tard", desc: "Passer cette étape et configurer l'authentification dans l'admin", icon: "⏭️" },
+              { value: "password", label: t("common.password"), desc: t("setup.authPassword"), icon: "🔑" },
+              { value: "sso", label: "SSO / OIDC", desc: t("setup.authSSO"), icon: "🔗" },
+              { value: "plex", label: "Plex Auth", desc: t("setup.authPlex"), icon: "🎬" },
+              { value: "later", label: t("setup.configureLater"), desc: t("setup.authLater"), icon: "⏭️" },
             ].map(opt => (
               <button key={opt.value}
                 onClick={() => setAuthMethod(opt.value)}
@@ -489,13 +491,13 @@ export default function SetupWizard({ onComplete }) {
         {step === 6 && (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🎬</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#E5A00D" }}>Configuration terminée !</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#E5A00D" }}>{t("setup.done")}</div>
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 6 }}>
-              {selectedUsers.length} utilisateur{selectedUsers.length > 1 ? "s" : ""} importé{selectedUsers.length > 1 ? "s" : ""}
+              {selectedUsers.length} {t("admin.users").toLowerCase()}{selectedUsers.length > 1 ? "s" : ""}
               {Object.values(optTested).filter(v => v === "ok").length > 0 && (
-                <> · {Object.values(optTested).filter(v => v === "ok").length} service{Object.values(optTested).filter(v => v === "ok").length > 1 ? "s" : ""} optionnel{Object.values(optTested).filter(v => v === "ok").length > 1 ? "s" : ""}</>
+                <> · {Object.values(optTested).filter(v => v === "ok").length} {t("admin.services").toLowerCase()}</>
               )}
-              <span style={{ display: "block", marginTop: 4 }}>Redirection...</span>
+              <span style={{ display: "block", marginTop: 4 }}>{t("setup.redirecting")}</span>
             </div>
           </div>
         )}
@@ -503,22 +505,22 @@ export default function SetupWizard({ onComplete }) {
         {/* Navigation — hidden on welcome (step 0 has its own buttons) */}
         {step > 0 && step < 6 && (
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20, gap: 10 }}>
-            <button onClick={goBack} style={{ ...btn, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", flex: 1 }}>Retour</button>
+            <button onClick={goBack} style={{ ...btn, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", flex: 1 }}>{t("common.back")}</button>
             {/* In import mode, step 3 goes directly to finish */}
             {importedBackup && step === 3 ? (
               <button onClick={finish} disabled={finishing} style={{ ...btn, flex: 1, opacity: finishing ? 0.6 : 1 }}>
-                {finishing ? "Restauration..." : "Restaurer et créer le compte"}
+                {finishing ? t("setup.restoring") : t("setup.restoreAndCreate")}
               </button>
             ) : step < 5 ? (
               <button onClick={goNext} disabled={step === 1 && !tested} style={{
                 ...btn, flex: 1,
                 opacity: (step === 1 && !tested) || (step === 2 && !hasAdmin) ? 0.4 : 1,
               }}>
-                {step === 4 ? "Suivant (ou passer)" : "Suivant"}
+                {step === 4 ? t("setup.nextOrSkip") : t("common.next")}
               </button>
             ) : (
               <button onClick={finish} disabled={finishing} style={{ ...btn, flex: 1, opacity: finishing ? 0.6 : 1 }}>
-                {finishing ? "Configuration..." : "Terminer"}
+                {finishing ? t("setup.configuring") : t("setup.finish")}
               </button>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { useLabels } from "../ThemeContext"
 import { useActive, AN, Tag, Lbl } from "../SharedUI"
+import useI18n from "../../../i18n/index.jsx"
 
 function UsersIcon({ size = 12, color = "currentColor" }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>
@@ -10,6 +11,7 @@ function EyeIcon({ size = 12, color = "currentColor" }) {
 }
 
 export default function OverseerrPopularSlide({ accent, data, year }) {
+  const { t } = useI18n()
   const L = useLabels()
   const active = useActive()
   const ov = data?.overseerr
@@ -103,10 +105,10 @@ export default function OverseerrPopularSlide({ accent, data, year }) {
       <div className="s0" style={{ marginBottom: 12 }}>
         <Tag accent={accent} year={year} />
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Tes demandes a <span style={{ color: accent }}>succes</span>
+          {t("overseerr.yourSuccessfulRequests")} <span style={{ color: accent }}>{t("overseerr.success")}</span>
         </h2>
         <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>
-          Les contenus que tu as demandes et que d'autres ont regardes
+          {t("overseerr.popularDesc")}
         </div>
       </div>
 
@@ -123,7 +125,7 @@ export default function OverseerrPopularSlide({ accent, data, year }) {
               {item.poster && <img src={item.poster} alt="" style={{ width: 32, height: 46, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} onError={e => { e.target.style.display = "none" }} />}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: 1.2 }}>{item.title}</div>
-                <div style={{ fontSize: 9, color: accent + "80", marginTop: 2 }}>{item.type === "movie" ? "Film" : "Serie"}{item.year ? " · " + item.year : ""}</div>
+                <div style={{ fontSize: 9, color: accent + "80", marginTop: 2 }}>{item.type === "movie" ? t("overseerr.movie") : t("overseerr.serie")}{item.year ? " · " + item.year : ""}</div>
                 {/* Viewer bar */}
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
                   <div style={{ flex: 1, height: 4, borderRadius: 2, background: "var(--th-surface-subtle)", overflow: "hidden" }}>

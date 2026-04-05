@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { ShieldCheck } from "lucide-react"
 import useAuthStore from "../../stores/authStore"
 import { api, setAccessToken } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
 export default function LoginPage() {
+  const { t } = useI18n()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -38,10 +40,10 @@ export default function LoginPage() {
             setAccessToken(data.access_token)
             fetchMe().then(() => navigate("/", { replace: true }))
           } else {
-            setError("Erreur SSO : code invalide ou expire")
+            setError(t("auth.ssoError"))
           }
         })
-        .catch(() => setError("Erreur SSO"))
+        .catch(() => setError(t("auth.ssoErrorGeneric")))
     }
   }, [searchParams, fetchMe, navigate])
 
@@ -81,7 +83,7 @@ export default function LoginPage() {
           </span>
         </div>
         <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center", marginBottom: 28 }}>
-          Connectez-vous pour voir votre recap
+          {t("auth.loginTitle")}
         </p>
 
         {error && (
@@ -115,25 +117,25 @@ export default function LoginPage() {
                   onMouseLeave={e => e.currentTarget.style.background = "rgba(96,165,250,0.08)"}
                 >
                   <ShieldCheck size={16} strokeWidth={2} />
-                  Se connecter avec {p.name}
+                  {t("auth.loginWith", { provider: p.name })}
                 </button>
               ))}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
-              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: "JetBrains Mono,monospace" }}>ou</span>
+              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, fontFamily: "JetBrains Mono,monospace" }}>{t("common.or")}</span>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
             </div>
           </>
         )}
 
         <input
-          type="email" placeholder="Email" value={email}
+          type="email" placeholder={t("auth.emailPlaceholder")} value={email}
           onChange={(e) => setEmail(e.target.value)} required
           style={inputStyle()}
         />
         <input
-          type="password" placeholder="Mot de passe" value={password}
+          type="password" placeholder={t("auth.passwordPlaceholder")} value={password}
           onChange={(e) => setPassword(e.target.value)} required
           style={inputStyle()}
         />
@@ -144,7 +146,7 @@ export default function LoginPage() {
           fontFamily: "Nunito, sans-serif", cursor: loading ? "wait" : "pointer",
           opacity: loading ? 0.6 : 1, marginTop: 8,
         }}>
-          {loading ? "..." : "Se connecter"}
+          {loading ? "..." : t("auth.login")}
         </button>
       </form>
     </div>

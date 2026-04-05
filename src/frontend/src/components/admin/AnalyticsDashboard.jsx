@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { api } from "../../services/api"
 import { BarChart2, Users, Clock, Eye, Music, GitCompare, Palette, ChevronDown, ChevronUp, Filter, CheckCircle, Trash2 } from "lucide-react"
+import useI18n from "../../i18n/index.jsx"
 
 const mono = { fontFamily: "JetBrains Mono,monospace" }
 const dim = { color: "rgba(255,255,255,0.35)", fontSize: 11 }
@@ -56,31 +57,31 @@ function SortTh({ col, label, align = "left", sortCol, sortDir, onClick, pad = 6
 }
 
 // ── Overview Cards ──
-function OverviewSection({ summary }) {
+function OverviewSection({ summary, t }) {
   if (!summary) return null
   const completionRate = summary.total_sessions > 0
     ? Math.round((summary.users?.filter(u => u.avg_slides >= summary.avg_slides_viewed).length || 0) / (summary.users?.length || 1) * 100) : 0
 
   return (
     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-      <StatCard icon={Eye} label="Sessions" value={summary.total_sessions} />
-      <StatCard icon={Users} label="Spectateurs" value={summary.unique_viewers} />
-      <StatCard icon={Clock} label="Durée moy." value={formatTime(summary.avg_duration)} />
-      <StatCard icon={BarChart2} label="Slides moy." value={Math.round(summary.avg_slides_viewed)} />
-      <StatCard icon={Music} label="Musique" value={summary.music_usage} color="#34d399" sub={`/ ${summary.total_sessions}`} />
-      <StatCard icon={GitCompare} label="Comparaison" value={summary.comparison_usage} color="#60a5fa" sub={`/ ${summary.total_sessions}`} />
-      {summary.themes?.[0] && <StatCard icon={Palette} label="Thème favori" value={summary.themes[0].theme} color="#a78bfa" sub={`${summary.themes[0].count}x`} />}
+      <StatCard icon={Eye} label={t("analytics.sessions")} value={summary.total_sessions} />
+      <StatCard icon={Users} label={t("analytics.viewers")} value={summary.unique_viewers} />
+      <StatCard icon={Clock} label={t("analytics.avgDuration")} value={formatTime(summary.avg_duration)} />
+      <StatCard icon={BarChart2} label={t("analytics.avgSlides")} value={Math.round(summary.avg_slides_viewed)} />
+      <StatCard icon={Music} label={t("analytics.musicUsage")} value={summary.music_usage} color="#34d399" sub={`/ ${summary.total_sessions}`} />
+      <StatCard icon={GitCompare} label={t("analytics.comparisonUsage")} value={summary.comparison_usage} color="#60a5fa" sub={`/ ${summary.total_sessions}`} />
+      {summary.themes?.[0] && <StatCard icon={Palette} label={t("analytics.favoriteTheme")} value={summary.themes[0].theme} color="#a78bfa" sub={`${summary.themes[0].count}x`} />}
     </div>
   )
 }
 
 // ── Users Summary ──
-function UsersSummary({ users }) {
+function UsersSummary({ users, t }) {
   if (!users?.length) return null
   const maxTime = Math.max(...users.map(u => u.total_time || 0), 1)
   return (
     <div style={{ ...cardStyle, marginBottom: 16 }}>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 10 }}>Par utilisateur</div>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, marginBottom: 10 }}>{t("analytics.byUser")}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {users.map(u => (
           <div key={u.user_id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -102,7 +103,7 @@ function UsersSummary({ users }) {
 }
 
 // ── Sessions Table ──
-function SessionsTable({ sessions, slideStats }) {
+function SessionsTable({ sessions, slideStats, t }) {
   const [expandedId, setExpandedId] = useState(null)
   const [filterUser, setFilterUser] = useState("")
   const [filterYear, setFilterYear] = useState("")
@@ -149,7 +150,7 @@ function SessionsTable({ sessions, slideStats }) {
   const toggleSelect = (id) => setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   const toggleSelectAll = () => { selectedIds.size === sorted.length ? setSelectedIds(new Set()) : setSelectedIds(new Set(sorted.map(s => s.id))) }
   const deleteSelected = async () => {
-    if (!selectedIds.size || !confirm(`Supprimer ${selectedIds.size} session(s) ?`)) return
+    if (!selectedIds.size || !confirm(t("analytics.deleteSessionConfirm").replace("{count}", selectedIds.size))) return
     setDeleting(true)
     try {
       await api("/analytics/admin/sessions", { method: "DELETE", body: { ids: [...selectedIds] } })
@@ -165,17 +166,17 @@ function SessionsTable({ sessions, slideStats }) {
       <div style={{ display: "flex", gap: 6, padding: "10px 12px", alignItems: "center", flexWrap: "wrap", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
         <Filter size={12} color="rgba(255,255,255,0.2)" />
         <select value={filterUser} onChange={e => setFilterUser(e.target.value)} style={{ padding: "3px 6px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)", fontSize: 9 }}>
-          <option value="">Tous</option>
+          <option value="">{t("analytics.allUsers")}</option>
           {userNames.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
         <select value={filterYear} onChange={e => setFilterYear(e.target.value)} style={{ padding: "3px 6px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)", fontSize: 9 }}>
-          <option value="">Années</option>
+          <option value="">{t("analytics.allYears")}</option>
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
         <select value={filterCompleted} onChange={e => setFilterCompleted(e.target.value)} style={{ padding: "3px 6px", borderRadius: 5, border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)", fontSize: 9 }}>
-          <option value="all">Tous</option>
-          <option value="completed">Terminés</option>
-          <option value="incomplete">Non terminés</option>
+          <option value="all">{t("analytics.all")}</option>
+          <option value="completed">{t("analytics.completed")}</option>
+          <option value="incomplete">{t("analytics.incomplete")}</option>
         </select>
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.15)", ...mono }}>{sorted.length}</span>
         {selectedIds.size > 0 && (
@@ -195,25 +196,25 @@ function SessionsTable({ sessions, slideStats }) {
             <th style={{ padding: "6px 4px", width: 24, textAlign: "center" }}>
               <input type="checkbox" checked={sorted.length > 0 && selectedIds.size === sorted.length} onChange={toggleSelectAll} style={{ cursor: "pointer", accentColor: accent }} />
             </th>
-            <SortTh col="started_at" label="Date" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
-            <SortTh col="user_name" label="Utilisateur" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} pad={8} />
-            <SortTh col="year" label="Recap" align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
-            <SortTh col="duration" label="Durée" align="right" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
-            <SortTh col="progress" label="Progr." align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
-            <th style={{ padding: "6px", fontSize: 8, color: "rgba(255,255,255,0.2)", textAlign: "center" }}>Options</th>
+            <SortTh col="started_at" label={t("common.date")} sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+            <SortTh col="user_name" label={t("analytics.user")} sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} pad={8} />
+            <SortTh col="year" label={t("analytics.recap")} align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+            <SortTh col="duration" label={t("analytics.duration")} align="right" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+            <SortTh col="progress" label={t("analytics.progress")} align="center" sortCol={sortCol} sortDir={sortDir} onClick={toggleSort} />
+            <th style={{ padding: "6px", fontSize: 8, color: "rgba(255,255,255,0.2)", textAlign: "center" }}>{t("analytics.options")}</th>
             <th style={{ width: 24 }} />
           </tr>
         </thead>
         <tbody>
-          {sorted.map(s => <SessionRow key={s.id} session={s} expanded={expandedId === s.id} onToggle={() => setExpandedId(expandedId === s.id ? null : s.id)} selected={selectedIds.has(s.id)} onSelect={toggleSelect} />)}
-          {sorted.length === 0 && <tr><td colSpan={8} style={{ padding: 20, textAlign: "center", ...dim }}>Aucune session</td></tr>}
+          {sorted.map(s => <SessionRow key={s.id} session={s} expanded={expandedId === s.id} onToggle={() => setExpandedId(expandedId === s.id ? null : s.id)} selected={selectedIds.has(s.id)} onSelect={toggleSelect} t={t} />)}
+          {sorted.length === 0 && <tr><td colSpan={8} style={{ padding: 20, textAlign: "center", ...dim }}>{t("analytics.noSession")}</td></tr>}
         </tbody>
       </table>
     </div>
   )
 }
 
-function SessionRow({ session, expanded, onToggle, selected, onSelect }) {
+function SessionRow({ session, expanded, onToggle, selected, onSelect, t }) {
   const completed = session.slides_viewed >= session.total_slides && session.total_slides > 0
   const pct = session.total_slides > 0 ? Math.round(session.slides_viewed / session.total_slides * 100) : 0
   return (
@@ -242,12 +243,12 @@ function SessionRow({ session, expanded, onToggle, selected, onSelect }) {
           {expanded ? <ChevronUp size={12} color="rgba(255,255,255,0.15)" /> : <ChevronDown size={12} color="rgba(255,255,255,0.15)" />}
         </td>
       </tr>
-      {expanded && <tr><td colSpan={8} style={{ padding: "0 8px 10px 32px", background: "rgba(255,255,255,0.01)" }}><SessionDetail session={session} /></td></tr>}
+      {expanded && <tr><td colSpan={8} style={{ padding: "0 8px 10px 32px", background: "rgba(255,255,255,0.01)" }}><SessionDetail session={session} t={t} /></td></tr>}
     </>
   )
 }
 
-function SessionDetail({ session }) {
+function SessionDetail({ session, t }) {
   const slideData = session.slide_data || []
   const topSlides = [...slideData].sort((a, b) => b.timeSpent - a.timeSpent)
   const maxTime = topSlides[0]?.timeSpent || 1
@@ -257,7 +258,7 @@ function SessionDetail({ session }) {
     <div style={{ display: "flex", gap: 14, flexWrap: "wrap", paddingTop: 8 }}>
       {/* Slides */}
       <div style={{ flex: "1 1 220px", minWidth: 220 }}>
-        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 5 }}>Temps par slide</div>
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 5 }}>{t("analytics.timePerSlide")}</div>
         <div style={{ maxHeight: 180, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1 }}>
           {topSlides.map(s => (
             <div key={s.slideId} style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -276,7 +277,7 @@ function SessionDetail({ session }) {
         {/* Interactions */}
         {Object.keys(interactions).length > 0 && (
           <div style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>Interactions</div>
+            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>{t("analytics.interactions")}</div>
             {Object.entries(interactions).map(([sid, d]) => (
               <div key={sid} style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", marginBottom: 2 }}>
                 {sid} {d.score != null && <span style={{ color: accent, ...mono }}>{d.score}/{d.total}</span>}
@@ -288,18 +289,18 @@ function SessionDetail({ session }) {
         {/* Reaction */}
         {session.reactions?.length > 0 && (
           <div style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Reaction</div>
+            <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>{t("analytics.reaction")}</div>
             <span style={{ fontSize: 22 }}>{session.reactions[0].value}</span>
           </div>
         )}
 
         {/* Params */}
-        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Paramètres</div>
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>{t("analytics.settings")}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 1, fontSize: 9, color: "rgba(255,255,255,0.3)" }}>
-          {session.theme_id && <div>Thème: <span style={{ color: "#a78bfa" }}>{session.theme_id}</span></div>}
-          {session.palette_slug && <div>Palette: <span style={{ color: accent }}>{session.palette_slug}</span></div>}
-          <div>Musique: {session.music_enabled ? <span style={{ color: "#34d399" }}>Oui</span> : "Non"}</div>
-          <div>Comparaison: {session.comparison_enabled ? <span style={{ color: "#60a5fa" }}>Oui</span> : "Non"}</div>
+          {session.theme_id && <div>{t("analytics.theme")}: <span style={{ color: "#a78bfa" }}>{session.theme_id}</span></div>}
+          {session.palette_slug && <div>{t("analytics.palette")}: <span style={{ color: accent }}>{session.palette_slug}</span></div>}
+          <div>{t("analytics.music")}: {session.music_enabled ? <span style={{ color: "#34d399" }}>{t("common.yes")}</span> : t("common.no")}</div>
+          <div>{t("analytics.comparison")}: {session.comparison_enabled ? <span style={{ color: "#60a5fa" }}>{t("common.yes")}</span> : t("common.no")}</div>
         </div>
         {session.device && <div style={{ fontSize: 7, color: "rgba(255,255,255,0.1)", marginTop: 4, wordBreak: "break-all" }}>{session.device.substring(0, 60)}</div>}
       </div>
@@ -308,14 +309,14 @@ function SessionDetail({ session }) {
 }
 
 // ── Slide Stats (expandable) ──
-function SlideStatsSection({ slides }) {
+function SlideStatsSection({ slides, t }) {
   const [open, setOpen] = useState(false)
   if (!slides.length) return null
   const maxTime = slides[0]?.avg_time || 1
   return (
     <div style={{ ...cardStyle, marginTop: 12 }}>
       <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>Temps moyen par slide</span>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>{t("analytics.avgTimePerSlide")}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", ...mono }}>{slides.length}</span>
           {open ? <ChevronUp size={13} color="rgba(255,255,255,0.15)" /> : <ChevronDown size={13} color="rgba(255,255,255,0.15)" />}
@@ -342,6 +343,7 @@ function SlideStatsSection({ slides }) {
 
 // ── Main Dashboard ──
 export default function AnalyticsDashboard() {
+  const { t } = useI18n()
   const [summary, setSummary] = useState(null)
   const [sessions, setSessions] = useState([])
   const [slideStats, setSlideStats] = useState([])
@@ -360,20 +362,20 @@ export default function AnalyticsDashboard() {
     }).catch(() => setLoading(false))
   }, [])
 
-  if (loading) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Chargement...</div>
-  if (!summary) return <div style={{ textAlign: "center", padding: 40, ...dim }}>Aucune donnée</div>
+  if (loading) return <div style={{ textAlign: "center", padding: 40, ...dim }}>{t("common.loading")}</div>
+  if (!summary) return <div style={{ textAlign: "center", padding: 40, ...dim }}>{t("analytics.noData")}</div>
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
         <BarChart2 size={20} color={accent} strokeWidth={1.5} />
-        <h2 style={{ color: "white", fontFamily: "Nunito,sans-serif", fontSize: 16, fontWeight: 700, margin: 0 }}>Statistiques des recaps</h2>
+        <h2 style={{ color: "white", fontFamily: "Nunito,sans-serif", fontSize: 16, fontWeight: 700, margin: 0 }}>{t("analytics.title")}</h2>
       </div>
 
-      <OverviewSection summary={summary} />
-      <UsersSummary users={summary.users} />
-      <SessionsTable sessions={sessions} slideStats={slideStats} />
-      <SlideStatsSection slides={slideStats} />
+      <OverviewSection summary={summary} t={t} />
+      <UsersSummary users={summary.users} t={t} />
+      <SessionsTable sessions={sessions} slideStats={slideStats} t={t} />
+      <SlideStatsSection slides={slideStats} t={t} />
     </div>
   )
 }

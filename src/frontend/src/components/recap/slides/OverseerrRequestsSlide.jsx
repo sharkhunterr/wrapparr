@@ -1,8 +1,10 @@
 import { useLabels } from "../ThemeContext"
 import { useActive, AN, Tag, Lbl, useComparison, CompLegend } from "../SharedUI"
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
+import useI18n from "../../../i18n/index.jsx"
 
 export default function OverseerrRequestsSlide({ accent, data, year, config = {} }) {
+  const { t } = useI18n()
   const L = useLabels()
   const active = useActive()
   const comp = useComparison()
@@ -27,10 +29,10 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
 
   // Availability bar: available / partial / processing / pending
   const statusSegments = [
-    { key: "available", count: available, color: "#4ade80", label: "Disponible" },
-    { key: "partial", count: partial, color: "#fbbf24", label: "Partiel" },
-    { key: "processing", count: processing, color: accent, label: "En cours" },
-    { key: "pending", count: pending + unknown, color: "rgba(255,255,255,0.15)", label: "En attente" },
+    { key: "available", count: available, color: "#4ade80", label: t("overseerr.available") },
+    { key: "partial", count: partial, color: "#fbbf24", label: t("overseerr.partial") },
+    { key: "processing", count: processing, color: accent, label: t("overseerr.processing") },
+    { key: "pending", count: pending + unknown, color: "rgba(255,255,255,0.15)", label: t("overseerr.pendingStatus") },
   ].filter(s => s.count > 0)
 
   // Monthly comparison data
@@ -44,20 +46,20 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
       <div className="s0" style={{ marginBottom: 12 }}>
         <Tag accent={accent} year={year} />
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Bilan <span style={{ color: accent }}>demandes</span>
+          {t("overseerr.requestSummaryTitle")} <span style={{ color: accent }}>{t("overseerr.requests")}</span>
         </h2>
       </div>
 
       {/* Stats badges */}
       <div className="s0" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-        <StatBadge value={active ? ov.total : 0} label="demandes" accent={accent} primary prev={hasPrev ? prev.total : null} />
-        <StatBadge value={active ? ov.movies : 0} label="films" accent={null} prev={hasPrev ? prev.movies : null} />
-        <StatBadge value={active ? ov.series : 0} label="series" accent={null} prev={hasPrev ? prev.series : null} />
+        <StatBadge value={active ? ov.total : 0} label={t("overseerr.requests")} accent={accent} primary prev={hasPrev ? prev.total : null} />
+        <StatBadge value={active ? ov.movies : 0} label={t("common.films")} accent={null} prev={hasPrev ? prev.movies : null} />
+        <StatBadge value={active ? ov.series : 0} label={t("overseerr.series")} accent={null} prev={hasPrev ? prev.series : null} />
       </div>
 
       {/* Approval progress bar */}
       <div className="glass s1" style={{ padding: "10px 14px", marginBottom: 8 }}>
-        <Lbl c={accent} size={8}>Taux d'approbation</Lbl>
+        <Lbl c={accent} size={8}>{t("overseerr.approvalRate")}</Lbl>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
           <span style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: accent, fontFamily: "var(--th-font-mono)" }}>
             {active ? <AN t={approvalRate} s="%" /> : "0%"}
@@ -68,8 +70,8 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
               <div style={{ height: "100%", background: "rgba(239,68,68,0.4)", width: (pendingCount / ov.total * 100) + "%", transition: "width 1.2s ease" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
-              <span style={{ fontSize: 8, color: "#4ade80" }}>{approvedCount} approuvees</span>
-              <span style={{ fontSize: 8, color: "rgba(239,68,68,0.6)" }}>{pendingCount} en attente</span>
+              <span style={{ fontSize: 8, color: "#4ade80" }}>{approvedCount} {t("overseerr.approved")}</span>
+              <span style={{ fontSize: 8, color: "rgba(239,68,68,0.6)" }}>{pendingCount} {t("overseerr.pending")}</span>
             </div>
           </div>
         </div>
@@ -89,7 +91,7 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
 
       {/* Availability status bar */}
       <div className="glass s1" style={{ padding: "10px 14px", marginBottom: 10 }}>
-        <Lbl c={accent} size={8}>Disponibilite</Lbl>
+        <Lbl c={accent} size={8}>{t("overseerr.availability")}</Lbl>
         <div style={{ height: 10, borderRadius: 5, overflow: "hidden", display: "flex", marginTop: 6 }}>
           {statusSegments.map(s => (
             <div key={s.key} style={{ height: "100%", background: s.color, width: (s.count / totalStatused * 100) + "%", transition: "width 1s ease" }} />
@@ -108,7 +110,7 @@ export default function OverseerrRequestsSlide({ accent, data, year, config = {}
       {/* Monthly chart with comparison */}
       {ov.monthly?.length > 0 && (
         <div className="s2" style={{ padding: "10px 10px 6px", borderRadius: "var(--th-radius)", background: "var(--th-surface-subtle)", border: "1px solid var(--th-border-subtle)" }}>
-          <Lbl c={accent} size={8}>Demandes par mois</Lbl>
+          <Lbl c={accent} size={8}>{t("overseerr.requestsPerMonth")}</Lbl>
           {hasPrev && (
             <div style={{ display: "flex", gap: 12, marginBottom: 4, marginTop: 2 }}>
               <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, color: accent }}>

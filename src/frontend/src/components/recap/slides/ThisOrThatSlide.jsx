@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useActive, Tag } from "../SharedUI"
+import useI18n from "../../../i18n/index.jsx"
 
 const ANIM_DURATION = 600
 
@@ -64,7 +65,7 @@ function OptionCard({ label, value, unit, thumb, accent, side, selected, reveale
   )
 }
 
-function buildQuestions(data, section) {
+function buildQuestions(data, section, t) {
   const questions = []
 
   if (section === "films" || section === "series") {
@@ -82,7 +83,7 @@ function buildQuestions(data, section) {
         if (a && b && a.t !== b.t) {
           const aVal = a.plays || a.h || 1, bVal = b.plays || b.h || 1
           questions.push({
-            question: section === "series" ? "Quelle serie as-tu le plus regardee ?" : "Quel film as-tu le plus regarde ?",
+            question: section === "series" ? t("thisOrThat.questions.mostWatchedSeries") : t("thisOrThat.questions.mostWatchedFilm"),
             a: { label: a.t, value: aVal, unit: a.plays ? "x" : "h", thumb: a.thumb },
             b: { label: b.t, value: bVal, unit: b.plays ? "x" : "h", thumb: b.thumb },
             winner: aVal >= bVal ? "a" : "b",
@@ -95,7 +96,7 @@ function buildQuestions(data, section) {
     if (genres.length >= 2) {
       const g1 = genres[0], g2 = genres[Math.min(1, genres.length - 1)]
       questions.push({
-        question: "Quel genre a domine cette annee ?",
+        question: t("thisOrThat.questions.dominantGenre"),
         a: { label: g1.n, value: g1.v, unit: "" },
         b: { label: g2.n, value: g2.v, unit: "" },
         winner: g1.v >= g2.v ? "a" : "b",
@@ -109,7 +110,7 @@ function buildQuestions(data, section) {
       const m1 = sorted[0], m2 = sorted[Math.min(1, sorted.length - 1)]
       if (m1.m !== m2.m) {
         questions.push({
-          question: "Quel mois as-tu ete le plus actif ?",
+          question: t("thisOrThat.questions.busiestMonth"),
           a: { label: m1.m, value: m1.v, unit: "" },
           b: { label: m2.m, value: m2.v, unit: "" },
           winner: m1.v >= m2.v ? "a" : "b",
@@ -126,7 +127,7 @@ function buildQuestions(data, section) {
     if (top.length >= 2) {
       const a = top[0], b = top[1]
       questions.push({
-        question: "Quel livre as-tu le plus ecoute ?",
+        question: t("thisOrThat.questions.mostListened"),
         a: { label: a.t, value: a.h, unit: a.h_unit || "h", thumb: a.thumb },
         b: { label: b.t, value: b.h, unit: b.h_unit || "h", thumb: b.thumb },
         winner: (a.h || 0) >= (b.h || 0) ? "a" : "b",
@@ -135,7 +136,7 @@ function buildQuestions(data, section) {
 
     if (genres.length >= 2) {
       questions.push({
-        question: "Quel genre audio as-tu prefere ?",
+        question: t("thisOrThat.questions.favoriteAudioGenre"),
         a: { label: genres[0].n, value: genres[0].v, unit: "" },
         b: { label: genres[1].n, value: genres[1].v, unit: "" },
         winner: genres[0].v >= genres[1].v ? "a" : "b",
@@ -146,9 +147,9 @@ function buildQuestions(data, section) {
   if (section === "demandes") {
     const ov = data.overseerr || {}
     questions.push({
-      question: "Qu'as-tu le plus demande ?",
-      a: { label: "Films", value: ov.movies || 0, unit: "" },
-      b: { label: "Series", value: ov.series || 0, unit: "" },
+      question: t("thisOrThat.questions.mostRequested"),
+      a: { label: t("thisOrThat.questions.films"), value: ov.movies || 0, unit: "" },
+      b: { label: t("thisOrThat.questions.series"), value: ov.series || 0, unit: "" },
       winner: (ov.movies || 0) >= (ov.series || 0) ? "a" : "b",
     })
   }
@@ -166,7 +167,7 @@ function buildQuestions(data, section) {
       const u1h = Math.round(u1.tautulli?.total_hours || u1.plex?.total_hours || 0)
       const u2h = Math.round(u2.tautulli?.total_hours || u2.plex?.total_hours || 0)
       questions.push({
-        question: "Qui a regarde le plus cette annee ?",
+        question: t("thisOrThat.questions.whoWatchedMost"),
         a: { label: u1.name, value: u1h, unit: "h" },
         b: { label: u2.name, value: u2h, unit: "h" },
         winner: u1h >= u2h ? "a" : "b",
@@ -178,8 +179,9 @@ function buildQuestions(data, section) {
 }
 
 export default function ThisOrThatSlide({ accent, data, year, section = "films", config = {}, onInteraction }) {
+  const { t } = useI18n()
   const active = useActive()
-  const questions = buildQuestions(data, section)
+  const questions = buildQuestions(data, section, t)
   const [current, setCurrent] = useState(0)
   const [selected, setSelected] = useState(null)
   const [revealed, setRevealed] = useState(false)
@@ -221,8 +223,8 @@ export default function ThisOrThatSlide({ accent, data, year, section = "films",
   if (!questions.length) return null
 
   const sectionLabels = {
-    films: "Films", series: "Series", audiobook: "Livres Audio",
-    demandes: "Demandes", community: "Communaute", grimmory: "Lecture",
+    films: t("thisOrThat.questions.films"), series: t("thisOrThat.questions.series"), audiobook: t("thisOrThat.sectionAudiobook"),
+    demandes: t("thisOrThat.sectionRequests"), community: t("thisOrThat.sectionCommunity"), grimmory: t("thisOrThat.sectionReading"),
   }
 
   return (
@@ -233,7 +235,7 @@ export default function ThisOrThatSlide({ accent, data, year, section = "films",
           This or <span style={{ color: accent }}>That</span>
         </h2>
         <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>
-          {sectionLabels[section] || section} — Teste tes connaissances
+          {sectionLabels[section] || section} — {t("thisOrThat.subtitle")}
         </div>
       </div>
 
@@ -289,9 +291,9 @@ export default function ThisOrThatSlide({ accent, data, year, section = "films",
             {score}/{questions.length}
           </div>
           <div style={{ fontSize: 13, color: "var(--th-text-secondary)", marginTop: 4 }}>
-            {score === questions.length ? "Parfait ! Tu connais tes habitudes !"
-              : score >= questions.length / 2 ? "Pas mal ! Tu te connais bien."
-              : "Surpris ? Tes habitudes te reservent des surprises !"}
+            {score === questions.length ? t("thisOrThat.perfect")
+              : score >= questions.length / 2 ? t("thisOrThat.good")
+              : t("thisOrThat.surprised")}
           </div>
 
           {/* Score bar */}

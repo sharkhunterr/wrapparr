@@ -1,8 +1,10 @@
 import { useState, useRef } from "react"
 import { Download, Upload, Shield, AlertTriangle } from "lucide-react"
 import { api } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
 export default function BackupManager() {
+  const { t } = useI18n()
   const [importing, setImporting] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [result, setResult] = useState(null)
@@ -17,7 +19,7 @@ export default function BackupManager() {
       const resp = await fetch("/api/v1/backup/export", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (!resp.ok) throw new Error("Erreur export: " + resp.status)
+      if (!resp.ok) throw new Error(t("common.error") + ": " + resp.status)
       const data = await resp.json()
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
       const url = URL.createObjectURL(blob)
@@ -26,7 +28,7 @@ export default function BackupManager() {
       a.download = `wrapparr-backup-${new Date().toISOString().slice(0, 10)}.json`
       a.click()
       URL.revokeObjectURL(url)
-      setResult({ type: "export", message: "Backup exporté avec succès" })
+      setResult({ type: "export", message: t("backup.exportSuccess") })
     } catch (e) {
       setError(e.message)
     }
@@ -49,8 +51,8 @@ export default function BackupManager() {
         body: formData,
       })
       const data = await resp.json()
-      if (!resp.ok) throw new Error(data.detail || "Erreur import")
-      setResult({ type: "import", message: "Import réussi", details: data.imported })
+      if (!resp.ok) throw new Error(data.detail || t("common.error"))
+      setResult({ type: "import", message: t("backup.importSuccess"), details: data.imported })
     } catch (e) {
       setError(e.message)
     }
@@ -62,9 +64,9 @@ export default function BackupManager() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
         <Shield size={20} color="#E5A00D" strokeWidth={1.5} />
-        <h2 style={h2}>Sauvegarde et restauration</h2>
+        <h2 style={h2}>{t("backup.title")}</h2>
       </div>
-      <p style={desc}>Exportez ou importez la configuration complète de Wrapparr : utilisateurs, services, mappings, slides, thèmes, musique, paramètres.</p>
+      <p style={desc}>{t("backup.desc")}</p>
 
       {error && <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", fontSize: 12, marginBottom: 14 }}>{error}</div>}
 
@@ -88,13 +90,13 @@ export default function BackupManager() {
         <div style={{ flex: "1 1 200px", padding: "20px 18px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <Download size={18} color="#E5A00D" />
-            <span style={{ fontSize: 14, fontWeight: 700, color: "white" }}>Exporter</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "white" }}>{t("backup.exportTitle")}</span>
           </div>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 14, lineHeight: 1.5 }}>
-            Télécharge un fichier JSON contenant toute la configuration. Les clés API sont incluses (chiffrées dans le backup).
+            {t("backup.exportDesc")}
           </p>
           <button onClick={handleExport} disabled={exporting} style={btnAccent}>
-            <Download size={14} /> {exporting ? "Export..." : "Télécharger le backup"}
+            <Download size={14} /> {exporting ? t("backup.exporting") : t("backup.exportBtn")}
           </button>
         </div>
 
@@ -102,17 +104,17 @@ export default function BackupManager() {
         <div style={{ flex: "1 1 200px", padding: "20px 18px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <Upload size={18} color="#60a5fa" />
-            <span style={{ fontSize: 14, fontWeight: 700, color: "white" }}>Importer</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "white" }}>{t("backup.importTitle")}</span>
           </div>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 8, lineHeight: 1.5 }}>
-            Restaure la configuration depuis un fichier backup. Les données existantes sont mises à jour, les nouvelles sont ajoutées.
+            {t("backup.importDesc")}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 6, background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)", marginBottom: 12 }}>
             <AlertTriangle size={12} color="#fbbf24" />
-            <span style={{ fontSize: 9, color: "#fbbf24" }}>Les configurations existantes seront écrasées</span>
+            <span style={{ fontSize: 9, color: "#fbbf24" }}>{t("backup.importWarn")}</span>
           </div>
           <label style={{ ...btnBlue, cursor: importing ? "wait" : "pointer", opacity: importing ? 0.6 : 1 }}>
-            <Upload size={14} /> {importing ? "Import..." : "Choisir un fichier"}
+            <Upload size={14} /> {importing ? t("backup.importing") : t("backup.importBtn")}
             <input ref={fileRef} type="file" accept=".json" onChange={handleImport} style={{ display: "none" }} />
           </label>
         </div>
@@ -120,10 +122,10 @@ export default function BackupManager() {
 
       {/* Contenu du backup */}
       <div style={{ marginTop: 20, padding: "14px 16px", borderRadius: 10, background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>Contenu du backup</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>{t("backup.backupContent")}</div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {["Utilisateurs", "Services", "Mappings", "Configuration slides", "Musique", "Thèmes personnalisés", "Paramètres globaux", "OIDC", "Phrases"].map(item => (
-            <span key={item} style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.06)" }}>{item}</span>
+          {["users", "services", "mappings", "slides", "music", "themes", "config", "oidc", "phrases"].map(key => (
+            <span key={key} style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.06)" }}>{t(`backup.contents.${key}`)}</span>
           ))}
         </div>
       </div>

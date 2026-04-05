@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { useParams } from "react-router-dom"
 import { api } from "../../services/api"
 import useAuthStore from "../../stores/authStore"
+import useI18n from "../../i18n/index.jsx"
 import { RECAP_CSS } from "./recapStyles"
 import IntroSlide from "./slides/IntroSlide"
 import OnboardingSlide from "./slides/OnboardingSlide"
@@ -19,14 +20,16 @@ import FullscreenButton from "./player/FullscreenButton"
 import ComparisonButton from "./player/ComparisonButton"
 import NavChevron from "./player/NavChevron"
 
-const SERVICE_META = {
-  tautulli: { key: "plex", icon: "🎬", label: "FILMS & SÉRIES", sub: "Cinéma · Séries TV" },
-  plex: { key: "plex", icon: "🎬", label: "FILMS & SÉRIES", sub: "Cinéma · Séries TV" },
-  jellyfin: { key: "jellyfin", icon: "📺", label: "JELLYFIN", sub: "Films · Séries" },
-  romm: { key: "romm", icon: "🎮", label: "JEUX VIDÉO", sub: "Switch · PC · Retrogaming" },
-  audiobookshelf: { key: "audiobookshelf", icon: "🎧", label: "LIVRES AUDIO", sub: "Sci-Fi · Thriller · Fantasy" },
-  komga: { key: "komga", icon: "📚", label: "MANGA", sub: "Shonen · Seinen · Dark Fantasy" },
-  booklore: { key: "booklore", icon: "📖", label: "LIVRES", sub: "Romans · Essais · BD" },
+function getServiceMeta(t) {
+  return {
+    tautulli: { key: "plex", icon: "🎬", label: t("recap.serviceMeta.moviesAndShows"), sub: t("recap.serviceMeta.cinemaSeries") },
+    plex: { key: "plex", icon: "🎬", label: t("recap.serviceMeta.moviesAndShows"), sub: t("recap.serviceMeta.cinemaSeries") },
+    jellyfin: { key: "jellyfin", icon: "📺", label: "JELLYFIN", sub: t("recap.serviceMeta.filmsSeries") },
+    romm: { key: "romm", icon: "🎮", label: t("recap.serviceMeta.videoGames"), sub: "Switch · PC · Retrogaming" },
+    audiobookshelf: { key: "audiobookshelf", icon: "🎧", label: t("recap.serviceMeta.audiobooks"), sub: "Sci-Fi · Thriller · Fantasy" },
+    komga: { key: "komga", icon: "📚", label: "MANGA", sub: "Shonen · Seinen · Dark Fantasy" },
+    booklore: { key: "booklore", icon: "📖", label: t("recap.serviceMeta.books"), sub: t("recap.serviceMeta.booksSub") },
+  }
 }
 
 const toUuidDash = (id) => id && id.length === 32 ? id.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, "$1-$2-$3-$4-$5") : id
@@ -217,6 +220,7 @@ function ReactionPanel({ accent, year, onReaction }) {
 }
 
 function AdminUserSelect({ recapUsers, currentUid, originalUid, impersonating, accent, onSelect }) {
+  const { t } = useI18n()
   const [el, setEl] = useState(null)
   useEffect(() => {
     const slot = document.getElementById("recap-topbar-extra")
@@ -239,7 +243,7 @@ function AdminUserSelect({ recapUsers, currentUid, originalUid, impersonating, a
     >
       {recapUsers.map(u => (
         <option key={u.uid} value={u.uid} style={{ background: "#111", color: "#ccc" }}>
-          {u.name}{u.uid === originalUid ? " (moi)" : ""}
+          {u.name}{u.uid === originalUid ? ` (${t("recap.me")})` : ""}
         </option>
       ))}
     </select>
@@ -249,6 +253,7 @@ function AdminUserSelect({ recapUsers, currentUid, originalUid, impersonating, a
 }
 
 export default function RecapPlayer() {
+  const { t } = useI18n()
   const { year: paramYear } = useParams()
   const user = useAuthStore((s) => s.user)
 
@@ -429,7 +434,7 @@ export default function RecapPlayer() {
     <div style={{ width: "100%", height: "100vh", background: "#05050e", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 32, marginBottom: 16, animation: "pulse-ring 2s ease-out infinite" }}>🎬</div>
-        <div style={{ color: "#E5A00D", fontFamily: "Nunito,sans-serif", fontSize: 14 }}>Chargement du recap {year}...</div>
+        <div style={{ color: "#E5A00D", fontFamily: "Nunito,sans-serif", fontSize: 14 }}>{t("recap.loading", { year })}</div>
       </div>
     </div>
   )
@@ -442,10 +447,10 @@ export default function RecapPlayer() {
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, filter: "drop-shadow(0 0 20px #E5A00D90)" }}>🎬</div>
         </div>
         <div style={{ color: "white", fontSize: 18, fontWeight: 700, marginBottom: 6 }}>
-          {error ? "Erreur" : "Pas encore de recap"}
+          {error ? t("common.error") : t("recap.noRecap")}
         </div>
         <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13 }}>
-          {error || "Aucun recap disponible pour le moment. Revenez plus tard !"}
+          {error || t("recap.noRecapDesc")}
         </div>
       </div>
     </div>
@@ -607,7 +612,7 @@ export default function RecapPlayer() {
               onMouseEnter={e => e.currentTarget.style.background = accent + "30"}
               onMouseLeave={e => e.currentTarget.style.background = accent + "18"}
             >
-              <span style={{ fontSize: 10, color: accent, fontWeight: 600 }}>Suivant</span>
+              <span style={{ fontSize: 10, color: accent, fontWeight: 600 }}>{t("recap.next")}</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round">
                 <path d="M6 9l6 6 6-6" style={{ animation: "bounce-arrow 1.5s ease-in-out infinite" }} />
               </svg>

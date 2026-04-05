@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useActive, Tag, AN } from "../SharedUI"
+import useI18n from "../../../i18n/index.jsx"
 
 function SliderInput({ value, onChange, min, max, step, accent, disabled, label, unit }) {
   const trackRef = useRef(null)
@@ -86,7 +87,7 @@ function SliderInput({ value, onChange, min, max, step, accent, disabled, label,
   )
 }
 
-function ResultReveal({ label, estimated, actual, unit, accent, delay = 0 }) {
+function ResultReveal({ label, estimated, actual, unit, accent, delay = 0, t }) {
   const diff = actual - estimated
   const pctDiff = actual > 0 ? Math.round(Math.abs(diff) / actual * 100) : 0
   const isClose = pctDiff <= 15
@@ -116,13 +117,13 @@ function ResultReveal({ label, estimated, actual, unit, accent, delay = 0 }) {
         background: isExact ? accent + "20" : isClose ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.1)",
         color: isExact ? accent : isClose ? "#4ade80" : "#f87171",
       }}>
-        {isExact ? "Exact !" : diff > 0 ? `+${Math.abs(diff)}${unit}` : `-${Math.abs(diff)}${unit}`}
+        {isExact ? (t ? t("estimation.exact") : "Exact !") : diff > 0 ? `+${Math.abs(diff)}${unit}` : `-${Math.abs(diff)}${unit}`}
       </div>
     </div>
   )
 }
 
-function buildEstimations(data, section) {
+function buildEstimations(data, section, t) {
   const estimations = []
   const svcData = data.tautulli || data.plex || data.jellyfin || {}
   const mediaKey = section === "series" ? "series" : "films"
@@ -137,7 +138,7 @@ function buildEstimations(data, section) {
     if (totalItems > 0) {
       estimations.push({
         key: "items",
-        label: section === "series" ? "Combien d'episodes cette annee ?" : "Combien de films cette annee ?",
+        label: section === "series" ? t("estimation.questions.howManyEpisodes") : t("estimation.questions.howManyFilms"),
         unit: "",
         actual: totalItems,
         min: 0,
@@ -150,7 +151,7 @@ function buildEstimations(data, section) {
     if (totalHours > 0) {
       estimations.push({
         key: "hours",
-        label: "Combien d'heures au total ?",
+        label: t("estimation.questions.howManyHours"),
         unit: "h",
         actual: totalHours,
         min: 0,
@@ -163,7 +164,7 @@ function buildEstimations(data, section) {
     if (avgRating > 0) {
       estimations.push({
         key: "rating",
-        label: "Ta note moyenne estimee ?",
+        label: t("estimation.questions.avgRating"),
         unit: "/10",
         actual: avgRating,
         min: 0,
@@ -181,14 +182,14 @@ function buildEstimations(data, section) {
 
     if (totalBooks > 0) {
       estimations.push({
-        key: "books", label: "Combien de livres ecoutes ?", unit: "",
+        key: "books", label: t("estimation.questions.howManyBooks"), unit: "",
         actual: totalBooks, min: 0, max: Math.max(totalBooks * 3, 20), step: 1,
         default: Math.round(totalBooks * 0.5),
       })
     }
     if (totalH > 0) {
       estimations.push({
-        key: "hours", label: "Combien d'heures d'ecoute ?", unit: "h",
+        key: "hours", label: t("estimation.questions.listeningHours"), unit: "h",
         actual: totalH, min: 0, max: Math.max(totalH * 3, 50), step: 1,
         default: Math.round(totalH * 0.6),
       })
@@ -199,13 +200,13 @@ function buildEstimations(data, section) {
     const ov = data.overseerr || {}
     if (ov.total > 0) {
       estimations.push({
-        key: "requests", label: "Combien de demandes cette annee ?", unit: "",
+        key: "requests", label: t("estimation.questions.howManyRequests"), unit: "",
         actual: ov.total, min: 0, max: Math.max(ov.total * 3, 30), step: 1,
         default: Math.round(ov.total * 0.5),
       })
       if (ov.match_rate > 0) {
         estimations.push({
-          key: "match", label: "Quel % de tes demandes as-tu regarde ?", unit: "%",
+          key: "match", label: t("estimation.questions.matchPercent"), unit: "%",
           actual: ov.match_rate, min: 0, max: 100, step: 1,
           default: 50,
         })
@@ -217,8 +218,9 @@ function buildEstimations(data, section) {
 }
 
 export default function EstimationSlide({ accent, data, year, section = "films", config = {}, onInteraction }) {
+  const { t } = useI18n()
   const active = useActive()
-  const estimations = buildEstimations(data, section)
+  const estimations = buildEstimations(data, section, t)
   const [values, setValues] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
@@ -254,8 +256,8 @@ export default function EstimationSlide({ accent, data, year, section = "films",
 
   const maxScore = estimations.length * 3
   const sectionLabels = {
-    films: "Films", series: "Series", audiobook: "Livres Audio",
-    demandes: "Demandes", community: "Communaute",
+    films: t("thisOrThat.questions.films"), series: t("thisOrThat.questions.series"), audiobook: t("thisOrThat.sectionAudiobook"),
+    demandes: t("thisOrThat.sectionRequests"), community: t("thisOrThat.sectionCommunity"),
   }
 
   return (
@@ -263,10 +265,10 @@ export default function EstimationSlide({ accent, data, year, section = "films",
       <div className="s0" style={{ marginBottom: 14 }}>
         <Tag accent={accent} year={year} />
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          A ton <span style={{ color: accent }}>avis</span> ?
+          {t("estimation.title")}
         </h2>
         <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>
-          {sectionLabels[section] || section} — Estime tes stats avant de decouvrir la realite
+          {sectionLabels[section] || section} — {t("estimation.subtitle")}
         </div>
       </div>
 
@@ -293,7 +295,7 @@ export default function EstimationSlide({ accent, data, year, section = "films",
             onMouseEnter={e => { e.target.style.transform = "scale(1.02)" }}
             onMouseLeave={e => { e.target.style.transform = "scale(1)" }}
           >
-            Voir la realite
+            {t("estimation.reveal")}
           </button>
         </div>
       ) : (
@@ -307,6 +309,7 @@ export default function EstimationSlide({ accent, data, year, section = "films",
               unit={est.unit}
               accent={accent}
               delay={i * 0.15}
+              t={t}
             />
           ))}
 
@@ -323,9 +326,9 @@ export default function EstimationSlide({ accent, data, year, section = "films",
               {score}/{maxScore}
             </div>
             <div style={{ fontSize: 11, color: "var(--th-text-secondary)", marginTop: 2 }}>
-              {score >= maxScore * 0.8 ? "Tu te connais par coeur !"
-                : score >= maxScore * 0.5 ? "Pas mal du tout !"
-                : "Tes habitudes t'ont surpris !"}
+              {score >= maxScore * 0.8 ? t("estimation.knowYourself")
+                : score >= maxScore * 0.5 ? t("estimation.notBad")
+                : t("estimation.surprising")}
             </div>
           </div>
         </div>

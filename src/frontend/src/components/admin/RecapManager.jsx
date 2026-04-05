@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react"
 import { Play, Eye, Trash2, ToggleLeft, ToggleRight, RefreshCw, Calendar, Clock, CheckCircle2, XCircle, AlertCircle, Clapperboard, Timer } from "lucide-react"
 import { api } from "../../services/api"
+import useI18n from "../../i18n/index.jsx"
 
-const STATUS = {
-  completed: { label: "Terminé", color: "#4ade80", Icon: CheckCircle2 },
-  failed: { label: "Échoué", color: "#f87171", Icon: XCircle },
-  pending: { label: "En attente", color: "#fbbf24", Icon: Clock },
-  collecting: { label: "Collecte...", color: "#60a5fa", Icon: RefreshCw },
-  processing: { label: "Traitement...", color: "#60a5fa", Icon: RefreshCw },
-  fetching_posters: { label: "Affiches...", color: "#60a5fa", Icon: RefreshCw },
+const STATUS_COLORS = {
+  completed: { color: "#4ade80", Icon: CheckCircle2 },
+  failed: { color: "#f87171", Icon: XCircle },
+  pending: { color: "#fbbf24", Icon: Clock },
+  collecting: { color: "#60a5fa", Icon: RefreshCw },
+  processing: { color: "#60a5fa", Icon: RefreshCw },
+  fetching_posters: { color: "#60a5fa", Icon: RefreshCw },
 }
 
-const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
-
 export default function RecapManager() {
+  const { t } = useI18n()
   const [recaps, setRecaps] = useState([])
   const [generating, setGenerating] = useState(false)
   const [genYear, setGenYear] = useState(new Date().getFullYear())
@@ -84,7 +84,7 @@ export default function RecapManager() {
   }
 
   const deleteRecap = async (id) => {
-    if (!confirm("Supprimer ce recap définitivement ?")) return
+    if (!confirm(t("recaps.deleteConfirm"))) return
     await api(`/admin/recaps/${id}`, { method: "DELETE" })
     load()
   }
@@ -93,15 +93,15 @@ export default function RecapManager() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
         <Clapperboard size={20} color="#E5A00D" strokeWidth={1.5} />
-        <h2 style={h2}>Gestion des recaps</h2>
+        <h2 style={h2}>{t("recaps.title")}</h2>
       </div>
-      <p style={desc}>Créez, configurez et diffusez les recaps annuels à vos utilisateurs.</p>
+      <p style={desc}>{t("recaps.desc")}</p>
 
       {/* Generate */}
       <div style={{ ...card, marginBottom: 20, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 150 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 4 }}>Nouveau recap</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Génère les données depuis tous les services connectés</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "white", marginBottom: 4 }}>{t("recaps.newRecap")}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{t("recaps.generateDesc")}</div>
         </div>
         <input type="number" value={genYear} onChange={(e) => setGenYear(parseInt(e.target.value) || 2024)}
           style={yearInput} />
@@ -109,7 +109,7 @@ export default function RecapManager() {
           ...btn, background: generating ? "rgba(229,160,13,0.15)" : "#E5A00D",
           color: generating ? "#E5A00D" : "#05050e",
         }}>
-          {generating ? <><RefreshCw size={13} className="spin" /> Génération...</> : <><Play size={13} /> Générer</>}
+          {generating ? <><RefreshCw size={13} className="spin" /> {t("recaps.generating")}</> : <><Play size={13} /> {t("recaps.generate")}</>}
         </button>
       </div>
 
@@ -119,7 +119,7 @@ export default function RecapManager() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: schedule.enabled ? 14 : 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Timer size={15} color="#60a5fa" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "white" }}>Planification automatique</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "white" }}>{t("recaps.schedule")}</span>
             </div>
             <button onClick={() => {
               const next = { ...schedule, enabled: !schedule.enabled }
@@ -133,12 +133,12 @@ export default function RecapManager() {
           {schedule.enabled && (
             <div>
               <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>
-                Le recap sera généré automatiquement pour l'année en cours au moment de l'exécution.
+                {t("recaps.scheduleDesc")}
               </div>
 
               {/* Mode toggle */}
               <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-                {[{ v: "simple", l: "Simple" }, { v: "cron", l: "Expert (cron)" }].map(m => (
+                {[{ v: "simple", l: t("recaps.scheduleSimple") }, { v: "cron", l: t("recaps.scheduleCron") }].map(m => (
                   <button key={m.v} onClick={() => setSchedule({ ...schedule, mode: m.v })} style={{
                     padding: "5px 12px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer",
                     background: schedule.mode === m.v ? "rgba(96,165,250,0.12)" : "rgba(255,255,255,0.02)",
@@ -151,37 +151,37 @@ export default function RecapManager() {
               {schedule.mode === "simple" ? (
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
                   <div>
-                    <div style={inputLabel}>Mois</div>
+                    <div style={inputLabel}>{t("common.month")}</div>
                     <select value={schedule.month} onChange={e => setSchedule({ ...schedule, month: parseInt(e.target.value) })}
                       style={{ ...input, minWidth: 110 }}>
-                      {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                      {t("months").map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                     </select>
                   </div>
                   <div>
-                    <div style={inputLabel}>Jour</div>
+                    <div style={inputLabel}>{t("common.day")}</div>
                     <input type="number" min={1} max={31} value={schedule.day}
                       onChange={e => setSchedule({ ...schedule, day: parseInt(e.target.value) || 1 })}
                       style={{ ...input, width: 50, textAlign: "center" }} />
                   </div>
                   <div>
-                    <div style={inputLabel}>Heure</div>
+                    <div style={inputLabel}>{t("common.hour")}</div>
                     <input type="number" min={0} max={23} value={schedule.hour}
                       onChange={e => setSchedule({ ...schedule, hour: parseInt(e.target.value) || 0 })}
                       style={{ ...input, width: 50, textAlign: "center" }} />
                   </div>
                   <button onClick={() => saveSchedule(schedule)} disabled={scheduleSaving} style={{ ...btn, fontSize: 11, padding: "7px 14px" }}>
-                    {scheduleSaving ? "..." : "Enregistrer"}
+                    {scheduleSaving ? "..." : t("common.save")}
                   </button>
                 </div>
               ) : (
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
                   <div style={{ flex: 1, minWidth: 150 }}>
-                    <div style={inputLabel}>Expression cron (min h jour mois dow)</div>
+                    <div style={inputLabel}>{t("recaps.cronLabel")}</div>
                     <input value={schedule.cron} onChange={e => setSchedule({ ...schedule, cron: e.target.value })}
                       placeholder="0 9 1 12 *" style={{ ...input, width: "100%", fontFamily: "JetBrains Mono,monospace" }} />
                   </div>
                   <button onClick={() => saveSchedule(schedule)} disabled={scheduleSaving} style={{ ...btn, fontSize: 11, padding: "7px 14px" }}>
-                    {scheduleSaving ? "..." : "Enregistrer"}
+                    {scheduleSaving ? "..." : t("common.save")}
                   </button>
                 </div>
               )}
@@ -189,8 +189,8 @@ export default function RecapManager() {
               {/* Preview */}
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 8, fontFamily: "JetBrains Mono,monospace" }}>
                 {schedule.mode === "simple"
-                  ? `Prochain : ${schedule.day} ${MONTHS[schedule.month - 1]} ${new Date().getFullYear()} à ${String(schedule.hour).padStart(2, "0")}:00 → recap ${new Date().getFullYear()}`
-                  : `Cron : ${schedule.cron}`
+                  ? `${t("recaps.nextRun")} ${schedule.day} ${t("months")[schedule.month - 1]} ${new Date().getFullYear()} ${String(schedule.hour).padStart(2, "0")}:00 → recap ${new Date().getFullYear()}`
+                  : `${t("recaps.cronPrefix")} ${schedule.cron}`
                 }
               </div>
             </div>
@@ -201,13 +201,13 @@ export default function RecapManager() {
       {/* Recap list */}
       {recaps.length === 0 && (
         <div style={{ textAlign: "center", padding: 40, color: "rgba(255,255,255,0.2)", borderRadius: 12, border: "1px dashed rgba(255,255,255,0.08)" }}>
-          Aucun recap. Générez-en un ci-dessus.
+          {t("recaps.noRecaps")}
         </div>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {recaps.map((r) => {
-          const st = STATUS[r.status] || STATUS.pending
+          const st = STATUS_COLORS[r.status] || STATUS_COLORS.pending
           const isEditing = editing === r.id
           return (
             <div key={r.id} style={{ ...card, border: r.is_active ? "1px solid rgba(34,197,94,0.25)" : card.border }}>
@@ -217,8 +217,8 @@ export default function RecapManager() {
                 <div style={{ flex: 1, minWidth: 100 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <st.Icon size={13} color={st.color} strokeWidth={1.5} />
-                    <span style={{ fontSize: 12, color: st.color }}>{st.label}</span>
-                    {r.is_active && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(34,197,94,0.12)", color: "#4ade80", fontFamily: "JetBrains Mono,monospace" }}>ACTIF</span>}
+                    <span style={{ fontSize: 12, color: st.color }}>{t(`recaps.status.${r.status}`)}</span>
+                    {r.is_active && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(34,197,94,0.12)", color: "#4ade80", fontFamily: "JetBrains Mono,monospace" }}>{t("recaps.active")}</span>}
                   </div>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", fontFamily: "JetBrains Mono,monospace", marginTop: 2 }}>
                     {r.user_name} {r.completed_at && (" — " + new Date(r.completed_at).toLocaleDateString("fr-FR"))}
@@ -249,17 +249,17 @@ export default function RecapManager() {
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
                   {/* Diffusion */}
                   <div>
-                    <div style={label}>Période de diffusion</div>
+                    <div style={label}>{t("recaps.diffusion")}</div>
                     <div style={{ display: "flex", gap: 10, marginTop: 6, flexWrap: "wrap" }}>
                       <div>
-                        <div style={inputLabel}>Début</div>
+                        <div style={inputLabel}>{t("recaps.start")}</div>
                         <input type="datetime-local"
                           value={r.available_from ? r.available_from.slice(0, 16) : ""}
                           onChange={(e) => updateRecap(r.id, { available_from: e.target.value ? new Date(e.target.value).toISOString() : null })}
                           style={input} />
                       </div>
                       <div>
-                        <div style={inputLabel}>Fin</div>
+                        <div style={inputLabel}>{t("recaps.end")}</div>
                         <input type="datetime-local"
                           value={r.available_until ? r.available_until.slice(0, 16) : ""}
                           onChange={(e) => updateRecap(r.id, { available_until: e.target.value ? new Date(e.target.value).toISOString() : null })}
@@ -278,7 +278,7 @@ export default function RecapManager() {
 
                   {/* Regenerate */}
                   <button onClick={() => { generate(); setEditing(null) }} style={{ ...btn, width: "fit-content" }}>
-                    <RefreshCw size={13} /> Régénérer les données
+                    <RefreshCw size={13} /> {t("recaps.regenerate")}
                   </button>
                 </div>
               )}

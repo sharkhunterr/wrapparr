@@ -1,14 +1,17 @@
 import { useLabels } from "../ThemeContext"
 import { useActive, AN, Tag, Lbl } from "../SharedUI"
+import useI18n from "../../../i18n/index.jsx"
 
-const DEFAULT_PROFILES = [
-  { min: 0, max: 15, name: "Collectionneur fantome", desc: "Tu demandes mais tu ne regardes pas", emoji: "👻" },
-  { min: 15, max: 35, name: "Demandeur distrait", desc: "Ta wishlist deborde un peu", emoji: "🫣" },
-  { min: 35, max: 55, name: "Demandeur equilibre", desc: "Tu regardes une bonne partie de tes demandes", emoji: "⚖️" },
-  { min: 55, max: 75, name: "Demandeur assidu", desc: "Tu honores la plupart de tes demandes", emoji: "🎯" },
-  { min: 75, max: 90, name: "Demandeur exemplaire", desc: "Presque tout est regarde", emoji: "🏅" },
-  { min: 90, max: 101, name: "Demandeur parfait", desc: "Tu regardes tout ce que tu demandes", emoji: "👑" },
-]
+function getDefaultProfiles(t) {
+  return [
+    { min: 0, max: 15, name: t("overseerr.profiles.ghost.name"), desc: t("overseerr.profiles.ghost.desc"), emoji: "👻" },
+    { min: 15, max: 35, name: t("overseerr.profiles.distracted.name"), desc: t("overseerr.profiles.distracted.desc"), emoji: "🫣" },
+    { min: 35, max: 55, name: t("overseerr.profiles.balanced.name"), desc: t("overseerr.profiles.balanced.desc"), emoji: "⚖️" },
+    { min: 55, max: 75, name: t("overseerr.profiles.diligent.name"), desc: t("overseerr.profiles.diligent.desc"), emoji: "🎯" },
+    { min: 75, max: 90, name: t("overseerr.profiles.exemplary.name"), desc: t("overseerr.profiles.exemplary.desc"), emoji: "🏅" },
+    { min: 90, max: 101, name: t("overseerr.profiles.perfect.name"), desc: t("overseerr.profiles.perfect.desc"), emoji: "👑" },
+  ]
+}
 
 function CheckIcon({ size = 14, color = "currentColor" }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
@@ -19,6 +22,7 @@ function ClockIcon({ size = 14, color = "currentColor" }) {
 }
 
 export default function OverseerrMatchSlide({ accent, data, year, config = {} }) {
+  const { t } = useI18n()
   const L = useLabels()
   const active = useActive()
   const ov = data?.overseerr
@@ -33,7 +37,7 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
   const realUnwatched = ov.not_watched_count || notWatched.length
 
   // Profile based on match rate
-  const profiles = config.categories?.length > 0 ? config.categories : DEFAULT_PROFILES
+  const profiles = config.categories?.length > 0 ? config.categories : getDefaultProfiles(t)
   const profile = profiles.find(p => matchRate >= p.min && matchRate < p.max) || profiles[profiles.length - 1]
 
   const gaugeColor = matchRate >= 70 ? "#4ade80" : matchRate >= 40 ? accent : "#f87171"
@@ -43,10 +47,10 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
       <div className="s0" style={{ marginBottom: 12 }}>
         <Tag accent={accent} year={year} />
         <h2 style={{ fontSize: "clamp(18px, 5vw, 26px)", fontWeight: 800, color: "var(--th-text)", lineHeight: 1.05 }}>
-          Demande vs <span style={{ color: accent }}>regarde</span>
+          {t("overseerr.requestedVs")} <span style={{ color: accent }}>{t("overseerr.watched")}</span>
         </h2>
         <div style={{ fontSize: 11, color: "var(--th-text-muted)", marginTop: 4 }}>
-          As-tu vraiment regarde ce que tu as demande ?
+          {t("overseerr.matchQuestion")}
         </div>
       </div>
 
@@ -58,7 +62,7 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
               {active ? <AN t={matchRate} s="%" /> : "0%"}
             </div>
             <div style={{ fontSize: 9, color: "var(--th-text-secondary)", marginTop: 2 }}>
-              de visionnage
+              {t("overseerr.watchRate")}
             </div>
           </div>
           <div style={{ flex: 1 }}>
@@ -68,10 +72,10 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
               <span style={{ fontSize: 9, color: "#4ade80", display: "flex", alignItems: "center", gap: 3 }}>
-                <CheckIcon size={10} color="#4ade80" /> {realMatched} regarde{realMatched > 1 ? "s" : ""}
+                <CheckIcon size={10} color="#4ade80" /> {realMatched} {t("overseerr.watchedCount")}
               </span>
               <span style={{ fontSize: 9, color: "var(--th-text-dim)", display: "flex", alignItems: "center", gap: 3 }}>
-                <ClockIcon size={10} color="var(--th-text-dim)" /> {realUnwatched} en attente
+                <ClockIcon size={10} color="var(--th-text-dim)" /> {realUnwatched} {t("overseerr.pending")}
               </span>
             </div>
           </div>
@@ -91,12 +95,12 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
       {/* Matched list */}
       {matched.length > 0 && (
         <div className="s2" style={{ marginBottom: 10 }}>
-          <Lbl c="#4ade80" size={8}>Demande et regarde</Lbl>
+          <Lbl c="#4ade80" size={8}>{t("overseerr.requestedAndWatched")}</Lbl>
           <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
             {matched.slice(0, 5).map((item, i) => (
-              <MatchItem key={item.title + i} item={item} accent={accent} watched i={i} />
+              <MatchItem key={item.title + i} item={item} accent={accent} watched i={i} t={t} />
             ))}
-            {realMatched > 5 && <div style={{ fontSize: 9, color: "var(--th-text-dim)", textAlign: "center", marginTop: 2 }}>+{realMatched - 5} autres</div>}
+            {realMatched > 5 && <div style={{ fontSize: 9, color: "var(--th-text-dim)", textAlign: "center", marginTop: 2 }}>+{realMatched - 5} {t("overseerr.others")}</div>}
           </div>
         </div>
       )}
@@ -104,12 +108,12 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
       {/* Not watched list */}
       {notWatched.length > 0 && (
         <div className="s3">
-          <Lbl c="var(--th-text-dim)" size={8}>En attente de visionnage</Lbl>
+          <Lbl c="var(--th-text-dim)" size={8}>{t("overseerr.awaitingWatch")}</Lbl>
           <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
             {notWatched.slice(0, 5).map((item, i) => (
-              <MatchItem key={item.title + i} item={item} accent={accent} watched={false} i={i} />
+              <MatchItem key={item.title + i} item={item} accent={accent} watched={false} i={i} t={t} />
             ))}
-            {realUnwatched > 5 && <div style={{ fontSize: 9, color: "var(--th-text-dim)", textAlign: "center", marginTop: 2 }}>+{realUnwatched - 5} autres</div>}
+            {realUnwatched > 5 && <div style={{ fontSize: 9, color: "var(--th-text-dim)", textAlign: "center", marginTop: 2 }}>+{realUnwatched - 5} {t("overseerr.others")}</div>}
           </div>
         </div>
       )}
@@ -117,7 +121,7 @@ export default function OverseerrMatchSlide({ accent, data, year, config = {} })
   )
 }
 
-function MatchItem({ item, accent, watched, i }) {
+function MatchItem({ item, accent, watched, i, t }) {
   return (
     <div style={{
       display: "flex", gap: 8, alignItems: "center", padding: "5px 10px", borderRadius: 8,
@@ -128,7 +132,7 @@ function MatchItem({ item, accent, watched, i }) {
       {item.poster && <img src={item.poster} alt="" style={{ width: 24, height: 34, borderRadius: 3, objectFit: "cover", flexShrink: 0 }} onError={e => { e.target.style.display = "none" }} />}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: "var(--th-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</div>
-        <span style={{ fontSize: 9, color: accent + "80" }}>{item.type === "movie" ? "Film" : "Serie"}</span>
+        <span style={{ fontSize: 9, color: accent + "80" }}>{item.type === "movie" ? (t ? t("overseerr.movie") : "Film") : (t ? t("overseerr.serie") : "Serie")}</span>
       </div>
       <div style={{ flexShrink: 0 }}>
         {watched

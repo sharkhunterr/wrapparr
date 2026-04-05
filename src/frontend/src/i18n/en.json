@@ -100,7 +100,22 @@
     "configuring": "Configuring...",
     "backupLoaded": "Backup loaded",
     "backupRestore": "The configuration will be restored after admin account creation.",
-    "invalidBackup": "This file is not a Wrapparr backup"
+    "invalidBackup": "This file is not a Wrapparr backup",
+    "welcomePrefix": "Welcome to",
+    "initialConfig": "Initial configuration",
+    "tmdbDesc": "Enriches movies with posters, budgets, ratings, actors, directors, countries",
+    "overseerrDesc": "Adds media requests to the recap: what you requested, watched or not",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 4 characters",
+    "emailRequired": "Email required for admin account",
+    "importError": "Import error",
+    "checkUsersToImport": "Check the users to import. The user marked \"Admin\" will be the administrator account.",
+    "testingConnection": "Testing...",
+    "configureLater": "Configure later",
+    "restoring": "Restoring...",
+    "restoreAndCreate": "Restore and create account",
+    "nextOrSkip": "Next (or skip)",
+    "redirecting": "Redirecting..."
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -164,6 +179,7 @@
     "linkService": "Link a service",
     "noServiceLinked": "No service linked — recaps will not be generated for this user",
     "deleteLink": "Delete this {service} link: {username}?",
+    "usernamePlaceholder": "Username",
     "servicePlaceholder": "Service...",
     "userPlaceholder": "User...",
     "addUser": "Add a user",
@@ -228,7 +244,21 @@
     "sslNotVerified": "(SSL not verified)",
     "deleteProvider": "Delete this SSO provider?",
     "nameIssuerRequired": "Name, Issuer URL and Client ID are required",
-    "secretRequired": "Client Secret is required for a new provider"
+    "secretRequired": "Client Secret is required for a new provider",
+    "editProvider": "Edit provider",
+    "providerNameLabel": "Provider name (shown on login button)",
+    "issuerUrlLabel": "Issuer URL",
+    "plexLogin": "Plex login",
+    "plexLoginDesc": "Users will be able to log in with their Plex account.",
+    "plexAuth": "Plex Auth",
+    "comingSoon": "coming soon",
+    "updateProvider": "Update",
+    "addProvider": "Add SSO provider",
+    "redirectUri": "Redirect URI:",
+    "copied": "copied!",
+    "copyUrl": "Copy URL",
+    "secretUnchanged": "(unchanged if empty)",
+    "connectionSuccess": "Connection successful — issuer:"
   },
   "recaps": {
     "title": "Recap management",
@@ -247,6 +277,10 @@
     "end": "End",
     "noRecaps": "No recaps. Generate one above.",
     "deleteConfirm": "Permanently delete this recap?",
+    "cronLabel": "Cron expression (min h day month dow)",
+    "nextRun": "Next:",
+    "cronPrefix": "Cron:",
+    "active": "ACTIVE",
     "status": {
       "completed": "Completed",
       "failed": "Failed",
@@ -282,7 +316,12 @@
     "reaction": "Reaction",
     "settings": "Settings",
     "noSession": "No session",
-    "noData": "No data"
+    "noData": "No data",
+    "deleteSessionConfirm": "Delete {count} session(s)?",
+    "theme": "Theme",
+    "palette": "Palette",
+    "music": "Music",
+    "comparison": "Comparison"
   },
   "slides": {
     "title": "Slide configuration",
@@ -322,7 +361,16 @@
     "thanks": "Thanks!",
     "share": "Share",
     "capture": "Capturing...",
-    "replay": "Replay"
+    "replay": "Replay",
+    "serviceMeta": {
+      "moviesAndShows": "MOVIES & TV SHOWS",
+      "cinemaSeries": "Cinema · TV Series",
+      "filmsSeries": "Movies · TV Shows",
+      "videoGames": "VIDEO GAMES",
+      "audiobooks": "AUDIOBOOKS",
+      "books": "BOOKS",
+      "booksSub": "Novels · Essays · Comics"
+    }
   },
   "thisOrThat": {
     "title": "This or That",
@@ -342,7 +390,11 @@
       "films": "Movies",
       "series": "TV Shows",
       "whoWatchedMost": "Who watched the most this year?"
-    }
+    },
+    "sectionAudiobook": "Audiobooks",
+    "sectionRequests": "Requests",
+    "sectionCommunity": "Community",
+    "sectionReading": "Reading"
   },
   "estimation": {
     "title": "What do you think?",
@@ -417,5 +469,49 @@
   },
   "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
   "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  "overseerr": {
+    "requestedVs": "Requested vs",
+    "watched": "watched",
+    "matchQuestion": "Did you really watch what you requested?",
+    "watchRate": "watch rate",
+    "watchedCount": "watched",
+    "pending": "pending",
+    "requestedAndWatched": "Requested and watched",
+    "awaitingWatch": "Awaiting viewing",
+    "others": "others",
+    "movie": "Movie",
+    "serie": "TV Show",
+    "requestSummaryTitle": "Request",
+    "requests": "requests",
+    "series": "TV shows",
+    "approvalRate": "Approval rate",
+    "approved": "approved",
+    "available": "Available",
+    "partial": "Partial",
+    "processing": "Processing",
+    "pendingStatus": "Pending",
+    "availability": "Availability",
+    "requestsPerMonth": "Requests per month",
+    "topRequestersTitle": "Top",
+    "requesters": "requesters",
+    "users": "users",
+    "inRequests": "in requests",
+    "requesterRanking": "Requester ranking",
+    "mostPopularRequests": "Most popular requests",
+    "mostPopularDesc": "Requests that were most successful with users",
+    "requestedBy": "requested by",
+    "haveWatched": "watched",
+    "yourSuccessfulRequests": "Your successful",
+    "success": "requests",
+    "popularDesc": "Content you requested that others have watched",
+    "profiles": {
+      "ghost": { "name": "Ghost collector", "desc": "You request but don't watch" },
+      "distracted": { "name": "Distracted requester", "desc": "Your wishlist overflows a bit" },
+      "balanced": { "name": "Balanced requester", "desc": "You watch a good portion of your requests" },
+      "diligent": { "name": "Diligent requester", "desc": "You honor most of your requests" },
+      "exemplary": { "name": "Exemplary requester", "desc": "Almost everything is watched" },
+      "perfect": { "name": "Perfect requester", "desc": "You watch everything you request" }
+    }
+  }
 }
