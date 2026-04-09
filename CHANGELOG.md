@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.16](https://github.com/your-username/wrapparr/-/compare/v0.1.15...v0.1.16) (2026-04-09)
+
+
+### Features
+
+* admin peut visualiser le recap d'un autre utilisateur via select dans la barre d'actions ([4c1d928](https://github.com/your-username/wrapparr/-/commit/4c1d9288c0f81356dfde632f5e21d21934c7bb54))
+* colonne et filtre annee dans le tableau statistiques admin ([52cdc14](https://github.com/your-username/wrapparr/-/commit/52cdc1461ac5c77c55b1cb5c825fe9f6f79a3336))
+* emoji caca + picker etendu avec bouton + pour choisir parmi 29 emojis ([8a086f0](https://github.com/your-username/wrapparr/-/commit/8a086f0f0164aacb95bcca4c7e3e7ae3cb60844c))
+* indicateur slide suivante + reactions emoji animees sur la finale ([87b98c5](https://github.com/your-username/wrapparr/-/commit/87b98c53ac54107e8505c6bb6bf398936f19fc76))
+* planification automatique des recaps (mode simple + expert cron) ([0fea631](https://github.com/your-username/wrapparr/-/commit/0fea631b20856a1066f48a894cca324219d4cbd4))
+* reaction emoji affichee dans le detail expandable des stats admin ([f65b612](https://github.com/your-username/wrapparr/-/commit/f65b61201d86f7a9d9b2a722b6f44470784cb6b3))
+* remontee reponses slides interactives + badge interactif dans gestion slides ([7fc4389](https://github.com/your-username/wrapparr/-/commit/7fc438975efaedce8829afb61eacef6c78a4337f))
+* scheduler intégré + auto-activation des recaps après génération ([e03cc97](https://github.com/your-username/wrapparr/-/commit/e03cc97d9b21835b70f27caf261f49d748ece677))
+* selection et suppression de sessions dans les stats admin (unitaire + masse) ([02e291e](https://github.com/your-username/wrapparr/-/commit/02e291e98563ba2011206cb154bae773bd5d0b29))
+* slides interactives This or That + Curseur Estimation ([17888cb](https://github.com/your-username/wrapparr/-/commit/17888cb37255019da2225002ca897a128f261ab1))
+* systeme de telemetrie et page admin statistiques des recaps ([bfad409](https://github.com/your-username/wrapparr/-/commit/bfad409ad04bfb4cac5179314f7ec178ed8b5f35))
+* systeme i18n avec 5 langues (FR, EN, DE, ES, IT) ([db8c837](https://github.com/your-username/wrapparr/-/commit/db8c837456c2e44b07183043cb7848a0fc63a939))
+* telemetrie demarre a la slide 2, detection inactivite, parametres admin ([7d93095](https://github.com/your-username/wrapparr/-/commit/7d93095ceffbafcf90764e1bb196b541d3a7ae50))
+* tri par colonne (asc/desc) dans le tableau statistiques admin ([59a1fb5](https://github.com/your-username/wrapparr/-/commit/59a1fb55dd247ae6e2829803861c0a8d08381be8))
+
+
+### Bug Fixes
+
+* axe Y des graphiques tronque pour les valeurs en dizaines/centaines (largeur dynamique) ([46b629a](https://github.com/your-username/wrapparr/-/commit/46b629aa867b4fd6258bdddde3d046e7cbba0793))
+* axe Y tronque sur tous les graphiques (community, overseerr, compare) - largeur dynamique ([343cd04](https://github.com/your-username/wrapparr/-/commit/343cd0449c5aaf2b47180aa957831b85d778e01f))
+* bouton suivant centre, timing adapte par type de slide, visible sur toutes les slides ([bd28c10](https://github.com/your-username/wrapparr/-/commit/bd28c10df065bcd0a0ebcbb91e3231460bac0861))
+* comparaison utilise les donnees de l'utilisateur impersone au lieu de l'admin ([ec105d8](https://github.com/your-username/wrapparr/-/commit/ec105d89270031c83cf0e64a4c9cacb51fc1d9bb))
+* correction de TOUS les accents manquants dans les slides, thèmes et effets ([6f33c5e](https://github.com/your-username/wrapparr/-/commit/6f33c5e82c4e53013059fcac2c3cfa07d0383ebc))
+* correction de tous les accents manquants dans les textes français (13 fichiers) ([b438988](https://github.com/your-username/wrapparr/-/commit/b43898846b985a09982705da8b14b7ce42fbfb81))
+* ecran noir cause par boucle infinie dans le tracking de slide telemetry ([fc3bc7b](https://github.com/your-username/wrapparr/-/commit/fc3bc7b1d6f0e12a03e83ebbb636bb22bb644592))
+* ecran noir du recap cause par mismatch UUID avec/sans tirets (SQLite) ([9b11b79](https://github.com/your-username/wrapparr/-/commit/9b11b79b462ccccdf219470c456de8bd1c6f825e))
+* fallback display_name ne chargeait pas les donnees utilisateur dans le recap ([24062e9](https://github.com/your-username/wrapparr/-/commit/24062e96abc4d488e510065daad299fb70494ec6))
+* hooks appeles apres early return causaient crash React (rules of hooks) ([f07badf](https://github.com/your-username/wrapparr/-/commit/f07badf8fde685439863ee59d0ec9e4206779bd1))
+* ne plus flush sur la finale pour laisser le temps a la reaction et compter le temps sur la slide ([ce8451c](https://github.com/your-username/wrapparr/-/commit/ce8451c822b2791a8214e79e6050f181016eb42b))
+* ordre colonnes tableau stats: date, utilisateur, annee, duree, progression, options ([6eda305](https://github.com/your-username/wrapparr/-/commit/6eda305f5c6981916b7f82700cc2db3937dbf2d1))
+* pipeline double commit causait statut bloqué sur fetching_posters (commit unique) ([1b10339](https://github.com/your-username/wrapparr/-/commit/1b10339f0dac23d6a7e7032c1d65b2ba4f8893d6))
+* podium comparaison utilise le bon mediaType (films/series/audiobook) ([1cb6e8c](https://github.com/your-username/wrapparr/-/commit/1cb6e8ce7bd91e8b2bef4f7fa3af23e7573579f6))
+* reaction emoji enregistree dans la session telemetrie + affichee dans les stats admin ([8e51515](https://github.com/your-username/wrapparr/-/commit/8e51515fb56a2cebbc0e563def1cc9d55fa554de))
+* reaction manquante dans le payload sendBeacon (unmount SPA) ([354211e](https://github.com/your-username/wrapparr/-/commit/354211e60e4dca5b0b2b8e8fe3aaba4b0ed44994))
+* recaps desactives invisibles pour les non-admin + suppression logs 200 ([65b7d22](https://github.com/your-username/wrapparr/-/commit/65b7d2245242d4e9f3cde0c16094de3007309d8d))
+* select admin utilise portal topbar + nom utilisateur impersone dans les slides ([0f474f6](https://github.com/your-username/wrapparr/-/commit/0f474f6db39892c77e875b72723d076c1dfb0ae2))
+* suppression bouton generer recap de la page recap (uniquement via admin recaps) ([69e49aa](https://github.com/your-username/wrapparr/-/commit/69e49aa8e27215e9403ea249348dcf76ee972b89))
+* suppression console.log spam dans buildSlides + debug telemetrie ([0c0019e](https://github.com/your-username/wrapparr/-/commit/0c0019eb2e4944f04e92dece1b9b760ab19c0b8f))
+* suppression generation recap du dashboard (uniquement via page recaps) ([d52dae4](https://github.com/your-username/wrapparr/-/commit/d52dae447762d483302fa1284ea97ed9a17b1101))
+* suppression inscription depuis la page login (mode register, champ nom, lien s'inscrire) ([112d6cb](https://github.com/your-username/wrapparr/-/commit/112d6cba7171bfcd564fcd59ba37215226b47009))
+* telemetrie envoyee au demontage du composant (navigation SPA) ([3571665](https://github.com/your-username/wrapparr/-/commit/3571665c82fb4835c5bad4db08510fbd8785f8e0))
+* telemetrie utilisateur non-admin utilise fetch avec Auth header au lieu de sendBeacon sans token ([9cc437c](https://github.com/your-username/wrapparr/-/commit/9cc437cf413d6fa9856a2cc9f32726df94ff15ea))
+* telemetrie utilise des refs pour eviter flush premature avec mauvaises valeurs ([d08d88d](https://github.com/your-username/wrapparr/-/commit/d08d88d08d5f8ffe489c67f6f935d738963d4e79))
+* token capture dans une ref au mount pour survivre au logout avant le flush telemetrie ([09b9c8a](https://github.com/your-username/wrapparr/-/commit/09b9c8a251e69cdb699b2ed078e9db166ec786b4))
+* total_slides toujours zero dans telemetrie (ref mise a jour apres buildSlides) ([09643db](https://github.com/your-username/wrapparr/-/commit/09643db2bd815c34dc23555dbb7cd1b3f12155ea))
+* useEffect ecrasait totalSlides et reaction dans latestRef a chaque render ([9eab634](https://github.com/your-username/wrapparr/-/commit/9eab634586719d56e796e963d38e37960ff395f4))
+
 ### [0.1.15](https://github.com/your-username/wrapparr/-/compare/v0.1.14...v0.1.15) (2026-04-01)
 
 
